@@ -1,23 +1,17 @@
-import { App, Stack, StackProps } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
+import { App } from 'aws-cdk-lib';
+import * as Dotenv from 'dotenv';
+import { getEnvironmentConfiguration } from './Configuration';
+import { PipelineStack } from './PipelineStack';
 
-export class MyStack extends Stack {
-  constructor(scope: Construct, id: string, props: StackProps = {}) {
-    super(scope, id, props);
-
-    // define resources here...
-  }
-}
-
-// for development, use account/region from cdk cli
-const devEnv = {
-  account: process.env.CDK_DEFAULT_ACCOUNT,
-  region: process.env.CDK_DEFAULT_REGION,
-};
-
+Dotenv.config();
 const app = new App();
 
-new MyStack(app, 'mijn-services-dev', { env: devEnv });
-// new MyStack(app, 'mijn-services-prod', { env: prodEnv });
+const branchToBuild = process.env.BRANCH_NAME ?? 'acceptance';
+const configuration = getEnvironmentConfiguration(branchToBuild);
+
+new PipelineStack(app, `mijn-services-pipeline-stack-${configuration.branch}`, {
+  env: configuration.buildEnvironment,
+  configuration: configuration,
+});
 
 app.synth();
