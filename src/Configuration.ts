@@ -53,7 +53,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesAccp,
     alternativeDomainNames: [
-      'zgw.accp.nijmegen.nl',
+      'mijn-services.accp.nijmegen.nl',
     ],
   },
   main: {
@@ -61,7 +61,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
     alternativeDomainNames: [
-      'zgw.nijmegen.nl',
+      'mijn-services.nijmegen.nl',
     ],
   },
 };
