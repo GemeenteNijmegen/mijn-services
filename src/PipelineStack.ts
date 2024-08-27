@@ -1,8 +1,8 @@
 import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
 import { Stack, StackProps, Tags, pipelines, CfnParameter, Aspects } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { ApiStage } from './ApiStage';
 import { Configurable } from './Configuration';
+import { MijnServicesStage } from './MijnServicesStage';
 import { ParameterStage } from './ParameterStage';
 import { Statics } from './Statics';
 
@@ -42,7 +42,7 @@ export class PipelineStack extends Stack {
     pipeline.addStage(parameters);
 
     // API stage
-    const api = new ApiStage(this, `${Statics.projectName}-api`, {
+    const api = new MijnServicesStage(this, Statics.projectName, {
       env: props.configuration.deploymentEnvironment,
       configuration: props.configuration,
     });
