@@ -29,7 +29,7 @@ export class UsEastStack extends Stack {
    */
   setupCloudfrontCertificate(hostedzone: IHostedZone) {
     const validation = this.props.configuration.alternativeDomainNames ? CertificateValidation.fromDns() : CertificateValidation.fromDns(hostedzone);
-    const certificate = new Certificate(this, 'cloudfonrt-certificate', {
+    const certificate = new Certificate(this, 'cloudfront-certificate', {
       domainName: hostedzone.zoneName,
       subjectAlternativeNames: this.props.configuration.alternativeDomainNames,
       validation: validation,
