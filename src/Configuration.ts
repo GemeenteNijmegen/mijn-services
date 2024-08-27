@@ -39,6 +39,11 @@ export interface Configuration {
    * the workload AWS account in our default region.
    */
   deploymentEnvironment: Environment;
+
+  /**
+   * Provie alternative domain names
+   */
+  alternativeDomainNames?: string[];
 }
 
 
@@ -47,11 +52,17 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     branch: 'acceptance',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesAccp,
+    alternativeDomainNames: [
+      'zgw.accp.nijmegen.nl',
+    ],
   },
   main: {
     branch: 'main',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
+    alternativeDomainNames: [
+      'zgw.nijmegen.nl',
+    ],
   },
 };
 
