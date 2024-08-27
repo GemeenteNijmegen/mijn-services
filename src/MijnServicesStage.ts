@@ -2,13 +2,14 @@ import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
 import { Aspects, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
+import { MainStack } from './MainStack';
 import { UsEastStack } from './UsEastStack';
 
-interface ApiStageProps extends StageProps, Configurable {}
+interface MijnServicesStageProps extends StageProps, Configurable {}
 
-export class ApiStage extends Stage {
+export class MijnServicesStage extends Stage {
 
-  constructor(scope: Construct, id: string, props: ApiStageProps) {
+  constructor(scope: Construct, id: string, props: MijnServicesStageProps) {
     super(scope, id, props);
     Aspects.of(this).add(new PermissionsBoundaryAspect());
 
@@ -18,13 +19,23 @@ export class ApiStage extends Stage {
      * AWS European Sovereign Cloud is available and supports CloudFront.
      * See: https://aws.amazon.com/blogs/security/aws-digital-sovereignty-pledge-announcing-a-new-independent-sovereign-cloud-in-europe/
      */
-    new UsEastStack(this, 'us-east', {
+    const usstack = new UsEastStack(this, 'us-east-stack', { // Translates to mijn-services-us-east-stack
       env: {
         account: props.configuration.deploymentEnvironment.account,
         region: 'us-east-1',
       },
       configuration: props.configuration,
     });
+
+    /**
+     * Main stack of this project
+     * Constains resources such as loadbalancer, cloudfront, apigateway, fargate cluster
+     */
+    const mainstack = new MainStack(this, 'stack', { // Translates to mijn-services-stack
+      env: props.configuration.deploymentEnvironment,
+      configuration: props.configuration,
+    });
+    mainstack.addDependency(usstack, 'Cloudfront cert must exist before distribution is created');
 
   }
 
