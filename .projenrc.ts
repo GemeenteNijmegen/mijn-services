@@ -10,6 +10,7 @@ const project = new GemeenteNijmegenCdkApp({
   deps: [
     'dotenv',
     '@gemeentenijmegen/aws-constructs',
+    'cdk-remote-stack',
   ],
 });
 project.synth();
