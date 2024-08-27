@@ -148,6 +148,7 @@
         "devDependencies": [
           "**/test/**",
           "**/build-tools/**",
+          "src/custom-resources/create-databases/create-databases.lambda.ts",
           ".projenrc.ts",
           "projenrc/**/*.ts"
         ],

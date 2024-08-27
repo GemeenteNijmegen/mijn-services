@@ -2,7 +2,7 @@ export class Statics {
   static readonly projectName = 'mijn-services';
   static readonly projectRepo = 'GemeenteNijmegen/mijn-services';
 
-  // MAKR: SSM Parameters
+  // MARK: SSM Parameters
   static readonly ssmDummyParameter = `/${Statics.projectName}/dummy/parameter`;
 
   // Managed in dns-managment project:
@@ -13,8 +13,25 @@ export class Statics {
 
   // Lets use _ for denoting internal like parameters (eg for stack decoupling)
   static readonly _ssmCertificateArn = `/${Statics.projectName}/internal/cloudfront/cert-arn`;
+  static readonly _ssmDatabaseCredentials = `/${Statics.projectName}/internal/database/credentials`;
+  static readonly _ssmDatabaseArn = `/${Statics.projectName}/internal/database/arn`;
+  static readonly _ssmDatabaseHostname = `/${Statics.projectName}/internal/database/hostname`;
+  static readonly _ssmDatabasePort = `/${Statics.projectName}/internal/database/post`;
+  static readonly _ssmDatabaseSecurityGroup = `/${Statics.projectName}/internal/database/security-group`;
 
-  // MARK: ENVIRONMENTS
+  // MARK: Databases
+  static readonly defaultDatabaseName = 'default-database';
+  static readonly databaseOpenKlant = 'open-klant';
+
+  /**
+   * List all databases that should be
+   * present in a single array
+   */
+  static readonly databases = [
+    Statics.databaseOpenKlant,
+  ];
+
+  // MARK: Environments
   static readonly gnBuildEnvironment = {
     account: '836443378780',
     region: 'eu-central-1',

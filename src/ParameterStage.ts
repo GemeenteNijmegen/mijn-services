@@ -1,5 +1,6 @@
 import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
 import { Stack, Tags, Stage, aws_ssm as SSM, StageProps, Aspects } from 'aws-cdk-lib';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { Statics } from './Statics';
@@ -31,6 +32,7 @@ export class ParameterStack extends Stack {
     Tags.of(this).add('Project', Statics.projectName);
 
     this.addOpenKlantParameters();
+    this.addDatabaseCredentials();
 
   }
 
@@ -39,6 +41,21 @@ export class ParameterStack extends Stack {
     new SSM.StringParameter(this, 'dummy', {
       stringValue: 'dummyparam',
       parameterName: Statics.ssmDummyParameter,
+    });
+  }
+
+
+  addDatabaseCredentials() {
+    new Secret(this, 'db-credentials', {
+      description: 'Credentials for connecting to the mijn-services database instance',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'mijn-services-db-user',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmDatabaseCredentials,
     });
   }
 
