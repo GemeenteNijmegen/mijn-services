@@ -4,6 +4,7 @@ import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { DatabaseStack } from './DatabaseStack';
 import { MainStack } from './MainStack';
+import { Statics } from './Statics';
 import { UsEastStack } from './UsEastStack';
 
 interface MijnServicesStageProps extends StageProps, Configurable {}
@@ -35,6 +36,7 @@ export class MijnServicesStage extends Stage {
     const databasestack = new DatabaseStack(this, 'database-stack', {
       env: props.configuration.deploymentEnvironment,
       configuration: props.configuration,
+      databases: Statics.databases,
     });
 
     /**
