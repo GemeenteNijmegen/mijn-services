@@ -20,7 +20,7 @@ export class Statics {
   static readonly _ssmDatabaseSecurityGroup = `/${Statics.projectName}/internal/database/security-group`;
 
   // MARK: Databases
-  static readonly defaultDatabaseName = 'default-database';
+  static readonly defaultDatabaseName = 'postgres';
   static readonly databaseOpenKlant = 'open-klant';
 
   /**
