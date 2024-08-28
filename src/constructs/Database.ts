@@ -37,6 +37,9 @@ export class Database extends Construct {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_ISOLATED,
       },
+      parameters: {
+        'rds.force_ssl': '0',
+      },
     });
 
     new StringParameter(this, 'db-arn', {
