@@ -69,9 +69,9 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     branch: 'main',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
-    // alternativeDomainNames: [ // TODO enable when nijmegen.nl CNAME records are added
-    //   'mijn-services.nijmegen.nl',
-    // ],
+    alternativeDomainNames: [
+      'mijn-services.nijmegen.nl',
+    ],
     cnameRecords: {
       _762e893c9ea81e57b34ab11ed543256d: '_1c518863d978cddd100e65875b7c1136.djqtsrsxkq.acm-validations.aws.',
     },
