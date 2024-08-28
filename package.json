@@ -31,10 +31,10 @@
   },
   "devDependencies": {
     "@gemeentenijmegen/projen-project-type": "^1.7.4",
-    "@types/aws-lambda": "^8.10.143",
+    "@types/aws-lambda": "^8.10.145",
     "@types/jest": "^29.5.12",
     "@types/node": "^18",
-    "@types/pg": "^8.11.6",
+    "@types/pg": "^8.11.7",
     "@typescript-eslint/eslint-plugin": "^7",
     "@typescript-eslint/parser": "^7",
     "aws-cdk": "^2.1.0",
@@ -51,7 +51,7 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@gemeentenijmegen/aws-constructs": "^0.0.18",
+    "@gemeentenijmegen/aws-constructs": "^0.0.19",
     "@gemeentenijmegen/utils": "^0.0.15",
     "aws-cdk-lib": "^2.1.0",
     "cdk-remote-stack": "^2.1.0",
