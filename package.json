@@ -51,7 +51,7 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@gemeentenijmegen/aws-constructs": "^0.0.19",
+    "@gemeentenijmegen/aws-constructs": "^0.0.20",
     "@gemeentenijmegen/utils": "^0.0.15",
     "aws-cdk-lib": "^2.1.0",
     "cdk-remote-stack": "^2.1.0",
