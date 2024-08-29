@@ -35,7 +35,7 @@ export async function handler(event: CdkCustomResourceEvent) {
 
 
 async function existsDatabase(client: postgres.Client, name: string) {
-  const resp = await client.query(`SELECT datname FROM pg_catalog.pg_database WHERE datname = ${name};`);
+  const resp = await client.query(`SELECT datname FROM pg_catalog.pg_database WHERE datname = '${name}';`);
   return resp.rowCount !== 0;
 }
 
