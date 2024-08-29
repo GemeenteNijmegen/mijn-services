@@ -5,12 +5,20 @@
       "type": "build"
     },
     {
+      "name": "@types/aws-lambda",
+      "type": "build"
+    },
+    {
       "name": "@types/jest",
       "type": "build"
     },
     {
       "name": "@types/node",
       "version": "^18",
+      "type": "build"
+    },
+    {
+      "name": "@types/pg",
       "type": "build"
     },
     {
@@ -80,6 +88,10 @@
       "type": "runtime"
     },
     {
+      "name": "@gemeentenijmegen/utils",
+      "type": "runtime"
+    },
+    {
       "name": "aws-cdk-lib",
       "version": "^2.1.0",
       "type": "runtime"
@@ -95,6 +107,10 @@
     },
     {
       "name": "dotenv",
+      "type": "runtime"
+    },
+    {
+      "name": "pg",
       "type": "runtime"
     }
   ],

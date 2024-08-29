@@ -44,7 +44,30 @@
     },
     "bundle": {
       "name": "bundle",
-      "description": "Prepare assets"
+      "description": "Prepare assets",
+      "steps": [
+        {
+          "spawn": "bundle:custom-resources/create-databases/create-databases.lambda"
+        }
+      ]
+    },
+    "bundle:custom-resources/create-databases/create-databases.lambda": {
+      "name": "bundle:custom-resources/create-databases/create-databases.lambda",
+      "description": "Create a JavaScript bundle from src/custom-resources/create-databases/create-databases.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+        }
+      ]
+    },
+    "bundle:custom-resources/create-databases/create-databases.lambda:watch": {
+      "name": "bundle:custom-resources/create-databases/create-databases.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/custom-resources/create-databases/create-databases.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+        }
+      ]
     },
     "clobber": {
       "name": "clobber",
@@ -279,13 +302,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@gemeentenijmegen/projen-project-type,@types/jest,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript,@gemeentenijmegen/aws-constructs,cdk-remote-stack,dotenv"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@gemeentenijmegen/projen-project-type,@types/aws-lambda,@types/jest,@types/pg,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/utils,cdk-remote-stack,dotenv,pg"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @gemeentenijmegen/projen-project-type @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk commit-and-tag-version esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen ts-jest ts-node typescript @gemeentenijmegen/aws-constructs aws-cdk-lib cdk-remote-stack constructs dotenv"
+          "exec": "yarn upgrade @gemeentenijmegen/projen-project-type @types/aws-lambda @types/jest @types/node @types/pg @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk commit-and-tag-version esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen ts-jest ts-node typescript @gemeentenijmegen/aws-constructs @gemeentenijmegen/utils aws-cdk-lib cdk-remote-stack constructs dotenv pg"
         },
         {
           "exec": "npx projen"

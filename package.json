@@ -4,6 +4,8 @@
     "build": "npx projen build",
     "bump": "npx projen bump",
     "bundle": "npx projen bundle",
+    "bundle:custom-resources/create-databases/create-databases.lambda": "npx projen bundle:custom-resources/create-databases/create-databases.lambda",
+    "bundle:custom-resources/create-databases/create-databases.lambda:watch": "npx projen bundle:custom-resources/create-databases/create-databases.lambda:watch",
     "clobber": "npx projen clobber",
     "compile": "npx projen compile",
     "default": "npx projen default",
@@ -29,8 +31,10 @@
   },
   "devDependencies": {
     "@gemeentenijmegen/projen-project-type": "^1.7.4",
+    "@types/aws-lambda": "^8.10.145",
     "@types/jest": "^29.5.12",
     "@types/node": "^18",
+    "@types/pg": "^8.11.7",
     "@typescript-eslint/eslint-plugin": "^7",
     "@typescript-eslint/parser": "^7",
     "aws-cdk": "^2.1.0",
@@ -47,11 +51,13 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@gemeentenijmegen/aws-constructs": "^0.0.17",
+    "@gemeentenijmegen/aws-constructs": "^0.0.20",
+    "@gemeentenijmegen/utils": "^0.0.15",
     "aws-cdk-lib": "^2.1.0",
     "cdk-remote-stack": "^2.1.0",
     "constructs": "^10.0.5",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "pg": "^8.12.0"
   },
   "license": "EUPL-1.2",
   "publishConfig": {

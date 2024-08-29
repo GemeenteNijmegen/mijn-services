@@ -6,11 +6,15 @@ const project = new GemeenteNijmegenCdkApp({
   projenrcTs: true,
   devDeps: [
     '@gemeentenijmegen/projen-project-type',
+    '@types/aws-lambda',
+    '@types/pg',
   ],
   deps: [
     'dotenv',
     '@gemeentenijmegen/aws-constructs',
+    '@gemeentenijmegen/utils',
     'cdk-remote-stack',
+    'pg', // Postgres client 🐘
   ],
 });
 project.synth();
