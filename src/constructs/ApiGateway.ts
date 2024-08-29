@@ -101,12 +101,15 @@ export class ApiGateway extends Construct {
       integrationUri: service.serviceArn,
       payloadFormatVersion: '1.0',
     });
+    integration.node.addDependency(service);
+    integration.node.addDependency(link);
 
-    new CfnRoute(this, `route-${id}`, {
+    const route = new CfnRoute(this, `route-${id}`, {
       apiId: this.api.apiId,
       routeKey: `ANY /${path}/{proxy+}`,
       target: `integrations/${integration.ref}`,
     });
+    route.addDependency(integration);
 
   }
 }
