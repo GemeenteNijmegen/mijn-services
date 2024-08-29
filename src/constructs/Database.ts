@@ -25,7 +25,9 @@ export class Database extends Construct {
     });
 
     this.db = new rds.DatabaseInstance(this, 'postgres-instance', {
-      engine: rds.DatabaseInstanceEngine.POSTGRES,
+      engine: rds.DatabaseInstanceEngine.postgres({
+        version: rds.PostgresEngineVersion.VER_16_4,
+      }),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO), // Smallest instance possible to start with
       credentials: {
         username: props.databaseSecret.secretValueFromJson('username').toString(),
