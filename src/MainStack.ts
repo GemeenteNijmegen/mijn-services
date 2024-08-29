@@ -1,3 +1,4 @@
+import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -11,11 +12,13 @@ interface MainStackProps extends StackProps, Configurable {}
 export class MainStack extends Stack {
   private readonly configuration;
   private readonly hostedzone: IHostedZone;
+  private readonly vpc: GemeenteNijmegenVpc;
   constructor(scope: Construct, id: string, props: MainStackProps) {
     super(scope, id, props);
     this.configuration = props.configuration;
 
     this.hostedzone = this.importHostedzone();
+    this.vpc = new GemeenteNijmegenVpc(this, 'vpc');
 
     new DnsRecords(this, 'dns', {
       hostedzone: this.hostedzone,
