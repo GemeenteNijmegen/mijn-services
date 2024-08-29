@@ -32,7 +32,7 @@ export class MainStack extends Stack {
       cnameRecords: this.configuration.cnameRecords,
     });
 
-    const api = new ApiGateway(this, 'api-gateway', {
+    new ApiGateway(this, 'api-gateway', {
       hostedzone: this.hostedzone,
       vpc: this.vpc.vpc,
     });
