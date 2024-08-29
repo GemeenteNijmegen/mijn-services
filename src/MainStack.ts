@@ -32,7 +32,7 @@ export class MainStack extends Stack {
       cnameRecords: this.configuration.cnameRecords,
     });
 
-    new ApiGateway(this, 'api-gateway', {
+    const api = new ApiGateway(this, 'api-gateway', {
       hostedzone: this.hostedzone,
       vpc: this.vpc.vpc,
     });
@@ -46,7 +46,7 @@ export class MainStack extends Stack {
     if (!hello.cloudMapService) {
       throw Error('Expected a cloudmap service to be set!');
     }
-    // api.addRoute('hello', platform.vpcLink, hello.cloudMapService, 'hello');
+    api.addRoute('hello', platform.vpcLink, hello.cloudMapService, 'hello');
 
   }
 
