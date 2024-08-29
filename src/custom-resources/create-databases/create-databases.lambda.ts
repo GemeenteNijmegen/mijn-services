@@ -23,7 +23,7 @@ export async function handler(event: CdkCustomResourceEvent) {
   await client.connect();
 
   // Check if databases exist otherwise create them
-  const databases = process.env.LIST_OF_DATABASE!.split(',');
+  const databases = process.env.LIST_OF_DATABASES!.split(',');
   for (const database of databases) {
     const exists = await existsDatabase(client, database);
     if (!exists) {
