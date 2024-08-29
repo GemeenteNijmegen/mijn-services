@@ -27,7 +27,10 @@ export async function handler(event: CdkCustomResourceEvent) {
   for (const database of databases) {
     const exists = await existsDatabase(client, database);
     if (!exists) {
+      console.info('Creating database', database);
       await createDatabase(client, database);
+    } else {
+      console.info('Database', database, 'already exists... skipping creation.');
     }
   }
 
@@ -41,7 +44,7 @@ async function existsDatabase(client: postgres.Client, name: string) {
 
 async function createDatabase(client: postgres.Client, name: string) {
   try {
-    await client.query(`CREATE DATABASE ${name};`);
+    await client.query(`CREATE DATABASE "${name}";`);
   } catch ( err ) {
     console.error(err);
     throw Error(`Could not create database ${name}`);

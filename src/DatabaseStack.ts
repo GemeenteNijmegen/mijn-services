@@ -1,7 +1,8 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { CustomResource, Stack, StackProps } from 'aws-cdk-lib';
 import { Port, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
+import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { Database } from './constructs/Database';
@@ -58,13 +59,13 @@ export class DatabaseStack extends Stack {
     this.database.db.connections.allowFrom(createDatabaseFunction.connections, Port.tcp(port));
 
     // Run the custom resources
-    // const provider = new Provider(this, 'custom-resource-provider', {
-    //   onEventHandler: createDatabaseFunction,
-    // });
-    // const resource = new CustomResource(this, 'custom-resource', {
-    //   serviceToken: provider.serviceToken,
-    // });
-    // resource.node.addDependency(this.database.db);
+    const provider = new Provider(this, 'custom-resource-provider', {
+      onEventHandler: createDatabaseFunction,
+    });
+    const resource = new CustomResource(this, 'custom-resource', {
+      serviceToken: provider.serviceToken,
+    });
+    resource.node.addDependency(this.database.db);
 
 
   }
