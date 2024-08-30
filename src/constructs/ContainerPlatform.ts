@@ -2,7 +2,7 @@ import { Duration } from 'aws-cdk-lib';
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { IVpc, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, Compatibility, ContainerImage, FargateService, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
-import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
+import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
 export interface ContainerPlatformProps {
@@ -65,6 +65,8 @@ export class ContainerPlatform extends Construct {
       cloudMapOptions: {
         cloudMapNamespace: this.cloudmap,
         containerPort: 80,
+        dnsRecordType: DnsRecordType.SRV,
+        dnsTtl: Duration.seconds(60),
       },
     });
 

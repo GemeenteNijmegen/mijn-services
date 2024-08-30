@@ -89,6 +89,8 @@ export class ApiGateway extends Construct {
         protocol: '$context.protocol',
         responseLength: '$context.responseLength',
         domainName: '$context.domainName',
+        integrationError: '$context.integration.error',
+        integrationStatus: '$context.integration.status',
       }),
     };
 
