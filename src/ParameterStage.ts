@@ -1,5 +1,5 @@
 import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
-import { Stack, Tags, Stage, aws_ssm as SSM, StageProps, Aspects } from 'aws-cdk-lib';
+import { Stack, Tags, Stage, StageProps, Aspects } from 'aws-cdk-lib';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
@@ -38,9 +38,17 @@ export class ParameterStack extends Stack {
 
 
   addOpenKlantParameters() {
-    new SSM.StringParameter(this, 'dummy', {
-      stringValue: 'dummyparam',
-      parameterName: Statics.ssmDummyParameter,
+    new Secret(this, 'open-klant-credentials', {
+      description: 'Credentials for the open klant superuser',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'open-klant',
+          email: 'devops@nijmegen.nl',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmOpenKlantCredentials,
     });
   }
 

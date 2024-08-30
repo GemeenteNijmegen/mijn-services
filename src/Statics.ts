@@ -14,6 +14,7 @@ export class Statics {
   // Lets use _ for denoting internal like parameters (eg for stack decoupling)
   static readonly _ssmCertificateArn = `/${Statics.projectName}/internal/cloudfront/cert-arn`;
   static readonly _ssmDatabaseCredentials = `/${Statics.projectName}/internal/database/credentials`;
+  static readonly _ssmOpenKlantCredentials = `/${Statics.projectName}/internal/open-klant/credentials`;
   static readonly _ssmDatabaseArn = `/${Statics.projectName}/internal/database/arn`;
   static readonly _ssmDatabaseHostname = `/${Statics.projectName}/internal/database/hostname`;
   static readonly _ssmDatabasePort = `/${Statics.projectName}/internal/database/post`;
