@@ -28,12 +28,15 @@ export class Service extends Construct {
   }
 
   addRoute(path: string) {
+    if (!this.service.cloudMapService) {
+      throw Error('Cannot add route if ther\'s no cloudmap service configured');
+    }
     const integration = new CfnIntegration(this, 'integration', {
       apiId: this.props.api.apiId,
       connectionId: this.props.link.vpcLinkId,
       connectionType: HttpConnectionType.VPC_LINK,
       integrationType: HttpIntegrationType.HTTP_PROXY,
-      integrationUri: this.service.serviceArn,
+      integrationUri: this.service.cloudMapService?.serviceArn,
       integrationMethod: 'ANY',
       payloadFormatVersion: '1.0',
     });
