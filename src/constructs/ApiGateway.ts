@@ -56,7 +56,6 @@ export class ApiGateway extends Construct {
     const loggroup = new LogGroup(this, 'access-logging', {
       retention: RetentionDays.ONE_YEAR,
     });
-    loggroup.grantWrite(new ServicePrincipal('apigateway.amazonaws.com'));
 
     // We need to configure API gateway service to have a role that allows it to log to cloudwatch...
     const role = new Role(this, 'accesslogging-role', {
@@ -68,6 +67,8 @@ export class ApiGateway extends Construct {
     new CfnAccount(this, 'account', {
       cloudWatchRoleArn: role.roleArn,
     });
+
+    loggroup.grantWrite(role);
 
     const defaultStage = this.api.defaultStage?.node.defaultChild as CfnStage;
     if (!defaultStage) {
