@@ -62,7 +62,7 @@ export class ApiGateway extends Construct {
     const role = new Role(this, 'accesslogging-role', {
       assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
       managedPolicies: [
-        ManagedPolicy.fromManagedPolicyName(this, 'accesslogging-policy', 'AmazonAPIGatewayPushToCloudWatchLogs'),
+        ManagedPolicy.fromAwsManagedPolicyName('AmazonAPIGatewayPushToCloudWatchLogs'),
       ],
     });
     new CfnAccount(this, 'account', {
