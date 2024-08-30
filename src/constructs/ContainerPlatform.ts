@@ -45,7 +45,7 @@ export class ContainerPlatform extends Construct {
   }
 
   helloWorldContainer() {
-    const task = new TaskDefinition(this, 'hello-world-task', {
+    const task = new TaskDefinition(this, 'hello2-task', {
       cpu: '256',
       memoryMiB: '512',
       compatibility: Compatibility.FARGATE,
@@ -66,7 +66,7 @@ export class ContainerPlatform extends Construct {
       ],
     });
 
-    const service = new FargateService(this, 'hello-world-service', {
+    const service = new FargateService(this, 'hello2-service', {
       cluster: this.cluster,
       taskDefinition: task,
       cloudMapOptions: {
