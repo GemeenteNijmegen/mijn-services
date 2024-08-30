@@ -1,7 +1,7 @@
 import { Duration } from 'aws-cdk-lib';
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { IVpc, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, Compatibility, ContainerImage, FargateService, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, Compatibility, ContainerImage, FargateService, Protocol, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
@@ -57,6 +57,13 @@ export class ContainerPlatform extends Construct {
         command: ['CMD-SHELL', 'curl -f http://127.0.0.1 || exit 1'],
         interval: Duration.seconds(10),
       },
+      portMappings: [
+        {
+          containerPort: 80,
+          hostPort: 80,
+          protocol: Protocol.TCP,
+        },
+      ],
     });
 
     const service = new FargateService(this, 'hello-world-service', {
