@@ -95,10 +95,11 @@ export class ApiGateway extends Construct {
   addRoute(id: string, link: VpcLink, service: IService, path: string) {
     const integration = new CfnIntegration(this, `integration-${id}`, {
       apiId: this.api.apiId,
-      integrationType: IntegrationType.HTTP_PROXY,
       connectionId: link.vpcLinkId,
       connectionType: HttpConnectionType.VPC_LINK,
+      integrationType: IntegrationType.HTTP_PROXY,
       integrationUri: service.serviceArn,
+      integrationMethod: 'ANY',
       payloadFormatVersion: '1.0',
     });
     integration.node.addDependency(service);

@@ -52,7 +52,7 @@ export class ContainerPlatform extends Construct {
     });
 
     task.addContainer('main', {
-      image: ContainerImage.fromRegistry('nginxdemos/hello/'),
+      image: ContainerImage.fromRegistry('nginxdemos/hello'),
       healthCheck: {
         command: ['CMD-SHELL', 'curl -f http://127.0.0.1 || exit 1'],
         interval: Duration.seconds(10),
