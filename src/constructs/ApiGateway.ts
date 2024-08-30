@@ -1,12 +1,11 @@
-import { CfnAccount, IntegrationType } from 'aws-cdk-lib/aws-apigateway';
-import { CfnIntegration, CfnRoute, CfnStage, DomainName, HttpApi, HttpConnectionType, SecurityPolicy, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
+import { CfnAccount } from 'aws-cdk-lib/aws-apigateway';
+import { CfnStage, DomainName, HttpApi, SecurityPolicy } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
 import { ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { ApiGatewayv2DomainProperties } from 'aws-cdk-lib/aws-route53-targets';
-import { IService } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
 export interface ApiGatewayProps {
@@ -99,25 +98,5 @@ export class ApiGateway extends Construct {
 
   }
 
-  addRoute(id: string, link: VpcLink, service: IService, path: string) {
-    const integration = new CfnIntegration(this, `integration-${id}`, {
-      apiId: this.api.apiId,
-      connectionId: link.vpcLinkId,
-      connectionType: HttpConnectionType.VPC_LINK,
-      integrationType: IntegrationType.HTTP_PROXY,
-      integrationUri: service.serviceArn,
-      integrationMethod: 'ANY',
-      payloadFormatVersion: '1.0',
-    });
-    integration.node.addDependency(service);
-    integration.node.addDependency(link);
 
-    const route = new CfnRoute(this, `route-${id}`, {
-      apiId: this.api.apiId,
-      routeKey: `ANY /${path}/{proxy+}`,
-      target: `integrations/${integration.ref}`,
-    });
-    route.addDependency(integration);
-
-  }
 }

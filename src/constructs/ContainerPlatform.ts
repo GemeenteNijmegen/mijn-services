@@ -1,8 +1,7 @@
-import { Duration } from 'aws-cdk-lib';
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
-import { IVpc, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, Compatibility, ContainerImage, FargateService, Protocol, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
-import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
+import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { Cluster } from 'aws-cdk-lib/aws-ecs';
+import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
 export interface ContainerPlatformProps {
@@ -16,13 +15,13 @@ export class ContainerPlatform extends Construct {
 
   readonly cluster: Cluster;
   readonly vpcLink: VpcLink;
-  private readonly vpcLinkSecurityGroup: SecurityGroup;
-  private readonly cloudmap: PrivateDnsNamespace;
+  readonly vpcLinkSecurityGroup: SecurityGroup;
+  readonly namespace: PrivateDnsNamespace;
 
   constructor(scope: Construct, id: string, props: ContainerPlatformProps) {
     super(scope, id);
 
-    this.cloudmap = new PrivateDnsNamespace(this, 'cloudmap', {
+    this.namespace = new PrivateDnsNamespace(this, 'cloudmap', {
       name: 'mijn-services.local',
       vpc: props.vpc,
       description: 'Mijn-services CloudMap',
@@ -42,44 +41,6 @@ export class ContainerPlatform extends Construct {
       vpc: props.vpc,
     });
 
-  }
-
-  helloWorldContainer() {
-    const task = new TaskDefinition(this, 'hello2-task', {
-      cpu: '256',
-      memoryMiB: '512',
-      compatibility: Compatibility.FARGATE,
-    });
-
-    task.addContainer('main', {
-      image: ContainerImage.fromRegistry('nginxdemos/hello'),
-      healthCheck: {
-        command: ['CMD-SHELL', 'curl -f http://127.0.0.1 || exit 1'],
-        interval: Duration.seconds(10),
-      },
-      portMappings: [
-        {
-          containerPort: 80,
-          hostPort: 80,
-          protocol: Protocol.TCP,
-        },
-      ],
-    });
-
-    const service = new FargateService(this, 'hello2-service', {
-      cluster: this.cluster,
-      taskDefinition: task,
-      cloudMapOptions: {
-        cloudMapNamespace: this.cloudmap,
-        containerPort: 80,
-        dnsRecordType: DnsRecordType.SRV,
-        dnsTtl: Duration.seconds(60),
-      },
-    });
-
-    service.connections.allowFrom(this.vpcLinkSecurityGroup, Port.tcp(80));
-
-    return service;
   }
 
 }

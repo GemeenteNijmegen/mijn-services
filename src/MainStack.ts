@@ -7,6 +7,7 @@ import { Configurable } from './Configuration';
 import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
+import { Service } from './constructs/Service';
 import { Statics } from './Statics';
 
 interface MainStackProps extends StackProps, Configurable {}
@@ -42,11 +43,15 @@ export class MainStack extends Stack {
     });
 
     // Setup a hello world container for good measure
-    const hello = platform.helloWorldContainer();
-    if (!hello.cloudMapService) {
-      throw Error('Expected a cloudmap service to be set!');
-    }
-    api.addRoute('hello2', platform.vpcLink, hello.cloudMapService, 'hello');
+    const hello = new Service(this, 'hello-service', {
+      api: api.api,
+      cluster: platform.cluster,
+      link: platform.vpcLink,
+      namespace: platform.namespace,
+      port: 80,
+      vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+    });
+    hello.addRoute('hello-world');
 
   }
 
