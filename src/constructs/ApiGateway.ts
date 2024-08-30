@@ -4,7 +4,8 @@ import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatem
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
 import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
+import { ApiGatewayv2DomainProperties } from 'aws-cdk-lib/aws-route53-targets';
 import { IService } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
@@ -35,10 +36,15 @@ export class ApiGateway extends Construct {
       description: 'API for mijn-services',
     });
 
-    new DomainName(this, 'domain', {
+    const domain = new DomainName(this, 'domain', {
       certificate: cert,
       domainName: props.hostedzone.zoneName,
       securityPolicy: SecurityPolicy.TLS_1_2,
+    });
+
+    new ARecord(this, 'a', {
+      target: RecordTarget.fromAlias(new ApiGatewayv2DomainProperties(domain.regionalDomainName, domain.regionalHostedZoneId)),
+      zone: props.hostedzone,
     });
 
     this.setupAccessLogging();
