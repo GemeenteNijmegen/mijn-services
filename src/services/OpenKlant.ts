@@ -93,7 +93,6 @@ export class OpenKlantService extends Construct {
         command: ['CMD-SHELL', 'exit 0'], // Not sure what to check when executing a single script
         startPeriod: Duration.seconds(30), // Give the script an inital 30 seconds to run before starting the health check
       },
-      essential: false,
       // Note: use env vars in combinations with the below command https://stackoverflow.com/questions/26963444/django-create-superuser-from-batch-file
       // Note command can only run once: 'CommandError: Error: That gebruikersnaam is already taken.'
       command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'],
