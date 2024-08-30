@@ -43,7 +43,7 @@ export class MainStack extends Stack {
     });
 
     // Setup a hello world container for good measure
-    const hello = new Service(this, 'hello-service', {
+    new Service(this, 'hello-service', {
       api: api.api,
       cluster: platform.cluster,
       link: platform.vpcLink,
@@ -51,7 +51,7 @@ export class MainStack extends Stack {
       port: 80,
       vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
     });
-    hello.addRoute('hello-world');
+    // hello.addRoute('hello-world');
 
   }
 

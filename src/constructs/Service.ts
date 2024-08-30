@@ -80,7 +80,7 @@ export class Service extends Construct {
    * @param task
    * @returns
    */
-  setupContainers(task: TaskDefinition) {
+  protected setupContainers(task: TaskDefinition) {
     return task.addContainer('main', {
       image: ContainerImage.fromRegistry('nginxdemos/hello'),
       healthCheck: {
