@@ -1,8 +1,8 @@
-import { CfnStage, IntegrationType } from 'aws-cdk-lib/aws-apigateway';
+import { CfnAccount, CfnStage, IntegrationType } from 'aws-cdk-lib/aws-apigateway';
 import { CfnIntegration, CfnRoute, DomainName, HttpApi, HttpConnectionType, SecurityPolicy, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
-import { ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { ApiGatewayv2DomainProperties } from 'aws-cdk-lib/aws-route53-targets';
@@ -57,6 +57,17 @@ export class ApiGateway extends Construct {
       retention: RetentionDays.ONE_YEAR,
     });
     loggroup.grantWrite(new ServicePrincipal('apigateway.amazonaws.com'));
+
+    // We need to configure API gateway service to have a role that allows it to log to cloudwatch...
+    const role = new Role(this, 'accesslogging-role', {
+      assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
+      managedPolicies: [
+        ManagedPolicy.fromManagedPolicyName(this, 'accesslogging-policy', 'AmazonAPIGatewayPushToCloudWatchLogs'),
+      ],
+    });
+    new CfnAccount(this, 'account', {
+      cloudWatchRoleArn: role.roleArn,
+    });
 
     const defaultStage = this.api.defaultStage?.node.defaultChild as CfnStage;
     if (!defaultStage) {
