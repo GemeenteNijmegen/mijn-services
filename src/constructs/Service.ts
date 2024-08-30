@@ -1,6 +1,5 @@
 import { Duration } from 'aws-cdk-lib';
-import { IntegrationType } from 'aws-cdk-lib/aws-apigateway';
-import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
+import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, Compatibility, ContainerImage, FargateService, Protocol, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
@@ -33,7 +32,7 @@ export class Service extends Construct {
       apiId: this.props.api.apiId,
       connectionId: this.props.link.vpcLinkId,
       connectionType: HttpConnectionType.VPC_LINK,
-      integrationType: IntegrationType.HTTP_PROXY,
+      integrationType: HttpIntegrationType.HTTP_PROXY,
       integrationUri: this.service.serviceArn,
       integrationMethod: 'ANY',
       payloadFormatVersion: '1.0',
