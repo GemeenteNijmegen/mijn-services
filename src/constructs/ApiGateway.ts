@@ -1,5 +1,5 @@
-import { CfnAccount, CfnStage, IntegrationType } from 'aws-cdk-lib/aws-apigateway';
-import { CfnIntegration, CfnRoute, DomainName, HttpApi, HttpConnectionType, SecurityPolicy, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
+import { CfnAccount, IntegrationType } from 'aws-cdk-lib/aws-apigateway';
+import { CfnIntegration, CfnRoute, CfnStage, DomainName, HttpApi, HttpConnectionType, SecurityPolicy, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
 import { ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
@@ -75,7 +75,7 @@ export class ApiGateway extends Construct {
     if (!defaultStage) {
       throw Error('Expected default stage to be set for api gateway!');
     }
-    defaultStage.accessLogSetting = {
+    defaultStage.accessLogSettings = {
       destinationArn: loggroup.logGroupArn,
       format: JSON.stringify({
         requestId: '$context.requestId',
