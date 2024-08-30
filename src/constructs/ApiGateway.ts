@@ -32,14 +32,17 @@ export class ApiGateway extends Construct {
       validation: CertificateValidation.fromDns(props.hostedzone),
     });
 
-    this.api = new HttpApi(this, 'api-gateway', {
-      description: 'API for mijn-services',
-    });
-
     const domain = new DomainName(this, 'domain', {
       certificate: cert,
       domainName: props.hostedzone.zoneName,
       securityPolicy: SecurityPolicy.TLS_1_2,
+    });
+
+    this.api = new HttpApi(this, 'api-gateway', {
+      description: 'API for mijn-services',
+      defaultDomainMapping: {
+        domainName: domain,
+      },
     });
 
     new ARecord(this, 'a', {
