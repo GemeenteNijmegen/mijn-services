@@ -69,6 +69,7 @@ export class ApiGateway extends Construct {
     });
 
     loggroup.grantWrite(role);
+    loggroup.grantWrite(new ServicePrincipal('apigateway.amazonaws.com'));
 
     const defaultStage = this.api.defaultStage?.node.defaultChild as CfnStage;
     if (!defaultStage) {
