@@ -2,7 +2,7 @@ import { CfnStage, IntegrationType } from 'aws-cdk-lib/aws-apigateway';
 import { CfnIntegration, CfnRoute, DomainName, HttpApi, HttpConnectionType, SecurityPolicy, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
-import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { ApiGatewayv2DomainProperties } from 'aws-cdk-lib/aws-route53-targets';
@@ -56,24 +56,7 @@ export class ApiGateway extends Construct {
     const loggroup = new LogGroup(this, 'access-logging', {
       retention: RetentionDays.ONE_YEAR,
     });
-
-    const role = new Role(this, 'access-logging-role', {
-      assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
-    });
-
-    role.addToPolicy(new PolicyStatement({
-      actions: [
-        'logs:CreateLogGroup',
-        'logs:CreateLogStream',
-        'logs:DescribeLogGroups',
-        'logs:DescribeLogStreams',
-        'logs:PutLogEvents',
-        'logs:GetLogEvents',
-        'logs:FilterLogEvents',
-      ],
-      resources: ['*'],
-    }));
-    loggroup.grantWrite(role);
+    loggroup.grantWrite(new ServicePrincipal('apigateway.amazonaws.com'));
 
     const defaultStage = this.api.defaultStage?.node.defaultChild as CfnStage;
     if (!defaultStage) {
