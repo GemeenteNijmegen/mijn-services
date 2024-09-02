@@ -24,8 +24,9 @@ export class OpenKlantService extends Construct {
   private readonly logs: LogGroup;
   private readonly props: OpenKlantServiceProps;
   private readonly serviceFactory: ServiceFactory;
-  private databaseCredentials: ISecret;
-  private openKlantCredentials: ISecret;
+  private readonly databaseCredentials: ISecret;
+  private readonly openKlantCredentials: ISecret;
+  private readonly secretKey: ISecret;
   constructor(scope: Construct, id: string, props: OpenKlantServiceProps) {
     super(scope, id);
     this.props = props;
@@ -35,6 +36,12 @@ export class OpenKlantService extends Construct {
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.openKlantCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenKlantCredentials);
+    this.secretKey = new SecretParameter(this, 'secret-key', {
+      description: 'Open klant secret key',
+      generateSecretString: {
+        excludePunctuation: true,
+      },
+    });
 
     this.setupInitalization();
     this.setupService();
@@ -73,6 +80,9 @@ export class OpenKlantService extends Construct {
     const secrets = {
       DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+
+      // Django requires a secret key to be defined (auto generated on deployment for this service)
+      SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
       // Generic super user creation works with running the createsuperuser command
       DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openKlantCredentials, 'username'),
