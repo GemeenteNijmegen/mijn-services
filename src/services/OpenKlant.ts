@@ -1,8 +1,9 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { IRole } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
+import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { CacheDatabase } from '../constructs/Redis';
@@ -23,11 +24,17 @@ export class OpenKlantService extends Construct {
   private readonly logs: LogGroup;
   private readonly props: OpenKlantServiceProps;
   private readonly serviceFactory: ServiceFactory;
+  private databaseCredentials: ISecret;
+  private openKlantCredentials: ISecret;
   constructor(scope: Construct, id: string, props: OpenKlantServiceProps) {
     super(scope, id);
     this.props = props;
     this.serviceFactory = new ServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+
+    this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
+    this.openKlantCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenKlantCredentials);
 
     this.setupInitalization();
     this.setupService();
@@ -42,7 +49,7 @@ export class OpenKlantService extends Construct {
       DB_NAME: Statics.databaseOpenKlant,
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
-      ALLOWED_HOSTS: '*', // See loadbalancer target remark above this.props.zgwCluster.alb.getDomain(),
+      ALLOWED_HOSTS: '*',
       CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/'+this.props.path,
@@ -63,21 +70,14 @@ export class OpenKlantService extends Construct {
   }
 
   private getSecretConfiguration() {
-
-    // Import db credentials
-    const databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
-
-    // Import openklant superuser credentials
-    const openKlantCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenKlantCredentials);
-
     const secrets = {
-      DB_PASSWORD: Secret.fromSecretsManager(databaseCredentials, 'password'),
-      DB_USER: Secret.fromSecretsManager(databaseCredentials, 'username'),
+      DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+      DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
 
       // Generic super user creation works with running the createsuperuser command
-      DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(openKlantCredentials, 'username'),
-      DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(openKlantCredentials, 'password'),
-      DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(openKlantCredentials, 'email'),
+      DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openKlantCredentials, 'username'),
+      DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.openKlantCredentials, 'password'),
+      DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openKlantCredentials, 'email'),
     };
     return secrets;
   }
@@ -110,7 +110,7 @@ export class OpenKlantService extends Construct {
       throw Error('Expected security groups to be set!');
     }
     this.setupConnectivity('init', scheduledTask.task.securityGroups);
-
+    this.allowAccessToSecrets(scheduledTask.taskDefinition.executionRole!);
   }
 
   setupService() {
@@ -137,6 +137,7 @@ export class OpenKlantService extends Construct {
     });
     const service = this.serviceFactory.createService(task, this.props.path);
     this.setupConnectivity('main', service.connections.securityGroups);
+    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
   }
 
   private logGroup() {
@@ -163,4 +164,11 @@ export class OpenKlantService extends Construct {
       });
     });
   }
+
+  private allowAccessToSecrets(role: IRole) {
+    this.databaseCredentials.grantRead(role);
+    this.openKlantCredentials.grantRead(role);
+  }
+
+
 }
