@@ -111,6 +111,8 @@ export class OpenKlantService extends Construct {
         streamPrefix: 'logs',
         logGroup: this.logs,
       }),
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
     });
 
     const service = this.serviceFactory.createService(task, undefined, 'init');
