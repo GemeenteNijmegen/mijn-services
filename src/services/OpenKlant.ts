@@ -121,7 +121,14 @@ export class OpenKlantService extends Construct {
       environment: this.getEnvironmentConfiguration(),
     });
 
-    const service = this.serviceFactory.createService(task, undefined, 'init');
+    const service = this.serviceFactory.createService({
+      id: 'init',
+      task: task,
+      path: undefined, // Service is not exposed
+      options: {
+        desiredCount: 0, // Service runs only once and is disabled by default!
+      },
+    });
     this.setupConnectivity('init', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
   }
@@ -149,7 +156,14 @@ export class OpenKlantService extends Construct {
         logGroup: this.logs,
       }),
     });
-    const service = this.serviceFactory.createService(task, this.props.path);
+
+    const service = this.serviceFactory.createService({
+      task,
+      path: this.props.path,
+      options: {
+        desiredCount: 1,
+      },
+    });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
   }
@@ -170,7 +184,14 @@ export class OpenKlantService extends Construct {
       }),
       command: ['/celery_worker.sh'],
     });
-    const service = this.serviceFactory.createService(task, undefined, 'celery');
+    const service = this.serviceFactory.createService({
+      task,
+      path: undefined, // Not exposed service
+      id: 'celery',
+      options: {
+        desiredCount: 1,
+      },
+    });
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
   }

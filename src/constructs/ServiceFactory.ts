@@ -1,9 +1,7 @@
 import { Duration } from 'aws-cdk-lib';
 import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, Compatibility, FargateService, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
-import { ScheduledFargateTask } from 'aws-cdk-lib/aws-ecs-patterns';
-import { Schedule } from 'aws-cdk-lib/aws-events';
+import { Cluster, Compatibility, FargateService, FargateServiceProps, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
@@ -17,6 +15,29 @@ export interface ServiceFactoryProps {
   port: number;
 }
 
+export interface CreateServiceOptions {
+  /**
+   * The taskdefinition the service will use.
+   */
+  task: TaskDefinition;
+  /**
+   * This overwrites the service options created by this
+   * factory. Can also be used to append options
+   */
+  options?: Partial<FargateServiceProps>;
+  /**
+   * Provide a path to expose the service on in the
+   * API gateway. An api route, integration and servicediscovery
+   * are created when this property is set.
+   * @default - No integration, route and servicediscovery are created
+   */
+  path?: string;
+  /**
+   * Provide an cdk id for the service as the resources are created
+   * in the scope provided during factory construction.
+   */
+  id?: string;
+}
 
 export class ServiceFactory {
 
@@ -37,41 +58,26 @@ export class ServiceFactory {
     return task;
   }
 
-  createService(task: TaskDefinition, path?: string, id?: string) {
-    const service = new FargateService(this.scope, `${id ? id + '-' : ''}service`, {
+  createService(options: CreateServiceOptions) {
+    const service = new FargateService(this.scope, `${options.id ? options.id + '-' : ''}service`, {
       cluster: this.props.cluster,
-      taskDefinition: task,
-      cloudMapOptions: path ? {
+      taskDefinition: options.task,
+      cloudMapOptions: options.path ? {
         cloudMapNamespace: this.props.namespace,
         containerPort: this.props.port,
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
       } : undefined,
+      ...options.options,
     });
 
     service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
 
-    if (path) {
-      this.addRoute(service, path);
+    if (options.path) {
+      this.addRoute(service, options.path);
     }
 
     return service;
-  }
-
-  createScheduledService(date: Date, task: TaskDefinition, id?: string) {
-    return new ScheduledFargateTask(this.scope, `${id ? id + '-' : ''}service`, {
-      schedule: Schedule.cron({
-        day: date.getDay().toString(),
-        hour: date.getHours().toString(),
-        minute: date.getMinutes().toString(),
-        month: date.getMonth().toString(),
-        year: date.getFullYear().toString(),
-      }),
-      cluster: this.props.cluster,
-      scheduledFargateTaskDefinitionOptions: {
-        taskDefinition: task,
-      },
-    });
   }
 
   private addRoute(service: FargateService, path: string, id?: string) {
