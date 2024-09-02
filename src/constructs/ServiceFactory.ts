@@ -66,7 +66,6 @@ export class ServiceFactory {
         minute: date.getMinutes().toString(),
         month: date.getMonth().toString(),
         year: date.getFullYear().toString(),
-        weekDay: '?',
       }),
       cluster: this.props.cluster,
       scheduledFargateTaskDefinitionOptions: {
