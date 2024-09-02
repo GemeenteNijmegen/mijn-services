@@ -1,5 +1,6 @@
 import { Duration } from 'aws-cdk-lib';
-import { ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -18,13 +19,14 @@ export interface OpenKlantServiceProps {
 }
 
 export class OpenKlantService extends Construct {
-
+  private readonly logs: LogGroup;
   private readonly props: OpenKlantServiceProps;
   private readonly serviceFactory: ServiceFactory;
   constructor(scope: Construct, id: string, props: OpenKlantServiceProps) {
     super(scope, id);
     this.props = props;
     this.serviceFactory = new ServiceFactory(this, props.service);
+    this.logs = this.logGroup();
 
     this.setupInitalization();
     this.setupService();
@@ -97,6 +99,10 @@ export class OpenKlantService extends Construct {
       // Note command can only run once: 'CommandError: Error: That gebruikersnaam is already taken.'
       command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'],
       portMappings: [],
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: this.logs,
+      }),
     });
 
     this.serviceFactory.createScheduledService(over15minuten, task, 'init');
@@ -119,8 +125,18 @@ export class OpenKlantService extends Construct {
       ],
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: this.logs,
+      }),
     });
     this.serviceFactory.createService(task, this.props.path);
+  }
+
+  private logGroup() {
+    return new LogGroup(this, 'logs', {
+      retention: RetentionDays.ONE_MONTH,
+    });
   }
 
 
