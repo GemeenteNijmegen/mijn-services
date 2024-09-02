@@ -158,7 +158,7 @@ export class OpenKlantService extends Construct {
     task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'exit 0'], // TODO fix health check but no curl or wget in image
+        command: ['CMD-SHELL', 'celery', '--app', 'openklant.celery'],
         interval: Duration.seconds(10),
       },
       secrets: this.getSecretConfiguration(),
