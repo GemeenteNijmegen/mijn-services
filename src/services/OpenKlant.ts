@@ -1,5 +1,6 @@
-import { Duration } from 'aws-cdk-lib';
-import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { Duration, Token } from 'aws-cdk-lib';
+import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { AwsLogDriver, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -130,7 +131,8 @@ export class OpenKlantService extends Construct {
         logGroup: this.logs,
       }),
     });
-    this.serviceFactory.createService(task, this.props.path);
+    const service = this.serviceFactory.createService(task, this.props.path);
+    this.setupConnectivity(service);
   }
 
   private logGroup() {
@@ -139,5 +141,22 @@ export class OpenKlantService extends Construct {
     });
   }
 
+  private setupConnectivity(service: FargateService) {
 
+    const dbSecurityGroupId = StringParameter.valueForStringParameter(this, Statics._ssmDatabaseSecurityGroup);
+    const dbSecurityGroup = SecurityGroup.fromSecurityGroupId(this, 'db-security-group', dbSecurityGroupId);
+    const dbPort = StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort);
+    service.connections.securityGroups.forEach(serviceSecurityGroup => {
+      dbSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(dbPort)));
+    });
+
+    const cachePort = this.props.cache.db.attrRedisEndpointPort;
+    service.connections.securityGroups.forEach(serviceSecurityGroup => {
+      dbSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(dbPort)));
+      this.props.cache.db.vpcSecurityGroupIds?.forEach((cacheSecurityGroupId, index) => {
+        const cacheSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `cache-security-group-${index}`, cacheSecurityGroupId);
+        cacheSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(cachePort)));
+      });
+    });
+  }
 }
