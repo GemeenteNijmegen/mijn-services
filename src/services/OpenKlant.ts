@@ -113,7 +113,7 @@ export class OpenKlantService extends Construct {
       }),
     });
 
-    const service = this.serviceFactory.createService(task, 'init');
+    const service = this.serviceFactory.createService(task, undefined, 'init');
     this.setupConnectivity('init', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
   }

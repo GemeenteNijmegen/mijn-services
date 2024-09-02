@@ -41,12 +41,12 @@ export class ServiceFactory {
     const service = new FargateService(this.scope, `${id ? id + '-' : ''}service`, {
       cluster: this.props.cluster,
       taskDefinition: task,
-      cloudMapOptions: {
+      cloudMapOptions: path ? {
         cloudMapNamespace: this.props.namespace,
         containerPort: this.props.port,
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
-      },
+      } : undefined,
     });
 
     service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
