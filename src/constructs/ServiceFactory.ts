@@ -60,7 +60,14 @@ export class ServiceFactory {
 
   createScheduledService(date: Date, task: TaskDefinition, id?: string) {
     return new ScheduledFargateTask(this.scope, `${id ? id + '-' : ''}service`, {
-      schedule: Schedule.expression(date.toISOString()),
+      schedule: Schedule.cron({
+        day: date.getDay().toString(),
+        hour: date.getHours().toString(),
+        minute: date.getMinutes().toString(),
+        month: date.getMonth().toString(),
+        year: date.getFullYear().toString(),
+        weekDay: '?',
+      }),
       cluster: this.props.cluster,
       scheduledFargateTaskDefinitionOptions: {
         taskDefinition: task,
