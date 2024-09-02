@@ -1,6 +1,6 @@
 import { Duration, Token } from 'aws-cdk-lib';
-import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -86,8 +86,7 @@ export class OpenKlantService extends Construct {
    * Run an initalization container once 15 minutes after creating.
    */
   private setupInitalization() {
-    const over15minuten = new Date();
-    over15minuten.setMinutes(new Date().getMinutes() + 15);
+    const runTaskAtTime = new Date(Date.parse('2024-09-02T09:59:99.000Z'));
 
     const task = this.serviceFactory.createTaskDefinition('init');
     task.addContainer('init', {
@@ -106,7 +105,12 @@ export class OpenKlantService extends Construct {
       }),
     });
 
-    this.serviceFactory.createScheduledService(over15minuten, task, 'init');
+    const scheduledTask = this.serviceFactory.createScheduledService(runTaskAtTime, task, 'init');
+    if (!scheduledTask.task.securityGroups) {
+      throw Error('Expected security groups to be set!');
+    }
+    this.setupConnectivity('init', scheduledTask.task.securityGroups);
+
   }
 
   setupService() {
@@ -132,7 +136,7 @@ export class OpenKlantService extends Construct {
       }),
     });
     const service = this.serviceFactory.createService(task, this.props.path);
-    this.setupConnectivity(service);
+    this.setupConnectivity('main', service.connections.securityGroups);
   }
 
   private logGroup() {
@@ -141,20 +145,20 @@ export class OpenKlantService extends Construct {
     });
   }
 
-  private setupConnectivity(service: FargateService) {
+  private setupConnectivity(id: string, serviceSecurityGroups: ISecurityGroup[]) {
 
     const dbSecurityGroupId = StringParameter.valueForStringParameter(this, Statics._ssmDatabaseSecurityGroup);
-    const dbSecurityGroup = SecurityGroup.fromSecurityGroupId(this, 'db-security-group', dbSecurityGroupId);
+    const dbSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `db-security-group-${id}`, dbSecurityGroupId);
     const dbPort = StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort);
-    service.connections.securityGroups.forEach(serviceSecurityGroup => {
+    serviceSecurityGroups.forEach(serviceSecurityGroup => {
       dbSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(dbPort)));
     });
 
     const cachePort = this.props.cache.db.attrRedisEndpointPort;
-    service.connections.securityGroups.forEach(serviceSecurityGroup => {
+    serviceSecurityGroups.forEach(serviceSecurityGroup => {
       dbSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(dbPort)));
       this.props.cache.db.vpcSecurityGroupIds?.forEach((cacheSecurityGroupId, index) => {
-        const cacheSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `cache-security-group-${index}`, cacheSecurityGroupId);
+        const cacheSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `cache-security-group-${id}-${index}`, cacheSecurityGroupId);
         cacheSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(cachePort)));
       });
     });
