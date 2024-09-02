@@ -96,8 +96,6 @@ export class OpenKlantService extends Construct {
    * Run an initalization container once 15 minutes after creating.
    */
   private setupInitalization() {
-    const runTaskAtTime = new Date(Date.parse('2024-09-02T09:59:99.000Z'));
-
     const task = this.serviceFactory.createTaskDefinition('init');
     task.addContainer('init', {
       image: ContainerImage.fromRegistry(this.props.image),
@@ -115,12 +113,9 @@ export class OpenKlantService extends Construct {
       }),
     });
 
-    const scheduledTask = this.serviceFactory.createScheduledService(runTaskAtTime, task, 'init');
-    if (!scheduledTask.task.securityGroups) {
-      throw Error('Expected security groups to be set!');
-    }
-    this.setupConnectivity('init', scheduledTask.task.securityGroups);
-    this.allowAccessToSecrets(scheduledTask.taskDefinition.executionRole!);
+    const service = this.serviceFactory.createService(task, 'init');
+    this.setupConnectivity('init', service.connections.securityGroups);
+    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
   }
 
   setupService() {
