@@ -125,7 +125,7 @@ export class OpenKlantService extends Construct {
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'curl -f http://127.0.0.1/ || exit 1'],
+        command: ['CMD-SHELL', 'curl -f http://127.0.0.1:8080/ || exit 1'],
         interval: Duration.seconds(10),
       },
       portMappings: [
