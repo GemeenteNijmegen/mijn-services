@@ -45,6 +45,7 @@ export class OpenKlantService extends Construct {
 
     this.setupInitalization();
     this.setupService();
+    this.setupCeleryService();
   }
 
   private getEnvironmentConfiguration() {
@@ -144,6 +145,27 @@ export class OpenKlantService extends Construct {
     });
     const service = this.serviceFactory.createService(task, this.props.path);
     this.setupConnectivity('main', service.connections.securityGroups);
+    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+  }
+
+  setupCeleryService() {
+    const task = this.serviceFactory.createTaskDefinition('celery');
+    task.addContainer('celery', {
+      image: ContainerImage.fromRegistry(this.props.image),
+      healthCheck: {
+        command: ['CMD-SHELL', 'exit 0'], // TODO fix health check but no curl or wget in image
+        interval: Duration.seconds(10),
+      },
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: this.logs,
+      }),
+      command: ['/celery_worker.sh'],
+    });
+    const service = this.serviceFactory.createService(task, undefined, 'celery');
+    this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
   }
 
