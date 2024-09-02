@@ -74,6 +74,9 @@ export class OpenKlantService extends Construct {
       CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
       CELERY_LOGLEVEL: this.props.logLevel,
 
+
+      USE_X_FORWARDED_HOST: 'True',
+
     };
   }
 
