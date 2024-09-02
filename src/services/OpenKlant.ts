@@ -131,7 +131,7 @@ export class OpenKlantService extends Construct {
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'python3', '-c', `import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)`],
+        command: ['CMD-SHELL', 'python', '-c', `import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)`],
         interval: Duration.seconds(10),
       },
       portMappings: [
