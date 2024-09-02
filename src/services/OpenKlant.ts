@@ -3,6 +3,7 @@ import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -18,6 +19,7 @@ export interface OpenKlantServiceProps {
   logLevel: string;
   service: ServiceFactoryProps;
   path: string;
+  hostedzone: IHostedZone;
 }
 
 export class OpenKlantService extends Construct {
@@ -75,7 +77,7 @@ export class OpenKlantService extends Construct {
       CELERY_LOGLEVEL: this.props.logLevel,
 
 
-      USE_X_FORWARDED_HOST: 'True',
+      CSRF_TRUSTED_ORIGINS: `https://${this.props.hostedzone.zoneName}`,
 
     };
   }

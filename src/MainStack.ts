@@ -50,6 +50,7 @@ export class MainStack extends Stack {
 
   private openKlantService(api: ApiGateway, platform: ContainerPlatform) {
     new OpenKlantService(this, 'open-klant', {
+      hostedzone: this.hostedzone,
       cache: this.cache,
       cacheDatabaseIndex: 1,
       cacheDatabaseIndexCelery: 2,
