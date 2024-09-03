@@ -38,6 +38,7 @@ export class MainStack extends Stack {
     const api = new ApiGateway(this, 'api-gateway', {
       hostedzone: this.hostedzone,
       vpc: this.vpc.vpc,
+      alternativeDomainNames: props.configuration.alternativeDomainNames,
     });
 
     const platform = new ContainerPlatform(this, 'containers', {
