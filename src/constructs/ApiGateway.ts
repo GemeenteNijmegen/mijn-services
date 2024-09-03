@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { CfnAccount } from 'aws-cdk-lib/aws-apigateway';
 import { CfnStage, DomainName, HttpApi, SecurityPolicy } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
@@ -55,6 +56,15 @@ export class ApiGateway extends Construct {
       target: RecordTarget.fromAlias(new ApiGatewayv2DomainProperties(domain.regionalDomainName, domain.regionalHostedZoneId)),
       zone: props.hostedzone,
     });
+
+    for (const alternativeDomainName of props.alternativeDomainNames ?? []) {
+      const hash = createHash('sha265').update(alternativeDomainName).digest('hex').substring(0, 5);
+      new DomainName(this, `nijmegen-nl-domain-${hash}`, {
+        certificate: cert,
+        domainName: alternativeDomainName,
+        securityPolicy: SecurityPolicy.TLS_1_2,
+      });
+    }
 
     this.setupAccessLogging();
 
