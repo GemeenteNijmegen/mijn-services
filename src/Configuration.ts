@@ -50,8 +50,14 @@ export interface Configuration {
    * E.g. for certificates.
    */
   cnameRecords?: Record<string, string>;
+
+  openklant: OpenKlantConfiguration;
 }
 
+export interface OpenKlantConfiguration {
+  image: string;
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+}
 
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
   acceptance: {
@@ -64,16 +70,24 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     cnameRecords: {
       _b528d6157c2d9a369bf7d7812881d466: '_189b6977b0d0141d6cbb01e0ba1386e6.djqtsrsxkq.acm-validations.aws.',
     },
+    openklant: {
+      image: 'maykinmedia/open-klant:2.1.0',
+      logLevel: 'DEBUG',
+    },
   },
   main: {
     branch: 'main',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
-    alternativeDomainNames: [
-      'mijn-services.nijmegen.nl',
-    ],
+    // alternativeDomainNames: [
+    //   'mijn-services.nijmegen.nl',
+    // ],
     cnameRecords: {
       _762e893c9ea81e57b34ab11ed543256d: '_1c518863d978cddd100e65875b7c1136.djqtsrsxkq.acm-validations.aws.',
+    },
+    openklant: {
+      image: 'maykinmedia/open-klant:2.1.0',
+      logLevel: 'INFO',
     },
   },
 };
