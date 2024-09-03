@@ -20,6 +20,7 @@ export interface OpenKlantServiceProps {
   service: ServiceFactoryProps;
   path: string;
   hostedzone: IHostedZone;
+  alternativeDomainNames?: string[];
 }
 
 export class OpenKlantService extends Construct {
@@ -54,6 +55,10 @@ export class OpenKlantService extends Construct {
 
     const cacheHost = this.props.cache.db.attrRedisEndpointAddress + ':' + this.props.cache.db.attrRedisEndpointPort + '/';
 
+
+    const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
+    trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
+
     return {
       DJANGO_SETTINGS_MODULE: 'openklant.conf.docker',
       DB_NAME: Statics.databaseOpenKlant,
@@ -77,7 +82,7 @@ export class OpenKlantService extends Construct {
       CELERY_LOGLEVEL: this.props.logLevel,
 
 
-      CSRF_TRUSTED_ORIGINS: `https://${this.props.hostedzone.zoneName}`,
+      CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
 
     };
   }

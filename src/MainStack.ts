@@ -38,6 +38,7 @@ export class MainStack extends Stack {
     const api = new ApiGateway(this, 'api-gateway', {
       hostedzone: this.hostedzone,
       vpc: this.vpc.vpc,
+      alternativeDomainNames: props.configuration.alternativeDomainNames,
     });
 
     const platform = new ContainerPlatform(this, 'containers', {
@@ -56,6 +57,7 @@ export class MainStack extends Stack {
       cacheDatabaseIndexCelery: 2,
       image: this.configuration.openklant.image,
       logLevel: this.configuration.openklant.logLevel,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
       path: 'open-klant',
       service: {
         api: api.api,
