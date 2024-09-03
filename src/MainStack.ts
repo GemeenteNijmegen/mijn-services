@@ -57,6 +57,7 @@ export class MainStack extends Stack {
       cacheDatabaseIndexCelery: 2,
       image: this.configuration.openklant.image,
       logLevel: this.configuration.openklant.logLevel,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
       path: 'open-klant',
       service: {
         api: api.api,
