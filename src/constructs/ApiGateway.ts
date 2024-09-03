@@ -58,7 +58,7 @@ export class ApiGateway extends Construct {
     });
 
     for (const alternativeDomainName of props.alternativeDomainNames ?? []) {
-      const hash = createHash('sha265').update(alternativeDomainName).digest('hex').substring(0, 5);
+      const hash = createHash('sha256').update(alternativeDomainName).digest('base64').substring(0, 5);
       new DomainName(this, `nijmegen-nl-domain-${hash}`, {
         certificate: cert,
         domainName: alternativeDomainName,
