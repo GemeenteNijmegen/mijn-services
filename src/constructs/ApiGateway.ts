@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { CfnAccount } from 'aws-cdk-lib/aws-apigateway';
-import { CfnStage, DomainName, HttpApi, SecurityPolicy } from 'aws-cdk-lib/aws-apigatewayv2';
+import { ApiMapping, CfnStage, DomainName, HttpApi, SecurityPolicy } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc } from 'aws-cdk-lib/aws-ec2';
 import { ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
@@ -59,10 +59,14 @@ export class ApiGateway extends Construct {
 
     for (const alternativeDomainName of props.alternativeDomainNames ?? []) {
       const hash = createHash('sha256').update(alternativeDomainName).digest('base64').substring(0, 5);
-      new DomainName(this, `nijmegen-nl-domain-${hash}`, {
+      const domainName = new DomainName(this, `nijmegen-nl-domain-${hash}`, {
         certificate: cert,
         domainName: alternativeDomainName,
         securityPolicy: SecurityPolicy.TLS_1_2,
+      });
+      new ApiMapping(this, `api-mapping-${hash}`, {
+        api: this.api,
+        domainName: domainName,
       });
     }
 
