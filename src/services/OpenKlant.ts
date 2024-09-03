@@ -134,7 +134,7 @@ export class OpenKlantService extends Construct {
   }
 
   setupService() {
-    const task = this.serviceFactory.createTaskDefinition();
+    const task = this.serviceFactory.createTaskDefinition('main');
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
@@ -158,7 +158,8 @@ export class OpenKlantService extends Construct {
     });
 
     const service = this.serviceFactory.createService({
-      task,
+      id: 'main',
+      task: task,
       path: this.props.path,
       options: {
         desiredCount: 1,

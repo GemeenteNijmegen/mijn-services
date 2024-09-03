@@ -17,6 +17,11 @@ export interface ServiceFactoryProps {
 
 export interface CreateServiceOptions {
   /**
+   * Provide an cdk id for the service as the resources are created
+   * in the scope provided during factory construction.
+   */
+  id: string;
+  /**
    * The taskdefinition the service will use.
    */
   task: TaskDefinition;
@@ -32,11 +37,6 @@ export interface CreateServiceOptions {
    * @default - No integration, route and servicediscovery are created
    */
   path?: string;
-  /**
-   * Provide an cdk id for the service as the resources are created
-   * in the scope provided during factory construction.
-   */
-  id?: string;
 }
 
 export class ServiceFactory {
@@ -49,8 +49,8 @@ export class ServiceFactory {
     this.props = props;
   }
 
-  createTaskDefinition(id?: string) {
-    const task = new TaskDefinition(this.scope, `${id ? id + '-' : ''}task`, {
+  createTaskDefinition(id: string) {
+    const task = new TaskDefinition(this.scope, `${id}-task`, {
       cpu: '256',
       memoryMiB: '512',
       compatibility: Compatibility.FARGATE,
@@ -59,7 +59,7 @@ export class ServiceFactory {
   }
 
   createService(options: CreateServiceOptions) {
-    const service = new FargateService(this.scope, `${options.id ? options.id + '-' : ''}service`, {
+    const service = new FargateService(this.scope, `${options.id}-service`, {
       cluster: this.props.cluster,
       taskDefinition: options.task,
       cloudMapOptions: options.path ? {
@@ -74,17 +74,17 @@ export class ServiceFactory {
     service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
 
     if (options.path) {
-      this.addRoute(service, options.path);
+      this.addRoute(service, options.path, options.id);
     }
 
     return service;
   }
 
-  private addRoute(service: FargateService, path: string, id?: string) {
+  private addRoute(service: FargateService, path: string, id: string) {
     if (!service.cloudMapService) {
       throw Error('Cannot add route if ther\'s no cloudmap service configured');
     }
-    const integration = new CfnIntegration(this.scope, `${id ? id + '-' : ''}integration`, {
+    const integration = new CfnIntegration(this.scope, `${id}-integration`, {
       apiId: this.props.api.apiId,
       connectionId: this.props.link.vpcLinkId,
       connectionType: HttpConnectionType.VPC_LINK,
@@ -96,7 +96,7 @@ export class ServiceFactory {
     integration.node.addDependency(service);
     integration.node.addDependency(this.props.link);
 
-    const route = new CfnRoute(this.scope, `${id ? id + '-' : ''}route`, {
+    const route = new CfnRoute(this.scope, `${id}-route`, {
       apiId: this.props.api.apiId,
       routeKey: `ANY /${path}/{proxy+}`,
       target: `integrations/${integration.ref}`,
