@@ -152,6 +152,15 @@ export class OpenNotificatiesService extends Construct {
       },
       environment: {}, // TODO figgure out if we need any settings?
     });
+    const service = this.serviceFactory.createService({
+      task,
+      path: undefined, // Not exposed service
+      id: OpenNotificatiesService.RABBIT_MQ_NAME,
+      options: {
+        desiredCount: 1,
+      },
+    });
+    return service;
   }
 
   private setupService() {
@@ -206,6 +215,7 @@ export class OpenNotificatiesService extends Construct {
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    return service;
   }
 
   setupCeleryService() {
