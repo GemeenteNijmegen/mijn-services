@@ -275,6 +275,7 @@ export class OpenNotificatiesService extends Construct {
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
     this.openNotificatiesCredentials.grantRead(role);
+    this.secretKey.grantRead(role);
   }
 
 

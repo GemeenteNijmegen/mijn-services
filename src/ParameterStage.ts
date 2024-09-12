@@ -33,11 +33,12 @@ export class ParameterStack extends Stack {
 
     this.addOpenKlantParameters();
     this.addDatabaseCredentials();
+    this.addOpenNotificatiesParameters();
 
   }
 
 
-  addOpenKlantParameters() {
+  private addOpenKlantParameters() {
     new Secret(this, 'open-klant-credentials', {
       description: 'Credentials for the open klant superuser',
       generateSecretString: {
@@ -52,7 +53,7 @@ export class ParameterStack extends Stack {
     });
   }
 
-  addOpenNotificatiesParameters() {
+  private addOpenNotificatiesParameters() {
     new Secret(this, 'open-notificaties-credentials', {
       description: 'Credentials for the open notificaties superuser',
       generateSecretString: {
@@ -80,7 +81,7 @@ export class ParameterStack extends Stack {
   }
 
 
-  addDatabaseCredentials() {
+  private addDatabaseCredentials() {
     new Secret(this, 'db-credentials', {
       description: 'Credentials for connecting to the mijn-services database instance',
       generateSecretString: {
