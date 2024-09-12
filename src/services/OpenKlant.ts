@@ -178,7 +178,7 @@ export class OpenKlantService extends Construct {
 
   setupCeleryService() {
     const task = this.serviceFactory.createTaskDefinition('celery');
-    task.addContainer('celery', {
+    const container = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
         command: ['CMD-SHELL', 'celery', '--app', 'openklant.celery'],
@@ -193,6 +193,7 @@ export class OpenKlantService extends Construct {
       }),
       command: ['/celery_worker.sh'],
     });
+    this.serviceFactory.createEphemeralStorage(task, container, 'temp', '/tmp');
     const service = this.serviceFactory.createService({
       task,
       path: undefined, // Not exposed service
