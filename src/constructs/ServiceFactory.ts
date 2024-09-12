@@ -1,7 +1,7 @@
 import { Duration } from 'aws-cdk-lib';
 import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, Compatibility, ContainerDefinition, FargateService, FargateServiceProps, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, Compatibility, ContainerDefinition, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem } from 'aws-cdk-lib/aws-efs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
@@ -57,11 +57,12 @@ export class ServiceFactory {
     this.props = props;
   }
 
-  createTaskDefinition(id: string) {
+  createTaskDefinition(id: string, options?: Partial<TaskDefinitionProps>) {
     const task = new TaskDefinition(this.scope, `${id}-task`, {
       cpu: '256',
       memoryMiB: '512',
       compatibility: Compatibility.FARGATE,
+      ...options,
     });
     return task;
   }
@@ -91,8 +92,7 @@ export class ServiceFactory {
     return service;
   }
 
-  createEphemeralStorage(task: TaskDefinition, container: ContainerDefinition, name: string, ...mountpoints: string[]) {
-    task.addVolume({ name });
+  createEphemeralStorage(container: ContainerDefinition, name: string, ...mountpoints: string[]) {
     mountpoints.forEach(mountpoint => {
       container.addMountPoints({
         containerPath: mountpoint,
