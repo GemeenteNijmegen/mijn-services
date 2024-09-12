@@ -92,7 +92,7 @@ export class ServiceFactory {
     return service;
   }
 
-  createEphemeralStorage(container: ContainerDefinition, name: string, ...mountpoints: string[]) {
+  attachEphemeralStorage(container: ContainerDefinition, name: string, ...mountpoints: string[]) {
     mountpoints.forEach(mountpoint => {
       container.addMountPoints({
         containerPath: mountpoint,

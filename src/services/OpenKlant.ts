@@ -198,7 +198,7 @@ export class OpenKlantService extends Construct {
       }),
       command: ['/celery_worker.sh'],
     });
-    this.serviceFactory.createEphemeralStorage(container, VOLUME_NAME, '/tmp');
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
 
     // Set the correct rights for the /tmp dir using a init container
     const initContainer = task.addContainer('init-storage', {
@@ -215,7 +215,7 @@ export class OpenKlantService extends Construct {
       container: initContainer,
       condition: ContainerDependencyCondition.SUCCESS,
     });
-    this.serviceFactory.createEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
+    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
 
     // Construct the service and setup conectivity and secrets access
     const service = this.serviceFactory.createService({
