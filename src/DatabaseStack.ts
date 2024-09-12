@@ -62,6 +62,9 @@ export class DatabaseStack extends Stack {
     });
     const resource = new CustomResource(this, 'custom-resource', {
       serviceToken: provider.serviceToken,
+      properties: {
+        listOfDatabases: LIST_OF_DATABASES,
+      },
     });
     resource.node.addDependency(this.database.db);
 

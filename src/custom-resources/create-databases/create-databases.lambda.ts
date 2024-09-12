@@ -3,6 +3,7 @@ import { CdkCustomResourceEvent } from 'aws-lambda';
 import * as postgres from 'pg';
 
 export async function handler(event: CdkCustomResourceEvent) {
+  console.log(JSON.stringify(event));
 
   if (event.RequestType == 'Delete') {
     console.error('Delete events are not implemented for this custom resources! You\'ll have to manually delete the databases');
@@ -23,7 +24,9 @@ export async function handler(event: CdkCustomResourceEvent) {
   await client.connect();
 
   // Check if databases exist otherwise create them
-  const databases = process.env.LIST_OF_DATABASES!.split(',');
+  const listOfDatabases = event.ResourceProperties.listOfDatabases;
+  console.log('Found list of databases', listOfDatabases);
+  const databases = listOfDatabases.split(',');
   for (const database of databases) {
     const exists = await existsDatabase(client, database);
     if (!exists) {
