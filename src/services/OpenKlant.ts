@@ -122,7 +122,7 @@ export class OpenKlantService extends Construct {
         streamPrefix: 'logs',
         logGroup: this.logs,
       }),
-      // readonlyRootFilesystem: true,
+      readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
     });
@@ -155,7 +155,7 @@ export class OpenKlantService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      // readonlyRootFilesystem: true,
+      readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -184,7 +184,7 @@ export class OpenKlantService extends Construct {
         command: ['CMD-SHELL', 'celery', '--app', 'openklant.celery'],
         interval: Duration.seconds(10),
       },
-      // readonlyRootFilesystem: true,
+      readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
