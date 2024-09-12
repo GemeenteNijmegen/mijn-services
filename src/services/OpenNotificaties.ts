@@ -54,10 +54,12 @@ export class OpenNotificatiesService extends Construct {
       },
     });
 
-    this.setupRabbitMqService();
-    this.setupService();
+    const rabbitMqService = this.setupRabbitMqService();
+    const mainService = this.setupService();
     // this.setupCeleryService();
     // this.setupCeleryBeatService();
+
+    rabbitMqService.connections.allowFrom(mainService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
   }
 
   private getEnvironmentConfiguration() {

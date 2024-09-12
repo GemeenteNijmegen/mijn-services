@@ -76,7 +76,7 @@ export class ParameterStack extends Stack {
         }),
         generateStringKey: 'password',
       },
-      secretName: Statics._ssmOpenNotificatiesCredentials,
+      secretName: Statics._ssmRabbitMqCredentials,
     });
   }
 
