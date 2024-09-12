@@ -14,15 +14,9 @@ import { Statics } from '../Statics';
 import { Utils } from '../Utils';
 
 export interface OpenNotificatiesServiceProps {
-  image: string;
   cache: CacheDatabase;
   cacheDatabaseIndex: number;
   cacheDatabaseIndexCelery: number;
-  logLevel: string;
-  /**
-   * @default false
-   */
-  debug?: boolean;
   service: ServiceFactoryProps;
   path: string;
   hostedzone: IHostedZone;
@@ -89,14 +83,14 @@ export class OpenNotificatiesService extends Construct {
       IS_HTTPS: 'yes',
       UWSGI_PORT: this.props.service.port.toString(),
 
-      LOG_LEVEL: this.props.logLevel,
-      LOG_REQUESTS: Utils.toPythonBooleanString(this.props.debug, false),
+      LOG_LEVEL: this.props.openNotificationsConfiguration.logLevel,
+      LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
       LOG_QUERIES: 'False',
-      DEBUG: Utils.toPythonBooleanString(this.props.debug, false),
+      DEBUG: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
 
       // Celery
       CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
-      CELERY_LOGLEVEL: this.props.logLevel,
+      CELERY_LOGLEVEL: this.props.openNotificationsConfiguration.logLevel,
       CELERY_WORKER_CONCURRENCY: '4',
       RABBITMQ_HOST: rabbitMqHost,
       CELERY_BROKER_URL: rabbitMqBrokerUrl,
@@ -217,7 +211,7 @@ export class OpenNotificatiesService extends Construct {
   setupCeleryService() {
     const task = this.serviceFactory.createTaskDefinition('celery');
     task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.image),
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', 'celery', '--app', 'openklant.celery'],
         interval: Duration.seconds(10),
