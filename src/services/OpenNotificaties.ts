@@ -166,7 +166,10 @@ export class OpenNotificatiesService extends Construct {
   }
 
   private setupService() {
-    const task = this.serviceFactory.createTaskDefinition('main');
+    const VOLUME_NAME = 'tmp';
+    const task = this.serviceFactory.createTaskDefinition('main', {
+      volumes: [{ name: VOLUME_NAME }],
+    });
 
     // Main service container
     const container = task.addContainer('main', {
@@ -191,11 +194,12 @@ export class OpenNotificatiesService extends Construct {
         logGroup: this.logs,
       }),
     });
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
 
     // Initialization container
     const initContainer = task.addContainer('init', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
-      command: ['/setup_configuration.sh'],
+      command: ['chmod 0777 /tmp && /setup_configuration.sh'],
       readonlyRootFilesystem: true,
       essential: false, // exit after running
       logging: new AwsLogDriver({
@@ -206,6 +210,7 @@ export class OpenNotificatiesService extends Construct {
       container: initContainer,
       condition: ContainerDependencyCondition.SUCCESS,
     });
+    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
 
     const service = this.serviceFactory.createService({
       id: 'main',
