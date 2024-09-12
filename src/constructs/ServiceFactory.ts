@@ -1,7 +1,8 @@
 import { Duration } from 'aws-cdk-lib';
 import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, Compatibility, FargateService, FargateServiceProps, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, Compatibility, ContainerDefinition, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
+import { AccessPoint, FileSystem } from 'aws-cdk-lib/aws-efs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
@@ -37,6 +38,13 @@ export interface CreateServiceOptions {
    * @default - No integration, route and servicediscovery are created
    */
   path?: string;
+  /**
+   * Configuration for mount paths in the filesystem.
+   * Provide a name and the container mounth path.
+   * A filesystem is automatically created.
+   * @default - no filesystem is created
+   */
+  filesystem?: Record<string, string>;
 }
 
 export class ServiceFactory {
@@ -49,11 +57,12 @@ export class ServiceFactory {
     this.props = props;
   }
 
-  createTaskDefinition(id: string) {
+  createTaskDefinition(id: string, options?: Partial<TaskDefinitionProps>) {
     const task = new TaskDefinition(this.scope, `${id}-task`, {
       cpu: '256',
       memoryMiB: '512',
       compatibility: Compatibility.FARGATE,
+      ...options,
     });
     return task;
   }
@@ -76,8 +85,77 @@ export class ServiceFactory {
     if (options.path) {
       this.addRoute(service, options.path, options.id);
     }
+    if (options.filesystem) {
+      this.createFileSytem(service, options);
+    }
 
     return service;
+  }
+
+  createEphemeralStorage(container: ContainerDefinition, name: string, ...mountpoints: string[]) {
+    mountpoints.forEach(mountpoint => {
+      container.addMountPoints({
+        containerPath: mountpoint,
+        readOnly: false,
+        sourceVolume: name,
+      });
+    });
+
+  }
+
+  private createFileSytem(service: FargateService, options: CreateServiceOptions) {
+    const privateFileSystemSecurityGroup = new SecurityGroup(this.scope, 'efs-security-group', {
+      vpc: this.props.cluster.vpc,
+    });
+
+    const fileSystem = new FileSystem(this.scope, 'esf-filesystem', {
+      encrypted: true,
+      vpc: this.props.cluster.vpc,
+      securityGroup: privateFileSystemSecurityGroup,
+    });
+
+    const fileSystemAccessPoint = new AccessPoint(this.scope, 'esf-access-point', {
+      fileSystem: fileSystem,
+
+      path: '/data',
+      createAcl: {
+        ownerGid: '1000',
+        ownerUid: '1000',
+        permissions: '755',
+      },
+      posixUser: {
+        uid: '1000',
+        gid: '1000',
+      },
+    });
+
+    const privateFileSystemConfig = {
+      authorizationConfig: {
+        accessPointId: fileSystemAccessPoint.accessPointId,
+        iam: 'ENABLED',
+      },
+      fileSystemId: fileSystem.fileSystemId,
+      transitEncryption: 'ENABLED',
+    };
+
+    const volumes = Object.entries(options.filesystem ?? {});
+    for (const volume of volumes) {
+      const name = volume[0];
+      const containerPath = volume[1];
+      service.taskDefinition.addVolume({
+        name: name,
+        efsVolumeConfiguration: privateFileSystemConfig,
+      });
+      service.taskDefinition.defaultContainer?.addMountPoints({
+        readOnly: false,
+        containerPath: containerPath,
+        sourceVolume: name,
+      });
+    }
+
+    service.connections.securityGroups.forEach(sg => {
+      privateFileSystemSecurityGroup.addIngressRule(sg, Port.NFS);
+    });
   }
 
   private addRoute(service: FargateService, path: string, id: string) {

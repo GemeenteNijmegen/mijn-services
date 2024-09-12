@@ -1,6 +1,6 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
@@ -122,6 +122,7 @@ export class OpenKlantService extends Construct {
         streamPrefix: 'logs',
         logGroup: this.logs,
       }),
+      readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
     });
@@ -154,6 +155,7 @@ export class OpenKlantService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
+      readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -175,13 +177,19 @@ export class OpenKlantService extends Construct {
   }
 
   setupCeleryService() {
-    const task = this.serviceFactory.createTaskDefinition('celery');
-    task.addContainer('celery', {
+    const VOLUME_NAME = 'temp';
+    const task = this.serviceFactory.createTaskDefinition('celery', {
+      volumes: [{ name: VOLUME_NAME }],
+    });
+
+    // Setup celery container
+    const container = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
         command: ['CMD-SHELL', 'celery', '--app', 'openklant.celery'],
         interval: Duration.seconds(10),
       },
+      readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -190,6 +198,26 @@ export class OpenKlantService extends Construct {
       }),
       command: ['/celery_worker.sh'],
     });
+    this.serviceFactory.createEphemeralStorage(container, VOLUME_NAME, '/tmp');
+
+    // Set the correct rights for the /tmp dir using a init container
+    const initContainer = task.addContainer('init-storage', {
+      image: ContainerImage.fromRegistry('alpine:latest'),
+      entryPoint: ['sh', '-c'],
+      command: ['chmod 0777 /tmp'],
+      readonlyRootFilesystem: true,
+      essential: false, // exit after running
+      logging: new AwsLogDriver({
+        streamPrefix: 'init-storage',
+      }),
+    });
+    container.addContainerDependencies({
+      container: initContainer,
+      condition: ContainerDependencyCondition.SUCCESS,
+    });
+    this.serviceFactory.createEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
+
+    // Construct the service and setup conectivity and secrets access
     const service = this.serviceFactory.createService({
       task,
       path: undefined, // Not exposed service

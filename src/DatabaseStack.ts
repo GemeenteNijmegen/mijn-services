@@ -9,9 +9,7 @@ import { Database } from './constructs/Database';
 import { CreateDatabasesFunction } from './custom-resources/create-databases/create-databases-function';
 import { Statics } from './Statics';
 
-interface DatabaseStackProps extends StackProps, Configurable {
-  databases?: string[];
-}
+interface DatabaseStackProps extends StackProps, Configurable {}
 
 export class DatabaseStack extends Stack {
 
@@ -30,8 +28,8 @@ export class DatabaseStack extends Stack {
       vpc: this.vpc.vpc,
     });
 
-    if (props.databases) {
-      this.createRequiredDatabasesIfNotExistent(props.databases);
+    if (props.configuration.databases) {
+      this.createRequiredDatabasesIfNotExistent(props.configuration.databases);
     }
 
   }

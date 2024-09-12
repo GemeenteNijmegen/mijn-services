@@ -50,6 +50,10 @@ export class MainStack extends Stack {
 
 
   private openKlantService(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.openklant) {
+      console.warn('No open-klant configuration provided. Skipping creation of open klant service!');
+      return;
+    }
     new OpenKlantService(this, 'open-klant', {
       hostedzone: this.hostedzone,
       cache: this.cache,
