@@ -61,10 +61,21 @@ export interface Configuration {
    * Configuration for open klant
    */
   openklant?: OpenKlantConfiguration;
+
+  /**
+   * Configuration for open notifications
+   */
+  openNotificaties?: OpenNotificatiesConfiguration;
 }
 
 export interface OpenKlantConfiguration {
   image: string;
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+}
+
+export interface OpenNotificatiesConfiguration {
+  image: string;
+  rabbitMqImage: string;
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
 }
 
@@ -82,6 +93,11 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     databases: Statics.databasesAcceptance,
     openklant: {
       image: 'maykinmedia/open-klant:2.1.0',
+      logLevel: 'DEBUG',
+    },
+    openNotificaties: {
+      image: 'openzaak/open-notificaties:1.7.0',
+      rabbitMqImage: 'rabbitmq:3.13.4-alpine',
       logLevel: 'DEBUG',
     },
   },

@@ -52,6 +52,33 @@ export class ParameterStack extends Stack {
     });
   }
 
+  addOpenNotificatiesParameters() {
+    new Secret(this, 'open-notificaties-credentials', {
+      description: 'Credentials for the open notificaties superuser',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'open-notificaties',
+          email: 'devops@nijmegen.nl',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmOpenNotificatiesCredentials,
+    });
+
+    new Secret(this, 'rabbit-mq-credentials', {
+      description: 'Credentials for the open notificaties rabbit mq instance',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'open-notificaties-rabbit-mq',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmOpenNotificatiesCredentials,
+    });
+  }
+
 
   addDatabaseCredentials() {
     new Secret(this, 'db-credentials', {

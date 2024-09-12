@@ -1,6 +1,7 @@
 export class Statics {
   static readonly projectName = 'mijn-services';
   static readonly projectRepo = 'GemeenteNijmegen/mijn-services';
+  static readonly organization = 'GemeenteNijmegen';
 
   // MARK: SSM Parameters
   static readonly ssmDummyParameter = `/${Statics.projectName}/dummy/parameter`;
@@ -16,6 +17,7 @@ export class Statics {
   static readonly _ssmDatabaseCredentials = `/${Statics.projectName}/internal/database/credentials`;
   static readonly _ssmOpenKlantCredentials = `/${Statics.projectName}/internal/open-klant/credentials`;
   static readonly _ssmOpenNotificatiesCredentials = `/${Statics.projectName}/internal/open-notificaties/credentials`;
+  static readonly _ssmRabbitMqCredentials = `/${Statics.projectName}/internal/open-notificaties/rabbit-mq/credentials`;
   static readonly _ssmOpenZaakCredentials = `/${Statics.projectName}/internal/open-zaak/credentials`;
   static readonly _ssmDatabaseArn = `/${Statics.projectName}/internal/database/arn`;
   static readonly _ssmDatabaseHostname = `/${Statics.projectName}/internal/database/hostname`;
