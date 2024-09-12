@@ -25,13 +25,27 @@ export class Statics {
   // MARK: Databases
   static readonly defaultDatabaseName = 'postgres';
   static readonly databaseOpenKlant = 'open-klant';
+  static readonly databaseOpenNotificaties = 'open-notificaties';
+  static readonly databaseOpenZaak = 'open-zaak';
 
   /**
+   * PRODUCTION
    * List all databases that should be
    * present in a single array
    */
-  static readonly databases = [
+  static readonly databasesProduction = [
     Statics.databaseOpenKlant,
+  ];
+
+  /**
+   * ACCEPTANCE
+   * List all databases that should be
+   * present in a single array
+   */
+  static readonly databasesAcceptance = [
+    Statics.databaseOpenKlant,
+    Statics.databaseOpenNotificaties,
+    Statics.databaseOpenZaak,
   ];
 
   // MARK: Environments
