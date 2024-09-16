@@ -307,7 +307,7 @@ export class OpenNotificatiesService extends Construct {
       }),
       command: ['/celery_beat.sh'],
     });
-    this.serviceFactory.attachEphemeralStorage(beat, VOLUME_NAME, '/celerybeat');
+    this.serviceFactory.attachEphemeralStorage(beat, VOLUME_NAME, '/app/celerybeat');
 
     // Filesystem write access - initialization container
     const fsInitContainer = task.addContainer('init-storage', {
@@ -325,7 +325,7 @@ export class OpenNotificatiesService extends Construct {
       container: fsInitContainer,
       condition: ContainerDependencyCondition.SUCCESS,
     });
-    this.serviceFactory.attachEphemeralStorage(fsInitContainer, VOLUME_NAME, '/celerybeat');
+    this.serviceFactory.attachEphemeralStorage(fsInitContainer, VOLUME_NAME, '/app/celerybeat');
 
     const service = this.serviceFactory.createService({
       task,

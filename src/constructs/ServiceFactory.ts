@@ -120,7 +120,7 @@ export class ServiceFactory {
       readonlyRootFilesystem: true,
       essential: false, // exit after running
       logging: new AwsLogDriver({
-        streamPrefix: 'init-storage',
+        streamPrefix: 'logs',
         logGroup: logs,
       }),
     });
