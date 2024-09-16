@@ -215,6 +215,7 @@ export class OpenNotificatiesService extends Construct {
     // 1st Filesystem write access - initialization container
     const fsInitContainer = task.addContainer('init-storage', {
       image: ContainerImage.fromRegistry('alpine:latest'),
+      entryPoint: ['sh', '-c'],
       command: ['chmod 0777 /tmp'],
       readonlyRootFilesystem: true,
       essential: false, // exit after running
