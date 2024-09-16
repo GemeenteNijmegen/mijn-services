@@ -61,8 +61,8 @@ export class OpenZaakService extends Construct {
 
     const cacheHost = this.props.cache.db.attrRedisEndpointAddress + ':' + this.props.cache.db.attrRedisEndpointPort + '/';
 
-    const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
-    trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
+    const trustedDomains = this.props.alternativeDomainNames ?? [];
+    trustedDomains.push(this.props.hostedzone.zoneName);
 
     return {
       DJANGO_SETTINGS_MODULE: 'openzaak.conf.docker',
@@ -92,18 +92,15 @@ export class OpenZaakService extends Construct {
       CELERY_WORKER_CONCURRENCY: '4',
 
       // Conectivity
-      CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
+      CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
       // CORS_ALLOW_ALL_ORIGINS: 'True', // TODO figure out of we need this?
 
 
       // Open notificaties specific stuff
       SENDFILE_BACKEND: 'django_sendfile.backends.simple', // Django backend to download files
-
-      OPENZAAK_DOMAIN: trustedOrigins[0],
+      OPENZAAK_DOMAIN: trustedDomains[0],
       OPENZAAK_ORGANIZATION: Statics.organization,
-
-      NOTIF_API_ROOT: `https://${trustedOrigins[0]}/open-notifications/api/v1/`, // TODO remove hardcoded path
-
+      NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notifications/api/v1/`, // TODO remove hardcoded path
 
     };
   }
