@@ -33,6 +33,7 @@ export class CacheDatabase extends Construct {
       numCacheNodes: 1,
       cacheSubnetGroupName: redisSubnetGroup.ref,
       vpcSecurityGroupIds: [redisSecurityGroup.securityGroupId],
+      snapshotRetentionLimit: 5,
     });
 
     this.db = db;

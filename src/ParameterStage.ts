@@ -33,11 +33,13 @@ export class ParameterStack extends Stack {
 
     this.addOpenKlantParameters();
     this.addDatabaseCredentials();
+    this.addOpenNotificatiesParameters();
+    this.addOpenZaakParameters();
 
   }
 
 
-  addOpenKlantParameters() {
+  private addOpenKlantParameters() {
     new Secret(this, 'open-klant-credentials', {
       description: 'Credentials for the open klant superuser',
       generateSecretString: {
@@ -52,8 +54,74 @@ export class ParameterStack extends Stack {
     });
   }
 
+  private addOpenZaakParameters() {
+    new Secret(this, 'open-zaak-credentials', {
+      description: 'Credentials for the open zaak superuser',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'open-zaak',
+          email: 'devops@nijmegen.nl',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmOpenZaakCredentials,
+    });
+  }
 
-  addDatabaseCredentials() {
+  private addOpenNotificatiesParameters() {
+    new Secret(this, 'open-notificaties-credentials', {
+      description: 'Credentials for the open notificaties superuser',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'open-notificaties',
+          email: 'devops@nijmegen.nl',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmOpenNotificatiesCredentials,
+    });
+
+    new Secret(this, 'rabbit-mq-credentials', {
+      description: 'Credentials for the open notificaties rabbit mq instance',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'open-notificaties-rabbit-mq',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmRabbitMqCredentials,
+    });
+
+    new Secret(this, 'client-credentials-1', {
+      description: 'Credentials for openzaak to access opennotifications',
+      secretName: Statics._ssmClientCredentialsZaakNotifications,
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'zaak-to-notifications',
+        }),
+        generateStringKey: 'secret',
+      },
+    });
+
+    new Secret(this, 'client-credentials-2', {
+      description: 'Credentials for opennotifications to access openzaak',
+      secretName: Statics._ssmClientCredentialsNotificationsZaak,
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'notifications-to-zaak',
+        }),
+        generateStringKey: 'secret',
+      },
+    });
+  }
+
+
+  private addDatabaseCredentials() {
     new Secret(this, 'db-credentials', {
       description: 'Credentials for connecting to the mijn-services database instance',
       generateSecretString: {

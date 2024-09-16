@@ -7,38 +7,45 @@ import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { OpenZaakConfiguration } from '../Configuration';
 import { CacheDatabase } from '../constructs/Redis';
 import { ServiceFactory, ServiceFactoryProps } from '../constructs/ServiceFactory';
 import { Statics } from '../Statics';
+import { Utils } from '../Utils';
 
-export interface OpenKlantServiceProps {
-  image: string;
+export interface OpenZaakServiceProps {
   cache: CacheDatabase;
   cacheDatabaseIndex: number;
   cacheDatabaseIndexCelery: number;
-  logLevel: string;
   service: ServiceFactoryProps;
   path: string;
   hostedzone: IHostedZone;
   alternativeDomainNames?: string[];
+
+  openZaakConfiguration: OpenZaakConfiguration;
 }
 
-export class OpenKlantService extends Construct {
+export class OpenZaakService extends Construct {
+
   private readonly logs: LogGroup;
-  private readonly props: OpenKlantServiceProps;
+  private readonly props: OpenZaakServiceProps;
   private readonly serviceFactory: ServiceFactory;
   private readonly databaseCredentials: ISecret;
-  private readonly openKlantCredentials: ISecret;
+  private readonly openZaakCredentials: ISecret;
   private readonly secretKey: ISecret;
-  constructor(scope: Construct, id: string, props: OpenKlantServiceProps) {
+  private readonly clientCredentialsNotificationsZaak: ISecret;
+  private readonly clientCredentialsZaakNotifications: ISecret;
+
+  constructor(scope: Construct, id: string, props: OpenZaakServiceProps) {
     super(scope, id);
     this.props = props;
     this.serviceFactory = new ServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
-
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
-    this.openKlantCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenKlantCredentials);
+    this.openZaakCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenZaakCredentials);
+    this.clientCredentialsZaakNotifications = SecretParameter.fromSecretNameV2(this, 'client-credentials-zaak-notifications', Statics._ssmClientCredentialsZaakNotifications);
+    this.clientCredentialsNotificationsZaak = SecretParameter.fromSecretNameV2(this, 'client-credentials-notifications-zaak', Statics._ssmClientCredentialsNotificationsZaak);
     this.secretKey = new SecretParameter(this, 'secret-key', {
       description: 'Open klant secret key',
       generateSecretString: {
@@ -46,7 +53,6 @@ export class OpenKlantService extends Construct {
       },
     });
 
-    this.setupInitalization();
     this.setupService();
     this.setupCeleryService();
   }
@@ -55,33 +61,52 @@ export class OpenKlantService extends Construct {
 
     const cacheHost = this.props.cache.db.attrRedisEndpointAddress + ':' + this.props.cache.db.attrRedisEndpointPort + '/';
 
-    const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
-    trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
+    const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
+    trustedDomains.push(this.props.hostedzone.zoneName);
 
     return {
-      DJANGO_SETTINGS_MODULE: 'openklant.conf.docker',
-      DB_NAME: Statics.databaseOpenKlant,
+      DJANGO_SETTINGS_MODULE: 'openzaak.conf.docker',
+      DB_NAME: Statics.databaseOpenZaak,
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
       CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/'+this.props.path,
-      IS_HTTPS: 'True',
+      IS_HTTPS: 'yes',
       UWSGI_PORT: this.props.service.port.toString(),
 
-      LOG_LEVEL: this.props.logLevel,
-      LOG_REQUESTS: 'True',
+      LOG_LEVEL: this.props.openZaakConfiguration.logLevel,
+      LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
       LOG_QUERIES: 'False',
-      DEBUG: 'True',
+      DEBUG: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
+
+      // TODO not used as we do not store documents nor import them... yet
+      // IMPORT_DOCUMENTEN_BASE_DIR=${IMPORT_DOCUMENTEN_BASE_DIR:-/app/import-data}
+      // IMPORT_DOCUMENTEN_BATCH_SIZE=${IMPORT_DOCUMENTEN_BATCH_SIZE:-500}
 
       // Celery
       CELERY_BROKER_URL: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
       CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
-      CELERY_LOGLEVEL: this.props.logLevel,
+      CELERY_LOGLEVEL: this.props.openZaakConfiguration.logLevel,
+      CELERY_WORKER_CONCURRENCY: '4',
+
+      // Conectivity
+      CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
+      // CORS_ALLOW_ALL_ORIGINS: 'True', // TODO figure out of we need this?
 
 
-      CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
+      // Open notificaties specific stuff
+      SENDFILE_BACKEND: 'django_sendfile.backends.simple', // Django backend to download files
+      OPENZAAK_DOMAIN: trustedDomains[0],
+      OPENZAAK_ORGANIZATION: Statics.organization,
+      NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notificaties/api/v1/`, // TODO remove hardcoded path
+
+
+      // Somehow this is required aswell...
+      DEMO_CONFIG_ENABLE: 'False',
+      DEMO_CLIENT_ID: 'demo-client',
+      DEMO_SECRET: 'demo-secret',
 
     };
   }
@@ -95,53 +120,31 @@ export class OpenKlantService extends Construct {
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
       // Generic super user creation works with running the createsuperuser command
-      DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openKlantCredentials, 'username'),
-      DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.openKlantCredentials, 'password'),
-      DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openKlantCredentials, 'email'),
+      DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openZaakCredentials, 'username'),
+      DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.openZaakCredentials, 'password'),
+      DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openZaakCredentials, 'email'),
+      OPENZAAK_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openZaakCredentials, 'username'),
+      OPENZAAK_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openZaakCredentials, 'email'),
+
+      // Default connection between open-zaak and open-notifications
+      NOTIF_OPENZAAK_CLIENT_ID: Secret.fromSecretsManager(this.clientCredentialsNotificationsZaak, 'username'),
+      NOTIF_OPENZAAK_SECRET: Secret.fromSecretsManager(this.clientCredentialsNotificationsZaak, 'secret'),
+      OPENZAAK_NOTIF_CLIENT_ID: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'username'),
+      OPENZAAK_NOTIF_SECRET: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'secret'),
+
     };
     return secrets;
   }
 
-  /**
-   * Run an initalization container once 15 minutes after creating.
-   */
-  private setupInitalization() {
-    const task = this.serviceFactory.createTaskDefinition('init');
-    task.addContainer('init', {
-      image: ContainerImage.fromRegistry(this.props.image),
-      healthCheck: {
-        command: ['CMD-SHELL', 'exit 0'], // Not sure what to check when executing a single script
-        startPeriod: Duration.seconds(30), // Give the script an inital 30 seconds to run before starting the health check
-      },
-      // Note: use env vars in combinations with the below command https://stackoverflow.com/questions/26963444/django-create-superuser-from-batch-file
-      // Note command can only run once: 'CommandError: Error: That gebruikersnaam is already taken.'
-      command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'],
-      portMappings: [],
-      logging: new AwsLogDriver({
-        streamPrefix: 'logs',
-        logGroup: this.logs,
-      }),
-      readonlyRootFilesystem: true,
-      secrets: this.getSecretConfiguration(),
-      environment: this.getEnvironmentConfiguration(),
+  private setupService() {
+    const VOLUME_NAME = 'tmp';
+    const task = this.serviceFactory.createTaskDefinition('main', {
+      volumes: [{ name: VOLUME_NAME }],
     });
 
-    const service = this.serviceFactory.createService({
-      id: 'init',
-      task: task,
-      path: undefined, // Service is not exposed
-      options: {
-        desiredCount: 0, // Service runs only once and is disabled by default!
-      },
-    });
-    this.setupConnectivity('init', service.connections.securityGroups);
-    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
-  }
-
-  setupService() {
-    const task = this.serviceFactory.createTaskDefinition('main');
-    task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.image),
+    // 3th Main service container
+    const container = task.addContainer('main', {
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         interval: Duration.seconds(10),
@@ -162,6 +165,28 @@ export class OpenKlantService extends Construct {
         logGroup: this.logs,
       }),
     });
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
+
+    // 2nd Configuration - initialization container
+    const initContainer = task.addContainer('init-config', {
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
+      command: ['/setup_configuration.sh'],
+      readonlyRootFilesystem: true,
+      essential: false, // exit after running
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: this.logs,
+      }),
+    });
+    container.addContainerDependencies({
+      container: initContainer,
+      condition: ContainerDependencyCondition.SUCCESS,
+    });
+    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
+
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp');
 
     const service = this.serviceFactory.createService({
       id: 'main',
@@ -173,19 +198,19 @@ export class OpenKlantService extends Construct {
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    return service;
   }
 
-  setupCeleryService() {
+  private setupCeleryService() {
     const VOLUME_NAME = 'temp';
     const task = this.serviceFactory.createTaskDefinition('celery', {
       volumes: [{ name: VOLUME_NAME }],
     });
 
-    // Setup celery container
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'celery', '--app', 'openklant.celery'],
+        command: ['CMD-SHELL', 'celery', '--app', 'openzaak'],
         interval: Duration.seconds(10),
       },
       readonlyRootFilesystem: true,
@@ -198,25 +223,10 @@ export class OpenKlantService extends Construct {
       command: ['/celery_worker.sh'],
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/app/tmp');
 
-    // Set the correct rights for the /tmp dir using a init container
-    const initContainer = task.addContainer('init-storage', {
-      image: ContainerImage.fromRegistry('alpine:latest'),
-      entryPoint: ['sh', '-c'],
-      command: ['chmod 0777 /tmp'],
-      readonlyRootFilesystem: true,
-      essential: false, // exit after running
-      logging: new AwsLogDriver({
-        streamPrefix: 'init-storage',
-      }),
-    });
-    container.addContainerDependencies({
-      container: initContainer,
-      condition: ContainerDependencyCondition.SUCCESS,
-    });
-    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/tmp');
 
-    // Construct the service and setup conectivity and secrets access
     const service = this.serviceFactory.createService({
       task,
       path: undefined, // Not exposed service
@@ -256,7 +266,8 @@ export class OpenKlantService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
-    this.openKlantCredentials.grantRead(role);
+    this.openZaakCredentials.grantRead(role);
+    this.secretKey.grantRead(role);
   }
 
 

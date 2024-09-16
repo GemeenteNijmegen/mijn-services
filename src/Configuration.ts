@@ -61,11 +61,36 @@ export interface Configuration {
    * Configuration for open klant
    */
   openklant?: OpenKlantConfiguration;
+
+  /**
+   * Configuration for open notifications
+   * Note: deplends on open zaak service being deployed as well.
+   */
+  openNotificaties?: OpenNotificatiesConfiguration;
+
+  /**
+   * Configuration for open zaak
+   */
+  openZaak?: OpenZaakConfiguration;
 }
 
 export interface OpenKlantConfiguration {
   image: string;
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  debug?: boolean;
+}
+
+export interface OpenNotificatiesConfiguration {
+  image: string;
+  rabbitMqImage: string;
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  debug?: boolean;
+}
+
+export interface OpenZaakConfiguration {
+  image: string;
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  debug?: boolean;
 }
 
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
@@ -83,6 +108,18 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     openklant: {
       image: 'maykinmedia/open-klant:2.1.0',
       logLevel: 'DEBUG',
+      debug: true,
+    },
+    openNotificaties: {
+      image: 'openzaak/open-notificaties:1.7.0',
+      rabbitMqImage: 'rabbitmq:3.13.4-alpine',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
+    openZaak: {
+      image: 'openzaak/open-zaak:1.14.0',
+      logLevel: 'DEBUG',
+      debug: true,
     },
   },
   main: {

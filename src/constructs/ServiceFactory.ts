@@ -1,8 +1,9 @@
 import { Duration } from 'aws-cdk-lib';
 import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, Compatibility, ContainerDefinition, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem } from 'aws-cdk-lib/aws-efs';
+import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
@@ -92,7 +93,7 @@ export class ServiceFactory {
     return service;
   }
 
-  createEphemeralStorage(container: ContainerDefinition, name: string, ...mountpoints: string[]) {
+  attachEphemeralStorage(container: ContainerDefinition, name: string, ...mountpoints: string[]) {
     mountpoints.forEach(mountpoint => {
       container.addMountPoints({
         containerPath: mountpoint,
@@ -101,6 +102,35 @@ export class ServiceFactory {
       });
     });
 
+  }
+
+  /**
+   * Initalize the writable directories the task requires
+   * @param volumeName
+   * @param task
+   * @param runBeforeContainer
+   * @param dirs
+   */
+  setupWritableVolume(volumeName: string, task: TaskDefinition, logs: LogGroup, runBeforeContainer: ContainerDefinition, ...dirs: string[]) {
+    const command = dirs.map(dir => `chmod 0777 ${dir}`).join(' && ');
+    const fsInitContainer = task.addContainer('init-storage', {
+      image: ContainerImage.fromRegistry('alpine:latest'),
+      entryPoint: ['sh', '-c'],
+      command: [command],
+      readonlyRootFilesystem: true,
+      essential: false, // exit after running
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: logs,
+      }),
+    });
+    runBeforeContainer.addContainerDependencies({
+      container: fsInitContainer,
+      condition: ContainerDependencyCondition.SUCCESS,
+    });
+    dirs.forEach(dir => {
+      this.attachEphemeralStorage(fsInitContainer, volumeName, dir);
+    });
   }
 
   private createFileSytem(service: FargateService, options: CreateServiceOptions) {

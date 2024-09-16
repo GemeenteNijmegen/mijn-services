@@ -9,6 +9,8 @@ import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
 import { OpenKlantService } from './services/OpenKlant';
+import { OpenNotificatiesService } from './services/OpenNotificaties';
+import { OpenZaakService } from './services/OpenZaak';
 import { Statics } from './Statics';
 
 interface MainStackProps extends StackProps, Configurable {}
@@ -46,6 +48,8 @@ export class MainStack extends Stack {
     });
 
     this.openKlantService(api, platform);
+    this.openNotificatiesServices(api, platform);
+    this.openZaakServices(api, platform);
   }
 
 
@@ -71,6 +75,54 @@ export class MainStack extends Stack {
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
+    });
+  }
+
+  private openNotificatiesServices(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.openNotificaties) {
+      console.warn('No open-notificaties configuration provided. Skipping creation of open notification service!');
+      return;
+    }
+    new OpenNotificatiesService(this, 'open-notificaties', {
+      hostedzone: this.hostedzone,
+      cache: this.cache,
+      cacheDatabaseIndex: 1,
+      cacheDatabaseIndexCelery: 2,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'open-notificaties',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      openNotificationsConfiguration: this.configuration.openNotificaties,
+    });
+  }
+
+  private openZaakServices(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.openZaak) {
+      console.warn('No open-zaak configuration provided. Skipping creation of open zaak service!');
+      return;
+    }
+    new OpenZaakService(this, 'open-zaak', {
+      hostedzone: this.hostedzone,
+      cache: this.cache,
+      cacheDatabaseIndex: 1,
+      cacheDatabaseIndexCelery: 2,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'open-zaak',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      openZaakConfiguration: this.configuration.openZaak,
     });
   }
 
