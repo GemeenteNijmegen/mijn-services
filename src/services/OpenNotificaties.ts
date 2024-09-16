@@ -313,7 +313,7 @@ export class OpenNotificatiesService extends Construct {
     const fsInitContainer = task.addContainer('init-storage', {
       image: ContainerImage.fromRegistry('alpine:latest'),
       entryPoint: ['sh', '-c'],
-      command: ['chmod 0777 /celerybeat'],
+      command: ['chmod 0777 /app/celerybeat'],
       readonlyRootFilesystem: true,
       essential: false, // exit after running
       logging: new AwsLogDriver({
