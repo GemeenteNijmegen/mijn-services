@@ -212,6 +212,7 @@ export class OpenNotificatiesService extends Construct {
       essential: false, // exit after running
       logging: new AwsLogDriver({
         streamPrefix: 'init-configuration',
+        logGroup: this.logs,
       }),
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
@@ -232,6 +233,7 @@ export class OpenNotificatiesService extends Construct {
       essential: false, // exit after running
       logging: new AwsLogDriver({
         streamPrefix: 'init-storage',
+        logGroup: this.logs,
       }),
     });
     initContainer.addContainerDependencies({
@@ -285,8 +287,12 @@ export class OpenNotificatiesService extends Construct {
   }
 
   setupCeleryBeatService() {
-    const task = this.serviceFactory.createTaskDefinition('celery-beat');
-    task.addContainer('beat', {
+    const VOLUME_NAME = 'celerybeat';
+    const task = this.serviceFactory.createTaskDefinition('celery-beat', {
+      volumes: [{ name: VOLUME_NAME }],
+    });
+
+    const beat = task.addContainer('beat', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', 'celery', 'inspect', 'ping', '--app', 'nrc'],
@@ -301,6 +307,26 @@ export class OpenNotificatiesService extends Construct {
       }),
       command: ['/celery_beat.sh'],
     });
+    this.serviceFactory.attachEphemeralStorage(beat, VOLUME_NAME, '/celerybeat');
+
+    // Filesystem write access - initialization container
+    const fsInitContainer = task.addContainer('init-storage', {
+      image: ContainerImage.fromRegistry('alpine:latest'),
+      entryPoint: ['sh', '-c'],
+      command: ['chmod 0777 /celerybeat'],
+      readonlyRootFilesystem: true,
+      essential: false, // exit after running
+      logging: new AwsLogDriver({
+        logGroup: this.logs,
+        streamPrefix: 'init-storage',
+      }),
+    });
+    beat.addContainerDependencies({
+      container: fsInitContainer,
+      condition: ContainerDependencyCondition.SUCCESS,
+    });
+    this.serviceFactory.attachEphemeralStorage(fsInitContainer, VOLUME_NAME, '/celerybeat');
+
     const service = this.serviceFactory.createService({
       task,
       path: undefined, // Not exposed service
