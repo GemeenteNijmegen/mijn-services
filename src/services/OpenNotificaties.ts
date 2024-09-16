@@ -36,7 +36,6 @@ export class OpenNotificatiesService extends Construct {
   private readonly props: OpenNotificatiesServiceProps;
   private readonly serviceFactory: ServiceFactory;
   private readonly databaseCredentials: ISecret;
-  // private readonly rabbitMqCredentials: ISecret;
   private readonly openNotificatiesCredentials: ISecret;
   private readonly clientCredentialsNotificationsZaak: ISecret;
   private readonly clientCredentialsZaakNotifications: ISecret;
@@ -52,7 +51,6 @@ export class OpenNotificatiesService extends Construct {
     this.openNotificatiesCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenNotificatiesCredentials);
     this.clientCredentialsZaakNotifications = SecretParameter.fromSecretNameV2(this, 'client-credentials-zaak-notifications', Statics._ssmClientCredentialsZaakNotifications);
     this.clientCredentialsNotificationsZaak = SecretParameter.fromSecretNameV2(this, 'client-credentials-notifications-zaak', Statics._ssmClientCredentialsNotificationsZaak);
-    // this.rabbitMqCredentials = SecretParameter.fromSecretNameV2(this, 'rabbit-mq-credentials', Statics._ssmRabbitMqCredentials);
     this.secretKey = new SecretParameter(this, 'secret-key', {
       description: 'Open klant secret key',
       generateSecretString: {
@@ -75,7 +73,6 @@ export class OpenNotificatiesService extends Construct {
 
     const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
     trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
-
 
     const rabbitMqHost = `${OpenNotificatiesService.RABBIT_MQ_NAME}.${this.props.service.namespace}`;
     const rabbitMqBrokerUrl = `amqp://guest:guest@${rabbitMqHost}:${OpenNotificatiesService.RABBIT_MQ_PORT}//`;
@@ -103,19 +100,15 @@ export class OpenNotificatiesService extends Construct {
       CELERY_WORKER_CONCURRENCY: '4',
       RABBITMQ_HOST: rabbitMqHost,
       CELERY_BROKER_URL: rabbitMqBrokerUrl,
-      // PUBLISH_BROKER_URL: 'amqp://guest:guest@rabbitmq.zgw.local:5672/%2F', // TODO i dont think we need this
 
       // Conectivity
       CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
       // CORS_ALLOW_ALL_ORIGINS: 'True', // TODO figure out of we need this?
 
-
       // Open notificaties specific stuff
       OPENNOTIFICATIES_ORGANIZATION: Statics.organization,
       OPENNOTIFICATIES_DOMAIN: `${trustedOrigins[0]}/${this.props.path}/`,
-
       AUTORISATIES_API_ROOT: `${trustedOrigins[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path
-
 
     };
   }
@@ -158,11 +151,9 @@ export class OpenNotificatiesService extends Construct {
       portMappings: [{
         containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
       }],
-      secrets: {
-        // RABBITMQ_DEFAULT_USER: Secret.fromSecretsManager(this.rabbitMqCredentials, 'username'), // TODO do we need this?
-        // RABBITMQ_DEFAULT_PASS: Secret.fromSecretsManager(this.rabbitMqCredentials, 'password'), // TODO do we need this?
-      },
+      secrets: {},
       environment: {}, // TODO figgure out if we need any settings?
+      // healthCheck: {} // TODO figure out how to check if this is healthy
     });
     const service = this.serviceFactory.createService({
       task,
