@@ -60,10 +60,11 @@ export class OpenNotificatiesService extends Construct {
 
     const rabbitMqService = this.setupRabbitMqService();
     const mainService = this.setupService();
-    this.setupCeleryService();
+    const celeryService = this.setupCeleryService();
     this.setupCeleryBeatService();
 
     rabbitMqService.connections.allowFrom(mainService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
+    rabbitMqService.connections.allowFrom(celeryService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
   }
 
   private getEnvironmentConfiguration() {
@@ -280,6 +281,7 @@ export class OpenNotificatiesService extends Construct {
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    return service;
   }
 
   setupCeleryBeatService() {

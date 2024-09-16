@@ -64,8 +64,14 @@ export interface Configuration {
 
   /**
    * Configuration for open notifications
+   * Note: deplends on open zaak service being deployed as well.
    */
   openNotificaties?: OpenNotificatiesConfiguration;
+
+  /**
+   * Configuration for open zaak
+   */
+  openZaak?: OpenZaakConfiguration;
 }
 
 export interface OpenKlantConfiguration {
@@ -107,6 +113,11 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.7.0',
       rabbitMqImage: 'rabbitmq:3.13.4-alpine',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
+    openZaak: {
+      image: 'openzaak/open-zaak:1.14.0',
       logLevel: 'DEBUG',
       debug: true,
     },

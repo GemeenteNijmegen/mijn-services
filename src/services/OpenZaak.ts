@@ -22,7 +22,7 @@ export interface OpenZaakServiceProps {
   hostedzone: IHostedZone;
   alternativeDomainNames?: string[];
 
-  openNotificationsConfiguration: OpenZaakConfiguration;
+  openZaakConfiguration: OpenZaakConfiguration;
 }
 
 export class OpenZaakService extends Construct {
@@ -76,10 +76,10 @@ export class OpenZaakService extends Construct {
       IS_HTTPS: 'yes',
       UWSGI_PORT: this.props.service.port.toString(),
 
-      LOG_LEVEL: this.props.openNotificationsConfiguration.logLevel,
-      LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
+      LOG_LEVEL: this.props.openZaakConfiguration.logLevel,
+      LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
       LOG_QUERIES: 'False',
-      DEBUG: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
+      DEBUG: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
 
       // TODO not used as we do not store documents nor import them... yet
       // IMPORT_DOCUMENTEN_BASE_DIR=${IMPORT_DOCUMENTEN_BASE_DIR:-/app/import-data}
@@ -88,7 +88,7 @@ export class OpenZaakService extends Construct {
       // Celery
       CELERY_BROKER_URL: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
       CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
-      CELERY_LOGLEVEL: this.props.openNotificationsConfiguration.logLevel,
+      CELERY_LOGLEVEL: this.props.openZaakConfiguration.logLevel,
       CELERY_WORKER_CONCURRENCY: '4',
 
       // Conectivity
@@ -141,7 +141,7 @@ export class OpenZaakService extends Construct {
 
     // 3th Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         interval: Duration.seconds(10),
@@ -166,7 +166,7 @@ export class OpenZaakService extends Construct {
 
     // 2nd Configuration - initialization container
     const initContainer = task.addContainer('init-config', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
       command: ['/setup_configuration.sh'],
       readonlyRootFilesystem: true,
       essential: false, // exit after running
@@ -213,7 +213,7 @@ export class OpenZaakService extends Construct {
   private setupCeleryService() {
     const task = this.serviceFactory.createTaskDefinition('celery');
     task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', 'celery', '--app', 'openzaak'],
         interval: Duration.seconds(10),
