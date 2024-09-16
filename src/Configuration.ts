@@ -81,6 +81,12 @@ export interface OpenNotificatiesConfiguration {
   debug?: boolean;
 }
 
+export interface OpenZaakConfiguration {
+  image: string;
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  debug?: boolean;
+}
+
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
   acceptance: {
     branch: 'acceptance',

@@ -199,7 +199,7 @@ export class OpenNotificatiesService extends Construct {
     // 2nd Configuration - initialization container
     const initContainer = task.addContainer('init-config', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
-      command: ['chmod 0777 /tmp && /setup_configuration.sh'],
+      command: ['/setup_configuration.sh'],
       readonlyRootFilesystem: true,
       essential: false, // exit after running
       logging: new AwsLogDriver({
