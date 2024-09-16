@@ -307,9 +307,9 @@ export class OpenNotificatiesService extends Construct {
       }),
       command: ['/celery_beat.sh'],
     });
-    this.serviceFactory.attachEphemeralStorage(beat, VOLUME_NAME, '/app/celerybeat', '/tmp');
+    this.serviceFactory.attachEphemeralStorage(beat, VOLUME_NAME, '/app/celerybeat', '/tmp', '/app/log');
 
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, beat, '/app/celerybeat', '/tmp');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, beat, '/app/celerybeat', '/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
       task,
