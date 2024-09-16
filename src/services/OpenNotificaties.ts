@@ -154,6 +154,7 @@ export class OpenNotificatiesService extends Construct {
         streamPrefix: 'logs',
         logGroup: this.logs,
       }),
+      readonlyRootFilesystem: true,
       portMappings: [{
         containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
       }],
