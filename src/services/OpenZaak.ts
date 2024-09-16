@@ -170,6 +170,8 @@ export class OpenZaakService extends Construct {
       command: ['/setup_configuration.sh'],
       readonlyRootFilesystem: true,
       essential: false, // exit after running
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
         streamPrefix: 'init-configuration',
         logGroup: this.logs,
