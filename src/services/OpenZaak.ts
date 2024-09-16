@@ -173,7 +173,7 @@ export class OpenZaakService extends Construct {
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
-        streamPrefix: 'init-configuration',
+        streamPrefix: 'logs',
         logGroup: this.logs,
       }),
     });

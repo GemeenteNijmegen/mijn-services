@@ -211,7 +211,7 @@ export class OpenNotificatiesService extends Construct {
       readonlyRootFilesystem: true,
       essential: false, // exit after running
       logging: new AwsLogDriver({
-        streamPrefix: 'init-configuration',
+        streamPrefix: 'logs',
         logGroup: this.logs,
       }),
       secrets: this.getSecretConfiguration(),
@@ -232,7 +232,7 @@ export class OpenNotificatiesService extends Construct {
       readonlyRootFilesystem: true,
       essential: false, // exit after running
       logging: new AwsLogDriver({
-        streamPrefix: 'init-storage',
+        streamPrefix: 'logs',
         logGroup: this.logs,
       }),
     });
@@ -318,7 +318,7 @@ export class OpenNotificatiesService extends Construct {
       essential: false, // exit after running
       logging: new AwsLogDriver({
         logGroup: this.logs,
-        streamPrefix: 'init-storage',
+        streamPrefix: 'logs',
       }),
     });
     beat.addContainerDependencies({
