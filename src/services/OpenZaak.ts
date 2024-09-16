@@ -61,7 +61,7 @@ export class OpenZaakService extends Construct {
 
     const cacheHost = this.props.cache.db.attrRedisEndpointAddress + ':' + this.props.cache.db.attrRedisEndpointPort + '/';
 
-    const trustedDomains = this.props.alternativeDomainNames ?? [];
+    const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
     return {

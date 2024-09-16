@@ -14,15 +14,17 @@ import { Statics } from '../Statics';
 import { Utils } from '../Utils';
 
 export interface OpenNotificatiesServiceProps {
-  cache: CacheDatabase;
-  cacheDatabaseIndex: number;
-  cacheDatabaseIndexCelery: number;
-  service: ServiceFactoryProps;
-  path: string;
-  hostedzone: IHostedZone;
-  alternativeDomainNames?: string[];
-
-  openNotificationsConfiguration: OpenNotificatiesConfiguration;
+  readonly cache: CacheDatabase;
+  readonly cacheDatabaseIndex: number;
+  readonly cacheDatabaseIndexCelery: number;
+  readonly service: ServiceFactoryProps;
+  readonly path: string;
+  readonly hostedzone: IHostedZone;
+  readonly alternativeDomainNames?: string[];
+  /**
+   * The configuration for the open configuration installation
+   */
+  readonly openNotificationsConfiguration: OpenNotificatiesConfiguration;
 }
 
 export class OpenNotificatiesService extends Construct {
