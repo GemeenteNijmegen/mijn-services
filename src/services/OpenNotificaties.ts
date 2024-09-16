@@ -171,7 +171,7 @@ export class OpenNotificatiesService extends Construct {
       volumes: [{ name: VOLUME_NAME }],
     });
 
-    // Main service container
+    // 3th Main service container
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       healthCheck: {
@@ -196,18 +196,34 @@ export class OpenNotificatiesService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
 
-    // Initialization container
-    const initContainer = task.addContainer('init', {
+    // 2nd Configuration - initialization container
+    const initContainer = task.addContainer('init-config', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       command: ['chmod 0777 /tmp && /setup_configuration.sh'],
+      readonlyRootFilesystem: true,
+      essential: false, // exit after running
+      logging: new AwsLogDriver({
+        streamPrefix: 'init-configuration',
+      }),
+    });
+    container.addContainerDependencies({
+      container: initContainer,
+      condition: ContainerDependencyCondition.SUCCESS,
+    });
+    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
+
+    // 1st Filesystem write access - initialization container
+    const fsInitContainer = task.addContainer('init-storage', {
+      image: ContainerImage.fromRegistry('alpine:latest'),
+      command: ['chmod 0777 /tmp'],
       readonlyRootFilesystem: true,
       essential: false, // exit after running
       logging: new AwsLogDriver({
         streamPrefix: 'init-storage',
       }),
     });
-    container.addContainerDependencies({
-      container: initContainer,
+    initContainer.addContainerDependencies({
+      container: fsInitContainer,
       condition: ContainerDependencyCondition.SUCCESS,
     });
     this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
