@@ -31,7 +31,7 @@ export class OpenZaakService extends Construct {
   private readonly props: OpenZaakServiceProps;
   private readonly serviceFactory: ServiceFactory;
   private readonly databaseCredentials: ISecret;
-  private readonly openNotificatiesCredentials: ISecret;
+  private readonly openZaakCredentials: ISecret;
   private readonly secretKey: ISecret;
   private readonly clientCredentialsNotificationsZaak: ISecret;
   private readonly clientCredentialsZaakNotifications: ISecret;
@@ -43,7 +43,7 @@ export class OpenZaakService extends Construct {
     this.logs = this.logGroup();
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
-    this.openNotificatiesCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenNotificatiesCredentials);
+    this.openZaakCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenZaakCredentials);
     this.clientCredentialsZaakNotifications = SecretParameter.fromSecretNameV2(this, 'client-credentials-zaak-notifications', Statics._ssmClientCredentialsZaakNotifications);
     this.clientCredentialsNotificationsZaak = SecretParameter.fromSecretNameV2(this, 'client-credentials-notifications-zaak', Statics._ssmClientCredentialsNotificationsZaak);
     this.secretKey = new SecretParameter(this, 'secret-key', {
@@ -66,7 +66,7 @@ export class OpenZaakService extends Construct {
 
     return {
       DJANGO_SETTINGS_MODULE: 'openzaak.conf.docker',
-      DB_NAME: Statics.databaseOpenKlant,
+      DB_NAME: Statics.databaseOpenZaak,
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
@@ -117,11 +117,11 @@ export class OpenZaakService extends Construct {
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
       // Generic super user creation works with running the createsuperuser command
-      DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openNotificatiesCredentials, 'username'),
-      DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.openNotificatiesCredentials, 'password'),
-      DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openNotificatiesCredentials, 'email'),
-      OPENZAAK_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openNotificatiesCredentials, 'username'),
-      OPENZAAK_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openNotificatiesCredentials, 'email'),
+      DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openZaakCredentials, 'username'),
+      DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.openZaakCredentials, 'password'),
+      DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openZaakCredentials, 'email'),
+      OPENZAAK_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openZaakCredentials, 'username'),
+      OPENZAAK_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openZaakCredentials, 'email'),
 
       // Default connection between open-zaak and open-notifications
       NOTIF_OPENZAAK_CLIENT_ID: Secret.fromSecretsManager(this.clientCredentialsNotificationsZaak, 'username'),
@@ -261,7 +261,7 @@ export class OpenZaakService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
-    this.openNotificatiesCredentials.grantRead(role);
+    this.openZaakCredentials.grantRead(role);
     this.secretKey.grantRead(role);
   }
 
