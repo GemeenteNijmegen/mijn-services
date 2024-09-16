@@ -226,7 +226,7 @@ export class OpenNotificatiesService extends Construct {
       container: fsInitContainer,
       condition: ContainerDependencyCondition.SUCCESS,
     });
-    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
+    this.serviceFactory.attachEphemeralStorage(fsInitContainer, VOLUME_NAME, '/tmp');
 
     const service = this.serviceFactory.createService({
       id: 'main',
