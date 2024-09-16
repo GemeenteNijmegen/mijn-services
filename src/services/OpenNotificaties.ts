@@ -201,8 +201,7 @@ export class OpenNotificatiesService extends Construct {
         logGroup: this.logs,
       }),
     });
-    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
-    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/app/log');
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
 
     // 2nd Configuration - initialization container
     const initContainer = task.addContainer('init-config', {
@@ -221,27 +220,10 @@ export class OpenNotificatiesService extends Construct {
       container: initContainer,
       condition: ContainerDependencyCondition.SUCCESS,
     });
-    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
-    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/app/log');
+    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/log');
 
     // 1st Filesystem write access - initialization container
-    const fsInitContainer = task.addContainer('init-storage', {
-      image: ContainerImage.fromRegistry('alpine:latest'),
-      entryPoint: ['sh', '-c'],
-      command: ['chmod 0777 /tmp && chmod 0777 /app/log'],
-      readonlyRootFilesystem: true,
-      essential: false, // exit after running
-      logging: new AwsLogDriver({
-        streamPrefix: 'logs',
-        logGroup: this.logs,
-      }),
-    });
-    initContainer.addContainerDependencies({
-      container: fsInitContainer,
-      condition: ContainerDependencyCondition.SUCCESS,
-    });
-    this.serviceFactory.attachEphemeralStorage(fsInitContainer, VOLUME_NAME, '/tmp');
-    this.serviceFactory.attachEphemeralStorage(fsInitContainer, VOLUME_NAME, '/app/log');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
       id: 'main',
@@ -256,7 +238,7 @@ export class OpenNotificatiesService extends Construct {
     return service;
   }
 
-  setupCeleryService() {
+  private setupCeleryService() {
     const task = this.serviceFactory.createTaskDefinition('celery');
     task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
@@ -286,7 +268,7 @@ export class OpenNotificatiesService extends Construct {
     return service;
   }
 
-  setupCeleryBeatService() {
+  private setupCeleryBeatService() {
     const VOLUME_NAME = 'celerybeat';
     const task = this.serviceFactory.createTaskDefinition('celery-beat', {
       volumes: [{ name: VOLUME_NAME }],

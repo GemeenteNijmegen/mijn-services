@@ -102,6 +102,12 @@ export class OpenZaakService extends Construct {
       OPENZAAK_ORGANIZATION: Statics.organization,
       NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notifications/api/v1/`, // TODO remove hardcoded path
 
+
+      // Somehow this is required aswell...
+      DEMO_CONFIG_ENABLE: 'False',
+      DEMO_CLIENT_ID: 'demo-client',
+      DEMO_SECRET: 'demo-secret',
+
     };
   }
 
