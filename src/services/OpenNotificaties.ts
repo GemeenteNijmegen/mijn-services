@@ -205,6 +205,8 @@ export class OpenNotificatiesService extends Construct {
       logging: new AwsLogDriver({
         streamPrefix: 'init-configuration',
       }),
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
     });
     container.addContainerDependencies({
       container: initContainer,
