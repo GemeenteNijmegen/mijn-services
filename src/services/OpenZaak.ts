@@ -100,7 +100,7 @@ export class OpenZaakService extends Construct {
       SENDFILE_BACKEND: 'django_sendfile.backends.simple', // Django backend to download files
       OPENZAAK_DOMAIN: trustedDomains[0],
       OPENZAAK_ORGANIZATION: Statics.organization,
-      NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notifications/api/v1/`, // TODO remove hardcoded path
+      NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notificaties/api/v1/`, // TODO remove hardcoded path
 
 
       // Somehow this is required aswell...
