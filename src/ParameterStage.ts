@@ -78,6 +78,30 @@ export class ParameterStack extends Stack {
       },
       secretName: Statics._ssmRabbitMqCredentials,
     });
+
+    new Secret(this, 'client-credentials-1', {
+      description: 'Credentials for openzaak to access opennotifications',
+      secretName: Statics._ssmClientCredentialsZaakNotifications,
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'zaak-to-notifications',
+        }),
+        generateStringKey: 'secret',
+      },
+    });
+
+    new Secret(this, 'client-credentials-2', {
+      description: 'Credentials for opennotifications to access openzaak',
+      secretName: Statics._ssmClientCredentialsNotificationsZaak,
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'notifications-to-zaak',
+        }),
+        generateStringKey: 'secret',
+      },
+    });
   }
 
 

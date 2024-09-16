@@ -36,6 +36,8 @@ export class OpenNotificatiesService extends Construct {
   private readonly databaseCredentials: ISecret;
   // private readonly rabbitMqCredentials: ISecret;
   private readonly openNotificatiesCredentials: ISecret;
+  private readonly clientCredentialsNotificationsZaak: ISecret;
+  private readonly clientCredentialsZaakNotifications: ISecret;
   private readonly secretKey: ISecret;
 
   constructor(scope: Construct, id: string, props: OpenNotificatiesServiceProps) {
@@ -46,6 +48,8 @@ export class OpenNotificatiesService extends Construct {
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.openNotificatiesCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenNotificatiesCredentials);
+    this.clientCredentialsZaakNotifications = SecretParameter.fromSecretNameV2(this, 'client-credentials-zaak-notifications', Statics._ssmClientCredentialsZaakNotifications);
+    this.clientCredentialsNotificationsZaak = SecretParameter.fromSecretNameV2(this, 'client-credentials-notifications-zaak', Statics._ssmClientCredentialsNotificationsZaak);
     // this.rabbitMqCredentials = SecretParameter.fromSecretNameV2(this, 'rabbit-mq-credentials', Statics._ssmRabbitMqCredentials);
     this.secretKey = new SecretParameter(this, 'secret-key', {
       description: 'Open klant secret key',
@@ -107,12 +111,7 @@ export class OpenNotificatiesService extends Construct {
       OPENNOTIFICATIES_ORGANIZATION: Statics.organization,
       OPENNOTIFICATIES_DOMAIN: trustedOrigins[0],
 
-      // TODO find a way to privde these when open zaak is running as well
-      // NOTIF_OPENZAAK_CLIENT_ID: 'notificaties-client',
-      // NOTIF_OPENZAAK_SECRET: 'notificaties-secret',
-      // AUTORISATIES_API_ROOT: 'https://lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/autorisaties/api/v1',
-      // OPENZAAK_NOTIF_CLIENT_ID: 'oz-client',
-      // OPENZAAK_NOTIF_SECRET: 'oz-secret',
+      AUTORISATIES_API_ROOT: `https://${trustedOrigins[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path
 
 
     };
@@ -132,6 +131,13 @@ export class OpenNotificatiesService extends Construct {
       DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openNotificatiesCredentials, 'email'),
       OPENNOTIFICATIES_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openNotificatiesCredentials, 'username'),
       OPENNOTIFICATIES_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openNotificatiesCredentials, 'email'),
+
+      // Default connection between open-zaak and open-notifications
+      NOTIF_OPENZAAK_CLIENT_ID: Secret.fromSecretsManager(this.clientCredentialsNotificationsZaak, 'username'),
+      NOTIF_OPENZAAK_SECRET: Secret.fromSecretsManager(this.clientCredentialsNotificationsZaak, 'secret'),
+      OPENZAAK_NOTIF_CLIENT_ID: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'username'),
+      OPENZAAK_NOTIF_SECRET: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'secret'),
+
 
     };
     return secrets;
@@ -195,6 +201,7 @@ export class OpenNotificatiesService extends Construct {
       }),
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/app/log');
 
     // 2nd Configuration - initialization container
     const initContainer = task.addContainer('init-config', {
@@ -213,12 +220,13 @@ export class OpenNotificatiesService extends Construct {
       condition: ContainerDependencyCondition.SUCCESS,
     });
     this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
+    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/app/log');
 
     // 1st Filesystem write access - initialization container
     const fsInitContainer = task.addContainer('init-storage', {
       image: ContainerImage.fromRegistry('alpine:latest'),
       entryPoint: ['sh', '-c'],
-      command: ['chmod 0777 /tmp'],
+      command: ['chmod 0777 /tmp && chmod 0777 /app/log'],
       readonlyRootFilesystem: true,
       essential: false, // exit after running
       logging: new AwsLogDriver({
@@ -230,6 +238,7 @@ export class OpenNotificatiesService extends Construct {
       condition: ContainerDependencyCondition.SUCCESS,
     });
     this.serviceFactory.attachEphemeralStorage(fsInitContainer, VOLUME_NAME, '/tmp');
+    this.serviceFactory.attachEphemeralStorage(fsInitContainer, VOLUME_NAME, '/app/log');
 
     const service = this.serviceFactory.createService({
       id: 'main',
