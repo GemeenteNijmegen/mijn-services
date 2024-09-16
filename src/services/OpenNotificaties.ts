@@ -61,7 +61,7 @@ export class OpenNotificatiesService extends Construct {
     const rabbitMqService = this.setupRabbitMqService();
     const mainService = this.setupService();
     this.setupCeleryService();
-    // this.setupCeleryBeatService();
+    this.setupCeleryBeatService();
 
     rabbitMqService.connections.allowFrom(mainService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
   }
@@ -258,7 +258,7 @@ export class OpenNotificatiesService extends Construct {
     task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'celery', '--app', 'nrc'],
+        command: ['CMD-SHELL', 'celery', 'inspect', 'ping', '--app', 'nrc'],
         interval: Duration.seconds(10),
       },
       readonlyRootFilesystem: true,
@@ -279,6 +279,35 @@ export class OpenNotificatiesService extends Construct {
       },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
+    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+  }
+
+  setupCeleryBeatService() {
+    const task = this.serviceFactory.createTaskDefinition('celery-beat');
+    task.addContainer('beat', {
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      healthCheck: {
+        command: ['CMD-SHELL', 'celery', 'inspect', 'ping', '--app', 'nrc'],
+        interval: Duration.seconds(10),
+      },
+      readonlyRootFilesystem: true,
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: this.logs,
+      }),
+      command: ['/celery_beat.sh'],
+    });
+    const service = this.serviceFactory.createService({
+      task,
+      path: undefined, // Not exposed service
+      id: 'celery-beat',
+      options: {
+        desiredCount: 1,
+      },
+    });
+    this.setupConnectivity('celery-beat', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
   }
 
