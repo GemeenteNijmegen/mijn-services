@@ -1,6 +1,6 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerDefinition, ContainerDependencyCondition, ContainerImage, Protocol, Secret, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
@@ -181,7 +181,7 @@ export class OpenZaakService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
 
-    this.setupWritableVolume(VOLUME_NAME, task, initContainer, '/tmp');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp');
 
     const service = this.serviceFactory.createService({
       id: 'main',
@@ -218,8 +218,9 @@ export class OpenZaakService extends Construct {
       command: ['/celery_worker.sh'],
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/app/tmp');
 
-    this.setupWritableVolume(VOLUME_NAME, task, container, '/tmp');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/tmp');
 
     const service = this.serviceFactory.createService({
       task,
@@ -262,36 +263,6 @@ export class OpenZaakService extends Construct {
     this.databaseCredentials.grantRead(role);
     this.openNotificatiesCredentials.grantRead(role);
     this.secretKey.grantRead(role);
-  }
-
-
-  /**
-   * Initalize the writable directories the task requires
-   * @param volumeName
-   * @param task
-   * @param runBeforeContainer
-   * @param dirs
-   */
-  private setupWritableVolume(volumeName: string, task: TaskDefinition, runBeforeContainer: ContainerDefinition, ...dirs: string[]) {
-    const command = dirs.map(dir => `chmod 0777 ${dir}`).join(' && ');
-    const fsInitContainer = task.addContainer('init-storage', {
-      image: ContainerImage.fromRegistry('alpine:latest'),
-      entryPoint: ['sh', '-c'],
-      command: [command],
-      readonlyRootFilesystem: true,
-      essential: false, // exit after running
-      logging: new AwsLogDriver({
-        streamPrefix: 'init-storage',
-        logGroup: this.logs,
-      }),
-    });
-    runBeforeContainer.addContainerDependencies({
-      container: fsInitContainer,
-      condition: ContainerDependencyCondition.SUCCESS,
-    });
-    dirs.forEach(dir => {
-      this.serviceFactory.attachEphemeralStorage(fsInitContainer, volumeName, dir);
-    });
   }
 
 
