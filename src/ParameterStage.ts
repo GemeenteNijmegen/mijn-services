@@ -34,6 +34,7 @@ export class ParameterStack extends Stack {
     this.addOpenKlantParameters();
     this.addDatabaseCredentials();
     this.addOpenNotificatiesParameters();
+    this.addOpenZaakParameters();
 
   }
 
@@ -50,6 +51,21 @@ export class ParameterStack extends Stack {
         generateStringKey: 'password',
       },
       secretName: Statics._ssmOpenKlantCredentials,
+    });
+  }
+
+  private addOpenZaakParameters() {
+    new Secret(this, 'open-zaak-credentials', {
+      description: 'Credentials for the open zaak superuser',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'open-zaak',
+          email: 'devops@nijmegen.nl',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmOpenZaakCredentials,
     });
   }
 
