@@ -307,25 +307,9 @@ export class OpenNotificatiesService extends Construct {
       }),
       command: ['/celery_beat.sh'],
     });
-    this.serviceFactory.attachEphemeralStorage(beat, VOLUME_NAME, '/app/celerybeat');
+    this.serviceFactory.attachEphemeralStorage(beat, VOLUME_NAME, '/app/celerybeat', '/tmp');
 
-    // Filesystem write access - initialization container
-    const fsInitContainer = task.addContainer('init-storage', {
-      image: ContainerImage.fromRegistry('alpine:latest'),
-      entryPoint: ['sh', '-c'],
-      command: ['chmod 0777 /app/celerybeat'],
-      readonlyRootFilesystem: true,
-      essential: false, // exit after running
-      logging: new AwsLogDriver({
-        logGroup: this.logs,
-        streamPrefix: 'logs',
-      }),
-    });
-    beat.addContainerDependencies({
-      container: fsInitContainer,
-      condition: ContainerDependencyCondition.SUCCESS,
-    });
-    this.serviceFactory.attachEphemeralStorage(fsInitContainer, VOLUME_NAME, '/app/celerybeat');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, beat, '/app/celerybeat', '/tmp');
 
     const service = this.serviceFactory.createService({
       task,
