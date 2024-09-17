@@ -1,3 +1,4 @@
+import { Environment } from 'aws-cdk-lib';
 import { Statics } from './Statics';
 
 /**
@@ -5,14 +6,6 @@ import { Statics } from './Statics';
  */
 export interface Configurable {
   configuration: Configuration;
-}
-
-/**
- * Environment object (required fields)
- */
-export interface Environment {
-  account: string;
-  region: string;
 }
 
 /**
@@ -29,7 +22,7 @@ export interface Configuration {
    *
    * Use this environment for your initial manual deploy
    */
-  buildEnvironment: Environment;
+  buildEnvironment: Required<Environment>;
 
   /**
    * Environment to deploy the application to
@@ -38,7 +31,7 @@ export interface Configuration {
    * deploy the application to this environment. This is usually
    * the workload AWS account in our default region.
    */
-  deploymentEnvironment: Environment;
+  deploymentEnvironment: Required<Environment>;
 
   /**
    * Provie alternative domain names
