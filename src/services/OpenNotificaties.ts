@@ -103,15 +103,11 @@ export class OpenNotificatiesService extends Construct {
 
       // Conectivity
       CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
-      CORS_ALLOW_ALL_ORIGINS: 'True', // TODO figure out of we need this?
-      /**
-       * Worked without turned on to check if it resolved the error: `Service '...' is not known in the client registry` (17 sept).
-       */
 
       // Open notificaties specific stuff
       OPENNOTIFICATIES_ORGANIZATION: Statics.organization,
       OPENNOTIFICATIES_DOMAIN: `${trustedOrigins[0]}/${this.props.path}/`,
-      AUTORISATIES_API_ROOT: `${trustedOrigins[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path
+      AUTORISATIES_API_ROOT: `${trustedOrigins[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path 'open-zaak'
 
     };
   }
