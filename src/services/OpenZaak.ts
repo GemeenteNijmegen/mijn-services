@@ -73,7 +73,7 @@ export class OpenZaakService extends Construct {
       CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/'+this.props.path,
-      IS_HTTPS: 'yes',
+      IS_HTTPS: 'True',
       UWSGI_PORT: this.props.service.port.toString(),
 
       LOG_LEVEL: this.props.openZaakConfiguration.logLevel,
@@ -93,12 +93,11 @@ export class OpenZaakService extends Construct {
 
       // Conectivity
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
-      // CORS_ALLOW_ALL_ORIGINS: 'True', // TODO figure out of we need this?
 
 
       // Open notificaties specific stuff
       SENDFILE_BACKEND: 'django_sendfile.backends.simple', // Django backend to download files
-      OPENZAAK_DOMAIN: trustedDomains[0],
+      OPENZAAK_DOMAIN: `https://${trustedDomains[0]}`,
       OPENZAAK_ORGANIZATION: Statics.organization,
       NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notificaties/api/v1/`, // TODO remove hardcoded path
 
