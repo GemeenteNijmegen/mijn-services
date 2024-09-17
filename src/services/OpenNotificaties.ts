@@ -103,7 +103,10 @@ export class OpenNotificatiesService extends Construct {
 
       // Conectivity
       CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
-      // CORS_ALLOW_ALL_ORIGINS: 'True', // TODO figure out of we need this?
+      CORS_ALLOW_ALL_ORIGINS: 'True', // TODO figure out of we need this?
+      /**
+       * Worked without turned on to check if it resolved the error: `Service '...' is not known in the client registry` (17 sept).
+       */
 
       // Open notificaties specific stuff
       OPENNOTIFICATIES_ORGANIZATION: Statics.organization,
