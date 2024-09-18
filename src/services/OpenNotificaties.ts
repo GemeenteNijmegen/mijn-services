@@ -91,6 +91,7 @@ export class OpenNotificatiesService extends Construct {
       SUBPATH: '/'+this.props.path,
       IS_HTTPS: 'yes',
       UWSGI_PORT: this.props.service.port.toString(),
+      USE_X_FORWARDED_HOST: 'True',
 
       LOG_LEVEL: this.props.openNotificationsConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
