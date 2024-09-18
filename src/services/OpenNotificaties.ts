@@ -71,8 +71,11 @@ export class OpenNotificatiesService extends Construct {
 
     const cacheHost = this.props.cache.db.attrRedisEndpointAddress + ':' + this.props.cache.db.attrRedisEndpointPort + '/';
 
-    const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
-    trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
+    // const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
+    // trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
+
+    const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
+    trustedDomains.push(this.props.hostedzone.zoneName);
 
     const rabbitMqHost = `${OpenNotificatiesService.RABBIT_MQ_NAME}.${this.props.service.namespace}`;
     const rabbitMqBrokerUrl = `amqp://guest:guest@${rabbitMqHost}:${OpenNotificatiesService.RABBIT_MQ_PORT}//`;
@@ -102,12 +105,12 @@ export class OpenNotificatiesService extends Construct {
       CELERY_BROKER_URL: rabbitMqBrokerUrl,
 
       // Conectivity
-      CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
+      CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
 
       // Open notificaties specific stuff
       OPENNOTIFICATIES_ORGANIZATION: Statics.organization,
-      OPENNOTIFICATIES_DOMAIN: `${trustedOrigins[0]}/${this.props.path}/`,
-      AUTORISATIES_API_ROOT: `${trustedOrigins[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path 'open-zaak'
+      OPENNOTIFICATIES_DOMAIN: trustedDomains[0],
+      AUTORISATIES_API_ROOT: `https://${trustedDomains[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path 'open-zaak'
 
     };
   }
