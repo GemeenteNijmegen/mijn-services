@@ -87,7 +87,7 @@ export class OMCService extends Construct {
 
       // TODO not sure if this does anything
       DEBUG: this.props.omcConfiguration.debug ? 'true' : 'false',
-
+      ASPNETCORE_ENVIRONMENT: 'Docker', // Use docker profile
     };
   }
 
