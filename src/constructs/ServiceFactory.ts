@@ -200,7 +200,11 @@ export class ServiceFactory {
       integrationUri: service.cloudMapService?.serviceArn,
       integrationMethod: 'ANY',
       payloadFormatVersion: '1.0',
+      requestParameters: {
+        'overwrite:header.X_FORWARDED_PROTO': 'https',
+      },
     });
+
     integration.node.addDependency(service);
     integration.node.addDependency(this.props.link);
 
