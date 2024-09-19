@@ -65,6 +65,11 @@ export interface Configuration {
    * Configuration for open zaak
    */
   openZaak?: OpenZaakConfiguration;
+
+  /**
+   * Configuration for OMC
+   */
+  outputManagementComponent?: OutputManagementComponentConfiguration;
 }
 
 export interface OpenKlantConfiguration {
@@ -81,6 +86,12 @@ export interface OpenNotificatiesConfiguration {
 }
 
 export interface OpenZaakConfiguration {
+  image: string;
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  debug?: boolean;
+}
+
+export interface OutputManagementComponentConfiguration {
   image: string;
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
   debug?: boolean;
@@ -111,6 +122,11 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     },
     openZaak: {
       image: 'openzaak/open-zaak:1.14.0',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
+    outputManagementComponent: {
+      image: 'worthnl/notifynl-omc:1.8.15',
       logLevel: 'DEBUG',
       debug: true,
     },

@@ -11,6 +11,7 @@ import { CacheDatabase } from './constructs/Redis';
 import { OpenKlantService } from './services/OpenKlant';
 import { OpenNotificatiesService } from './services/OpenNotificaties';
 import { OpenZaakService } from './services/OpenZaak';
+import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
 
 interface MainStackProps extends StackProps, Configurable {}
@@ -50,6 +51,7 @@ export class MainStack extends Stack {
     this.openKlantService(api, platform);
     this.openNotificatiesServices(api, platform);
     this.openZaakServices(api, platform);
+    this.outputManagementComponent(api, platform);
   }
 
 
@@ -123,6 +125,24 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       openZaakConfiguration: this.configuration.openZaak,
+    });
+  }
+
+  private outputManagementComponent(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.outputManagementComponent) {
+      console.warn('No OMC configuration provided. Skipping creation of OMC!');
+      return;
+    }
+    new OMCService(this, 'omc', {
+      omcConfiguration: this.configuration.outputManagementComponent,
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
     });
   }
 
