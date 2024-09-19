@@ -1,5 +1,5 @@
 import { Duration } from 'aws-cdk-lib';
-import { AwsLogDriver, ContainerImage, Secret as EcsSecret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, Secret as EcsSecret, Protocol } from 'aws-cdk-lib/aws-ecs';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
@@ -112,6 +112,13 @@ export class OMCService extends Construct {
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
+      portMappings: [
+        {
+          containerPort: this.props.service.port,
+          hostPort: this.props.service.port,
+          protocol: Protocol.TCP,
+        },
+      ],
       readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
@@ -126,7 +133,7 @@ export class OMCService extends Construct {
     const service = this.serviceFactory.createService({
       id: 'main',
       task: task,
-      path: undefined, // Not exposed to frontend
+      path: 'omc',
       options: {
         desiredCount: 1,
       },
