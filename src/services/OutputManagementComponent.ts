@@ -100,9 +100,12 @@ export class OMCService extends Construct {
   }
 
   setupService() {
-    const task = this.serviceFactory.createTaskDefinition('main');
+    const VOLUME_NAME = 'MAIN';
+    const task = this.serviceFactory.createTaskDefinition('main', {
+      volumes: [{ name: VOLUME_NAME }],
+    });
 
-    task.addContainer('main', {
+    const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.omcConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'], // TODO figurout a health check?
@@ -117,6 +120,8 @@ export class OMCService extends Construct {
         logGroup: this.logs,
       }),
     });
+
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/root/.aspnet');
 
     const service = this.serviceFactory.createService({
       id: 'main',
