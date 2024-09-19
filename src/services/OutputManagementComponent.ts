@@ -119,7 +119,7 @@ export class OMCService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
