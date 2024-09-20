@@ -95,6 +95,7 @@ export interface OutputManagementComponentConfiguration {
   image: string;
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
   debug?: boolean;
+  mode: 'Development' | 'Production';
 }
 
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
@@ -129,6 +130,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       image: 'worthnl/notifynl-omc:1.8.15',
       logLevel: 'DEBUG',
       debug: true,
+      mode: 'Development',
     },
   },
   main: {
