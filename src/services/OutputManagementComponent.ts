@@ -88,10 +88,9 @@ export class OMCService extends Construct {
       USER_WHITELIST_TASKOBJECTTYPE_UUID: '00000000-0000-0000-0000-000000000000', // Cannot be missing and have null or empty value + must be in UUID format 	Is provided by the user based on "objectType" from "kenmerken" from the initial notification received from "Notificaties" Web API service
       USER_WHITELIST_MESSAGEOBJECTTYPE_UUIDS: '00000000-0000-0000-0000-000000000000,00000000-0000-0000-0000-000000000000', 	// Cannot be missing and have null or empty value + must be in UUID format 	Is provided by the user based on "informatieobjecttype" from "informatieobject" retrieved from "OpenZaak" Web API service when querying "besluiten"
 
-
-      // TODO not sure if this does anything
+      // Environment settings
       DEBUG: this.props.omcConfiguration.debug ? 'true' : 'false',
-      ASPNETCORE_ENVIRONMENT: this.props.omcConfiguration.mode, // Use docker profile
+      ASPNETCORE_ENVIRONMENT: this.props.omcConfiguration.mode,
     };
   }
 
