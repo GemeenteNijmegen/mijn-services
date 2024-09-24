@@ -129,12 +129,12 @@ export class MainStack extends Stack {
   }
 
   private outputManagementComponent(api: ApiGateway, platform: ContainerPlatform) {
-    if (!this.configuration.outputManagementComponent) {
+    if (!this.configuration.vrijBrpOmc) {
       console.warn('No OMC configuration provided. Skipping creation of OMC!');
       return;
     }
     new OMCService(this, 'omc', {
-      omcConfiguration: this.configuration.outputManagementComponent,
+      omcConfiguration: this.configuration.vrijBrpOmc,
       service: {
         api: api.api,
         cluster: platform.cluster,

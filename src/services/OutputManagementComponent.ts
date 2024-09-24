@@ -17,6 +17,7 @@ export class OMCService extends Construct {
   private readonly logs: LogGroup;
   private readonly props: OMCServiceProps;
   private readonly serviceFactory: ServiceFactory;
+  private readonly configurationParameters: any;
 
   constructor(scope: Construct, id: string, props: OMCServiceProps) {
     super(scope, id);
@@ -24,8 +25,20 @@ export class OMCService extends Construct {
     this.serviceFactory = new ServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
-
+    this.configurationParameters = this.setupConfigurationParameters(id);
     this.setupService();
+  }
+
+  private setupConfigurationParameters(id: string) {
+    const ssmOpenKlantApiKey = `/${Statics.projectName}/omc/${id}/open-klant/api-key`;
+    const openKlantApiKey = new Secret(this, 'open-klant-api-key', {
+      description: `API key for OMC (${id}) to authenticate at open-klant `,
+      secretName: ssmOpenKlantApiKey,
+    });
+
+    return {
+      openklant: openKlantApiKey,
+    };
   }
 
   private getEnvironmentConfiguration() {
@@ -60,7 +73,7 @@ export class OMCService extends Construct {
       // Domains for ZGW(ish) components
       USER_DOMAIN_OPENNOTIFICATIES: 'mijn-services.accp.nijmegen.nl/open-notificaties', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
       USER_DOMAIN_OPENZAAK: 'mijn-services.accp.nijmegen.nl/open-zaak', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
-      USER_DOMAIN_OPENKLANT: 'mijn-services.accp.nijmegen.nl/open-klant', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
+      USER_DOMAIN_OPENKLANT: this.props.omcConfiguration.openKlantUrl, // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
       USER_DOMAIN_OBJECTEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
       USER_DOMAIN_OBJECTTYPEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
 
@@ -99,7 +112,7 @@ export class OMCService extends Construct {
       OMC_AUTHORIZATION_JWT_SECRET: EcsSecret.fromSecretsManager(Secret.fromSecretNameV2(this, 'omc-jwt', Statics._ssmOmcOmcJwtSecret)),
       USER_AUTHORIZATION_JWT_SECRET: EcsSecret.fromSecretsManager(Secret.fromSecretNameV2(this, 'zgw-jwt', Statics._ssmOmcZgwJwtSecret)),
 
-      USER_API_KEY_OPENKLANT: EcsSecret.fromSecretsManager(Secret.fromSecretNameV2(this, 'open-klant-key', Statics.ssmOpenKlantApiKeySecret)),
+      USER_API_KEY_OPENKLANT: EcsSecret.fromSecretsManager(this.configurationParameters.openklant),
     };
     return secrets;
   }
