@@ -46,6 +46,13 @@ export interface CreateServiceOptions {
    * @default - no filesystem is created
    */
   filesystem?: Record<string, string>;
+
+  /**
+   * Pass request rewrite paraemters to the API gateway integration.
+   * @see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigatewayv2-integration.html#cfn-apigatewayv2-integration-requestparameters
+   * @default - none
+   */
+  requestParameters?: Record<string, string>;
 }
 
 export class ServiceFactory {
@@ -84,7 +91,7 @@ export class ServiceFactory {
     service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
 
     if (options.path) {
-      this.addRoute(service, options.path, options.id);
+      this.addRoute(service, options.path, options.id, options.requestParameters);
     }
     if (options.filesystem) {
       this.createFileSytem(service, options);
@@ -188,7 +195,7 @@ export class ServiceFactory {
     });
   }
 
-  private addRoute(service: FargateService, path: string, id: string) {
+  private addRoute(service: FargateService, path: string, id: string, requestParameters?: Record<string, string>) {
     if (!service.cloudMapService) {
       throw Error('Cannot add route if ther\'s no cloudmap service configured');
     }
@@ -202,6 +209,7 @@ export class ServiceFactory {
       payloadFormatVersion: '1.0',
       requestParameters: {
         'overwrite:header.X_FORWARDED_PROTO': 'https',
+        ...requestParameters,
       },
     });
 

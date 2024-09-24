@@ -136,7 +136,10 @@ export class OMCService extends Construct {
     const service = this.serviceFactory.createService({
       id: 'main',
       task: task,
-      path: 'omc',
+      path: 'omc-vrijbrp',
+      requestParameters: {
+        'overwrite:path': '/$request.path',
+      },
       options: {
         desiredCount: 1,
       },
