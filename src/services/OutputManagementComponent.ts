@@ -98,6 +98,8 @@ export class OMCService extends Construct {
     const secrets = {
       OMC_AUTHORIZATION_JWT_SECRET: EcsSecret.fromSecretsManager(Secret.fromSecretNameV2(this, 'omc-jwt', Statics._ssmOmcOmcJwtSecret)),
       USER_AUTHORIZATION_JWT_SECRET: EcsSecret.fromSecretsManager(Secret.fromSecretNameV2(this, 'zgw-jwt', Statics._ssmOmcZgwJwtSecret)),
+
+      USER_API_KEY_OPENKLANT: EcsSecret.fromSecretsManager(Secret.fromSecretNameV2(this, 'open-klant-key', Statics.ssmOpenKlantApiKeySecret)),
     };
     return secrets;
   }

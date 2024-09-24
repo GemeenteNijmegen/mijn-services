@@ -152,6 +152,11 @@ export class ParameterStack extends Stack {
       },
       secretName: Statics._ssmOmcZgwJwtSecret,
     });
+
+    new Secret(this, 'open-klant-api-key', {
+      description: 'API key for OMC to authenticate at open-klant',
+      secretName: Statics.ssmOpenKlantApiKeySecret,
+    });
   }
 
 

@@ -12,6 +12,9 @@ export class Statics {
   static readonly ssmAccountRootHostedZoneId: string = '/gemeente-nijmegen/account/hostedzone/id';
   static readonly ssmAccountRootHostedZoneName: string = '/gemeente-nijmegen/account/hostedzone/name';
 
+  // Configurable parameters
+  static readonly ssmOpenKlantApiKeySecret = `/${Statics.projectName}/omc/open-klant/api-key`;
+
   // Lets use _ for denoting internal like parameters (eg for stack decoupling)
   static readonly _ssmCertificateArn = `/${Statics.projectName}/internal/cloudfront/cert-arn`;
   static readonly _ssmDatabaseCredentials = `/${Statics.projectName}/internal/database/credentials`;
