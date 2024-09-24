@@ -138,7 +138,7 @@ export class OMCService extends Construct {
       task: task,
       path: 'omc-vrijbrp',
       requestParameters: {
-        'overwrite:path': '/$request.path',
+        'overwrite:path': '/$request.path.proxy', // Remove the /omc-vrijbrp part from the path before forwarding to the integration
       },
       options: {
         desiredCount: 1,
