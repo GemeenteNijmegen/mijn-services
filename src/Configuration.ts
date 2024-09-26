@@ -128,6 +128,7 @@ export interface OpenKlantRegistrationServiceConfiguration {
   openKlantUrl: string;
   zakenApiUrl: string;
   debug: boolean;
+  targetRoleType: string;
 }
 
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
@@ -174,6 +175,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/api/v2/',
         zakenApiUrl: 'https://mijn-services.accp.nijmegen.nl/open-zaak/api/v1/',
         path: '/open-klant-registration-service-vrijbrp/callback',
+        targetRoleType: 'https://example.com',
       },
     ],
   },
