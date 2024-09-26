@@ -4,6 +4,7 @@ import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { authenticate } from './authenticate';
 import { Notification, NotificationSchema } from './Notification';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
+import { ZakenApi } from './ZakenApi';
 
 
 async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
@@ -24,8 +25,10 @@ async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
     openKlantApiUrl: env.OPEN_KLANT_API_URL,
     openKlantApiKey: openKlantApiKey,
     zakenApiUrl: env.ZAKEN_API_URL,
-    zgwTokenClientId: zgwCredentials.clientId,
-    zgwTokenClientSecret: zgwCredentials.secret,
+    zakenApi: new ZakenApi({
+      clientId: zgwCredentials.clientId,
+      clientSecret: zgwCredentials.clientSecret,
+    }),
   };
 
 }

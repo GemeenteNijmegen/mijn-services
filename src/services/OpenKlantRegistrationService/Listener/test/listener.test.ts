@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import { ApiGatewayV2Response } from '@gemeentenijmegen/apigateway-http';
 import { NotificationSchema } from '../Notification';
 import { OpenKlantRegistrationHandler } from '../OpenKlantRegistrationHandler';
+import { ZakenApiMock } from '../ZakenApi';
 
 
 beforeAll(() => {
@@ -34,7 +35,6 @@ function createHandler() {
     openKlantApiKey: 'geheim',
     openKlantApiUrl: 'https://example.com/open-klant',
     zakenApiUrl: 'https://example.com/open-zaak/zaken',
-    zgwTokenClientId: 'client-id',
-    zgwTokenClientSecret: 'client-secret',
+    zakenApi: new ZakenApiMock(),
   });
 }

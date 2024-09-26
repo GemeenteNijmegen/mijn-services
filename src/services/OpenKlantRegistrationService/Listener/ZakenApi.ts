@@ -44,3 +44,9 @@ export class ZakenApi implements IZakenApi {
     return token;
   }
 }
+
+export class ZakenApiMock implements IZakenApi {
+  async get(_url: string): Promise<any> {
+    return {};
+  }
+}

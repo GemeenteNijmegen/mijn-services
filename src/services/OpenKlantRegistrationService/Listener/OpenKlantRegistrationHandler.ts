@@ -1,14 +1,12 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { Notification } from './Notification';
-import { ZakenApi } from './ZakenApi';
+import { IZakenApi } from './ZakenApi';
 
 export interface OpenKlantRegistrationServiceProps {
   readonly zakenApiUrl: string;
   readonly openKlantApiUrl: string;
-  readonly zgwTokenClientId: string;
-  readonly zgwTokenClientSecret: string;
   readonly openKlantApiKey: string;
-  // readonly targetRoleType: string;
+  readonly zakenApi: IZakenApi;
 }
 
 export class OpenKlantRegistrationHandler {
@@ -37,11 +35,7 @@ export class OpenKlantRegistrationHandler {
 
     // Get the involved rol details and check if the role is the 'aanvrager'
     const rolUrl = notification.resourceUrl;
-    const zakenApi = new ZakenApi({
-      clientId: this.configuration.zgwTokenClientId,
-      clientSecret: this.configuration.zgwTokenClientSecret,
-    });
-    const rol = await zakenApi.get(rolUrl);
+    const rol = await this.configuration.zakenApi.get(rolUrl);
 
     // Check if role is the 'aanvrager'?
     console.log(rol);
