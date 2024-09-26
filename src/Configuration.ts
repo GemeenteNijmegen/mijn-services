@@ -167,15 +167,15 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak',
       notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties',
     },
-    openKlantRegistrationServices: [
-      {
-        cdkId: 'open-klant-registration-service-vrijbrp',
-        debug: true,
-        openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/api/v2/',
-        zakenApiUrl: 'https://mijn-services.accp.nijmegen.nl/open-zaak/api/v1/',
-        path: '/open-klant-registration-service-vrijbrp/callback',
-      },
-    ],
+    // openKlantRegistrationServices: [
+    //   {
+    //     cdkId: 'open-klant-registration-service-vrijbrp',
+    //     debug: true,
+    //     openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/api/v2/',
+    //     zakenApiUrl: 'https://mijn-services.accp.nijmegen.nl/open-zaak/api/v1/',
+    //     path: '/open-klant-registration-service-vrijbrp/callback',
+    //   },
+    // ],
   },
   main: {
     branch: 'main',

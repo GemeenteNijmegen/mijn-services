@@ -26,7 +26,7 @@ export const OpenKlantPartijSchema = z.object({
     // },
     volledigeNaam: z.string(),
   }),
-});
+}).required();
 
 type OpenKlantPartijType = z.infer<typeof OpenKlantPartijSchema>;
 
@@ -38,12 +38,16 @@ export class OpenKlantPartij {
       console.debug('Mapping rol to partij', rol);
     }
 
-    const partij = new OpenKlantPartij;
+    if (!rol?.contactpersoonRol) {
+      throw Error('No contactgegevens in rol');
+    }
+
+    const partij = new OpenKlantPartij();
     partij.data = {
       digitaleAdressen: [],
       indicatieActief: true,
       partijIdentificatie: {
-        volledigeNaam: '',
+        volledigeNaam: rol?.contactpersoonRol?.naam,
       },
       rekeningnummers: [],
       soortPartij: 'persoon',
