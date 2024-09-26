@@ -38,9 +38,13 @@ async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
   };
 
 }
-const configuration = initalize();
 
+let configuration : undefined | OpenKlantRegistrationServiceProps = undefined;
 export async function handler(event: APIGatewayProxyEventV2) {
+
+  if (!configuration) {
+    configuration = await initalize();
+  }
 
   // Log the event in debug modes
   if (process.env.DEBUG === 'true') {
@@ -57,7 +61,7 @@ export async function handler(event: APIGatewayProxyEventV2) {
     }
 
     // Create the handler
-    const registrationHandler = new OpenKlantRegistrationHandler(await configuration);
+    const registrationHandler = new OpenKlantRegistrationHandler(configuration);
 
     // Handle the notification event
     const notification = parseNotificationFromBody(event);

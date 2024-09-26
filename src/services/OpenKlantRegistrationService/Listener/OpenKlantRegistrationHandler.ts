@@ -16,7 +16,7 @@ export class OpenKlantRegistrationHandler {
   constructor(configuration: OpenKlantRegistrationServiceProps) {
     this.configuration = configuration;
 
-    if (process.env.DEBUG) {
+    if (process.env.DEBUG === 'true') {
       console.log('Configured using:', this.configuration);
     }
   }
@@ -24,7 +24,7 @@ export class OpenKlantRegistrationHandler {
 
   async handleNotification(notification: Notification) {
 
-    if (process.env.DEBUG) {
+    if (process.env.DEBUG === 'true') {
       console.log('Recevied notification', notification);
     }
 

@@ -34,7 +34,7 @@ export class OpenKlantPartij {
 
   static from(rol: Rol) : OpenKlantPartij {
 
-    if (process.env.DEBUG) {
+    if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to partij', rol);
     }
 
