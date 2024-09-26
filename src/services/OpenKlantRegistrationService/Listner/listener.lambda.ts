@@ -1,6 +1,8 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
+import { authenticate } from './authenticate';
+import { Notification, NotificationSchema } from './Notification';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 
 
@@ -10,12 +12,10 @@ async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
     'OPEN_KLANT_API_KEY_ARN',
     'ZAKEN_API_URL',
     'ZGW_TOKEN_CLIENT_CREDETIALS_ARN',
-    'API_KEY',
   ]);
 
   const openKlantApiKey = await AWS.getSecret(env.OPEN_KLANT_API_KEY_ARN);
   const zgwCredentials = JSON.parse(await AWS.getSecret(env.ZGW_TOKEN_CLIENT_CREDETIALS_ARN));
-  API_KEY = await AWS.getSecret(env.API_KEY);
 
   return {
     openKlantApiUrl: env.OPEN_KLANT_API_URL,
@@ -48,8 +48,8 @@ export async function handler(event: APIGatewayProxyEventV2) {
     const registrationHandler = new OpenKlantRegistrationHandler(await configuration);
 
     // Handle the notification event
-    const json = parseNotificationFromBody(event);
-    return await registrationHandler.handleNotification(json);
+    const notification = parseNotificationFromBody(event);
+    return await registrationHandler.handleNotification(notification);
 
   } catch (error) {
     console.log(JSON.stringify(error));
@@ -57,35 +57,7 @@ export async function handler(event: APIGatewayProxyEventV2) {
   }
 }
 
-
-let API_KEY: string | undefined = undefined;
-async function authenticate(event: APIGatewayProxyEventV2) {
-  if (!API_KEY) {
-    const env = environmentVariables(['API_KEY']);
-    API_KEY = await AWS.getSecret(env.API_KEY);
-  }
-
-  if (!API_KEY) {
-    console.error('API_KEY was not loaded, cannot authenticate request');
-    return Response.error(401);
-  }
-
-  const header = event.headers?.['x-api-key'];
-  if (!header) {
-    console.error('No x-api-key header fount in the request');
-    return Response.error(401, JSON.stringify({ error: 'No x-api-key header fount in the request' }));
-  }
-
-  if (header === API_KEY) {
-    return true;
-  }
-
-  console.error('Invalid API key');
-  return Response.error(401, JSON.stringify({ error: 'Invalid API key.' }));
-
-}
-
-function parseNotificationFromBody(event: APIGatewayProxyEventV2) {
+function parseNotificationFromBody(event: APIGatewayProxyEventV2) : Notification {
   if (!event.body) {
     throw Error('Received notification without notification body!');
   }
@@ -93,5 +65,5 @@ function parseNotificationFromBody(event: APIGatewayProxyEventV2) {
   if (event.isBase64Encoded) {
     body = Buffer.from(event.body, 'base64').toString('utf-8');
   }
-  return JSON.parse(body);
+  return NotificationSchema.parse(body);
 }

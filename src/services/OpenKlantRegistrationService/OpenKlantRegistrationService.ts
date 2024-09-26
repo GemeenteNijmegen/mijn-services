@@ -30,7 +30,7 @@ export class OpenKlantRegistrationService extends Construct {
         ZGW_TOKEN_CLIENT_CREDETIALS_ARN: params.zgw.secretArn,
         ZAKEN_API_URL: this.props.openKlantRegistrationServiceConfiguration.zakenApiUrl,
         DEBUG: this.props.openKlantRegistrationServiceConfiguration.debug ? 'true' : 'false',
-        API_KEY: params.authentication.secretArn,
+        API_KEY_ARN: params.authentication.secretArn,
       },
     });
 
