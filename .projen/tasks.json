@@ -50,7 +50,7 @@
           "spawn": "bundle:custom-resources/create-databases/create-databases.lambda"
         },
         {
-          "spawn": "bundle:services/OpenKlantRegistrationService/Listner/listener.lambda"
+          "spawn": "bundle:services/OpenKlantRegistrationService/Listener/listener.lambda"
         }
       ]
     },
@@ -72,21 +72,21 @@
         }
       ]
     },
-    "bundle:services/OpenKlantRegistrationService/Listner/listener.lambda": {
-      "name": "bundle:services/OpenKlantRegistrationService/Listner/listener.lambda",
-      "description": "Create a JavaScript bundle from src/services/OpenKlantRegistrationService/Listner/listener.lambda.ts",
+    "bundle:services/OpenKlantRegistrationService/Listener/listener.lambda": {
+      "name": "bundle:services/OpenKlantRegistrationService/Listener/listener.lambda",
+      "description": "Create a JavaScript bundle from src/services/OpenKlantRegistrationService/Listener/listener.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/Listner/listener.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/Listner/listener.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/Listener/listener.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/Listener/listener.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
-    "bundle:services/OpenKlantRegistrationService/Listner/listener.lambda:watch": {
-      "name": "bundle:services/OpenKlantRegistrationService/Listner/listener.lambda:watch",
-      "description": "Continuously update the JavaScript bundle from src/services/OpenKlantRegistrationService/Listner/listener.lambda.ts",
+    "bundle:services/OpenKlantRegistrationService/Listener/listener.lambda:watch": {
+      "name": "bundle:services/OpenKlantRegistrationService/Listener/listener.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/services/OpenKlantRegistrationService/Listener/listener.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/Listner/listener.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/Listner/listener.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/Listener/listener.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/Listener/listener.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },

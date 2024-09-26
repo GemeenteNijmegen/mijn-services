@@ -1,0 +1,13 @@
+{
+  "kanaal": "zaken",
+  "hoofdObject": "https://example.com/open-zaak/zaken/api/v1/zaken/6b41d4c4-ef64-453c-b705-606334e79d8a",
+  "resource": "zaak",
+  "resourceUrl": "https://example.com/open-zaak/zaken/api/v1/zaken/6b41d4c4-ef64-453c-b705-606334e79d8a",
+  "actie": "create",
+  "aanmaakdatum": "2024-09-25T18:48:45.706355Z",
+  "kenmerken": {
+    "bronorganisatie": "001479179",
+    "zaaktype": "https://example.com/open-zaak/catalogi/api/v1/zaaktypen/75d62343-0841-4e8e-87f0-37e2e8efc547",
+    "vertrouwelijkheidaanduiding": "geheim"
+  }
+}

@@ -59,7 +59,7 @@ junit.xml
 .cdk.staging/
 .parcel-cache/
 !/src/custom-resources/create-databases/create-databases-function.ts
-!/src/services/OpenKlantRegistrationService/Listner/listener-function.ts
+!/src/services/OpenKlantRegistrationService/Listener/listener-function.ts
 !/.github/workflows/emergency.yml
 !/.github/workflows/auto-merge.yml
 !/.projenrc.ts
