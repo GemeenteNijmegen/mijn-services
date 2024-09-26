@@ -6,6 +6,8 @@
     "bundle": "npx projen bundle",
     "bundle:custom-resources/create-databases/create-databases.lambda": "npx projen bundle:custom-resources/create-databases/create-databases.lambda",
     "bundle:custom-resources/create-databases/create-databases.lambda:watch": "npx projen bundle:custom-resources/create-databases/create-databases.lambda:watch",
+    "bundle:lambdas/OpenKlantRegistrationService/listener.lambda": "npx projen bundle:lambdas/OpenKlantRegistrationService/listener.lambda",
+    "bundle:lambdas/OpenKlantRegistrationService/listener.lambda:watch": "npx projen bundle:lambdas/OpenKlantRegistrationService/listener.lambda:watch",
     "clobber": "npx projen clobber",
     "compile": "npx projen compile",
     "default": "npx projen default",
@@ -51,6 +53,7 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "@gemeentenijmegen/apigateway-http": "^0.0.16",
     "@gemeentenijmegen/aws-constructs": "^0.0.20",
     "@gemeentenijmegen/utils": "^0.0.15",
     "aws-cdk-lib": "^2.1.0",

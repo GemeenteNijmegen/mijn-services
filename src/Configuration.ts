@@ -70,6 +70,12 @@ export interface Configuration {
    * Configuration for OMC used by VrijBRP notifications
    */
   vrijBrpOmc?: OutputManagementComponentConfiguration;
+
+  /**
+   * List or open klant registration services
+   */
+  openKlantRegistrationServices?: OpenKlantRegistrationServiceConfiguration[];
+
 }
 
 export interface OpenKlantConfiguration {
@@ -116,6 +122,14 @@ export interface OutputManagementComponentConfiguration {
   notificatiesApiUrl: string;
 }
 
+export interface OpenKlantRegistrationServiceConfiguration {
+  cdkId: string;
+  path: string;
+  openKlantUrl: string;
+  zakenApiUrl: string;
+  debug: boolean;
+}
+
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
   acceptance: {
     branch: 'acceptance',
@@ -153,6 +167,15 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak',
       notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties',
     },
+    openKlantRegistrationServices: [
+      {
+        cdkId: 'open-klant-registration-service-vrijbrp',
+        debug: true,
+        openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/api/v2/',
+        zakenApiUrl: 'https://mijn-services.accp.nijmegen.nl/open-zaak/api/v1/',
+        path: '/open-klant-registration-service-vrijbrp/callback',
+      },
+    ],
   },
   main: {
     branch: 'main',

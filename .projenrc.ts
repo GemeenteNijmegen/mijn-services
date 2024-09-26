@@ -13,6 +13,7 @@ const project = new GemeenteNijmegenCdkApp({
     'dotenv',
     '@gemeentenijmegen/aws-constructs',
     '@gemeentenijmegen/utils',
+    '@gemeentenijmegen/apigateway-http',
     'cdk-remote-stack',
     'pg', // Postgres client 🐘
   ],

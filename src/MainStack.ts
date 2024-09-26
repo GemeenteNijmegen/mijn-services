@@ -9,6 +9,7 @@ import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
 import { OpenKlantService } from './services/OpenKlant';
+import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationService';
 import { OpenNotificatiesService } from './services/OpenNotificaties';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
@@ -52,6 +53,7 @@ export class MainStack extends Stack {
     this.openNotificatiesServices(api, platform);
     this.openZaakServices(api, platform);
     this.outputManagementComponent(api, platform);
+    this.openKlantRegistrationServices(api);
   }
 
 
@@ -144,6 +146,20 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
     });
+  }
+
+  private openKlantRegistrationServices(api: ApiGateway) {
+    if (!this.configuration.openKlantRegistrationServices) {
+      console.warn('No openKlantRegistrationServices configuration provided. Skipping creation!');
+      return;
+    }
+    for (const openKlantRegistrationService of this.configuration.openKlantRegistrationServices) {
+      new OpenKlantRegistrationService(this, openKlantRegistrationService.cdkId, {
+        api: api.api,
+        openKlantRegistrationServiceConfiguration: openKlantRegistrationService,
+      });
+    }
+
   }
 
   private importHostedzone() {

@@ -1186,6 +1186,13 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.0.tgz#a5417ae8427873f1dd08b70b3574b453e67b5f7f"
   integrity sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==
 
+"@gemeentenijmegen/apigateway-http@^0.0.16":
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/apigateway-http/-/apigateway-http-0.0.16.tgz#f26807975b56bb2ac7025dd0ae01401ff7e97e38"
+  integrity sha512-QgSrurGr4d73Y9sNyQVd82DkWIH1oVEqJcakBMaWnVF2txp61ZXHh5uR9t1O67CqkMcXQrU7OnXKpJVpOYea7g==
+  dependencies:
+    "@types/aws-lambda" "^8.10.145"
+
 "@gemeentenijmegen/aws-constructs@^0.0.20":
   version "0.0.20"
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/aws-constructs/-/aws-constructs-0.0.20.tgz#a4bbd1c06d02b3e37dbdb3a555c48bac8cf95f1e"
