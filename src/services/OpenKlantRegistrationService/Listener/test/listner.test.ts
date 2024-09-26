@@ -13,7 +13,7 @@ test('Creation of handler class', () => {
 });
 
 test('Unsupported notification returns error', async () => {
-  const file = readFileSync('./src/services/OpenKlantRegistrationService/Listner/test/notification-zaak.json').toString('utf-8');
+  const file = readFileSync('./src/services/OpenKlantRegistrationService/Listener/test/notification-zaak.json').toString('utf-8');
   const notification = NotificationSchema.parse(JSON.parse(file));
   const handler = createHandler();
   const response = await handler.handleNotification(notification);
@@ -21,7 +21,7 @@ test('Unsupported notification returns error', async () => {
 });
 
 test('Handles role added to zaak notification', async () => {
-  const file = readFileSync('./src/services/OpenKlantRegistrationService/Listner/test/notification-rol.json').toString('utf-8');
+  const file = readFileSync('./src/services/OpenKlantRegistrationService/Listener/test/notification-rol.json').toString('utf-8');
   const notification = NotificationSchema.parse(JSON.parse(file));
   const handler = createHandler();
   const response = await handler.handleNotification(notification);
