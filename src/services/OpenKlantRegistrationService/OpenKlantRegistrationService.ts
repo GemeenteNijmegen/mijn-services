@@ -45,21 +45,21 @@ export class OpenKlantRegistrationService extends Construct {
   private setupVulServiceConfiguration(id: string) {
     const ssmApiKey = `/${Statics.projectName}/open-klant-registration/${id}/api-key`;
     const ssmOpenKlantApiKey = `/${Statics.projectName}/open-klant-registration/${id}/open-klant-api-key`;
-    const ssmZgwTokenClientCredentials = `/${Statics.projectName}/open-klant-registration/${id}/zgw-token/client-credentials`;
+    const ssmZgwTokenClientCredentials = `/${Statics.projectName}/open-klant-registration/${id}/zgw/client-credentials`;
 
     const openKlantApiKey = new Secret(this, 'open-klant-api-key', {
       secretName: ssmOpenKlantApiKey,
       description: `OpenKlantRegistrationService (${id}) api key for open-klant`,
     });
 
-    const zgwTokenClientCredentials = new Secret(this, 'zgw-token-client-credentials', {
+    const zgwTokenClientCredentials = new Secret(this, 'zgw-token-credentials', {
       secretName: ssmZgwTokenClientCredentials,
       description: `OpenKlantRegistrationService (${id}) api key for open-klant`,
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
           clientId: 'client-id',
         }),
-        generateStringKey: 'secret',
+        generateStringKey: 'clientSecret',
       },
     });
 

@@ -20,7 +20,7 @@ test('Unsupported notification returns error', async () => {
   expect((response as ApiGatewayV2Response).statusCode).toBe(400);
 });
 
-test('Handles role added to zaak notification', async () => {
+test('Handles role added to zaak notification (happy flow)', async () => {
   const file = readFileSync('./src/services/OpenKlantRegistrationService/Listener/test/notification-rol.json').toString('utf-8');
   const notification = NotificationSchema.parse(JSON.parse(file));
   const handler = createHandler();
