@@ -149,7 +149,7 @@
           "**/test/**",
           "**/build-tools/**",
           "src/custom-resources/create-databases/create-databases.lambda.ts",
-          "src/lambdas/OpenKlantRegistrationService/listener.lambda.ts",
+          "src/services/OpenKlantRegistrationService/Listner/listener.lambda.ts",
           ".projenrc.ts",
           "projenrc/**/*.ts"
         ],

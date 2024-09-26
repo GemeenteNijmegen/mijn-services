@@ -9,7 +9,7 @@ import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
 import { OpenKlantService } from './services/OpenKlant';
-import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationService';
+import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationService/OpenKlantRegistrationService';
 import { OpenNotificatiesService } from './services/OpenNotificaties';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
