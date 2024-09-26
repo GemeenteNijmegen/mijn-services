@@ -4,7 +4,7 @@ import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
-import { ListenerFunction } from './Listner/listener-function';
+import { ListenerFunction } from './Listener/listener-function';
 import { OpenKlantRegistrationServiceConfiguration } from '../../Configuration';
 import { Statics } from '../../Statics';
 
@@ -43,18 +43,18 @@ export class OpenKlantRegistrationService extends Construct {
   }
 
   private setupVulServiceConfiguration(id: string) {
-    const ssmApiKey = `/${Statics.projectName}/open-klant-regisration/${id}/api-key`;
-    const ssmOpenKlantApiKey = `/${Statics.projectName}/open-klant-regisration/${id}/open-klant-api-key`;
-    const ssmZgwTokenClientCredentials = `/${Statics.projectName}/open-klant-regisration/${id}/zgw-token/client-credentials`;
+    const ssmApiKey = `/${Statics.projectName}/open-klant-registration/${id}/api-key`;
+    const ssmOpenKlantApiKey = `/${Statics.projectName}/open-klant-registration/${id}/open-klant-api-key`;
+    const ssmZgwTokenClientCredentials = `/${Statics.projectName}/open-klant-registration/${id}/zgw-token/client-credentials`;
 
     const openKlantApiKey = new Secret(this, 'open-klant-api-key', {
       secretName: ssmOpenKlantApiKey,
-      description: 'OpenKlantRegistrationService (${id}) api key for open-klant',
+      description: `OpenKlantRegistrationService (${id}) api key for open-klant`,
     });
 
     const zgwTokenClientCredentials = new Secret(this, 'zgw-token-client-credentials', {
       secretName: ssmZgwTokenClientCredentials,
-      description: 'OpenKlantRegistrationService (${id}) api key for open-klant',
+      description: `OpenKlantRegistrationService (${id}) api key for open-klant`,
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
           clientId: 'client-id',
@@ -65,7 +65,7 @@ export class OpenKlantRegistrationService extends Construct {
 
     const serviceApiKey = new Secret(this, 'service-api-key', {
       secretName: ssmApiKey,
-      description: 'OpenKlantRegistrationService (${id}) api key used for calling this service',
+      description: `OpenKlantRegistrationService (${id}) api key used for calling this service`,
       generateSecretString: {
         excludePunctuation: true,
         passwordLength: 64,
