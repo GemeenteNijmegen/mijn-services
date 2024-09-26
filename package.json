@@ -33,7 +33,6 @@
   },
   "devDependencies": {
     "@gemeentenijmegen/projen-project-type": "^1.7.4",
-    "@types/aws-lambda": "^8.10.145",
     "@types/jest": "^29.5.12",
     "@types/node": "^18",
     "@types/pg": "^8.11.7",
@@ -56,6 +55,7 @@
     "@gemeentenijmegen/apigateway-http": "^0.0.16",
     "@gemeentenijmegen/aws-constructs": "^0.0.20",
     "@gemeentenijmegen/utils": "^0.0.15",
+    "@types/aws-lambda": "^8.10.145",
     "aws-cdk-lib": "^2.1.0",
     "cdk-remote-stack": "^2.1.0",
     "constructs": "^10.0.5",

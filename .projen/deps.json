@@ -5,10 +5,6 @@
       "type": "build"
     },
     {
-      "name": "@types/aws-lambda",
-      "type": "build"
-    },
-    {
       "name": "@types/jest",
       "type": "build"
     },
@@ -93,6 +89,10 @@
     },
     {
       "name": "@gemeentenijmegen/utils",
+      "type": "runtime"
+    },
+    {
+      "name": "@types/aws-lambda",
       "type": "runtime"
     },
     {
