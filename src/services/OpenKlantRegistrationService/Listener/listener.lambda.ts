@@ -2,7 +2,8 @@ import { Response } from '@gemeentenijmegen/apigateway-http';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { authenticate } from './authenticate';
-import { Notification, NotificationSchema } from './Notification';
+import { Notification, NotificationSchema } from './model/Notification';
+import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
 
@@ -12,23 +13,28 @@ async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
     'OPEN_KLANT_API_URL',
     'OPEN_KLANT_API_KEY_ARN',
     'ZAKEN_API_URL',
-    'ZGW_TOKEN_CLIENT_CREDETIALS_ARN',
+    'ZGW_TOKEN_CLIENT_ID_ARN',
+    'ZGW_TOKEN_CLIENT_SECRET_ARN',
+    'TARGET_ROL_TYPE',
   ]);
 
-  const [openKlantApiKey, zgwCredentialsString] = await Promise.all([
+  const [openKlantApiKey, zgwClientId, zgwClientSecret] = await Promise.all([
     AWS.getSecret(env.OPEN_KLANT_API_KEY_ARN),
-    AWS.getSecret(env.ZGW_TOKEN_CLIENT_CREDETIALS_ARN),
+    AWS.getSecret(env.ZGW_TOKEN_CLIENT_ID_ARN),
+    AWS.getSecret(env.ZGW_TOKEN_CLIENT_SECRET_ARN),
   ]);
-  const zgwCredentials = JSON.parse(zgwCredentialsString);
 
   return {
-    openKlantApiUrl: env.OPEN_KLANT_API_URL,
-    openKlantApiKey: openKlantApiKey,
     zakenApiUrl: env.ZAKEN_API_URL,
     zakenApi: new ZakenApi({
-      clientId: zgwCredentials.clientId,
-      clientSecret: zgwCredentials.clientSecret,
+      clientId: zgwClientId,
+      clientSecret: zgwClientSecret,
     }),
+    openKlantApi: new OpenKlantApi({
+      apikey: openKlantApiKey,
+      url: env.OPEN_KLANT_API_URL,
+    }),
+    targetRolType: env.TARGET_ROL_TYPE,
   };
 
 }

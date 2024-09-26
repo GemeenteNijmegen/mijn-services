@@ -65,7 +65,6 @@ export class OpenKlantRegistrationService extends Construct {
       description: `OpenKlantRegistrationService (${id}) ZGW token client secret`,
     });
 
-
     const serviceApiKey = new Secret(this, 'service-api-key', {
       secretName: ssmApiKey,
       description: `OpenKlantRegistrationService (${id}) api key used for calling this service`,
@@ -74,7 +73,6 @@ export class OpenKlantRegistrationService extends Construct {
         passwordLength: 64,
       },
     });
-
 
     return {
       openklant: openKlantApiKey,

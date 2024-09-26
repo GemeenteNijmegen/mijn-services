@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import { ApiGatewayV2Response } from '@gemeentenijmegen/apigateway-http';
-import { NotificationSchema } from '../Notification';
+import { NotificationSchema } from '../model/Notification';
+import { OpenKlantApiMock } from '../OpenKlantApi';
 import { OpenKlantRegistrationHandler } from '../OpenKlantRegistrationHandler';
 import { ZakenApiMock } from '../ZakenApi';
 
@@ -32,10 +33,9 @@ test('Handles role added to zaak notification (happy flow)', async () => {
 
 function createHandler() {
   return new OpenKlantRegistrationHandler({
-    openKlantApiKey: 'geheim',
-    openKlantApiUrl: 'https://example.com/open-klant',
     zakenApiUrl: 'https://example.com/open-zaak/zaken',
     zakenApi: new ZakenApiMock(),
     targetRolType: 'https://example.com/zaken/rollen/000-000-000-000',
+    openKlantApi: new OpenKlantApiMock(),
   });
 }

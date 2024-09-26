@@ -1,12 +1,12 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
-import { Notification } from './Notification';
+import { Notification } from './model/Notification';
+import { IOpenKlantApi } from './OpenKlantApi';
 import { IZakenApi } from './ZakenApi';
 
 export interface OpenKlantRegistrationServiceProps {
   readonly zakenApiUrl: string;
-  readonly openKlantApiUrl: string;
-  readonly openKlantApiKey: string;
   readonly zakenApi: IZakenApi;
+  readonly openKlantApi: IOpenKlantApi;
   readonly targetRolType: string;
 }
 
@@ -40,11 +40,12 @@ export class OpenKlantRegistrationHandler {
 
     // Check if role is of the target role type, otherwise return 200
     if (rol.roltype !== this.configuration.targetRolType) {
-      console.log('Role is not of the type to forward to open klant. Ignoring this notification');
+      console.debug('Role is not of the type to forward to open klant. Ignoring this notification');
       return Response.ok();
     }
 
-    console.log('Found a rol of the target type to forward to open klant.');
+    console.debug('Found a rol of the target type to forward to open klant.');
+    // await this.configuration.openKlantApi(partij);
 
     return Response.ok();
 
