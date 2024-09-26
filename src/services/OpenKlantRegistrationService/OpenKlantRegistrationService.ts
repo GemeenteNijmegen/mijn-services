@@ -26,7 +26,7 @@ export class OpenKlantRegistrationService extends Construct {
       timeout: Duration.seconds(30),
       environment: {
         OPEN_KLANT_API_URL: this.props.openKlantRegistrationServiceConfiguration.openKlantUrl,
-        OPEN_KLANT_API_KEY_ANR: params.openklant.secretArn,
+        OPEN_KLANT_API_KEY_ARN: params.openklant.secretArn,
         ZGW_TOKEN_CLIENT_CREDETIALS_ARN: params.zgw.secretArn,
         ZAKEN_API_URL: this.props.openKlantRegistrationServiceConfiguration.zakenApiUrl,
         DEBUG: this.props.openKlantRegistrationServiceConfiguration.debug ? 'true' : 'false',
