@@ -27,7 +27,8 @@ export class OpenKlantRegistrationService extends Construct {
       environment: {
         OPEN_KLANT_API_URL: this.props.openKlantRegistrationServiceConfiguration.openKlantUrl,
         OPEN_KLANT_API_KEY_ARN: params.openklant.secretArn,
-        ZGW_TOKEN_CLIENT_CREDETIALS_ARN: params.zgw.secretArn,
+        ZGW_TOKEN_CLIENT_ID_ARN: params.zgw.id.secretArn,
+        ZGW_TOKEN_CLIENT_SECRET_ARN: params.zgw.secret.secretArn,
         ZAKEN_API_URL: this.props.openKlantRegistrationServiceConfiguration.zakenApiUrl,
         DEBUG: this.props.openKlantRegistrationServiceConfiguration.debug ? 'true' : 'false',
         API_KEY_ARN: params.authentication.secretArn,
@@ -35,7 +36,8 @@ export class OpenKlantRegistrationService extends Construct {
     });
 
     params.openklant.grantRead(service);
-    params.zgw.grantRead(service);
+    params.zgw.id.grantRead(service);
+    params.zgw.secret.grantRead(service);
     params.authentication.grantRead(service);
 
     this.setupRoute(service);
@@ -45,23 +47,24 @@ export class OpenKlantRegistrationService extends Construct {
   private setupVulServiceConfiguration(id: string) {
     const ssmApiKey = `/${Statics.projectName}/open-klant-registration/${id}/api-key`;
     const ssmOpenKlantApiKey = `/${Statics.projectName}/open-klant-registration/${id}/open-klant-api-key`;
-    const ssmZgwTokenClientCredentials = `/${Statics.projectName}/open-klant-registration/${id}/zgw/client-credentials`;
+    const ssmZgwTokenClientId = `/${Statics.projectName}/open-klant-registration/${id}/zgw/client-id`;
+    const ssmZgwTokenClientSecret = `/${Statics.projectName}/open-klant-registration/${id}/zgw/clientsecret`;
 
     const openKlantApiKey = new Secret(this, 'open-klant-api-key', {
       secretName: ssmOpenKlantApiKey,
       description: `OpenKlantRegistrationService (${id}) api key for open-klant`,
     });
 
-    const zgwTokenClientCredentials = new Secret(this, 'zgw-token-credentials', {
-      secretName: ssmZgwTokenClientCredentials,
-      description: `OpenKlantRegistrationService (${id}) api key for open-klant`,
-      generateSecretString: {
-        secretStringTemplate: JSON.stringify({
-          clientId: 'client-id',
-        }),
-        generateStringKey: 'clientSecret',
-      },
+    const zgwTokenClientId = new Secret(this, 'zgw-token-client-id', {
+      secretName: ssmZgwTokenClientId,
+      description: `OpenKlantRegistrationService (${id}) ZGW token client id`,
     });
+
+    const zgwTokenClientSecret = new Secret(this, 'zgw-token-client-secret', {
+      secretName: ssmZgwTokenClientSecret,
+      description: `OpenKlantRegistrationService (${id}) ZGW token client secret`,
+    });
+
 
     const serviceApiKey = new Secret(this, 'service-api-key', {
       secretName: ssmApiKey,
@@ -75,7 +78,10 @@ export class OpenKlantRegistrationService extends Construct {
 
     return {
       openklant: openKlantApiKey,
-      zgw: zgwTokenClientCredentials,
+      zgw: {
+        id: zgwTokenClientId,
+        secret: zgwTokenClientSecret,
+      },
       authentication: serviceApiKey,
     };
 

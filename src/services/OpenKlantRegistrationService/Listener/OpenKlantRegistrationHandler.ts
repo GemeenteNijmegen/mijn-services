@@ -7,6 +7,7 @@ export interface OpenKlantRegistrationServiceProps {
   readonly openKlantApiUrl: string;
   readonly openKlantApiKey: string;
   readonly zakenApi: IZakenApi;
+  readonly targetRolType: string;
 }
 
 export class OpenKlantRegistrationHandler {
@@ -37,10 +38,13 @@ export class OpenKlantRegistrationHandler {
     const rolUrl = notification.resourceUrl;
     const rol = await this.configuration.zakenApi.get(rolUrl);
 
-    // Check if role is the 'aanvrager'?
-    console.log(rol);
+    // Check if role is of the target role type, otherwise return 200
+    if (rol.roltype !== this.configuration.targetRolType) {
+      console.log('Role is not of the type to forward to open klant. Ignoring this notification');
+      return Response.ok();
+    }
 
-    // Store contactgegevens in OpenKlant
+    console.log('Found a rol of the target type to forward to open klant.');
 
     return Response.ok();
 

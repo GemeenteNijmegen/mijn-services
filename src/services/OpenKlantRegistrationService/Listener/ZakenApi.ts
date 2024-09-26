@@ -47,6 +47,8 @@ export class ZakenApi implements IZakenApi {
 
 export class ZakenApiMock implements IZakenApi {
   async get(_url: string): Promise<any> {
-    return {};
+    return {
+      roltype: 'https://example.com/zaken/rollen/000-000-000-000',
+    };
   }
 }

@@ -36,5 +36,6 @@ function createHandler() {
     openKlantApiUrl: 'https://example.com/open-klant',
     zakenApiUrl: 'https://example.com/open-zaak/zaken',
     zakenApi: new ZakenApiMock(),
+    targetRolType: 'https://example.com/zaken/rollen/000-000-000-000',
   });
 }
