@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+/**
+ * Schema based on the notification playload defined by the
+ * notications API.
+ */
 export const NotificationSchema = z.object({
   kanaal: z.string(),
   hoofdObject: z.string(),

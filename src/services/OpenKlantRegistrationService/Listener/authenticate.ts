@@ -6,7 +6,7 @@ let API_KEY: string | undefined = undefined;
 export async function authenticate(event: APIGatewayProxyEventV2) {
   if (!API_KEY) {
     const env = environmentVariables(['API_KEY_ARN']);
-    API_KEY = await AWS.getSecret(env.API_KEY);
+    API_KEY = await AWS.getSecret(env.API_KEY_ARN);
   }
 
   if (!API_KEY) {
