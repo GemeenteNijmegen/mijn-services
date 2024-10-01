@@ -44,7 +44,7 @@ export class OpenKlantRegistrationHandler {
     const rolType = await this.configuration.catalogiApi.getRolType(rol.roltype);
 
     // Check if role is of the target role type, otherwise return 200 but do not handle the notification
-    const isTargetRolType = this.configuration.roltypesToRegister.includes(rolType.omschrijvingGeneriek);
+    const isTargetRolType = this.configuration.roltypesToRegister.includes(rolType.omschrijvingGeneriek.toLocaleLowerCase());
     if (!isTargetRolType) {
       console.debug('Role is not of the type to forward to open klant. Ignoring this notification.');
       return Response.ok();
