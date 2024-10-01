@@ -19,7 +19,13 @@ const project = new GemeenteNijmegenCdkApp({
     'pg', // Postgres client 🐘
     'zod',
     'jsonwebtoken',
+    'dotenv',
   ],
+  jestOptions: {
+    jestConfig: {
+      setupFiles: ['dotenv/config'],
+    },
+  },
 });
 
 /**

@@ -41,7 +41,9 @@ export class ZakenApi implements IZakenApi {
       client_id: this.props.clientId,
       user_id: this.props.clientId,
       user_representation: this.props.clientId,
-    }, this.props.clientSecret);
+    }, this.props.clientSecret, {
+      algorithm: 'HS256',
+    });
     return token;
   }
 }

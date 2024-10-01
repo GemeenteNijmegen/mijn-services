@@ -20,14 +20,15 @@ export const OpenKlantPartijSchema = z.object({
   }),
   voorkeurstaal: z.string(),
   partijIdentificatie: z.object({ // Staat niet in de docs maar is wel nodig?
-    // contactnaam: { // TODO figure out if we need this?
+    contactnaam: z.union([z.null(), z.object({ // This is not in the docs but we do need it apparently...
     //   voorletters: 'H',
     //   voornaam: 'Hans',
     //   voorvoegselAchternaam: 'de',
     //   achternaam: 'Jong',
-    // },
+    })]),
     volledigeNaam: z.string(),
   }),
+  indicatieGeheimhouding: z.boolean(),
 });
 
 /**
@@ -83,10 +84,18 @@ export type OpenKlantDigitaalAdresWithUuid = z.infer<typeof OpenKlantDigitaalAdr
 export const OpenKlantPartijIdentificiatieSchema = z.object({
   identificeerdePartij: z.union([z.null(), uuidSchema]),
   partijIdentificator: z.union([z.null(), z.object({
-    codeObjecttype: z.string().optional(),
-    codeSoortObjectId: z.string().optional(),
-    objectId: z.string().optional(),
-    codeRegister: z.string().optional(),
+    codeObjecttype: z.string({
+      description: 'Type van het object, bijvoorbeeld: INGESCHREVEN NATUURLIJK PERSOON',
+    }).optional(),
+    codeSoortObjectId: z.string({
+      description: 'Naam van de eigenschap die het object identificeert, bijvoorbeeld: Burgerservicenummer',
+    }).optional(),
+    objectId: z.string({
+      description: 'Waarde van de eigenschap die het object identificeert, bijvoorbeeld: 123456788',
+    }).optional(),
+    codeRegister: z.string({
+      description: 'Binnen het landschap van registers unieke omschrijving van het register waarin het object is geregistreerd, bijvoorbeeld: BRP',
+    }).optional(),
   })]),
   anderePartijIdentificator: z.string().optional(),
 });

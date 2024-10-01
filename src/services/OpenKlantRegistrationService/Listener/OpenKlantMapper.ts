@@ -25,12 +25,14 @@ export class OpenKlantMapper {
       indicatieActief: true,
       partijIdentificatie: {
         volledigeNaam: rol?.contactpersoonRol?.naam,
+        contactnaam: null,
       },
       rekeningnummers: [],
       soortPartij: 'persoon',
       voorkeursDigitaalAdres: null,
       voorkeursRekeningnummer: null,
       voorkeurstaal: 'dut',
+      indicatieGeheimhouding: false,
     };
   }
 

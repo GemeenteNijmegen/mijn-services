@@ -25,12 +25,13 @@ export class OpenKlantApi implements IOpenKlantApi {
       method: 'POST',
       body: JSON.stringify(address),
       headers: {
-        Authorization: `Token ${this.props.apikey}`,
+        'Authorization': `Token ${this.props.apikey}`,
+        'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      console.error('Request failed for url', response.status);
+      console.error('Request failed for url', response.status, await response.text());
       throw Error('Request failed');
     }
 
@@ -47,12 +48,13 @@ export class OpenKlantApi implements IOpenKlantApi {
       method: 'POST',
       body: JSON.stringify(identificatie),
       headers: {
-        Authorization: `Token ${this.props.apikey}`,
+        'Authorization': `Token ${this.props.apikey}`,
+        'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      console.error('Request failed for url', response.status);
+      console.error('Request failed for url', response.status, await response.text());
       throw Error('Request failed');
     }
 
@@ -69,12 +71,13 @@ export class OpenKlantApi implements IOpenKlantApi {
       method: 'POST',
       body: JSON.stringify(partij),
       headers: {
-        Authorization: `Token ${this.props.apikey}`,
+        'Authorization': `Token ${this.props.apikey}`,
+        'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      console.error('Request failed for url', response.status);
+      console.error('Request failed for url', response.status, await response.text());
       throw Error('Request failed');
     }
 
