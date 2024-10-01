@@ -2,6 +2,7 @@ import { Response } from '@gemeentenijmegen/apigateway-http';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { authenticate } from './authenticate';
+import { ErrorResponse } from './ErrorResponse';
 import { Notification, NotificationSchema } from './model/Notification';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
@@ -68,18 +69,26 @@ export async function handler(event: APIGatewayProxyEventV2) {
     return await registrationHandler.handleNotification(notification);
 
   } catch (error) {
+    if (error instanceof ErrorResponse) {
+      return Response.error(error.statusCode, error.message);
+    }
     console.log(JSON.stringify(error));
     return Response.error(500);
   }
 }
 
 function parseNotificationFromBody(event: APIGatewayProxyEventV2) : Notification {
-  if (!event.body) {
-    throw Error('Received notification without notification body!');
+  try {
+    if (!event.body) {
+      throw Error('Received notification without notification body!');
+    }
+    let body = event.body;
+    if (event.isBase64Encoded) {
+      body = Buffer.from(event.body, 'base64').toString('utf-8');
+    }
+    return NotificationSchema.parse(JSON.stringify(body));
+  } catch (error) {
+    console.error(error);
+    throw new ErrorResponse(400, 'Error parsing body');
   }
-  let body = event.body;
-  if (event.isBase64Encoded) {
-    body = Buffer.from(event.body, 'base64').toString('utf-8');
-  }
-  return NotificationSchema.parse(body);
 }
