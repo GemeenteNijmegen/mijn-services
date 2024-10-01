@@ -1,3 +1,4 @@
+import { ErrorResponse } from './ErrorResponse';
 import { OpenKlantDigitaalAdres, OpenKlantPartij, OpenKlantPartijIdentificiatie } from './model/Partij';
 import { Rol } from './model/Rol';
 
@@ -17,7 +18,7 @@ export class OpenKlantMapper {
     }
 
     if (!rol?.contactpersoonRol?.naam) {
-      throw Error('Expected name to be set in rol');
+      throw new ErrorResponse(400, 'Expected name to be set in rol.');
     }
 
     return {
@@ -43,11 +44,11 @@ export class OpenKlantMapper {
     }
 
     if (!rol?.contactpersoonRol) {
-      throw Error('No contactgegevens in rol');
+      throw new ErrorResponse(400, 'No contactgegevens in rol');
     }
 
     if (!rol.contactpersoonRol.emailadres && !rol.contactpersoonRol.telefoonnummer) {
-      throw Error('No email or telephonenumber in rol at least one is required');
+      throw new ErrorResponse(400, 'No email or telephonenumber in rol at least one is required');
     }
 
     const adressen: OpenKlantDigitaalAdres[] = [];
@@ -90,7 +91,7 @@ export class OpenKlantMapper {
 
     const bsn = rol.betrokkeneIdentificatie.inpBsn;
     if (!bsn) {
-      throw Error('Could not map rol to partijIdentificatie: no BSN found in rol');
+      throw new ErrorResponse(400, 'Could not map rol to partijIdentificatie: no BSN found in rol');
     }
 
     return {

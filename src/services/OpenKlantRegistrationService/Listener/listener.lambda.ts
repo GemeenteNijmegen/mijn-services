@@ -77,7 +77,7 @@ export async function handler(event: APIGatewayProxyEventV2) {
     if (error instanceof ErrorResponse) {
       return Response.error(error.statusCode, error.message);
     }
-    console.log(JSON.stringify(error));
+    console.error(error);
     return Response.error(500);
   }
 }
