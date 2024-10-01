@@ -1,4 +1,4 @@
-import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijWithUuid } from './model/Partij';
+import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from './model/Partij';
 
 interface OpenKlantApiProps {
   url: string;
@@ -20,60 +20,41 @@ export class OpenKlantApi implements IOpenKlantApi {
 
   async addDigitaalAdres(address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
     const url = this.props.url + '/digitaleadressen';
-
-    const response = await fetch(url, {
-      method: 'POST',
+    const response = await this.callApi('POST', url, {
       body: JSON.stringify(address),
-      headers: {
-        'Authorization': `Token ${this.props.apikey}`,
-        'Content-Type': 'application/json',
-      },
     });
-
-    if (!response.ok) {
-      console.error('Request failed for url', response.status, await response.text());
-      throw Error('Request failed');
-    }
-
-    // TODO fix types
-    const created = await response.json() as any;
-    return created;
-
+    const result = await response.json();
+    return OpenKlantDigitaalAdresSchemaWithUuid.parse(result);
   }
 
   async addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid> {
     const url =this.props.url + '/partij-identificatoren';
-
-    const response = await fetch(url, {
-      method: 'POST',
+    const response = await this.callApi('POST', url, {
       body: JSON.stringify(identificatie),
-      headers: {
-        'Authorization': `Token ${this.props.apikey}`,
-        'Content-Type': 'application/json',
-      },
     });
-
-    if (!response.ok) {
-      console.error('Request failed for url', response.status, await response.text());
-      throw Error('Request failed');
-    }
-
-    // TODO fix types
-    const created = await response.json() as any;
-    return created;
-
+    const result = await response.json();
+    return OpenKlantPartijIdentificiatieSchemaWithUuid.parse(result);
   }
 
   async registerPartij(partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid> {
-
     const url =this.props.url + '/partijen';
-    const response = await fetch(url, {
-      method: 'POST',
+    const response = await this.callApi('POST', url, {
       body: JSON.stringify(partij),
+    });
+    const result = await response.json();
+    return OpenKlantPartijSchemaWithUuid.parse(result);
+
+  }
+
+  private async callApi(method: string, url: string, options: RequestInit) {
+
+    const response = await fetch(url, {
+      method: method,
       headers: {
         'Authorization': `Token ${this.props.apikey}`,
         'Content-Type': 'application/json',
       },
+      ...options,
     });
 
     if (!response.ok) {
@@ -81,12 +62,8 @@ export class OpenKlantApi implements IOpenKlantApi {
       throw Error('Request failed');
     }
 
-    // TODO fix types
-    const created = await response.json() as any;
-    return created;
-
+    return response;
   }
-
 
 }
 
