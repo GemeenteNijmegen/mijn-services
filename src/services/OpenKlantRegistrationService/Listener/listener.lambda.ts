@@ -86,7 +86,7 @@ function parseNotificationFromBody(event: APIGatewayProxyEventV2) : Notification
     if (event.isBase64Encoded) {
       body = Buffer.from(event.body, 'base64').toString('utf-8');
     }
-    return NotificationSchema.parse(JSON.stringify(body));
+    return NotificationSchema.parse(JSON.parse(body));
   } catch (error) {
     console.error(error);
     throw new ErrorResponse(400, 'Error parsing body');
