@@ -24,6 +24,7 @@ export class OpenKlantRegistrationService extends Construct {
 
     const service = new ListenerFunction(this, 'listener', {
       timeout: Duration.seconds(30),
+      description: `Notification endpoint for ${id}`,
       environment: {
         OPEN_KLANT_API_URL: this.props.openKlantRegistrationServiceConfiguration.openKlantUrl,
         OPEN_KLANT_API_KEY_ARN: params.openklant.secretArn,
