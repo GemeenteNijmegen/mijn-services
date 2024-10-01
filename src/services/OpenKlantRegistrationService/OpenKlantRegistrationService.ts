@@ -33,7 +33,7 @@ export class OpenKlantRegistrationService extends Construct {
         ZAKEN_API_URL: this.props.openKlantRegistrationServiceConfiguration.zakenApiUrl,
         DEBUG: this.props.openKlantRegistrationServiceConfiguration.debug ? 'true' : 'false',
         API_KEY_ARN: params.authentication.secretArn,
-        TARGET_ROL_TYPE: this.props.openKlantRegistrationServiceConfiguration.targetRoleTypeUrl,
+        ROLTYPES_TO_REGISTER: this.props.openKlantRegistrationServiceConfiguration.roltypesToRegister.join(','),
       },
     });
 

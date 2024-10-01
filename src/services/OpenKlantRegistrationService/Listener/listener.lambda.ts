@@ -2,6 +2,7 @@ import { Response } from '@gemeentenijmegen/apigateway-http';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { authenticate } from './authenticate';
+import { CatalogiApi } from './CatalogiApi';
 import { ErrorResponse } from './ErrorResponse';
 import { Notification, NotificationSchema } from './model/Notification';
 import { OpenKlantApi } from './OpenKlantApi';
@@ -16,7 +17,7 @@ async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
     'ZAKEN_API_URL',
     'ZGW_TOKEN_CLIENT_ID_ARN',
     'ZGW_TOKEN_CLIENT_SECRET_ARN',
-    'TARGET_ROL_TYPE',
+    'ROLTYPES_TO_REGISTER',
   ]);
 
   const [openKlantApiKey, zgwClientId, zgwClientSecret] = await Promise.all([
@@ -35,7 +36,11 @@ async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
       apikey: openKlantApiKey,
       url: env.OPEN_KLANT_API_URL,
     }),
-    targetRolType: env.TARGET_ROL_TYPE,
+    catalogiApi: new CatalogiApi({
+      clientId: zgwClientId,
+      clientSecret: zgwClientSecret,
+    }),
+    roltypesToRegister: env.ROLTYPES_TO_REGISTER.split(','),
   };
 
 }

@@ -128,7 +128,7 @@ export interface OpenKlantRegistrationServiceConfiguration {
   openKlantUrl: string;
   zakenApiUrl: string;
   debug: boolean;
-  targetRoleTypeUrl: string;
+  roltypesToRegister: ('adviseur'|'behandelaar'|'belanghebbende'|'beslisser'|'initiator'|'klantcontacter'|'zaakcoordinator'|'mede_initiator')[];
 }
 
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
@@ -175,7 +175,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://example.com/conduction-zaken-api-url-here',
         path: '/open-klant-registration-service-vrijbrp/callback',
-        targetRoleTypeUrl: 'https://example.com/conduction-catalogi-rol-type-here',
+        roltypesToRegister: ['initiator'],
       },
       {
         cdkId: 'open-klant-registration-service-development',
@@ -183,7 +183,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
         path: '/open-klant-registration-service-development/callback',
-        targetRoleTypeUrl: 'https://lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/catalogi/api/v1/roltypen/92d293ef-8cb0-4341-b641-33971c2ab481',
+        roltypesToRegister: ['initiator'],
       },
     ],
   },

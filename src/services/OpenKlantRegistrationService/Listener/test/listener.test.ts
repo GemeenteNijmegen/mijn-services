@@ -1,12 +1,11 @@
 import { randomUUID } from 'crypto';
 import { readFileSync } from 'fs';
 import { ApiGatewayV2Response } from '@gemeentenijmegen/apigateway-http';
+import { CatalogiApiMock } from '../CatalogiApi';
 import { NotificationSchema } from '../model/Notification';
 import { OpenKlantApiMock } from '../OpenKlantApi';
 import { OpenKlantRegistrationHandler } from '../OpenKlantRegistrationHandler';
 import { ZakenApiMock } from '../ZakenApi';
-
-const TARGET_ROL_TYPE = 'https://example.com/open-zaak/zaken/api/v1/rollen/000-000-000-000';
 
 beforeAll(() => {
   process.env.DEBUG = 'true';
@@ -24,20 +23,21 @@ test('Unsupported notification returns error', async () => {
   expect((response as ApiGatewayV2Response).statusCode).toBe(400);
 });
 
-test('Handles role added to zaak notification (happy flow)', async () => {
+test('Do not handle rol of wrong type', async () => {
   const file = readFileSync('./src/services/OpenKlantRegistrationService/Listener/test/notification-rol.json').toString('utf-8');
   const notification = NotificationSchema.parse(JSON.parse(file));
-  const handler = createHandler();
+  const handler = createHandler('behandelaar');
   const response = await handler.handleNotification(notification);
   expect((response as ApiGatewayV2Response).statusCode).toBe(200);
 });
 
 
-function createHandler() {
+function createHandler(roltype?: string) {
   return new OpenKlantRegistrationHandler({
     zakenApiUrl: 'https://example.com/open-zaak/zaken',
     zakenApi: mockZakenApi(),
-    targetRolType: TARGET_ROL_TYPE,
+    catalogiApi: mockCatalogiApi(roltype),
+    roltypesToRegister: ['initatior'],
     openKlantApi: mockOpenKlantApi(),
   });
 }
@@ -54,7 +54,7 @@ function mockZakenApi() {
       },
       uuid: randomUUID(),
       zaak: 'https://example.com/open-zaak/zaken/api/v1/zaak/000-000-000-000',
-      roltype: TARGET_ROL_TYPE,
+      roltype: 'https://example.com/open-zaak/zaken/api/v1/rollen/000-000-000-000',
       betrokkeneIdentificatie: {
         inpBsn: '12345678',
       },
@@ -62,6 +62,19 @@ function mockZakenApi() {
     });
   });
   return zakenApiMock;
+}
+
+function mockCatalogiApi(roltype?: string) {
+  const catalogiApiMock = new CatalogiApiMock();
+  jest.spyOn(catalogiApiMock, 'getRolType').mockImplementation((url: string) => {
+    return Promise.resolve({
+      url: url,
+      omschrijving: 'Test',
+      omschrijvingGeneriek: roltype as any ?? 'initiator',
+      zaaktype: 'https://example.com/open-zaak/catalogi/api/v1/zaaktypen/000-000-000-000',
+    });
+  });
+  return catalogiApiMock;
 }
 
 function mockOpenKlantApi() {

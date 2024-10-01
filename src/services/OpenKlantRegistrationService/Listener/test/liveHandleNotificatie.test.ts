@@ -1,3 +1,4 @@
+import { CatalogiApi } from '../CatalogiApi';
 import { Notification } from '../model/Notification';
 import { OpenKlantApi } from '../OpenKlantApi';
 import { OpenKlantRegistrationHandler } from '../OpenKlantRegistrationHandler';
@@ -17,12 +18,18 @@ runLiveTests('Live tests handle notification', () => {
     clientSecret: process.env.ZAKEN_API_CLIENT_SECRET!,
   });
 
+  const catalogiApi = new CatalogiApi({
+    clientId: process.env.ZAKEN_API_CLIENT_ID!,
+    clientSecret: process.env.ZAKEN_API_CLIENT_SECRET!,
+  });
+
   test('Handles notification', async () => {
     const handler = new OpenKlantRegistrationHandler({
       openKlantApi: openKlantApi,
-      zakenApiUrl: process.env.ZAKEN_API_URL!,
       zakenApi: zakenApi,
-      targetRolType: process.env.ZAKEN_API_TEST_ROL_TYPE_WITH_ZAAK!,
+      catalogiApi: catalogiApi,
+      zakenApiUrl: process.env.ZAKEN_API_URL!,
+      roltypesToRegister: ['initiator'],
     });
     const response = await handler.handleNotification(composeNotification());
     expect(response.statusCode).toBe(200);

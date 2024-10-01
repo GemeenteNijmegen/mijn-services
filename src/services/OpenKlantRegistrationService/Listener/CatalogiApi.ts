@@ -1,4 +1,4 @@
-import { RolType, RolTypeSchema } from './model/RolType';
+import { RolType, RolTypeWithUrl, RolTypeWithUrlSchema } from './model/RolType';
 import { ZgwApi, ZgwApiProps } from './ZgwApi';
 
 export interface ICatalogiApi {
@@ -11,10 +11,10 @@ export class CatalogiApi extends ZgwApi implements ICatalogiApi {
     super(props);
   }
 
-  async getRolType(url: string) : Promise<RolType> {
+  async getRolType(url: string) : Promise<RolTypeWithUrl> {
     const response = await this.get(url);
     const result = await response.json();
-    return RolTypeSchema.parse(result);
+    return RolTypeWithUrlSchema.parse(result);
   }
 
 }
