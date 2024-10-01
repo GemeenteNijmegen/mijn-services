@@ -225,6 +225,16 @@
   },
   "overrides": [
     {
+      "rules": {
+        "import/no-extraneous-dependencies": [
+          "off"
+        ]
+      },
+      "files": [
+        "*.ts"
+      ]
+    },
+    {
       "files": [
         ".projenrc.ts"
       ],

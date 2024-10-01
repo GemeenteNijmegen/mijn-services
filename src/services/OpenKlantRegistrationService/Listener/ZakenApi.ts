@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken';
+import { Rol } from './model/Rol';
 
 interface ZakenApiProps {
   clientId: string;
@@ -6,7 +7,7 @@ interface ZakenApiProps {
 }
 
 export interface IZakenApi {
-  get(url: string) : Promise<any>;
+  getRol(url: string) : Promise<Rol>;
 }
 
 export class ZakenApi implements IZakenApi {
@@ -16,7 +17,7 @@ export class ZakenApi implements IZakenApi {
     this.props = props;
   }
 
-  async get(url: string) : Promise<any> {
+  async getRol(url: string) : Promise<Rol> {
 
     const response = await fetch(url, {
       headers: {
@@ -46,9 +47,7 @@ export class ZakenApi implements IZakenApi {
 }
 
 export class ZakenApiMock implements IZakenApi {
-  async get(_url: string): Promise<any> {
-    return {
-      roltype: 'https://example.com/zaken/rollen/000-000-000-000',
-    };
+  async getRol(_url: string): Promise<Rol> {
+    throw Error('This method should be mocked!');
   }
 }

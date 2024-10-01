@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { readFileSync } from 'fs';
 import { ApiGatewayV2Response } from '@gemeentenijmegen/apigateway-http';
 import { NotificationSchema } from '../model/Notification';
@@ -5,6 +6,7 @@ import { OpenKlantApiMock } from '../OpenKlantApi';
 import { OpenKlantRegistrationHandler } from '../OpenKlantRegistrationHandler';
 import { ZakenApiMock } from '../ZakenApi';
 
+const TARGET_ROL_TYPE = 'https://example.com/open-zaak/zaken/api/v1/rollen/000-000-000-000';
 
 beforeAll(() => {
   process.env.DEBUG = 'true';
@@ -34,8 +36,39 @@ test('Handles role added to zaak notification (happy flow)', async () => {
 function createHandler() {
   return new OpenKlantRegistrationHandler({
     zakenApiUrl: 'https://example.com/open-zaak/zaken',
-    zakenApi: new ZakenApiMock(),
-    targetRolType: 'https://example.com/zaken/rollen/000-000-000-000',
-    openKlantApi: new OpenKlantApiMock(),
+    zakenApi: mockZakenApi(),
+    targetRolType: TARGET_ROL_TYPE,
+    openKlantApi: mockOpenKlantApi(),
   });
+}
+
+function mockZakenApi() {
+  const zakenApiMock = new ZakenApiMock();
+  jest.spyOn(zakenApiMock, 'getRol').mockImplementation((url: string) => {
+    return Promise.resolve({
+      url: url,
+      contactpersoonRol: {
+        naam: 'Test Tester',
+        emailadres: 'test@example.com',
+        telefoonnummer: '06333333333',
+      },
+      uuid: randomUUID(),
+      zaak: 'https://example.com/open-zaak/zaken/api/v1/zaak/000-000-000-000',
+      roltype: TARGET_ROL_TYPE,
+      betrokkeneIdentificatie: {
+        inpBsn: '12345678',
+      },
+      betrokkeneType: 'natuurlijk_persoon',
+    });
+  });
+  return zakenApiMock;
+}
+
+function mockOpenKlantApi() {
+  const openKlantApiMock = new OpenKlantApiMock();
+  const appendUuid = (obj: any) => Promise.resolve({ uuid: randomUUID(), ...obj });
+  jest.spyOn(openKlantApiMock, 'registerPartij').mockImplementation(appendUuid);
+  jest.spyOn(openKlantApiMock, 'addPartijIdentificatie').mockImplementation(appendUuid);
+  jest.spyOn(openKlantApiMock, 'addDigitaalAdres').mockImplementation(appendUuid);
+  return openKlantApiMock;
 }

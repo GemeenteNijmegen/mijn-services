@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { Rol } from './Rol';
 
 const uuidSchema = z.object({ uuid: z.string() });
 
@@ -32,9 +31,22 @@ export const OpenKlantPartijSchema = z.object({
 });
 
 /**
+ * Partij schema based on OpenKlant 2.0 (API response includes uuid)
+ */
+export const OpenKlantPartijSchemaWithUuid = OpenKlantPartijSchema.extend({
+  uuid: z.string(),
+});
+
+/**
  * A OpenKlant 2.0 Partij
  */
 export type OpenKlantPartij = z.infer<typeof OpenKlantPartijSchema>;
+
+/**
+ * A OpenKlant 2.0 Partij (API response includes uuid)
+ */
+export type OpenKlantPartijWithUuid = z.infer<typeof OpenKlantPartijSchemaWithUuid>;
+
 
 /**
  * Digitaal adres schema based on OpenKlant 2.0
@@ -48,9 +60,22 @@ export const OpenKlantDigitaalAdresSchema = z.object({
 });
 
 /**
+ * Digitaal adres schema based on OpenKlant 2.0 (API returns a uuid)
+ */
+export const OpenKlantDigitaalAdresSchemaWithUuid = OpenKlantDigitaalAdresSchema.extend({
+  uuid: z.string(),
+});
+
+/**
  * A OpenKlant 2.0 digitaal adres
  */
 export type OpenKlantDigitaalAdres = z.infer<typeof OpenKlantDigitaalAdresSchema>;
+
+/**
+ * A OpenKlant 2.0 digitaal adres (API returns a uuid)
+ */
+export type OpenKlantDigitaalAdresWithUuid = z.infer<typeof OpenKlantDigitaalAdresSchemaWithUuid>;
+
 
 /**
  * Partij identificatie schema based on OpenKlant 2.0
@@ -67,101 +92,21 @@ export const OpenKlantPartijIdentificiatieSchema = z.object({
 });
 
 /**
+ * Partij identificatie schema based on OpenKlant 2.0 (API response includes uuid)
+ */
+export const OpenKlantPartijIdentificiatieSchemaWithUuid = OpenKlantPartijIdentificiatieSchema.extend({
+  uuid: z.string(),
+});
+
+
+/**
  * A OpenKlant 2.0 partij identificatie
  */
 export type OpenKlantPartijIdentificiatie = z.infer<typeof OpenKlantPartijIdentificiatieSchema>;
 
-
 /**
- * Mapping functinos to convert from zaken API to
- * OpenKlant objects.
+ * A OpenKlant 2.0 partij identificatie (API response includes uuid)
  */
-export class OpenKlantMapper {
-
-  static partijFromRol(rol: Rol) : OpenKlantPartij {
-
-    if (process.env.DEBUG === 'true') {
-      console.debug('Mapping rol to partij', rol);
-    }
-
-    if (!rol?.contactpersoonRol?.naam) {
-      throw Error('Expected name to be set in rol');
-    }
-
-    return {
-      digitaleAdressen: [],
-      indicatieActief: true,
-      partijIdentificatie: {
-        volledigeNaam: rol?.contactpersoonRol?.naam,
-      },
-      rekeningnummers: [],
-      soortPartij: 'persoon',
-      voorkeursDigitaalAdres: null,
-      voorkeursRekeningnummer: null,
-      voorkeurstaal: 'dut',
-    };
-  }
-
-  static digitaalAdressenFromRol(rol: Rol) : OpenKlantDigitaalAdres[] {
-
-    if (process.env.DEBUG === 'true') {
-      console.debug('Mapping rol to digitaal adres', rol);
-    }
-
-    if (!rol?.contactpersoonRol) {
-      throw Error('No contactgegevens in rol');
-    }
-
-    const adressen: OpenKlantDigitaalAdres[] = [];
-
-    if (rol.contactpersoonRol.emailadres) {
-      adressen.push({
-        adres: '',
-        omschrijving: '',
-        soortDigitaalAdres: '',
-        verstrektDoorBetrokkene: {
-          uuid: '',
-        },
-        verstrektDoorPartij: {
-          uuid: '',
-        },
-      });
-    }
-
-    if (rol.contactpersoonRol.telefoonnummer) {
-      adressen.push({
-        adres: '',
-        omschrijving: '',
-        soortDigitaalAdres: '',
-        verstrektDoorBetrokkene: {
-          uuid: '',
-        },
-        verstrektDoorPartij: {
-          uuid: '',
-        },
-      });
-    }
-
-    return adressen;
-  }
-
-  static partijIdentificatiesFromRol(rol: Rol) : OpenKlantPartijIdentificiatie {
-
-    if (process.env.DEBUG === 'true') {
-      console.debug('Mapping rol to partij identificaties', rol);
-    }
-
-    return {
-      identificeerdePartij: null,
-      partijIdentificator: {
-        codeObjecttype: '',
-        codeRegister: '',
-        codeSoortObjectId: '',
-        objectId: '',
-      },
-    };
-  }
-
-}
+export type OpenKlantPartijIdentificiatieWithUuid = z.infer<typeof OpenKlantPartijIdentificiatieSchemaWithUuid>;
 
 

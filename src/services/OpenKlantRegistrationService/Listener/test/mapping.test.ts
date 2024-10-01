@@ -1,25 +1,26 @@
 import { randomUUID } from 'crypto';
-import { OpenKlantMapper } from '../model/Partij';
 import { Rol } from '../model/Rol';
+import { OpenKlantMapper } from '../OpenKlantMapper';
 
 
 test('Partij from persoon with email and phone', () => {
   const rol = getRol();
   const partij = OpenKlantMapper.partijFromRol(rol);
-  console.log(partij);
+  expect(partij.partijIdentificatie.volledigeNaam).toBe('H. de Jong');
 });
 
-test('Digitale adressne from persoon with email and phone', () => {
+test('Digitale adressen from persoon with email and phone', () => {
   const rol = getRol();
-  const adrressen = OpenKlantMapper.digitaalAdressenFromRol(rol);
+  const adrressen = OpenKlantMapper.digitaalAdressenFromRol(rol, randomUUID());
   expect(adrressen).toHaveLength(2);
-  console.log(adrressen);
+  expect(adrressen[0].soortDigitaalAdres).toBe(OpenKlantMapper.EMAIL);
+  expect(adrressen[1].soortDigitaalAdres).toBe(OpenKlantMapper.TELEFOONNUMMER);
 });
 
-test('Partij identificaties from persoon with email and phone', () => {
+test('Partij identificatie from rol', () => {
   const rol = getRol();
-  const ids = OpenKlantMapper.partijIdentificatiesFromRol(rol);
-  console.log(ids);
+  const identificatie = OpenKlantMapper.partijIdentificatieFromRol(rol, randomUUID());
+  expect(identificatie.partijIdentificator?.objectId).toBe('900000999');
 });
 
 function getRol() {

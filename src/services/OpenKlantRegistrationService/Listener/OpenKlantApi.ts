@@ -1,4 +1,4 @@
-import { OpenKlantPartij } from './model/Partij';
+import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijWithUuid } from './model/Partij';
 
 interface OpenKlantApiProps {
   url: string;
@@ -6,7 +6,9 @@ interface OpenKlantApiProps {
 }
 
 export interface IOpenKlantApi {
-  registerPartijGegevens(url: string) : Promise<any>;
+  registerPartij(partij: OpenKlantPartij) : Promise<OpenKlantPartijWithUuid>;
+  addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid>;
+  addDigitaalAdres(address: OpenKlantDigitaalAdres) : Promise<OpenKlantDigitaalAdresWithUuid>;
 }
 
 export class OpenKlantApi implements IOpenKlantApi {
@@ -15,50 +17,84 @@ export class OpenKlantApi implements IOpenKlantApi {
   constructor(props: OpenKlantApiProps) {
     this.props = props;
   }
-  registerPartijGegevens(_url: string): Promise<any> {
-    console.log(this.props);
-    throw new Error('Method not implemented.');
+
+  async addDigitaalAdres(address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
+    const url = this.props.url + '/digitaleadressen';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(address),
+      headers: {
+        Authorization: `Token ${this.props.apikey}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Request failed for url', response.status);
+      throw Error('Request failed');
+    }
+
+    // TODO fix types
+    const created = await response.json() as any;
+    return created;
+
   }
 
-  async getPartij(_identificatie: string, _type: string) {
-    throw new Error('Method not implemented.');
+  async addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid> {
+    const url =this.props.url + '/partij-identificatoren';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(identificatie),
+      headers: {
+        Authorization: `Token ${this.props.apikey}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Request failed for url', response.status);
+      throw Error('Request failed');
+    }
+
+    // TODO fix types
+    const created = await response.json() as any;
+    return created;
+
   }
 
-  async postPartij(_partij: OpenKlantPartij) : Promise<any> {
-    throw new Error('Method not implemented.');
-    // const response = await fetch(this.props.url, {
-    //   headers: {
-    //     Authorization: `Token ${this.props.apikey}`,
-    //   },
-    // });
+  async registerPartij(partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid> {
 
-    // if (!response.ok) {
-    //   console.log('Get failed for', url, response.status, response.statusText);
-    //   throw Error('Request failed');
-    // }
+    const url =this.props.url + '/partijen';
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(partij),
+      headers: {
+        Authorization: `Token ${this.props.apikey}`,
+      },
+    });
 
-    // const result = await response.json();
-    // return result as any;
+    if (!response.ok) {
+      console.error('Request failed for url', response.status);
+      throw Error('Request failed');
+    }
+
+    // TODO fix types
+    const created = await response.json() as any;
+    return created;
+
   }
 
-  async putPartij(_partij: OpenKlantPartij) : Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-
-  async createPartijIdentificatie(_partijUrl: string) {
-    throw new Error('Method not implemented.');
-  }
-
-  async createDigitaalAdres(_partijUrl: string) {
-    throw new Error('Method not implemented.');
-  }
 
 }
 
 export class OpenKlantApiMock implements IOpenKlantApi {
-  async registerPartijGegevens(_url: string): Promise<any> {
-    return {
-      roltype: 'https://example.com/open-klant/000-000-000-000',
-    };
+  addDigitaalAdres(_address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
+    throw new Error('This method should be mocked.');
+  }
+  addPartijIdentificatie(_identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid> {
+    throw new Error('This method should be mocked.');
+  }
+  async registerPartij(_partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid> {
+    throw Error('This method should be mocked.');
   }
 }

@@ -1,6 +1,8 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { Notification } from './model/Notification';
+import { OpenKlantDigitaalAdresWithUuid } from './model/Partij';
 import { IOpenKlantApi } from './OpenKlantApi';
+import { OpenKlantMapper } from './OpenKlantMapper';
 import { IZakenApi } from './ZakenApi';
 
 export interface OpenKlantRegistrationServiceProps {
@@ -36,16 +38,33 @@ export class OpenKlantRegistrationHandler {
 
     // Get the involved rol details and check if the role is the 'aanvrager'
     const rolUrl = notification.resourceUrl;
-    const rol = await this.configuration.zakenApi.get(rolUrl);
+    const rol = await this.configuration.zakenApi.getRol(rolUrl);
 
     // Check if role is of the target role type, otherwise return 200
     if (rol.roltype !== this.configuration.targetRolType) {
       console.debug('Role is not of the type to forward to open klant. Ignoring this notification');
       return Response.ok();
     }
-
     console.debug('Found a rol of the target type to forward to open klant.');
-    // await this.configuration.openKlantApi(partij);
+
+    // Create a partij
+    const partijInput = OpenKlantMapper.partijFromRol(rol);
+    const partij = await this.configuration.openKlantApi.registerPartij(partijInput);
+    console.debug('Partij created', partij);
+
+    // Create a partij identificatie
+    const partijIdentificatieInput = OpenKlantMapper.partijIdentificatieFromRol(rol, partij.uuid);
+    const partijIdentificatie = await this.configuration.openKlantApi.addPartijIdentificatie(partijIdentificatieInput);
+    console.debug('Partij identificatie created', partijIdentificatie);
+
+    // Attach digitale adressen to partij
+    const digitaleAdressenInput = OpenKlantMapper.digitaalAdressenFromRol(rol, partij.uuid);
+    const promises: Promise<OpenKlantDigitaalAdresWithUuid>[] = [];
+    digitaleAdressenInput.forEach(digitaalAdres => {
+      promises.push(this.configuration.openKlantApi.addDigitaalAdres(digitaalAdres));
+    });
+    const digitaleAdressen = await Promise.all(promises);
+    digitaleAdressen.forEach(adres => console.log('Digitaal adres created', adres));
 
     return Response.ok();
 

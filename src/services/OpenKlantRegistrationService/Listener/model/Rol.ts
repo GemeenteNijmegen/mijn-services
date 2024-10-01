@@ -25,6 +25,6 @@ export const RolSchema = z.object({
     anpIdentificatie: z.string().optional(),
   }),
 
-}).optional();
+});
 
 export type Rol = z.infer<typeof RolSchema>;

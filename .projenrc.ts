@@ -21,4 +21,15 @@ const project = new GemeenteNijmegenCdkApp({
     'jsonwebtoken',
   ],
 });
+
+/**
+ * Supress the 'dependency should be included in the project dependencies' error.
+ */
+project.eslint?.addOverride({
+  rules: {
+    'import/no-extraneous-dependencies': ['off'],
+  },
+  files: ['*.ts'],
+});
+
 project.synth();
