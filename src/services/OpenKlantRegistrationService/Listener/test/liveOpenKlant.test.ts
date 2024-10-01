@@ -10,7 +10,7 @@ runLiveTests('Live tests OpenKlantApi', () => {
     apikey: process.env.OPEN_KLANT_API_KEY!,
   });
 
-  test('create partij', async () => {
+  test('create partij plain', async () => {
     await createPartij(api);
   });
 
