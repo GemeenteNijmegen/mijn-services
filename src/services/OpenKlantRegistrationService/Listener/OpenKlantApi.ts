@@ -47,22 +47,26 @@ export class OpenKlantApi implements IOpenKlantApi {
   }
 
   private async callApi(method: string, url: string, options: RequestInit) {
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Authorization': `Token ${this.props.apikey}`,
+          'Content-Type': 'application/json',
+        },
+        ...options,
+      });
 
-    const response = await fetch(url, {
-      method: method,
-      headers: {
-        'Authorization': `Token ${this.props.apikey}`,
-        'Content-Type': 'application/json',
-      },
-      ...options,
-    });
-
-    if (!response.ok) {
-      console.error('Request failed for url', response.status, await response.text());
-      throw Error('Request failed');
+      if (!response.ok) {
+        console.error('Request failed for url', response.status, await response.text());
+        throw Error('Request failed');
+      }
+      return response;
+    } catch (error) {
+      console.error(error);
+      throw Error('OpenKlantApi request failed');
     }
 
-    return response;
   }
 
 }
