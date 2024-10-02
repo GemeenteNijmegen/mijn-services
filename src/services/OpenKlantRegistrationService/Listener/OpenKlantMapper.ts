@@ -17,7 +17,16 @@ export class OpenKlantMapper {
       console.debug('Mapping rol to partij', rol);
     }
 
-    if (!rol?.contactpersoonRol?.naam) {
+    let name = undefined;
+
+    if (rol?.contactpersoonRol?.naam) {
+      name = rol.contactpersoonRol.naam;
+    } else if (rol?.betrokkeneIdentificatie.geslachtsnaam) {
+      console.warn('Using geslachtsnaam!'); // TODO figure out if we need to do something else here?
+      name = rol?.betrokkeneIdentificatie.geslachtsnaam;
+    }
+
+    if (!name) {
       throw new ErrorResponse(400, 'Expected name to be set in rol.');
     }
 
@@ -25,7 +34,7 @@ export class OpenKlantMapper {
       digitaleAdressen: [],
       indicatieActief: true,
       partijIdentificatie: {
-        volledigeNaam: rol?.contactpersoonRol?.naam,
+        volledigeNaam: name,
         contactnaam: null,
       },
       rekeningnummers: [],

@@ -23,6 +23,14 @@ export const RolSchema = z.object({
     inpBsn: z.string().optional(),
     inpA_nummer: z.string().optional(),
     anpIdentificatie: z.string().optional(),
+    geslachtsnaam: z.string().optional(),
+    voorvoegselGeslachtsnaam: z.string().optional(),
+    voorletters: z.string().optional(),
+    voornamen: z.string().optional(),
+    geslachtsaanduiding: z.enum(['m', 'v', 'o']).optional(),
+    geboortedatum: z.string().optional(),
+    // "verblijfsadres": {},
+    // "subVerblijfBuitenland": {}
   }),
 
 });
