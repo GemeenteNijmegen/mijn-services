@@ -185,6 +185,14 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         path: '/open-klant-registration-service-development/callback',
         roltypesToRegister: ['belanghebbende'],
       },
+      {
+        cdkId: 'open-klant-registration-service-woweb',
+        debug: true,
+        openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        zakenApiUrl: 'https://openzaak.woweb.app', // Accp omgeving?
+        path: '/open-klant-registration-service-woweb/callback',
+        roltypesToRegister: ['belanghebbende'],
+      },
     ],
   },
   main: {
