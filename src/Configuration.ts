@@ -189,7 +189,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         cdkId: 'open-klant-registration-service-woweb',
         debug: true,
         openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'https://openzaak.woweb.app', // Accp omgeving?
+        zakenApiUrl: 'https://openzaak.woweb.app',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
       },
