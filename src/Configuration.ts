@@ -160,7 +160,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       debug: true,
     },
     vrijBrpOmc: {
-      image: 'worthnl/notifynl-omc:1.8.15',
+      image: 'worthnl/notifynl-omc:1.10.0',
       logLevel: 'DEBUG',
       debug: true,
       mode: 'Development',
