@@ -161,16 +161,16 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       debug: true,
     },
     OutputManagementComponents: [
-      {
-        cdkId: 'vrijbrp-omc',
-        image: 'worthnl/notifynl-omc:1.10.0',
-        logLevel: 'DEBUG',
-        debug: true,
-        mode: 'Development',
-        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant',
-        zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak',
-        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties',
-      },
+      // {
+      //   cdkId: 'vrijbrp-omc',
+      //   image: 'worthnl/notifynl-omc:1.10.0',
+      //   logLevel: 'DEBUG',
+      //   debug: true,
+      //   mode: 'Development',
+      //   openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant',
+      //   zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak',
+      //   notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties',
+      // },
     ],
     openKlantRegistrationServices: [
       {
