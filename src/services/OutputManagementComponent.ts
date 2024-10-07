@@ -40,7 +40,7 @@ export class OMCService extends Construct {
 
     // Secret for jwt token to authenticate at OMC
     const ssmOmcJwt = `/${Statics.projectName}/omc/${id}/omc-jwt`;
-    const omcJwtSecret = new Secret(this, 'omc-jwt', {
+    const omcJwtSecret = new Secret(this, 'zgw-jwt', {
       description: `For jwt token to authenticate at OMC (${id})`,
       secretName: ssmOmcJwt,
     });
