@@ -164,7 +164,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     outputManagementComponents: [
       {
         cdkId: 'test-omc',
-        path: '/test-omc',
+        path: 'test-omc', // Without /
         image: 'worthnl/notifynl-omc:1.10.0',
         logLevel: 'DEBUG',
         debug: true,
