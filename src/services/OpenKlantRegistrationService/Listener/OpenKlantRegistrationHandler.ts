@@ -36,7 +36,7 @@ export class OpenKlantRegistrationHandler {
     const errors = this.validateNotification(notification);
     if (errors) {
       // TODO return 200 when notification is of different type and not handled
-      return Response.json({ errors }, 400);
+      return Response.json({ errors }, 200); // TODO change back in 400 later maybe?
     }
 
     // Get the involved rol details and check if the role is the 'aanvrager'
