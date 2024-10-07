@@ -16,13 +16,18 @@ export async function authenticate(event: APIGatewayProxyEventV2) {
     return Response.error(401);
   }
 
-  const header = event.headers?.['x-api-key'];
+  const header = event.headers?.Authorization;
   if (!header) {
-    console.error('No x-api-key header fount in the request');
-    return Response.error(401, 'No x-api-key header fount in the request' );
+    console.error('No Authorization header fount in the request');
+    return Response.error(401, 'No Authorization header fount in the request' );
   }
 
-  if (header === API_KEY) {
+  if (!header.startsWith('Token ')) {
+    console.error('Header is missing the \'Token \' prefix');
+    return Response.error(401, 'Authorization header must be of type Token' );
+  }
+
+  if (header.substring('Token '.length) === API_KEY) {
     return true;
   }
 
