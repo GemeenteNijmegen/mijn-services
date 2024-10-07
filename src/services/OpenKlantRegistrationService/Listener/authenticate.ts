@@ -14,7 +14,7 @@ export async function authenticate(event: APIGatewayProxyEventV2) {
     return Response.error(401);
   }
 
-  const header = event.headers?.Authorization;
+  const header = event.headers?.Authorization ?? event.headers?.['X-Authorization'];
 
   if (!header) {
     console.error('No Authorization header found in the request.');
