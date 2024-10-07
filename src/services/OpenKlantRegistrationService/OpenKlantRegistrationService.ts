@@ -1,5 +1,5 @@
 import { Duration } from 'aws-cdk-lib';
-import { HttpApi, HttpMethod } from 'aws-cdk-lib/aws-apigatewayv2';
+import { HttpApi, HttpMethod, MappingValue, ParameterMapping } from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -91,7 +91,9 @@ export class OpenKlantRegistrationService extends Construct {
     this.props.api.addRoutes({
       path: this.props.openKlantRegistrationServiceConfiguration.path,
       methods: [HttpMethod.POST],
-      integration: new HttpLambdaIntegration('integration', handler),
+      integration: new HttpLambdaIntegration('integration', handler, {
+        parameterMapping: new ParameterMapping().appendHeader('X-Authorization', MappingValue.requestHeader('Authorization')),
+      }),
     });
   }
 
