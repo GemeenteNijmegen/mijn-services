@@ -169,9 +169,9 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
-        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant',
-        zakenApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken',
-        notificatiesApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-notificaties',
+        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        zakenApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
+        notificatiesApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-notificaties/api/v1',
       },
     ],
     openKlantRegistrationServices: [
