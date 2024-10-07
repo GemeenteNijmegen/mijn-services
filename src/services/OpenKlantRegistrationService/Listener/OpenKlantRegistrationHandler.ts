@@ -72,9 +72,10 @@ export class OpenKlantRegistrationHandler {
     digitaleAdressen.forEach(adres => console.log('Digitaal adres created', adres));
 
     // Store the first digitaal adres as the prefered
-    // TODO This contains logic that must be validated and discussed
+    // TODO figure out what the primary should be of the returned adressen?
     await this.configuration.openKlantApi.updatePartij({
-      ...partij,
+      uuid: partij.uuid,
+      soortPartij: partij.soortPartij,
       voorkeursDigitaalAdres: {
         uuid: digitaleAdressen[0].uuid,
       },
