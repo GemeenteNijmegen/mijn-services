@@ -33,14 +33,14 @@ export class OMCService extends Construct {
 
     // Secret for signing the ZGW jwt token to authenticate at other ZGW components
     const ssmZgwJwt = `/${Statics.projectName}/omc/${id}/omc-jwt`;
-    const zgwJwtSecret = new Secret(this, 'omc-jwt', {
+    const omcJwtSecret = new Secret(this, 'omc-jwt', {
       description: `For jwt token to authenticate at OMC (${id})`,
       secretName: ssmZgwJwt,
     });
 
     // Secret for jwt token to authenticate at OMC
     const ssmOmcJwt = `/${Statics.projectName}/omc/${id}/zgw-jwt`;
-    const omcJwtSecret = new Secret(this, 'zgw-jwt', {
+    const zgwJwtSecret = new Secret(this, 'zgw-jwt', {
       description: `For jwt token to authenticate at other ZGW components, for OMC (${id})`,
       secretName: ssmOmcJwt,
     });

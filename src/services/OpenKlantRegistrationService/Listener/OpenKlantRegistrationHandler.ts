@@ -35,6 +35,7 @@ export class OpenKlantRegistrationHandler {
     // Validate notification
     const errors = this.validateNotification(notification);
     if (errors) {
+      // TODO return 200 when notification is of different type and not handled
       return Response.json({ errors }, 400);
     }
 
