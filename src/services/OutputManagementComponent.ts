@@ -84,7 +84,7 @@ export class OMCService extends Construct {
 
       // Builds ZGW token
       USER_AUTHORIZATION_JWT_ISSUER: 'OMC', // Something identifying "OpenZaak" / "OpenKlant" / "OpenNotificatie" Web API services (token is shared between of them)
-      USER_AUTHORIZATION_JWT_AUDIENCE: 'OMC', // Cannot be missing 	Something identifying OMC Web API service (it will be used internally) - The OMC is the audience
+      USER_AUTHORIZATION_JWT_AUDIENCE: '', // Cannot be missing 	Something identifying OMC Web API service (it will be used internally) - The OMC is the audience
       USER_AUTHORIZATION_JWT_EXPIRESINMIN: (60*24).toString(), // This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
       USER_AUTHORIZATION_JWT_USERID: 'OMC', //  This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
       USER_AUTHORIZATION_JWT_USERNAME: 'OMC', // This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
