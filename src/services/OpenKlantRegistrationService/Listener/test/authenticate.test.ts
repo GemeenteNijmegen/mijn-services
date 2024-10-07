@@ -43,7 +43,7 @@ describe('Authentication', () => {
     });
     const event: Partial<APIGatewayProxyEventV2> = {
       headers: {
-        'x-api-key': 'abc',
+        Authorization: 'abc',
       },
     };
     const result = await authenticate(event as any);
@@ -57,7 +57,7 @@ describe('Authentication', () => {
     });
     const event: Partial<APIGatewayProxyEventV2> = {
       headers: {
-        'x-api-key': 'geheim',
+        Authorization: 'Token geheim',
       },
     };
     const result = await authenticate(event as any);

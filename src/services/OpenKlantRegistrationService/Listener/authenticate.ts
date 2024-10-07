@@ -18,8 +18,8 @@ export async function authenticate(event: APIGatewayProxyEventV2) {
 
   const header = event.headers?.Authorization;
   if (!header) {
-    console.error('No Authorization header fount in the request');
-    return Response.error(401, 'No Authorization header fount in the request' );
+    console.error('No Authorization header found in the request');
+    return Response.error(401, 'No Authorization header found in the request' );
   }
 
   if (!header.startsWith('Token ')) {
