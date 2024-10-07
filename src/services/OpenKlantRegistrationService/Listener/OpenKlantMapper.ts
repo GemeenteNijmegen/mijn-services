@@ -35,7 +35,10 @@ export class OpenKlantMapper {
       indicatieActief: true,
       partijIdentificatie: {
         volledigeNaam: name,
-        contactnaam: null,
+        contactnaam: {
+          voornaam: name,
+          achternaam: 'Leeg',
+        },
       },
       rekeningnummers: [],
       soortPartij: 'persoon',
