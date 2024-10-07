@@ -30,6 +30,21 @@ export class OMCService extends Construct {
   }
 
   private setupConfigurationParameters(id: string) {
+
+    // Secret for signing the ZGW jwt token to authenticate at other ZGW components
+    const ssmZgwJwt = `/${Statics.projectName}/omc/${id}/omc-jwt`;
+    const zgwJwtSecret = new Secret(this, 'omc-jwt', {
+      description: `For jwt token to authenticate at other ZGW components, for OMC (${id})`,
+      secretName: ssmZgwJwt,
+    });
+
+    // Secret for jwt token to authenticate at OMC
+    const ssmOmcJwt = `/${Statics.projectName}/omc/${id}/omc-jwt`;
+    const omcJwtSecret = new Secret(this, 'omc-jwt', {
+      description: `For jwt token to authenticate at OMC (${id})`,
+      secretName: ssmOmcJwt,
+    });
+
     // OpenKlant API key
     const ssmOpenKlantApiKey = `/${Statics.projectName}/omc/${id}/open-klant/api-key`;
     const openKlantApiKey = new Secret(this, 'open-klant-api-key', {
@@ -47,6 +62,8 @@ export class OMCService extends Construct {
     return {
       openklant: openKlantApiKey,
       notify: notifyNlApiKey,
+      omcJwt: omcJwtSecret,
+      zgwJwt: zgwJwtSecret,
     };
   }
 
@@ -117,8 +134,8 @@ export class OMCService extends Construct {
 
   private getSecretConfiguration() {
     const secrets = {
-      OMC_AUTHORIZATION_JWT_SECRET: EcsSecret.fromSecretsManager(Secret.fromSecretNameV2(this, 'omc-jwt', Statics._ssmOmcOmcJwtSecret)),
-      USER_AUTHORIZATION_JWT_SECRET: EcsSecret.fromSecretsManager(Secret.fromSecretNameV2(this, 'zgw-jwt', Statics._ssmOmcZgwJwtSecret)),
+      OMC_AUTHORIZATION_JWT_SECRET: EcsSecret.fromSecretsManager(this.configurationParameters.omcJwt),
+      USER_AUTHORIZATION_JWT_SECRET: EcsSecret.fromSecretsManager(this.configurationParameters.zgwJwt),
 
       // API keys
       USER_API_KEY_OPENKLANT: EcsSecret.fromSecretsManager(this.configurationParameters.openklant),
