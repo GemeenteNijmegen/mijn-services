@@ -131,11 +131,11 @@ export class MainStack extends Stack {
   }
 
   private outputManagementComponent(api: ApiGateway, platform: ContainerPlatform) {
-    if (!this.configuration.OutputManagementComponents) {
+    if (!this.configuration.outputManagementComponents) {
       console.warn('No OMC configuration provided. Skipping creation of OMC!');
       return;
     }
-    for (const omc of this.configuration.OutputManagementComponents) {
+    for (const omc of this.configuration.outputManagementComponents) {
       new OMCService(this, omc.cdkId, {
         omcConfiguration: omc,
         service: {

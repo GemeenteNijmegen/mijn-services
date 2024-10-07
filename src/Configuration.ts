@@ -69,7 +69,7 @@ export interface Configuration {
   /**
    * Configurations for OMCs
    */
-  OutputManagementComponents?: OutputManagementComponentConfiguration[];
+  outputManagementComponents?: OutputManagementComponentConfiguration[];
 
   /**
    * List or open klant registration services
@@ -161,7 +161,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       logLevel: 'DEBUG',
       debug: true,
     },
-    OutputManagementComponents: [
+    outputManagementComponents: [
       {
         cdkId: 'test-omc',
         path: '/test-omc',

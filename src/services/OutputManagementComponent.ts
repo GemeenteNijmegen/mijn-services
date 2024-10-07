@@ -101,6 +101,8 @@ export class OMCService extends Construct {
       USER_DOMAIN_OPENKLANT: this.props.omcConfiguration.openKlantUrl, // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
       USER_DOMAIN_OBJECTEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
       USER_DOMAIN_OBJECTTYPEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
+      USER_DOMAIN_BESLUITEN: '',
+      USER_DOMAIN_CONTACTMOMENTEN: '',
 
       // Template references in Notify
       USER_TEMPLATEIDS_EMAIL_ZAAKCREATE: '00000000-0000-0000-0000-000000000000', // Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
