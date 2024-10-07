@@ -2,8 +2,6 @@ import { Response } from '@gemeentenijmegen/apigateway-http';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
-// TODO make this use the authorization header and Token prefix (zgw style)
-
 let API_KEY: string | undefined = undefined;
 export async function authenticate(event: APIGatewayProxyEventV2) {
   if (!API_KEY) {
@@ -17,6 +15,7 @@ export async function authenticate(event: APIGatewayProxyEventV2) {
   }
 
   const header = event.headers?.Authorization;
+
   if (!header) {
     console.error('No Authorization header found in the request');
     return Response.error(401, 'No Authorization header found in the request' );
