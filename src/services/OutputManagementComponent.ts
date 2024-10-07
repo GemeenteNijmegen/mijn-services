@@ -90,10 +90,8 @@ export class OMCService extends Construct {
       USER_AUTHORIZATION_JWT_USERNAME: 'OMC', // This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
 
       // API keys for ZGW(ish) components
-      // USER_API_KEY_OPENKLANT_2: '',
-      // USER_API_KEY_OPENKLANT: '', // Cannot be missing and have null or empty value (if you are using OMC Workflow v2 and above; otherwise, it's not mandatory) 	It needs to be generated for OMC Workflow v2 and above from "OpenKlant" 2.0 Web API service UI
-      // USER_API_KEY_OBJECTEN: 'NOT IN USE', // Cannot be missing and have null or empty value 	It needs to be generated from "Objecten" Web API service UI
-      // USER_API_KEY_OBJECTTYPEN: 'NOT IN USE', // Cannot be missing and have null or empty value 	It needs to be generated from "ObjectTypen" Web API service UI
+      USER_API_KEY_OBJECTEN: 'NOT IN USE', // Cannot be missing and have null or empty value 	It needs to be generated from "Objecten" Web API service UI
+      USER_API_KEY_OBJECTTYPEN: 'NOT IN USE', // Cannot be missing and have null or empty value 	It needs to be generated from "ObjectTypen" Web API service UI
 
       // Domains for ZGW(ish) components
       USER_DOMAIN_OPENNOTIFICATIES: this.props.omcConfiguration.notificatiesApiUrl, // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
