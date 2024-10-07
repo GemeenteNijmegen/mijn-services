@@ -2,6 +2,14 @@ import { Response } from '@gemeentenijmegen/apigateway-http';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
+const ALLOWED_HEADERS = [
+  'X-Authorization',
+  'X-Authorization',
+  'Authorization',
+  'authorization',
+  'x-api-key',
+];
+
 let API_KEY: string | undefined = undefined;
 export async function authenticate(event: APIGatewayProxyEventV2) {
   if (!API_KEY) {
@@ -14,7 +22,16 @@ export async function authenticate(event: APIGatewayProxyEventV2) {
     return Response.error(401);
   }
 
-  const header = event.headers?.Authorization ?? event.headers?.['X-Authorization'];
+  if (!event.headers) {
+    return Response.error(401, 'No headers available to check for API key');
+  }
+
+  const usedHeader = ALLOWED_HEADERS.find(h => event.headers[h] != undefined);
+  if (!usedHeader) {
+    return Response.error(401, 'No headers available to check for API key');
+  }
+
+  const header = event.headers[usedHeader];
 
   if (!header) {
     console.error('No Authorization header found in the request.');
