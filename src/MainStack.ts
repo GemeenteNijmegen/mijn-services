@@ -131,21 +131,23 @@ export class MainStack extends Stack {
   }
 
   private outputManagementComponent(api: ApiGateway, platform: ContainerPlatform) {
-    if (!this.configuration.vrijBrpOmc) {
+    if (!this.configuration.OutputManagementComponents) {
       console.warn('No OMC configuration provided. Skipping creation of OMC!');
       return;
     }
-    new OMCService(this, 'omc', {
-      omcConfiguration: this.configuration.vrijBrpOmc,
-      service: {
-        api: api.api,
-        cluster: platform.cluster,
-        link: platform.vpcLink,
-        namespace: platform.namespace,
-        port: 80,
-        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
-      },
-    });
+    for (const omc of this.configuration.OutputManagementComponents) {
+      new OMCService(this, omc.cdkId, {
+        omcConfiguration: omc,
+        service: {
+          api: api.api,
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          port: 80,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+      });
+    }
   }
 
   private openKlantRegistrationServices(api: ApiGateway) {

@@ -67,9 +67,9 @@ export interface Configuration {
   openZaak?: OpenZaakConfiguration;
 
   /**
-   * Configuration for OMC used by VrijBRP notifications
+   * Configurations for OMCs
    */
-  vrijBrpOmc?: OutputManagementComponentConfiguration;
+  OutputManagementComponents?: OutputManagementComponentConfiguration[];
 
   /**
    * List or open klant registration services
@@ -98,6 +98,7 @@ export interface OpenZaakConfiguration {
 }
 
 export interface OutputManagementComponentConfiguration {
+  cdkId: string;
   image: string;
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
   debug?: boolean;
@@ -159,15 +160,18 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       logLevel: 'DEBUG',
       debug: true,
     },
-    vrijBrpOmc: {
-      image: 'worthnl/notifynl-omc:1.10.0',
-      logLevel: 'DEBUG',
-      debug: true,
-      mode: 'Development',
-      openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant',
-      zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak',
-      notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties',
-    },
+    OutputManagementComponents: [
+      {
+        cdkId: 'vrijbrp-omc',
+        image: 'worthnl/notifynl-omc:1.10.0',
+        logLevel: 'DEBUG',
+        debug: true,
+        mode: 'Development',
+        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant',
+        zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak',
+        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties',
+      },
+    ],
     openKlantRegistrationServices: [
       {
         cdkId: 'open-klant-registration-service-vrijbrp',
