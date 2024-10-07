@@ -27,7 +27,7 @@ export const RolSchema = z.object({
     voorvoegselGeslachtsnaam: z.string().optional(),
     voorletters: z.string().optional(),
     voornamen: z.string().optional(),
-    geslachtsaanduiding: z.enum(['m', 'v', 'o']).optional(),
+    // geslachtsaanduiding: z.enum(['m', 'v', 'o']).optional(), // TODO check if we can add this back in later
     geboortedatum: z.string().optional(),
     // "verblijfsadres": {},
     // "subVerblijfBuitenland": {}
