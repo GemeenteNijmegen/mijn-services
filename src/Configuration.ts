@@ -170,8 +170,8 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant',
-        zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak',
-        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties',
+        zakenApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak',
+        notificatiesApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-notificaties',
       },
     ],
     openKlantRegistrationServices: [
