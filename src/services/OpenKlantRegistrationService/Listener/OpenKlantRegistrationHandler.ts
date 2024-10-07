@@ -71,6 +71,15 @@ export class OpenKlantRegistrationHandler {
     const digitaleAdressen = await Promise.all(promises);
     digitaleAdressen.forEach(adres => console.log('Digitaal adres created', adres));
 
+    // Store the first digitaal adres as the prefered
+    // TODO This contains logic that must be validated and discussed
+    await this.configuration.openKlantApi.updatePartij({
+      ...partij,
+      voorkeursDigitaalAdres: {
+        uuid: digitaleAdressen[0].uuid,
+      },
+    });
+
     return Response.ok();
 
   }

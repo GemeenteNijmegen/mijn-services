@@ -81,6 +81,7 @@ function mockOpenKlantApi() {
   const openKlantApiMock = new OpenKlantApiMock();
   const appendUuid = (obj: any) => Promise.resolve({ uuid: randomUUID(), ...obj });
   jest.spyOn(openKlantApiMock, 'registerPartij').mockImplementation(appendUuid);
+  jest.spyOn(openKlantApiMock, 'updatePartij').mockImplementation(appendUuid);
   jest.spyOn(openKlantApiMock, 'addPartijIdentificatie').mockImplementation(appendUuid);
   jest.spyOn(openKlantApiMock, 'addDigitaalAdres').mockImplementation(appendUuid);
   return openKlantApiMock;

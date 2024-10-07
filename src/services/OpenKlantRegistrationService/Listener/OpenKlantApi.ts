@@ -7,6 +7,7 @@ interface OpenKlantApiProps {
 
 export interface IOpenKlantApi {
   registerPartij(partij: OpenKlantPartij) : Promise<OpenKlantPartijWithUuid>;
+  updatePartij(partij: Partial<OpenKlantPartijWithUuid>) : Promise<OpenKlantPartijWithUuid>;
   addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid>;
   addDigitaalAdres(address: OpenKlantDigitaalAdres) : Promise<OpenKlantDigitaalAdresWithUuid>;
 }
@@ -37,13 +38,25 @@ export class OpenKlantApi implements IOpenKlantApi {
   }
 
   async registerPartij(partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid> {
-    const url =this.props.url + '/partijen';
+    const url = this.props.url + '/partijen';
     const response = await this.callApi('POST', url, {
       body: JSON.stringify(partij),
     });
     const result = await response.json();
     return OpenKlantPartijSchemaWithUuid.parse(result);
 
+  }
+
+  async updatePartij(partij: Partial<OpenKlantPartijWithUuid>) {
+    if (!partij.uuid) {
+      throw Error('Cannot update partij when uuid is not provided');
+    }
+    const url = this.props.url + `/partijen/${partij.uuid}`;
+    const response = await this.callApi('PATCH', url, {
+      body: JSON.stringify(partij),
+    });
+    const result = await response.json();
+    return OpenKlantPartijSchemaWithUuid.parse(result);
   }
 
   private async callApi(method: string, url: string, options: RequestInit) {
@@ -71,14 +84,18 @@ export class OpenKlantApi implements IOpenKlantApi {
 
 }
 
+
 export class OpenKlantApiMock implements IOpenKlantApi {
-  addDigitaalAdres(_address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
-    throw new Error('This method should be mocked.');
+  registerPartij(_partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid> {
+    throw new Error('Method should be mocked.');
+  }
+  updatePartij(_partij: Partial<OpenKlantPartijWithUuid>): Promise<OpenKlantPartijWithUuid> {
+    throw new Error('Method should be mocked.');
   }
   addPartijIdentificatie(_identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid> {
-    throw new Error('This method should be mocked.');
+    throw new Error('Method should be mocked.');
   }
-  async registerPartij(_partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid> {
-    throw Error('This method should be mocked.');
+  addDigitaalAdres(_address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
+    throw new Error('Method should be mocked.');
   }
 }
