@@ -179,7 +179,7 @@ export class OMCService extends Construct {
     const service = this.serviceFactory.createService({
       id: 'main',
       task: task,
-      path: 'omc-vrijbrp',
+      path: this.props.omcConfiguration.path,
       requestParameters: {
         'overwrite:path': '/$request.path.proxy', // Remove the /omc-vrijbrp part from the path before forwarding to the integration
       },
