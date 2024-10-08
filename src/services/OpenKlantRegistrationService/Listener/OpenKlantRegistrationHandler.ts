@@ -73,11 +73,17 @@ export class OpenKlantRegistrationHandler {
 
     // Store the first digitaal adres as the prefered
     // TODO figure out what the primary should be of the returned adressen?
+    const telefoon = digitaleAdressen.find(adres => adres.soortDigitaalAdres == OpenKlantMapper.TELEFOONNUMMER);
+    const email = digitaleAdressen.find(adres => adres.soortDigitaalAdres == OpenKlantMapper.EMAIL);
+    const voorkeur = telefoon?.uuid ?? email?.uuid;
+    if (!voorkeur) {
+      throw Error('No telefoon or email adres registered.');
+    }
     await this.configuration.openKlantApi.updatePartij({
       uuid: partij.uuid,
       soortPartij: partij.soortPartij,
       voorkeursDigitaalAdres: {
-        uuid: digitaleAdressen[0].uuid,
+        uuid: voorkeur,
       },
     });
 
