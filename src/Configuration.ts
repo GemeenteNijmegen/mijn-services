@@ -130,6 +130,19 @@ export interface OutputManagementComponentConfiguration {
     username: string;
   };
 
+  templates: {
+    zaakCreateEmail?: string;
+    zaakUpdateEmail?: string;
+    zaakCloseEmail?: string;
+    taskAssignedEmail?: string;
+    messsageEmail?: string;
+    zaakCreateSms?: string;
+    zaakUpdateSms?: string;
+    zaakCloseSms?: string;
+    taskAssignedSms?: string;
+    messsageSms?: string;
+  };
+
 }
 
 export interface OpenKlantRegistrationServiceConfiguration {
@@ -186,6 +199,14 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
           userId: 'OMC',
           username: 'OMC',
         },
+        templates: {
+          zaakCreateEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
+          zaakUpdateEmail: 'e868044f-4a30-42c9-b1bf-8ad95ec2a6b8',
+          zaakCloseEmail: '14cebdee-a179-4e0e-b7de-c660fdd47c57',
+          zaakCreateSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
+          zaakUpdateSms: '0ff5f21a-2af1-4fd4-8080-45cff34e0df7',
+          zaakCloseSms: 'ac885f24-09d8-4702-845f-2f53cd045790',
+        },
       },
       {
         cdkId: 'vrijbrp-omc',
@@ -202,6 +223,14 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
           issuer: 'zgw_nijmegen_notificatie',
           userId: 'zgw_nijmegen_notificatie',
           username: 'zgw_nijmegen_notificatie',
+        },
+        templates: {
+          zaakCreateEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
+          zaakUpdateEmail: 'e868044f-4a30-42c9-b1bf-8ad95ec2a6b8',
+          zaakCloseEmail: '14cebdee-a179-4e0e-b7de-c660fdd47c57',
+          zaakCreateSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
+          zaakUpdateSms: '0ff5f21a-2af1-4fd4-8080-45cff34e0df7',
+          zaakCloseSms: 'ac885f24-09d8-4702-845f-2f53cd045790',
         },
       },
     ],

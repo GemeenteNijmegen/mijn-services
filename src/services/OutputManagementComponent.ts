@@ -7,6 +7,8 @@ import { OutputManagementComponentConfiguration } from '../Configuration';
 import { ServiceFactory, ServiceFactoryProps } from '../constructs/ServiceFactory';
 import { Statics } from '../Statics';
 
+const DEFAULT_UUID = '00000000-0000-0000-0000-000000000000';
+
 export interface OMCServiceProps {
   service: ServiceFactoryProps;
   omcConfiguration: OutputManagementComponentConfiguration;
@@ -103,16 +105,16 @@ export class OMCService extends Construct {
       USER_DOMAIN_CONTACTMOMENTEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // NOT USED NOW
 
       // Template references in Notify
-      USER_TEMPLATEIDS_EMAIL_ZAAKCREATE: '00000000-0000-0000-0000-000000000000', // Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
-      USER_TEMPLATEIDS_EMAIL_ZAAKUPDATE: '00000000-0000-0000-0000-000000000000', // 	Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
-      USER_TEMPLATEIDS_EMAIL_ZAAKCLOSE: '00000000-0000-0000-0000-000000000000', // 	Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
-      USER_TEMPLATEIDS_EMAIL_TASKASSIGNED: '00000000-0000-0000-0000-000000000000', // 	Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
-      USER_TEMPLATEIDS_EMAIL_MESSAGE: '00000000-0000-0000-0000-000000000000', // 	Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
-      USER_TEMPLATEIDS_SMS_ZAAKCREATE: '00000000-0000-0000-0000-000000000000', // 	Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
-      USER_TEMPLATEIDS_SMS_ZAAKUPDATE: '00000000-0000-0000-0000-000000000000', // 	Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
-      USER_TEMPLATEIDS_SMS_ZAAKCLOSE: '00000000-0000-0000-0000-000000000000', // 	Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
-      USER_TEMPLATEIDS_SMS_TASKASSIGNED: '00000000-0000-0000-0000-000000000000', // 	Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
-      USER_TEMPLATEIDS_SMS_MESSAGE: '00000000-0000-0000-0000-000000000000', // 	Cannot be missing and have null or empty value + must be in UUID format 	Should be generated per specific business use case from "Notify NL" Admin Portal
+      USER_TEMPLATEIDS_EMAIL_ZAAKCREATE: this.props.omcConfiguration.templates.zaakCreateEmail ?? DEFAULT_UUID,
+      USER_TEMPLATEIDS_EMAIL_ZAAKUPDATE: this.props.omcConfiguration.templates.zaakUpdateEmail ?? DEFAULT_UUID,
+      USER_TEMPLATEIDS_EMAIL_ZAAKCLOSE: this.props.omcConfiguration.templates.zaakCloseEmail ?? DEFAULT_UUID,
+      USER_TEMPLATEIDS_EMAIL_TASKASSIGNED: DEFAULT_UUID,
+      USER_TEMPLATEIDS_EMAIL_MESSAGE: DEFAULT_UUID,
+      USER_TEMPLATEIDS_SMS_ZAAKCREATE: this.props.omcConfiguration.templates.zaakCreateSms ?? DEFAULT_UUID,
+      USER_TEMPLATEIDS_SMS_ZAAKUPDATE: this.props.omcConfiguration.templates.zaakUpdateSms ?? DEFAULT_UUID,
+      USER_TEMPLATEIDS_SMS_ZAAKCLOSE: this.props.omcConfiguration.templates.zaakCloseSms ?? DEFAULT_UUID,
+      USER_TEMPLATEIDS_SMS_TASKASSIGNED: DEFAULT_UUID,
+      USER_TEMPLATEIDS_SMS_MESSAGE: DEFAULT_UUID,
 
 
       // Whitelisted IDs used by OMC web API?
