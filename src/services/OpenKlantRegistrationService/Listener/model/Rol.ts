@@ -31,6 +31,7 @@ export const RolSchema = z.object({
     geboortedatum: z.string().optional(),
     // "verblijfsadres": {},
     // "subVerblijfBuitenland": {}
+    annIdentificatie: z.string().optional(), // TODO this depends on betrokkeneType. For now combine all fields in the object as optional. Fix later.
   }),
 
 });

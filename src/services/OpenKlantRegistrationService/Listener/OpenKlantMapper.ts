@@ -27,10 +27,14 @@ export class OpenKlantMapper {
     }
 
     if (!name) {
+      console.log('Returning 400 no name found');
       throw new ErrorResponse(400, 'Expected name to be set in rol.');
     }
 
-    const partijSoort = rol.betrokkeneIdentificatie.anpIdentificatie ? 'organisatie' : 'persoon';
+    let partijSoort : 'persoon'|'organisatie' = 'persoon';
+    if (rol.betrokkeneType === 'niet_natuurlijk_persoon') {
+      partijSoort = 'organisatie';
+    }
 
     return {
       digitaleAdressen: [],
@@ -104,7 +108,7 @@ export class OpenKlantMapper {
     }
 
     const bsn = rol.betrokkeneIdentificatie.inpBsn;
-    const kvk = rol.betrokkeneIdentificatie.anpIdentificatie;
+    const kvk = rol.betrokkeneIdentificatie.annIdentificatie;
     if (!bsn && !kvk) {
       throw new ErrorResponse(400, 'Could not map rol to partijIdentificatie: no identification information found in rol');
     }
