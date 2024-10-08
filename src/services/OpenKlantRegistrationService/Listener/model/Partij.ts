@@ -19,15 +19,14 @@ export const OpenKlantPartijSchema = z.object({
     description: 'Geeft aan of de contactgegevens van de partij nog gebruikt morgen worden om contact op te nemen. Gegevens van niet-actieve partijen mogen hiervoor niet worden gebruikt.',
   }),
   voorkeurstaal: z.string(),
-  partijIdentificatie: z.object({ // Staat niet in de docs maar is wel nodig?
-    contactnaam: z.union([z.null(), z.object({ // This is not in the docs but we do need it apparently...
-    //   voorletters: 'H',
-    //   voornaam: 'Hans',
-    //   voorvoegselAchternaam: 'de',
-    //   achternaam: 'Jong',
-    })]),
-    volledigeNaam: z.string(),
-  }),
+  partijIdentificatie: z.union([
+    z.object({ // Staat niet in de docs maar is wel nodig?
+      contactnaam: z.union([z.null(), z.object({ // This is not in the docs but we do need it apparently...
+      })]),
+      volledigeNaam: z.string(),
+    }),
+    z.null(),
+  ]),
   indicatieGeheimhouding: z.boolean(),
 });
 
