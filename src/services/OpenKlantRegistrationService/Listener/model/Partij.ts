@@ -19,11 +19,13 @@ export const OpenKlantPartijSchema = z.object({
     description: 'Geeft aan of de contactgegevens van de partij nog gebruikt morgen worden om contact op te nemen. Gegevens van niet-actieve partijen mogen hiervoor niet worden gebruikt.',
   }),
   voorkeurstaal: z.string(),
-  partijIdentificatie: z.union([
-    z.object({ // Staat niet in de docs maar is wel nodig?
-      contactnaam: z.union([z.null(), z.object({ // This is not in the docs but we do need it apparently...
-      })]),
+  partijIdentificatie: z.union([ // Staat niet in de docs maar is wel nodig, see https://github.com/maykinmedia/open-klant/issues/227
+    z.object({
+      contactnaam: z.union([z.null(), z.object({})]),
       volledigeNaam: z.string(),
+    }),
+    z.object({
+      naam: z.string(),
     }),
     z.null(),
   ]).optional(),
