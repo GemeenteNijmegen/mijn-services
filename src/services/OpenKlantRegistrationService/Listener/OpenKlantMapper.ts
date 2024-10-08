@@ -102,22 +102,35 @@ export class OpenKlantMapper {
     }
 
     const bsn = rol.betrokkeneIdentificatie.inpBsn;
-    if (!bsn) {
-      throw new ErrorResponse(400, 'Could not map rol to partijIdentificatie: no BSN found in rol');
+    const kvk = rol.betrokkeneIdentificatie.anpIdentificatie;
+    if (!bsn && !kvk) {
+      throw new ErrorResponse(400, 'Could not map rol to partijIdentificatie: no identification information found in rol');
+    }
+
+    let partijIdentificator = {
+      codeObjecttype: 'INGESCHREVEN NATUURLIJK PERSOON', // Type van het object, bijvoorbeeld: 'INGESCHREVEN NATUURLIJK PERSOON'.
+      codeSoortObjectId: 'Burgerservicenummer', // Naam van de eigenschap die het object identificeert, bijvoorbeeld: 'Burgerservicenummer'.
+      objectId: bsn, // Waarde van de eigenschap die het object identificeert, bijvoorbeeld: '123456788'.
+      codeRegister: 'BRP', // Binnen het landschap van registers unieke omschrijving van het register waarin het object is geregistreerd, bijvoorbeeld: 'BRP'.
+    };
+
+    if (kvk) {
+      partijIdentificator = {
+        codeObjecttype: 'NIET NATUURLIJK PERSOON', // Type van het object, bijvoorbeeld: 'INGESCHREVEN NATUURLIJK PERSOON'.
+        codeSoortObjectId: 'Kvknummer', // Naam van de eigenschap die het object identificeert, bijvoorbeeld: 'Burgerservicenummer'.
+        objectId: kvk, // Waarde van de eigenschap die het object identificeert, bijvoorbeeld: '123456788'.
+        codeRegister: 'KVK', // Binnen het landschap van registers unieke omschrijving van het register waarin het object is geregistreerd, bijvoorbeeld: 'BRP'.
+      };
     }
 
     return {
       identificeerdePartij: {
         uuid: partijUuid,
       },
-      partijIdentificator: {
-        codeObjecttype: 'INGESCHREVEN NATUURLIJK PERSOON', // Type van het object, bijvoorbeeld: 'INGESCHREVEN NATUURLIJK PERSOON'.
-        codeSoortObjectId: 'Burgerservicenummer', // Naam van de eigenschap die het object identificeert, bijvoorbeeld: 'Burgerservicenummer'.
-        objectId: bsn, // Waarde van de eigenschap die het object identificeert, bijvoorbeeld: '123456788'.
-        codeRegister: 'BRP', // Binnen het landschap van registers unieke omschrijving van het register waarin het object is geregistreerd, bijvoorbeeld: 'BRP'.
-      },
+      partijIdentificator,
       // anderePartijIdentificator: 'string', // Vrij tekstveld om de verwijzing naar een niet-voorgedefinieerd objecttype, soort objectID of Register vast te leggen.
     };
+
   }
 
 
