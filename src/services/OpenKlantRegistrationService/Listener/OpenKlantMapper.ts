@@ -39,13 +39,13 @@ export class OpenKlantMapper {
     return {
       digitaleAdressen: [],
       indicatieActief: true,
-      partijIdentificatie: {
+      partijIdentificatie: partijSoort == 'persoon' ? {
         volledigeNaam: name,
         contactnaam: {
           voornaam: name,
           achternaam: '',
         },
-      },
+      } : undefined,
       rekeningnummers: [],
       soortPartij: partijSoort,
       voorkeursDigitaalAdres: null,

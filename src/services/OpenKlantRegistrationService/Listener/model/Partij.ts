@@ -26,7 +26,7 @@ export const OpenKlantPartijSchema = z.object({
       volledigeNaam: z.string(),
     }),
     z.null(),
-  ]),
+  ]).optional(),
   indicatieGeheimhouding: z.boolean(),
 });
 
