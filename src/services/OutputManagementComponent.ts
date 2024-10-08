@@ -83,11 +83,11 @@ export class OMCService extends Construct {
       OMC_FEATURES_WORKFLOW_VERSION: '2', // Should be two because we use open-klant 2.0
 
       // Builds ZGW token
-      USER_AUTHORIZATION_JWT_ISSUER: 'OMC', // Something identifying "OpenZaak" / "OpenKlant" / "OpenNotificatie" Web API services (token is shared between of them)
-      USER_AUTHORIZATION_JWT_AUDIENCE: '', // Cannot be missing 	Something identifying OMC Web API service (it will be used internally) - The OMC is the audience
+      USER_AUTHORIZATION_JWT_ISSUER: this.props.omcConfiguration.zgwTokenInformation.issuer, // Something identifying "OpenZaak" / "OpenKlant" / "OpenNotificatie" Web API services (token is shared between of them)
+      USER_AUTHORIZATION_JWT_AUDIENCE: this.props.omcConfiguration.zgwTokenInformation.audience, // Cannot be missing 	Something identifying OMC Web API service (it will be used internally) - The OMC is the audience
       USER_AUTHORIZATION_JWT_EXPIRESINMIN: (60*24).toString(), // This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
-      USER_AUTHORIZATION_JWT_USERID: 'OMC', //  This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
-      USER_AUTHORIZATION_JWT_USERNAME: 'OMC', // This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
+      USER_AUTHORIZATION_JWT_USERID: this.props.omcConfiguration.zgwTokenInformation.userId, //  This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
+      USER_AUTHORIZATION_JWT_USERNAME: this.props.omcConfiguration.zgwTokenInformation.username, // This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
 
       // API keys for ZGW(ish) components
       USER_API_KEY_OBJECTEN: 'NOT IN USE', // Cannot be missing and have null or empty value 	It needs to be generated from "Objecten" Web API service UI

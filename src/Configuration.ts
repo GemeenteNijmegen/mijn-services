@@ -122,6 +122,14 @@ export interface OutputManagementComponentConfiguration {
    * configured using the console.
    */
   notificatiesApiUrl: string;
+
+  zgwTokenInformation: {
+    issuer: string;
+    audience: string;
+    userId: string;
+    username: string;
+  };
+
 }
 
 export interface OpenKlantRegistrationServiceConfiguration {
@@ -172,6 +180,12 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
         notificatiesApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-notificaties/api/v1',
+        zgwTokenInformation: {
+          audience: '',
+          issuer: 'OMC',
+          userId: 'OMC',
+          username: 'OMC',
+        },
       },
     ],
     openKlantRegistrationServices: [
