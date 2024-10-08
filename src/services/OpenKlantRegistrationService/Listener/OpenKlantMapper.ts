@@ -39,7 +39,7 @@ export class OpenKlantMapper {
         volledigeNaam: name,
         contactnaam: {
           voornaam: name,
-          achternaam: 'Leeg',
+          achternaam: '',
         },
       },
       rekeningnummers: [],
