@@ -220,7 +220,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
         path: '/open-klant-registration-service-development/callback',
-        roltypesToRegister: ['belanghebbende'],
+        roltypesToRegister: ['belanghebbende', 'initiator'],
       },
       {
         cdkId: 'open-klant-registration-service-woweb',

@@ -8,8 +8,8 @@ import { Rol } from './model/Rol';
  */
 export class OpenKlantMapper {
 
-  static readonly TELEFOONNUMMER = 'Telefoon';
-  static readonly EMAIL = 'Email';
+  static readonly TELEFOONNUMMER = 'Telefoon'; // Expected by OMC
+  static readonly EMAIL = 'Email'; // Expected by OMC
 
   static partijFromRol(rol: Rol) : OpenKlantPartij {
 
