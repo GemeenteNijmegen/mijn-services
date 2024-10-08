@@ -6,7 +6,7 @@ import { OpenKlantMapper } from '../OpenKlantMapper';
 test('Partij from persoon with email and phone', () => {
   const rol = getRol();
   const partij = OpenKlantMapper.partijFromRol(rol);
-  expect(partij.partijIdentificatie.volledigeNaam).toBe('H. de Jong');
+  expect(partij.partijIdentificatie?.volledigeNaam).toBe('H. de Jong');
 });
 
 test('Digitale adressen from persoon with email and phone', () => {
