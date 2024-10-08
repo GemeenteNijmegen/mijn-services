@@ -17,8 +17,9 @@ export class OpenKlantMapper {
       console.debug('Mapping rol to partij', rol);
     }
 
+    // Map correct name depending on information in rol.
+    // TODO we need to verify and expend this logic later on.
     let name = undefined;
-
     if (rol?.contactpersoonRol?.naam) {
       name = rol.contactpersoonRol.naam;
     } else if (rol?.betrokkeneIdentificatie.geslachtsnaam) {
@@ -31,21 +32,32 @@ export class OpenKlantMapper {
       throw new ErrorResponse(400, 'Expected name to be set in rol.');
     }
 
+    // Map to correct partijSoort
     let partijSoort : 'persoon'|'organisatie' = 'persoon';
     if (rol.betrokkeneType === 'niet_natuurlijk_persoon') {
       partijSoort = 'organisatie';
     }
 
+    // Map to correct partijIdentificatie
+    // This field must be filled differently for organisatie or persoon...
+    // See: https://github.com/maykinmedia/open-klant/issues/227
+    let partijIdentificatie: any = {
+      volledigeNaam: name,
+      contactnaam: {
+        voornaam: name,
+        achternaam: '',
+      },
+    };
+    if (partijSoort == 'organisatie') {
+      partijIdentificatie = {
+        naam: name,
+      };
+    }
+
     return {
       digitaleAdressen: [],
       indicatieActief: true,
-      partijIdentificatie: partijSoort == 'persoon' ? {
-        volledigeNaam: name,
-        contactnaam: {
-          voornaam: name,
-          achternaam: '',
-        },
-      } : undefined,
+      partijIdentificatie: partijIdentificatie,
       rekeningnummers: [],
       soortPartij: partijSoort,
       voorkeursDigitaalAdres: null,
