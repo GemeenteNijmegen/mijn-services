@@ -30,6 +30,8 @@ export class OpenKlantMapper {
       throw new ErrorResponse(400, 'Expected name to be set in rol.');
     }
 
+    const partijSoort = rol.betrokkeneIdentificatie.anpIdentificatie ? 'organisatie' : 'persoon';
+
     return {
       digitaleAdressen: [],
       indicatieActief: true,
@@ -41,7 +43,7 @@ export class OpenKlantMapper {
         },
       },
       rekeningnummers: [],
-      soortPartij: 'persoon',
+      soortPartij: partijSoort,
       voorkeursDigitaalAdres: null,
       voorkeursRekeningnummer: null,
       voorkeurstaal: 'dut',
