@@ -186,7 +186,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       {
         cdkId: 'test-omc',
         path: 'test-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.10.0',
+        image: 'worthnl/notifynl-omc:1.10.2',
         logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
@@ -211,7 +211,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       {
         cdkId: 'vrijbrp-omc',
         path: 'vrijbrp-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.10.0',
+        image: 'worthnl/notifynl-omc:1.10.2',
         logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
