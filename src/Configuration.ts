@@ -181,10 +181,27 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
         notificatiesApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-notificaties/api/v1',
         zgwTokenInformation: {
-          audience: '',
+          audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'OMC',
           userId: 'OMC',
           username: 'OMC',
+        },
+      },
+      {
+        cdkId: 'vrijbrp-omc',
+        path: 'vrijbrp-omc', // Without /
+        image: 'worthnl/notifynl-omc:1.10.0',
+        logLevel: 'DEBUG',
+        debug: true,
+        mode: 'Development',
+        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        zakenApiUrl: 'notificaties.test.common-gateway.commonground.nu/api/zrc/v1',
+        notificatiesApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-notificaties/api/v1', // TODO currently pointed at us, do we need this?
+        zgwTokenInformation: {
+          audience: 'OMC',
+          issuer: 'zgw_nijmegen_notificatie',
+          userId: 'zgw_nijmegen_notificatie',
+          username: 'zgw_nijmegen_notificatie',
         },
       },
     ],
