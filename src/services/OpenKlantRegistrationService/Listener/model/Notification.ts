@@ -13,6 +13,7 @@ export const NotificationSchema = z.object({
     'create',
     'update',
     'delete',
+    'partial_update',
   ]),
   aanmaakdatum: z.string(),
   kenmerken: z.object({}).passthrough(), // any
