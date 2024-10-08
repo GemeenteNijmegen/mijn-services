@@ -11,22 +11,32 @@ runLiveTests('Live tests OpenKlantApi', () => {
   });
 
   test('create partij plain', async () => {
-    await createPartij(api);
+    await createPartijPersoon(api);
+  });
+
+  test('create partij organisatie', async () => {
+    const result = await createPartijOrganisatie(api);
+    console.log(JSON.stringify(result, null, 4));
+  });
+
+  test('create partij identificatie organisatie', async () => {
+    // const partij = await createPartijOrganisatie(api);
+    await createPartijIdentificatieOrganisatie(api, '8cdabbd0-83d4-4772-a393-e12f4a6ba1d0');
   });
 
   test('create partij identificatie', async () => {
-    const partij = await createPartij(api);
-    await createPartijIdentificatie(api, partij.uuid);
+    // const partij = await createPartijPersoon(api);
+    await createPartijIdentificatie(api, '65fc6b49-4a3c-4213-ae7a-d2769762d79f');
   });
 
   test('create digitaal adres', async () => {
-    const partij = await createPartij(api);
+    const partij = await createPartijPersoon(api);
     await createDigitaalAdres(api, partij.uuid);
   });
 
 });
 
-async function createPartij(api: IOpenKlantApi) {
+async function createPartijPersoon(api: IOpenKlantApi) {
   return api.registerPartij({
     digitaleAdressen: [],
     indicatieActief: true,
@@ -43,6 +53,25 @@ async function createPartij(api: IOpenKlantApi) {
   });
 }
 
+
+async function createPartijOrganisatie(api: IOpenKlantApi) {
+  return api.registerPartij({
+    digitaleAdressen: [],
+    indicatieActief: true,
+    partijIdentificatie: {
+      volledigeNaam: 'Live Test Partij',
+      contactnaam: 'Test Live Partij',
+    },
+    rekeningnummers: [],
+    soortPartij: 'organisatie',
+    voorkeursDigitaalAdres: null,
+    voorkeursRekeningnummer: null,
+    voorkeurstaal: 'dut',
+    indicatieGeheimhouding: false,
+  });
+}
+
+
 async function createPartijIdentificatie(api: IOpenKlantApi, partijUuid: string) {
   return api.addPartijIdentificatie({
     identificeerdePartij: {
@@ -53,6 +82,20 @@ async function createPartijIdentificatie(api: IOpenKlantApi, partijUuid: string)
       codeSoortObjectId: 'Burgerservicenummer',
       objectId: '99999966',
       codeRegister: 'BRP',
+    },
+  });
+}
+
+async function createPartijIdentificatieOrganisatie(api: IOpenKlantApi, partijUuid: string) {
+  return api.addPartijIdentificatie({
+    identificeerdePartij: {
+      uuid: partijUuid,
+    },
+    partijIdentificator: {
+      codeObjecttype: 'NIET NATUURLIJK PERSOON',
+      codeSoortObjectId: 'Kvknummer',
+      objectId: '99999966',
+      codeRegister: 'KVK',
     },
   });
 }
