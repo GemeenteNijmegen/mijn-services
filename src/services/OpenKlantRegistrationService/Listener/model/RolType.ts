@@ -13,12 +13,12 @@ export const RolTypeSchema = z.object({
     'zaakcoordinator',
     'mede_initiator',
   ]),
-  zaaktypeIdentificatie: z.union([z.null(), z.string()]).optional(),
-  catalogus: z.union([z.null(), z.string()]).optional(),
-  beginGeldigheid: z.union([z.null(), z.string()]).optional(),
-  eindeGeldigheid: z.union([z.null(), z.string()]).optional(),
-  beginObject: z.union([z.null(), z.string()]).optional(),
-  eindeObject: z.union([z.null(), z.string()]).optional(),
+  zaaktypeIdentificatie: z.string().nullish(),
+  catalogus: z.string().nullish(),
+  beginGeldigheid: z.string().nullish(),
+  eindeGeldigheid: z.string().nullish(),
+  beginObject: z.string().nullish(),
+  eindeObject: z.string().nullish(),
 });
 
 export const RolTypeWithUrlSchema = RolTypeSchema.extend({

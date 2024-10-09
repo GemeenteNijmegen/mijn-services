@@ -14,24 +14,26 @@ export const RolSchema = z.object({
   ]),
   roltype: z.string(),
   contactpersoonRol: z.object({
-    naam: z.string(),
-    emailadres: z.string().optional(),
-    functie: z.string().optional(),
-    telefoonnummer: z.string().optional(),
+    naam: z.string().nullish(),
+    emailadres: z.string().nullish(),
+    functie: z.string().nullish(),
+    telefoonnummer: z.string().nullish(),
   }).optional(),
   betrokkeneIdentificatie: z.object({
-    inpBsn: z.string().optional(),
-    inpA_nummer: z.string().optional(),
-    anpIdentificatie: z.string().optional(),
-    geslachtsnaam: z.string().optional(),
-    voorvoegselGeslachtsnaam: z.string().optional(),
-    voorletters: z.string().optional(),
-    voornamen: z.string().optional(),
-    // geslachtsaanduiding: z.enum(['m', 'v', 'o']).optional(), // TODO check if we can add this back in later
-    geboortedatum: z.string().optional(),
+    inpBsn: z.string().nullish(),
+    annIdentificatie: z.string().nullish(), // TODO this depends on betrokkeneType. For now combine all fields in the object as optional. Fix later.
+    geslachtsnaam: z.string().nullish(), // TODO used by Woweb
+
+    // Unsued fields by this service
+    // inpA_nummer: vrijbrpStringOptional,
+    // anpIdentificatie: vrijbrpStringOptional,
+    // voorvoegselGeslachtsnaam: vrijbrpStringOptional,
+    // voorletters: vrijbrpStringOptional,
+    // voornamen: vrijbrpStringOptional,
+    // geslachtsaanduiding: z.enum(['m', 'v', 'o']).optional(),
+    // geboortedatum: vrijbrpStringOptional,
     // "verblijfsadres": {},
     // "subVerblijfBuitenland": {}
-    annIdentificatie: z.string().optional(), // TODO this depends on betrokkeneType. For now combine all fields in the object as optional. Fix later.
   }),
 
 });
