@@ -20,7 +20,7 @@ test('Unsupported notification returns error', async () => {
   const notification = NotificationSchema.parse(JSON.parse(file));
   const handler = createHandler();
   const response = await handler.handleNotification(notification);
-  expect((response as ApiGatewayV2Response).statusCode).toBe(200); // TODO fix later when we return another error code
+  expect((response as ApiGatewayV2Response).statusCode).toBe(206);
 });
 
 test('Do not handle rol of wrong type', async () => {
