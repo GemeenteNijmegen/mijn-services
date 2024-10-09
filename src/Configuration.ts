@@ -239,7 +239,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         cdkId: 'open-klant-registration-service-vrijbrp',
         debug: true,
         openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'https://example.com/conduction-zaken-api-url-here',
+        zakenApiUrl: 'https://notificaties.test.common-gateway.commonground.nu/api/zrc/v1',
         path: '/open-klant-registration-service-vrijbrp/callback',
         roltypesToRegister: ['initiator'],
       },
