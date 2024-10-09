@@ -20,6 +20,10 @@ export abstract class ZgwApi {
     return this.callApi('POST', url, options);
   }
 
+  protected patch(url: string, options?: RequestInit) {
+    return this.callApi('POST', url, options);
+  }
+
   protected delete(url: string, options?: RequestInit) {
     return this.callApi('DELETE', url, options);
   }

@@ -80,6 +80,7 @@ export class RolRegisrationStrategy implements IRegistrationStrategy {
       },
     });
 
+    // TODO Update rol with partij URL
 
     return Response.ok();
   }

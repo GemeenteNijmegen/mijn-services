@@ -5,6 +5,7 @@ export const RolSchema = z.object({
   url: z.string(),
   uuid: z.string(),
   zaak: z.string(),
+  betrokkene: z.string().nullish(), // TODO we will be using this to store the reference to open klant
   betrokkeneType: z.enum([
     'natuurlijk_persoon',
     'niet_natuurlijk_persoon',
