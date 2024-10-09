@@ -25,6 +25,9 @@ export class OpenKlantMapper {
     } else if (rol?.betrokkeneIdentificatie.geslachtsnaam) {
       console.warn('Using geslachtsnaam!'); // TODO figure out if we need to do something else here?
       name = rol?.betrokkeneIdentificatie.geslachtsnaam;
+    } else if (process.env.DEBUG === 'true') {
+      console.warn('No name in rol, doing a call to BRP to get the user\' info.');
+      name = 'Onbekende gebruiker'; // TODO implement BRP call here?
     }
 
     if (!name) {
