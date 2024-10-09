@@ -126,18 +126,18 @@ export class OpenKlantMapper {
     }
 
     let partijIdentificator = {
-      codeObjecttype: 'INGESCHREVEN NATUURLIJK PERSOON', // Type van het object, bijvoorbeeld: 'INGESCHREVEN NATUURLIJK PERSOON'.
-      codeSoortObjectId: 'Burgerservicenummer', // Naam van de eigenschap die het object identificeert, bijvoorbeeld: 'Burgerservicenummer'.
-      objectId: bsn, // Waarde van de eigenschap die het object identificeert, bijvoorbeeld: '123456788'.
-      codeRegister: 'BRP', // Binnen het landschap van registers unieke omschrijving van het register waarin het object is geregistreerd, bijvoorbeeld: 'BRP'.
+      codeObjecttype: 'INGESCHREVEN NATUURLIJK PERSOON',
+      codeSoortObjectId: 'Burgerservicenummer',
+      objectId: bsn ?? undefined, // Maps null | undefined to undefined...
+      codeRegister: 'BRP',
     };
 
     if (kvk) {
       partijIdentificator = {
-        codeObjecttype: 'NIET NATUURLIJK PERSOON', // Type van het object, bijvoorbeeld: 'INGESCHREVEN NATUURLIJK PERSOON'.
-        codeSoortObjectId: 'Kvknummer', // Naam van de eigenschap die het object identificeert, bijvoorbeeld: 'Burgerservicenummer'.
-        objectId: kvk, // Waarde van de eigenschap die het object identificeert, bijvoorbeeld: '123456788'.
-        codeRegister: 'KVK', // Binnen het landschap van registers unieke omschrijving van het register waarin het object is geregistreerd, bijvoorbeeld: 'BRP'.
+        codeObjecttype: 'NIET NATUURLIJK PERSOON',
+        codeSoortObjectId: 'Kvknummer',
+        objectId: kvk ?? undefined, // Maps null | undefined to undefined...
+        codeRegister: 'KVK',
       };
     }
 
