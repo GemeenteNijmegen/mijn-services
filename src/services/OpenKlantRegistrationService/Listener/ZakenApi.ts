@@ -33,24 +33,21 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
 
     try {
       await this.delete(rol.url);
-      await this.post(this.zakenApiUrl + '/zaken/api/v1/rollen', {
+      const response = await this.post(this.zakenApiUrl + '/zaken/api/v1/rollen', {
         body: JSON.stringify({
-          rol,
+          ...rol,
           url: undefined,
           uuid: undefined,
           registratiedatum: undefined,
         }),
       });
+      const result = await response.json();
+      return RolSchema.parse(result);
     } catch (error) {
       console.error('Failed to delete and recreate rol! This is the original role:', originalRol);
+      throw Error('Could not update rol');
     }
 
-
-    const response = await this.patch(rol.url, {
-      body: JSON.stringify(rol),
-    });
-    const result = await response.json();
-    return RolSchema.parse(result);
   }
 
 }

@@ -40,7 +40,7 @@ export abstract class ZgwApi {
     });
 
     if (!response.ok) {
-      console.log(method, 'failed for', url, response.status, response.statusText);
+      console.log(method, 'failed for', url, response.status, response.statusText, await response.text());
       throw new Error(method + ' request failed');
     }
     return response;
