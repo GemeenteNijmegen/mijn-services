@@ -5,11 +5,11 @@
       "type": "build"
     },
     {
-      "name": "@types/aws-lambda",
+      "name": "@types/jest",
       "type": "build"
     },
     {
-      "name": "@types/jest",
+      "name": "@types/jsonwebtoken",
       "type": "build"
     },
     {
@@ -84,11 +84,19 @@
       "type": "build"
     },
     {
+      "name": "@gemeentenijmegen/apigateway-http",
+      "type": "runtime"
+    },
+    {
       "name": "@gemeentenijmegen/aws-constructs",
       "type": "runtime"
     },
     {
       "name": "@gemeentenijmegen/utils",
+      "type": "runtime"
+    },
+    {
+      "name": "@types/aws-lambda",
       "type": "runtime"
     },
     {
@@ -110,7 +118,15 @@
       "type": "runtime"
     },
     {
+      "name": "jsonwebtoken",
+      "type": "runtime"
+    },
+    {
       "name": "pg",
+      "type": "runtime"
+    },
+    {
+      "name": "zod",
       "type": "runtime"
     }
   ],
