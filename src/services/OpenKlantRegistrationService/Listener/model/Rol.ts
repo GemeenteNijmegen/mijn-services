@@ -37,6 +37,6 @@ export const RolSchema = z.object({
     // "subVerblijfBuitenland": {}
   }),
 
-});
+}).passthrough();
 
 export type Rol = z.infer<typeof RolSchema>;
