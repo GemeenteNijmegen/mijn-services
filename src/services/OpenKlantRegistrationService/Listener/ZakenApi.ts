@@ -37,6 +37,8 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
         body: JSON.stringify({
           rol,
           url: undefined,
+          uuid: undefined,
+          registratiedatum: undefined,
         }),
       });
     } catch (error) {
