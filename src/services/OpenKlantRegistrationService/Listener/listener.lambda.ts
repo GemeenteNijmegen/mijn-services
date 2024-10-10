@@ -35,6 +35,7 @@ async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
     zakenApi: new ZakenApi({
       clientId: zgwClientId,
       clientSecret: zgwClientSecret,
+      zakenApiUrl: env.ZAKEN_API_URL,
     }),
     openKlantApi: new OpenKlantApi({
       apikey: openKlantApiKey,

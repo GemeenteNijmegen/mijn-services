@@ -17,6 +17,7 @@ runLiveTests('Live tests handle notification', () => {
   const zakenApi = new ZakenApi({
     clientId: process.env.ZAKEN_API_CLIENT_ID!,
     clientSecret: process.env.ZAKEN_API_CLIENT_SECRET!,
+    zakenApiUrl: process.env.ZAKEN_API_URL!,
   });
 
   const catalogiApi = new CatalogiApi({

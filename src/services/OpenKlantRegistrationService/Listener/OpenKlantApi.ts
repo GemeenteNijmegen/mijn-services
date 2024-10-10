@@ -10,6 +10,7 @@ export interface IOpenKlantApi {
   updatePartij(partij: Partial<OpenKlantPartijWithUuid>) : Promise<OpenKlantPartijWithUuid>;
   addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid>;
   addDigitaalAdres(address: OpenKlantDigitaalAdres) : Promise<OpenKlantDigitaalAdresWithUuid>;
+  getEndpoint(): string;
 }
 
 export class OpenKlantApi implements IOpenKlantApi {
@@ -59,6 +60,17 @@ export class OpenKlantApi implements IOpenKlantApi {
     return OpenKlantPartijSchemaWithUuid.parse(result);
   }
 
+  getEndpoint() {
+    return this.props.url;
+  }
+
+  constructEndpoint(path: string) {
+    if (path.startsWith('/')) {
+      return this.props.url + path;
+    }
+    return this.props.url + '/' + path;
+  }
+
   private async callApi(method: string, url: string, options: RequestInit) {
     try {
       const response = await fetch(url, {
@@ -86,6 +98,9 @@ export class OpenKlantApi implements IOpenKlantApi {
 
 
 export class OpenKlantApiMock implements IOpenKlantApi {
+  getEndpoint(): string {
+    throw new Error('Method should be mocked.');
+  }
   registerPartij(_partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid> {
     throw new Error('Method should be mocked.');
   }
