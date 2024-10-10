@@ -1,5 +1,6 @@
 import { IRegistrationStrategy, SimpleStrategy } from './IRegistrationStrategy';
 import { RolRegisrationStrategy } from './RolRegistrationStrategy';
+import { RolWithBRPRegistrationStrategy } from './RolWithBRPRegistrationStrategy';
 import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
 
 
@@ -20,7 +21,7 @@ export class RegistrationStrategyFactory {
       console.debug('Using rol registration strategy');
       return new RolRegisrationStrategy(this.configuration);
     } else if (strategy == 'rolwithbrpregistration') {
-
+      return new RolWithBRPRegistrationStrategy(this.configuration);
     }
 
     console.warn('Defaulting to simple strategy. This is porbably not what you want.');
