@@ -11,28 +11,9 @@ export class OpenKlantMapper {
   static readonly TELEFOONNUMMER = 'Telefoon'; // Expected by OMC
   static readonly EMAIL = 'Email'; // Expected by OMC
 
-  static partijFromRol(rol: Rol) : OpenKlantPartij {
-
+  static partijFromRolWithName(rol: Rol, name: string) {
     if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to partij', rol);
-    }
-
-    // Map correct name depending on information in rol.
-    // TODO we need to verify and expend this logic later on.
-    let name = undefined;
-    if (rol?.contactpersoonRol?.naam) {
-      name = rol.contactpersoonRol.naam;
-    } else if (rol?.betrokkeneIdentificatie.geslachtsnaam) {
-      console.warn('Using geslachtsnaam!'); // TODO figure out if we need to do something else here?
-      name = rol?.betrokkeneIdentificatie.geslachtsnaam;
-    } else if (process.env.DEBUG === 'true') {
-      console.warn('No name in rol, doing a call to BRP to get the user\' info.');
-      name = 'Onbekende gebruiker'; // TODO implement BRP call here?
-    }
-
-    if (!name) {
-      console.log('Returning 400 no name found');
-      throw new ErrorResponse(400, 'Expected name to be set in rol.');
     }
 
     // Map to correct partijSoort
@@ -68,6 +49,31 @@ export class OpenKlantMapper {
       voorkeurstaal: 'dut',
       indicatieGeheimhouding: false,
     };
+  }
+
+  static partijFromRol(rol: Rol) : OpenKlantPartij {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to partij', rol);
+    }
+
+    // Map correct name depending on information in rol.
+    // TODO we need to verify and expend this logic later on.
+    let name = undefined;
+    if (rol?.contactpersoonRol?.naam) {
+      name = rol.contactpersoonRol.naam;
+    } else if (rol?.betrokkeneIdentificatie.geslachtsnaam) {
+      console.warn('Using geslachtsnaam!'); // TODO figure out if we need to do something else here?
+      name = rol?.betrokkeneIdentificatie.geslachtsnaam;
+    } else if (process.env.DEBUG === 'true') {
+      console.warn('No name in rol, doing a call to BRP to get the user\' info.');
+      name = 'Onbekende gebruiker'; // TODO implement BRP call here?
+    }
+
+    if (!name) {
+      console.log('Returning 400 no name found');
+      throw new ErrorResponse(400, 'Expected name to be set in rol.');
+    }
+    return this.partijFromRolWithName(rol, name);
   }
 
   static digitaalAdressenFromRol(rol: Rol, partijUuid: string) : OpenKlantDigitaalAdres[] {
