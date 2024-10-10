@@ -34,6 +34,7 @@ export abstract class ZgwApi {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.createToken()}`,
+        'Accept-Crs': 'EPSG:4326',
       },
       ...options,
     });
