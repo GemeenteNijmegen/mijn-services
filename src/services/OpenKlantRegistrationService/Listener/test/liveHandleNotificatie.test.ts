@@ -1,3 +1,4 @@
+import { BRPApi } from '../BRPApi';
 import { CatalogiApi } from '../CatalogiApi';
 import { Notification } from '../model/Notification';
 import { OpenKlantApi } from '../OpenKlantApi';
@@ -30,6 +31,7 @@ runLiveTests('Live tests handle notification', () => {
       catalogiApi: catalogiApi,
       zakenApiUrl: process.env.ZAKEN_API_URL!,
       roltypesToRegister: ['initiator'],
+      brpApi: mockBrpApi(),
     });
     const response = await handler.handleNotification(composeNotification());
     expect(response.statusCode).toBe(200);
@@ -49,4 +51,10 @@ function composeNotification() : Notification {
       theContentOfThisObjectIsNotUsed: true,
     },
   };
+}
+
+function mockBrpApi() {
+  const api = new BRPApi({ apiKey: 'fakeKey', baseUrl: 'http://localhost' });
+  jest.spyOn(api, 'getName').mockImplementation((async () => 'Een naam'));
+  return api;
 }

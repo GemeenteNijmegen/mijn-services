@@ -3,6 +3,7 @@ import { HttpApi, HttpMethod, MappingValue, ParameterMapping } from 'aws-cdk-lib
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { ListenerFunction } from './Listener/listener-function';
 import { OpenKlantRegistrationServiceConfiguration } from '../../Configuration';
@@ -21,19 +22,21 @@ export class OpenKlantRegistrationService extends Construct {
     this.props = props;
 
     const params = this.setupVulServiceConfiguration(id);
-
+    const openKlantConfig = this.props.openKlantRegistrationServiceConfiguration;
     const service = new ListenerFunction(this, 'listener', {
       timeout: Duration.seconds(30),
       description: `Notification endpoint for ${id}`,
       environment: {
-        OPEN_KLANT_API_URL: this.props.openKlantRegistrationServiceConfiguration.openKlantUrl,
+        OPEN_KLANT_API_URL: openKlantConfig.openKlantUrl,
         OPEN_KLANT_API_KEY_ARN: params.openklant.secretArn,
         ZGW_TOKEN_CLIENT_ID_ARN: params.zgw.id.secretArn,
         ZGW_TOKEN_CLIENT_SECRET_ARN: params.zgw.secret.secretArn,
-        ZAKEN_API_URL: this.props.openKlantRegistrationServiceConfiguration.zakenApiUrl,
-        DEBUG: this.props.openKlantRegistrationServiceConfiguration.debug ? 'true' : 'false',
+        ZAKEN_API_URL: openKlantConfig.zakenApiUrl,
+        DEBUG: openKlantConfig.debug ? 'true' : 'false',
         API_KEY_ARN: params.authentication.secretArn,
-        ROLTYPES_TO_REGISTER: this.props.openKlantRegistrationServiceConfiguration.roltypesToRegister.join(','),
+        ROLTYPES_TO_REGISTER: openKlantConfig.roltypesToRegister.join(','),
+        HAALCENTRAAL_BRP_APIKEY_ARN: Secret.fromSecretNameV2(this, 'haalcentraal-apikey', Statics.ssmHaalCentraalBRPApiKeySecret).secretArn,
+        HAALCENTRAAL_BRP_BASEURL: StringParameter.fromStringParameterName(this, 'haalcentraal-apibaseurl', Statics.ssmHaalCentraalBRPBaseUrl).stringValue,
       },
     });
 
