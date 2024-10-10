@@ -29,9 +29,15 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
       throw Error('Cannot update a rol without URL');
     }
 
+    // TODO move this to somewhere in the rolregistrationflow
     const originalRol = await this.getRol(rol.url);
+    if (originalRol.betrokkene) {
+      console.debug('Rol alreay had betrokkene url set. Skipping update...');
+      return originalRol;
+    }
 
     try {
+      console.debug('Updating rol');
       await this.delete(rol.url);
       const response = await this.post(this.zakenApiUrl + '/zaken/api/v1/rollen', {
         body: JSON.stringify({
