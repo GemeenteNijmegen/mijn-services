@@ -16,7 +16,7 @@ export const NotificationSchema = z.object({
     'partial_update',
   ]),
   aanmaakdatum: z.string(),
-  kenmerken: z.object({}).passthrough(), // any
+  kenmerken: z.object({}).nullish(), // any
 });
 
 export type Notification = z.infer<typeof NotificationSchema>;
