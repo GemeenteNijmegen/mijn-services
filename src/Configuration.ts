@@ -152,7 +152,7 @@ export interface OpenKlantRegistrationServiceConfiguration {
   zakenApiUrl: string;
   debug: boolean;
   roltypesToRegister: ('adviseur'|'behandelaar'|'belanghebbende'|'beslisser'|'initiator'|'klantcontacter'|'zaakcoordinator'|'mede_initiator')[];
-  strategy: ('simple'|'rolregistration');
+  strategy: ('simple'|'rolregistration'|'rolwithbrpregistration');
 }
 
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
@@ -243,7 +243,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'https://notificaties.test.common-gateway.commonground.nu/api/zrc/v1',
         path: '/open-klant-registration-service-vrijbrp/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'simple',
+        strategy: 'rolwithbrpregistration',
       },
       {
         cdkId: 'open-klant-registration-service-development',

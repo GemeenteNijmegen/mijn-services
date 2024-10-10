@@ -19,6 +19,8 @@ export class RegistrationStrategyFactory {
     } else if (strategy == 'rolregistration') {
       console.debug('Using rol registration strategy');
       return new RolRegisrationStrategy(this.configuration);
+    } else if (strategy == 'rolwithbrpregistration') {
+
     }
 
     console.warn('Defaulting to simple strategy. This is porbably not what you want.');
