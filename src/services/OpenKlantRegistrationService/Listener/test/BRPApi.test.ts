@@ -2,10 +2,13 @@ import { Bsn, environmentVariables } from '@gemeentenijmegen/utils';
 import { BRPApi } from '../BRPApi';
 
 beforeAll(() => {
-  process.env.DEBUG = 'true';
 });
 
 const runLiveTests = process.env.RUN_LIVE_TESTS === 'true' ? describe : describe.skip;
+
+process.env.DEBUG = 'true';
+process.env.HAALCENTRAAL_BRP_APIKEY = process.env.HAALCENTRAAL_BRP_APIKEY ?? 'fakekey';
+process.env.HAALCENTRAAL_BRP_BASEURL = process.env.HAALCENTRAAL_BRP_BASEURL ?? 'http://localhost';
 const env = environmentVariables(['HAALCENTRAAL_BRP_APIKEY', 'HAALCENTRAAL_BRP_BASEURL']);
 
 const config = { apiKey: env.HAALCENTRAAL_BRP_APIKEY, baseUrl: env.HAALCENTRAAL_BRP_BASEURL };
