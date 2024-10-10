@@ -3,6 +3,7 @@ import { ZgwApi, ZgwApiProps } from './ZgwApi';
 
 export interface IZakenApi {
   getRol(url: string) : Promise<Rol>;
+  updateRol(rol: Partial<Rol>) : Promise<Rol>;
 }
 
 export class ZakenApi extends ZgwApi implements IZakenApi {
@@ -34,7 +35,7 @@ export class ZakenApiMock implements IZakenApi {
   async getRol(_url: string): Promise<Rol> {
     throw Error('This method should be mocked!');
   }
-  async updateRol(_url: string, _rol: Partial<Rol>): Promise<Rol> {
+  async updateRol(_rol: Partial<Rol>): Promise<Rol> {
     throw Error('This method should be mocked!');
   }
 }

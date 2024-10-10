@@ -152,6 +152,7 @@ export interface OpenKlantRegistrationServiceConfiguration {
   zakenApiUrl: string;
   debug: boolean;
   roltypesToRegister: ('adviseur'|'behandelaar'|'belanghebbende'|'beslisser'|'initiator'|'klantcontacter'|'zaakcoordinator'|'mede_initiator')[];
+  strategy: ('simple'|'rolregistration');
 }
 
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
@@ -242,6 +243,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'https://notificaties.test.common-gateway.commonground.nu/api/zrc/v1',
         path: '/open-klant-registration-service-vrijbrp/callback',
         roltypesToRegister: ['initiator'],
+        strategy: 'simple',
       },
       {
         cdkId: 'open-klant-registration-service-development',
@@ -250,6 +252,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'https://lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
         path: '/open-klant-registration-service-development/callback',
         roltypesToRegister: ['belanghebbende', 'initiator'],
+        strategy: 'simple',
       },
       {
         cdkId: 'open-klant-registration-service-woweb',
@@ -258,6 +261,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'https://openzaak.woweb.app',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
+        strategy: 'rolregistration',
       },
     ],
   },

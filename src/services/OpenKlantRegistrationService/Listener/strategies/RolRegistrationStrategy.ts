@@ -81,6 +81,8 @@ export class RolRegisrationStrategy implements IRegistrationStrategy {
     });
 
     // TODO Update rol with partij URL
+    rol.betrokkene = partij.uuid;
+    await this.configuration.zakenApi.updateRol(rol);
 
     return Response.ok();
   }

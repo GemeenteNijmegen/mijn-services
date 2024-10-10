@@ -37,6 +37,7 @@ export class OpenKlantRegistrationService extends Construct {
         ROLTYPES_TO_REGISTER: openKlantConfig.roltypesToRegister.join(','),
         HAALCENTRAAL_BRP_APIKEY_ARN: Secret.fromSecretNameV2(this, 'haalcentraal-apikey', Statics.ssmHaalCentraalBRPApiKeySecret).secretArn,
         HAALCENTRAAL_BRP_BASEURL: StringParameter.fromStringParameterName(this, 'haalcentraal-apibaseurl', Statics.ssmHaalCentraalBRPBaseUrl).stringValue,
+        STRATEGY: this.props.openKlantRegistrationServiceConfiguration.strategy,
       },
     });
 
