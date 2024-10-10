@@ -14,6 +14,7 @@ export const NotificationSchema = z.object({
     'update',
     'delete',
     'partial_update',
+    'destroy',
   ]),
   aanmaakdatum: z.string(),
   kenmerken: z.object({}).nullish(), // any
