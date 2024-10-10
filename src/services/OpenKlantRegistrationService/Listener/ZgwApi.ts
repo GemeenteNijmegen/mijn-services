@@ -39,8 +39,8 @@ export abstract class ZgwApi {
     });
 
     if (!response.ok) {
-      console.log('Get failed for', url, response.status, response.statusText);
-      throw new Error('Request failed');
+      console.log(method, 'failed for', url, response.status, response.statusText);
+      throw new Error(method + ' request failed');
     }
     return response;
   }
