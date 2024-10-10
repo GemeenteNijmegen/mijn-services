@@ -21,6 +21,7 @@ export class OpenKlantRegistrationService extends Construct {
     super(scope, id);
     this.props = props;
 
+    const haalcentraalApiKey = Secret.fromSecretNameV2(this, 'haalcentraal-apikey', Statics.ssmHaalCentraalBRPApiKeySecret);
     const params = this.setupVulServiceConfiguration(id);
     const openKlantConfig = this.props.openKlantRegistrationServiceConfiguration;
     const service = new ListenerFunction(this, 'listener', {
@@ -35,7 +36,7 @@ export class OpenKlantRegistrationService extends Construct {
         DEBUG: openKlantConfig.debug ? 'true' : 'false',
         API_KEY_ARN: params.authentication.secretArn,
         ROLTYPES_TO_REGISTER: openKlantConfig.roltypesToRegister.join(','),
-        HAALCENTRAAL_BRP_APIKEY_ARN: Secret.fromSecretNameV2(this, 'haalcentraal-apikey', Statics.ssmHaalCentraalBRPApiKeySecret).secretArn,
+        HAALCENTRAAL_BRP_APIKEY_ARN: haalcentraalApiKey.secretArn,
         HAALCENTRAAL_BRP_BASEURL: StringParameter.fromStringParameterName(this, 'haalcentraal-apibaseurl', Statics.ssmHaalCentraalBRPBaseUrl).stringValue,
         STRATEGY: this.props.openKlantRegistrationServiceConfiguration.strategy,
       },
@@ -45,6 +46,7 @@ export class OpenKlantRegistrationService extends Construct {
     params.zgw.id.grantRead(service);
     params.zgw.secret.grantRead(service);
     params.authentication.grantRead(service);
+    haalcentraalApiKey.grantRead(service);
 
     this.setupRoute(service);
 
