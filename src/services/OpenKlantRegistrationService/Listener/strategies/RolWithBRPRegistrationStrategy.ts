@@ -51,7 +51,7 @@ export class RolWithBRPRegistrationStrategy implements IRegistrationStrategy {
     // Get name from Rol
     const personName = await this.getNameFromRol(rol);
     // Create a partij
-    const partijInput = OpenKlantMapper.partijFromRolWithName(rol, personName);
+    const partijInput = OpenKlantMapper.partijFromRol(rol, personName);
     const partij = await this.configuration.openKlantApi.registerPartij(partijInput);
     console.debug('Partij created', partij);
 

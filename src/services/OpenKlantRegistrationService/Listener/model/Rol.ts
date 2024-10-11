@@ -24,7 +24,7 @@ export const RolSchema = z.object({
     inpBsn: z.string().nullish(),
     annIdentificatie: z.string().nullish(), // TODO this depends on betrokkeneType. For now combine all fields in the object as optional. Fix later.
     geslachtsnaam: z.string().nullish(), // TODO used by Woweb
-
+    statutaireNaam: z.string().nullish(),
     // Unsued fields by this service
     // inpA_nummer: vrijbrpStringOptional,
     // anpIdentificatie: vrijbrpStringOptional,

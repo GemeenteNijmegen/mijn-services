@@ -45,6 +45,7 @@ export class RolRegisrationStrategy implements IRegistrationStrategy {
     }
     console.debug('Found a rol of the target type to forward to open klant.');
 
+    // FOR BSN AND ORGANISATION
     // Create a partij
     const partijInput = OpenKlantMapper.partijFromRol(rol);
     const partij = await this.configuration.openKlantApi.registerPartij(partijInput);
@@ -55,8 +56,16 @@ export class RolRegisrationStrategy implements IRegistrationStrategy {
     const partijIdentificatie = await this.configuration.openKlantApi.addPartijIdentificatie(partijIdentificatieInput);
     console.debug('Partij identificatie created', partijIdentificatie);
 
+    let partijWithDigitaleAdressen = partij;
+    if (partij.soortPartij == 'organisatie') {
+      const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partij.uuid}`;
+      const contactpersoonInput = OpenKlantMapper.contactpersoonFromRol(rol, partij.uuid, partijUrl);
+      const contactpersoon = await this.configuration.openKlantApi.registerPartij(contactpersoonInput);
+      partijWithDigitaleAdressen = contactpersoon;
+    }
+
     // Attach digitale adressen to partij
-    const digitaleAdressenInput = OpenKlantMapper.digitaalAdressenFromRol(rol, partij.uuid);
+    const digitaleAdressenInput = OpenKlantMapper.digitaalAdressenFromRol(rol, partijWithDigitaleAdressen.uuid);
     const promises: Promise<OpenKlantDigitaalAdresWithUuid>[] = [];
     digitaleAdressenInput.forEach(digitaalAdres => {
       promises.push(this.configuration.openKlantApi.addDigitaalAdres(digitaalAdres));
@@ -73,15 +82,15 @@ export class RolRegisrationStrategy implements IRegistrationStrategy {
       throw Error('No telefoon or email adres registered.');
     }
     await this.configuration.openKlantApi.updatePartij({
-      uuid: partij.uuid,
-      soortPartij: partij.soortPartij,
+      uuid: partijWithDigitaleAdressen.uuid,
+      soortPartij: partijWithDigitaleAdressen.soortPartij,
       voorkeursDigitaalAdres: {
         uuid: voorkeur,
       },
     });
 
-    // TODO Update rol with partij URL
-    const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partij.uuid}`;
+    // Update rol with partij URL
+    const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partijWithDigitaleAdressen.uuid}`;
     rol.betrokkene = partijUrl;
     await this.configuration.zakenApi.updateRol(rol);
 
