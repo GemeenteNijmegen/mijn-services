@@ -63,9 +63,11 @@ export class RolRegisrationStrategy implements IRegistrationStrategy {
 
     let partijWithDigitaleAdressen = partij;
     if (partij.soortPartij == 'organisatie') {
+      console.debug('Partij is an organisatie, storing contactgegevens in contactpersoon partij...');
       const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partij.uuid}`;
       const contactpersoonInput = OpenKlantMapper.contactpersoonFromRol(rol, partijUrl, partij.uuid);
       const contactpersoon = await this.configuration.openKlantApi.registerPartij(contactpersoonInput);
+      console.debug('Contactpersoon partij created', contactpersoon);
       partijWithDigitaleAdressen = contactpersoon;
     }
 
@@ -86,18 +88,21 @@ export class RolRegisrationStrategy implements IRegistrationStrategy {
     if (!voorkeur) {
       throw Error('No telefoon or email adres registered.');
     }
-    await this.configuration.openKlantApi.updatePartij({
+    const partijUpdate = await this.configuration.openKlantApi.updatePartij({
       uuid: partijWithDigitaleAdressen.uuid,
       soortPartij: partijWithDigitaleAdressen.soortPartij,
       voorkeursDigitaalAdres: {
         uuid: voorkeur,
       },
     });
+    console.debug('Partij updates with voorkeur', partijUpdate);
+
 
     // Update rol with partij URL
     const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partijWithDigitaleAdressen.uuid}`;
     rol.betrokkene = partijUrl;
-    await this.configuration.zakenApi.updateRol(rol);
+    const rolUpdate = await this.configuration.zakenApi.updateRol(rol);
+    console.debug('Rol updated with betrokkene', rolUpdate);
 
     return Response.ok();
   }

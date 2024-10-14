@@ -1,3 +1,4 @@
+import { ErrorResponse } from './ErrorResponse';
 import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from './model/Partij';
 
 interface OpenKlantApiProps {
@@ -6,6 +7,7 @@ interface OpenKlantApiProps {
 }
 
 export interface IOpenKlantApi {
+  findPartij(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon') : Promise<OpenKlantPartijWithUuid>;
   registerPartij(partij: OpenKlantPartij) : Promise<OpenKlantPartijWithUuid>;
   updatePartij(partij: Partial<OpenKlantPartijWithUuid>) : Promise<OpenKlantPartijWithUuid>;
   addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid>;
@@ -18,6 +20,34 @@ export class OpenKlantApi implements IOpenKlantApi {
   private readonly props: OpenKlantApiProps;
   constructor(props: OpenKlantApiProps) {
     this.props = props;
+  }
+
+
+  async findPartij(id: string | undefined | null, partijSoort: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid> {
+
+    if (!id) {
+      throw new ErrorResponse(400, 'Partij identifier is undefined, cannot search for a partij');
+    }
+
+    let url = this.props.url + '/partij';
+    if (partijSoort == 'organisatie') {
+      url += '?partijIdentificator__codeSoortObjectId=KVK';
+      url += `&partijIdentificator__objectId=${id}`;
+    } else if (partijSoort == 'persoon') {
+      url += '?partijIdentificator__codeSoortObjectId=BRP';
+      url += `&partijIdentificator__objectId=${id}`;
+    } else if (partijSoort == 'contactpersoon') {
+      url += `?vertegenwoordigdePartij__uuid=${id}`;
+    } else {
+      throw Error('Unknonw partijSoort to query: ' + partijSoort);
+    }
+
+    const response = await this.callApi('GET', url);
+    const result = await response.json() as any;
+    if (result.count != 1) {
+      throw Error('Multiple partijen found where a single partij was expected!');
+    }
+    return OpenKlantPartijSchemaWithUuid.parse(result.results[0]);
   }
 
   async addDigitaalAdres(address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
@@ -71,7 +101,7 @@ export class OpenKlantApi implements IOpenKlantApi {
     return this.props.url + '/' + path;
   }
 
-  private async callApi(method: string, url: string, options: RequestInit) {
+  private async callApi(method: string, url: string, options?: RequestInit) {
     try {
       const response = await fetch(url, {
         method: method,
@@ -98,6 +128,9 @@ export class OpenKlantApi implements IOpenKlantApi {
 
 
 export class OpenKlantApiMock implements IOpenKlantApi {
+  findPartij(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid> {
+    throw new Error('Method should be mocked.');
+  }
   getEndpoint(): string {
     throw new Error('Method should be mocked.');
   }

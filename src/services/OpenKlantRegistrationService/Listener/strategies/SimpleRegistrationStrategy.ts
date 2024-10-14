@@ -1,5 +1,6 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
+import { ErrorResponse } from '../ErrorResponse';
 import { Notification } from '../model/Notification';
 import { OpenKlantDigitaalAdresWithUuid } from '../model/Partij';
 import { OpenKlantMapper } from '../OpenKlantMapper';
@@ -37,6 +38,17 @@ export class SimpleRegistrationStrategy implements IRegistrationStrategy {
     const rolUrl = notification.resourceUrl;
     const rol = await this.configuration.zakenApi.getRol(rolUrl);
     const rolType = await this.configuration.catalogiApi.getRolType(rol.roltype);
+
+    // Check if partij alreay exists
+    if (rol.betrokkeneType == 'natuurlijk_persoon') {
+      await this.configuration.openKlantApi.findPartij(rol.betrokkeneIdentificatie.inpBsn, 'persoon');
+    } else if (rol.betrokkeneType == 'niet_natuurlijk_persoon') {
+      const organisatie = await this.configuration.openKlantApi.findPartij(rol.betrokkeneIdentificatie.annIdentificatie, 'organisatie');
+      await this.configuration.openKlantApi.findPartij(organisatie.uuid, 'contactpersoon');
+    } else {
+      throw new ErrorResponse(400, 'Cannot handle a rol of betrokkeneType ' + rol.betrokkeneType);
+    }
+
 
     // Check if role is of the target role type, otherwise return 200 but do not handle the notification
     const isTargetRolType = this.configuration.roltypesToRegister.includes(rolType.omschrijvingGeneriek.toLocaleLowerCase());
