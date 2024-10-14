@@ -59,7 +59,7 @@ export class RolRegisrationStrategy implements IRegistrationStrategy {
     let partijWithDigitaleAdressen = partij;
     if (partij.soortPartij == 'organisatie') {
       const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partij.uuid}`;
-      const contactpersoonInput = OpenKlantMapper.contactpersoonFromRol(rol, partij.uuid, partijUrl);
+      const contactpersoonInput = OpenKlantMapper.contactpersoonFromRol(rol, partijUrl, partij.uuid);
       const contactpersoon = await this.configuration.openKlantApi.registerPartij(contactpersoonInput);
       partijWithDigitaleAdressen = contactpersoon;
     }
