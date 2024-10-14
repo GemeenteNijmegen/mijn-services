@@ -37,6 +37,11 @@ export class RolRegisrationStrategy implements IRegistrationStrategy {
     const rol = await this.configuration.zakenApi.getRol(rolUrl);
     const rolType = await this.configuration.catalogiApi.getRolType(rol.roltype);
 
+    if (rol.betrokkene) {
+      console.debug('Rol alreay had betrokkene url set. Skipping update...');
+      return Response.ok();
+    }
+
     // Check if role is of the target role type, otherwise return 200 but do not handle the notification
     const isTargetRolType = this.configuration.roltypesToRegister.includes(rolType.omschrijvingGeneriek.toLocaleLowerCase());
     if (!isTargetRolType) {
