@@ -18,6 +18,8 @@ export class Statics {
   static readonly _ssmOpenKlantCredentials = `/${Statics.projectName}/internal/open-klant/credentials`;
   static readonly _ssmOpenNotificatiesCredentials = `/${Statics.projectName}/internal/open-notificaties/credentials`;
   static readonly _ssmRabbitMqCredentials = `/${Statics.projectName}/internal/open-notificaties/rabbit-mq/credentials`;
+  static readonly _ssmOmcOmcJwtSecret = `/${Statics.projectName}/internal/omc/omc-jwt/secret`;
+  static readonly _ssmOmcZgwJwtSecret = `/${Statics.projectName}/internal/omc/zgw-jwt/secret`;
   static readonly _ssmClientCredentialsZaakNotifications = `/${Statics.projectName}/internal/open-notificaties/client/credentials/zaak-notifications`;
   static readonly _ssmClientCredentialsNotificationsZaak = `/${Statics.projectName}/internal/open-notificaties/client/credentials/notifications-zaak`;
   static readonly _ssmOpenZaakCredentials = `/${Statics.projectName}/internal/open-zaak/credentials`;
@@ -31,6 +33,10 @@ export class Statics {
   static readonly databaseOpenKlant = 'open-klant';
   static readonly databaseOpenNotificaties = 'open-notificaties';
   static readonly databaseOpenZaak = 'open-zaak';
+
+  // MARK: Vulservice
+  static readonly ssmHaalCentraalBRPBaseUrl = `/${Statics.projectName}/api/haalcentraalbrp/baseurl`;
+  static readonly ssmHaalCentraalBRPApiKeySecret = `/${Statics.projectName}/api/haalcentraalbrp/apikey`;
 
   /**
    * PRODUCTION
