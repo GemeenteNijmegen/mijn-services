@@ -36,7 +36,6 @@ export class OpenNotificatiesService extends Construct {
   private readonly props: OpenNotificatiesServiceProps;
   private readonly serviceFactory: ServiceFactory;
   private readonly databaseCredentials: ISecret;
-  // private readonly rabbitMqCredentials: ISecret;
   private readonly openNotificatiesCredentials: ISecret;
   private readonly clientCredentialsNotificationsZaak: ISecret;
   private readonly clientCredentialsZaakNotifications: ISecret;
@@ -52,7 +51,6 @@ export class OpenNotificatiesService extends Construct {
     this.openNotificatiesCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenNotificatiesCredentials);
     this.clientCredentialsZaakNotifications = SecretParameter.fromSecretNameV2(this, 'client-credentials-zaak-notifications', Statics._ssmClientCredentialsZaakNotifications);
     this.clientCredentialsNotificationsZaak = SecretParameter.fromSecretNameV2(this, 'client-credentials-notifications-zaak', Statics._ssmClientCredentialsNotificationsZaak);
-    // this.rabbitMqCredentials = SecretParameter.fromSecretNameV2(this, 'rabbit-mq-credentials', Statics._ssmRabbitMqCredentials);
     this.secretKey = new SecretParameter(this, 'secret-key', {
       description: 'Open klant secret key',
       generateSecretString: {
@@ -73,9 +71,11 @@ export class OpenNotificatiesService extends Construct {
 
     const cacheHost = this.props.cache.db.attrRedisEndpointAddress + ':' + this.props.cache.db.attrRedisEndpointPort + '/';
 
-    const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
-    trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
+    // const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
+    // trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
 
+    const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
+    trustedDomains.push(this.props.hostedzone.zoneName);
 
     const rabbitMqHost = `${OpenNotificatiesService.RABBIT_MQ_NAME}.${this.props.service.namespace}`;
     const rabbitMqBrokerUrl = `amqp://guest:guest@${rabbitMqHost}:${OpenNotificatiesService.RABBIT_MQ_PORT}//`;
@@ -91,6 +91,7 @@ export class OpenNotificatiesService extends Construct {
       SUBPATH: '/'+this.props.path,
       IS_HTTPS: 'yes',
       UWSGI_PORT: this.props.service.port.toString(),
+      USE_X_FORWARDED_HOST: 'True',
 
       LOG_LEVEL: this.props.openNotificationsConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
@@ -103,19 +104,14 @@ export class OpenNotificatiesService extends Construct {
       CELERY_WORKER_CONCURRENCY: '4',
       RABBITMQ_HOST: rabbitMqHost,
       CELERY_BROKER_URL: rabbitMqBrokerUrl,
-      // PUBLISH_BROKER_URL: 'amqp://guest:guest@rabbitmq.zgw.local:5672/%2F', // TODO i dont think we need this
 
       // Conectivity
-      CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
-      // CORS_ALLOW_ALL_ORIGINS: 'True', // TODO figure out of we need this?
-
+      CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
 
       // Open notificaties specific stuff
       OPENNOTIFICATIES_ORGANIZATION: Statics.organization,
-      OPENNOTIFICATIES_DOMAIN: `${trustedOrigins[0]}/${this.props.path}/`,
-
-      AUTORISATIES_API_ROOT: `${trustedOrigins[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path
-
+      OPENNOTIFICATIES_DOMAIN: trustedDomains[0],
+      AUTORISATIES_API_ROOT: `https://${trustedDomains[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path 'open-zaak'
 
     };
   }
@@ -154,14 +150,13 @@ export class OpenNotificatiesService extends Construct {
         streamPrefix: 'logs',
         logGroup: this.logs,
       }),
+      readonlyRootFilesystem: true,
       portMappings: [{
         containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
       }],
-      secrets: {
-        // RABBITMQ_DEFAULT_USER: Secret.fromSecretsManager(this.rabbitMqCredentials, 'username'), // TODO do we need this?
-        // RABBITMQ_DEFAULT_PASS: Secret.fromSecretsManager(this.rabbitMqCredentials, 'password'), // TODO do we need this?
-      },
+      secrets: {},
       environment: {}, // TODO figgure out if we need any settings?
+      // healthCheck: {} // TODO figure out how to check if this is healthy
     });
     const service = this.serviceFactory.createService({
       task,
