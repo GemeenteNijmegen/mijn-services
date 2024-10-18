@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { queryResponse } from './Query';
 
 const uuidSchema = z.object({ uuid: z.string() });
 
@@ -30,6 +31,17 @@ export const OpenKlantPartijSchema = z.object({
     z.null(),
   ]).optional(),
   indicatieGeheimhouding: z.boolean(),
+  _expand: z.object({
+    digitale_adressen: z.array(
+      z.object({
+        uuid: z.string(),
+        url: z.string(),
+        adres: z.string(),
+        soortDigitaalAdres: z.string(),
+        omschrijving: z.string(),
+      }),
+    ).nullish(),
+  }).nullish(),
 });
 
 /**
@@ -49,6 +61,9 @@ export type OpenKlantPartij = z.infer<typeof OpenKlantPartijSchema>;
  */
 export type OpenKlantPartijWithUuid = z.infer<typeof OpenKlantPartijSchemaWithUuid>;
 
+
+export const OpenKlantPartijenWithUuidSchema = queryResponse(OpenKlantPartijSchemaWithUuid);
+export type OpenKlantPartijenWithUuid = z.infer<typeof OpenKlantPartijenWithUuidSchema>;
 
 /**
  * Digitaal adres schema based on OpenKlant 2.0

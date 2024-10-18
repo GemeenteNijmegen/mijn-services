@@ -1,5 +1,5 @@
 import { ErrorResponse } from './ErrorResponse';
-import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from './model/Partij';
+import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijenWithUuid, OpenKlantPartijenWithUuidSchema, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from './model/Partij';
 
 interface OpenKlantApiProps {
   url: string;
@@ -8,10 +8,12 @@ interface OpenKlantApiProps {
 
 export interface IOpenKlantApi {
   findPartij(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon') : Promise<OpenKlantPartijWithUuid>;
+  findPartijen(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon') : Promise<OpenKlantPartijenWithUuid>;
   registerPartij(partij: OpenKlantPartij) : Promise<OpenKlantPartijWithUuid>;
   updatePartij(partij: Partial<OpenKlantPartijWithUuid>) : Promise<OpenKlantPartijWithUuid>;
   addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid>;
   addDigitaalAdres(address: OpenKlantDigitaalAdres) : Promise<OpenKlantDigitaalAdresWithUuid>;
+  deleteDigitaalAdres(uuid: string) : Promise<boolean>;
   getEndpoint(): string;
 }
 
@@ -22,9 +24,15 @@ export class OpenKlantApi implements IOpenKlantApi {
     this.props = props;
   }
 
-
   async findPartij(id: string | undefined | null, partijSoort: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid> {
+    const partijen = await this.findPartijen(id, partijSoort);
+    if (partijen.count != 1) {
+      throw Error('Multiple partijen found where a single partij was expected!');
+    }
+    return OpenKlantPartijSchemaWithUuid.parse(partijen.results[0]);
+  }
 
+  async findPartijen(id: string | undefined | null, partijSoort: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijenWithUuid> {
     if (!id) {
       throw new ErrorResponse(400, 'Partij identifier is undefined, cannot search for a partij');
     }
@@ -42,12 +50,11 @@ export class OpenKlantApi implements IOpenKlantApi {
       throw Error('Unknonw partijSoort to query: ' + partijSoort);
     }
 
+    url += '&expand=digitaleAdressen';
+
     const response = await this.callApi('GET', url);
     const result = await response.json() as any;
-    if (result.count != 1) {
-      throw Error('Multiple partijen found where a single partij was expected!');
-    }
-    return OpenKlantPartijSchemaWithUuid.parse(result.results[0]);
+    return OpenKlantPartijenWithUuidSchema.parse(result);
   }
 
   async addDigitaalAdres(address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
@@ -57,6 +64,12 @@ export class OpenKlantApi implements IOpenKlantApi {
     });
     const result = await response.json();
     return OpenKlantDigitaalAdresSchemaWithUuid.parse(result);
+  }
+
+  async deleteDigitaalAdres(uuid: string) {
+    const url = this.props.url + `/digitaleadressen/${uuid}`;
+    const response = await this.callApi('CELETE', url);
+    return response.ok;
   }
 
   async addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid> {
@@ -128,6 +141,12 @@ export class OpenKlantApi implements IOpenKlantApi {
 
 
 export class OpenKlantApiMock implements IOpenKlantApi {
+  deleteDigitaalAdres(_uuid: string): Promise<boolean> {
+    throw new Error('Method should be mocked.');
+  }
+  findPartijen(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijenWithUuid> {
+    throw new Error('Method should be mocked.');
+  }
   findPartij(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid> {
     throw new Error('Method should be mocked.');
   }

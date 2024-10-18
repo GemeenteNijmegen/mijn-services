@@ -1,4 +1,5 @@
 import { IRegistrationStrategy, SimpleStrategy } from './IRegistrationStrategy';
+import { RolRegisrationStrategySinglePartij } from './RolRegisrationStrategySinglePartij';
 import { RolRegisrationStrategy } from './RolRegistrationStrategy';
 import { RolWithBRPRegistrationStrategy } from './RolWithBRPRegistrationStrategy';
 import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
@@ -20,6 +21,9 @@ export class RegistrationStrategyFactory {
     } else if (strategy == 'rolregistration') {
       console.debug('Using rol registration strategy');
       return new RolRegisrationStrategy(this.configuration);
+    } else if (strategy == 'rolregistrationsinglepartij') {
+      console.debug('Using rol registration strategy single partij');
+      return new RolRegisrationStrategySinglePartij(this.configuration);
     } else if (strategy == 'rolwithbrpregistration') {
       return new RolWithBRPRegistrationStrategy(this.configuration);
     }
