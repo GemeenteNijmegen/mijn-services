@@ -102,7 +102,7 @@ export class OMCService extends Construct {
       USER_DOMAIN_OBJECTEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
       USER_DOMAIN_OBJECTTYPEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
       USER_DOMAIN_BESLUITEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // NOT USED NOW
-      USER_DOMAIN_CONTACTMOMENTEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // NOT USED NOW
+      USER_DOMAIN_CONTACTMOMENTEN: this.props.omcConfiguration.openKlantUrl,
 
       // Template references in Notify
       USER_TEMPLATEIDS_EMAIL_ZAAKCREATE: this.props.omcConfiguration.templates.zaakCreateEmail ?? DEFAULT_UUID,
