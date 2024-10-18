@@ -7,7 +7,7 @@ interface OpenKlantApiProps {
 }
 
 export interface IOpenKlantApi {
-  findPartij(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon') : Promise<OpenKlantPartijWithUuid>;
+  findPartij(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon') : Promise<OpenKlantPartijWithUuid | undefined>;
   findPartijen(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon') : Promise<OpenKlantPartijenWithUuid>;
   registerPartij(partij: OpenKlantPartij) : Promise<OpenKlantPartijWithUuid>;
   updatePartij(partij: Partial<OpenKlantPartijWithUuid>) : Promise<OpenKlantPartijWithUuid>;
@@ -24,10 +24,13 @@ export class OpenKlantApi implements IOpenKlantApi {
     this.props = props;
   }
 
-  async findPartij(id: string | undefined | null, partijSoort: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid> {
+  async findPartij(id: string | undefined | null, partijSoort: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid | undefined> {
     const partijen = await this.findPartijen(id, partijSoort);
-    if (partijen.count != 1) {
+    if (partijen.count > 1) {
       throw Error('Multiple partijen found where a single partij was expected!');
+    }
+    if (partijen.count == 0) {
+      return undefined;
     }
     return OpenKlantPartijSchemaWithUuid.parse(partijen.results[0]);
   }
@@ -147,7 +150,7 @@ export class OpenKlantApiMock implements IOpenKlantApi {
   findPartijen(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijenWithUuid> {
     throw new Error('Method should be mocked.');
   }
-  findPartij(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid> {
+  findPartij(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid| undefined> {
     throw new Error('Method should be mocked.');
   }
   getEndpoint(): string {

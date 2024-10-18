@@ -78,6 +78,9 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
       return this.configuration.openKlantApi.findPartij(rol.betrokkeneIdentificatie.inpBsn, 'persoon');
     } else if (rol.betrokkeneType == 'niet_natuurlijk_persoon') {
       const organisatie = await this.configuration.openKlantApi.findPartij(rol.betrokkeneIdentificatie.annIdentificatie, 'organisatie');
+      if (!organisatie) {
+        return undefined;
+      }
       const contactPersonen = await this.configuration.openKlantApi.findPartijen(organisatie.uuid, 'contactpersoon');
       return contactPersonen.results.find((p: OpenKlantPartijWithUuid) => {
         const volledigeNaam = (p.partijIdentificatie as any).volledigeNaam;
