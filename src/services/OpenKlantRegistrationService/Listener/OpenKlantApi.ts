@@ -26,9 +26,6 @@ export class OpenKlantApi implements IOpenKlantApi {
 
   async findPartij(id: string | undefined | null, partijSoort: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid | undefined> {
     const partijen = await this.findPartijen(id, partijSoort);
-    if (partijen.count > 1) {
-      throw Error('Multiple partijen found where a single partij was expected!');
-    }
     if (partijen.count == 0) {
       return undefined;
     }
@@ -42,10 +39,10 @@ export class OpenKlantApi implements IOpenKlantApi {
 
     let url = this.props.url + '/partijen';
     if (partijSoort == 'organisatie') {
-      url += '?partijIdentificator__codeSoortObjectId=KVK';
+      url += '?partijIdentificator__codeRegister=KVK';
       url += `&partijIdentificator__objectId=${id}`;
     } else if (partijSoort == 'persoon') {
-      url += '?partijIdentificator__codeSoortObjectId=BRP';
+      url += '?partijIdentificator__codeRegister=BRP';
       url += `&partijIdentificator__objectId=${id}`;
     } else if (partijSoort == 'contactpersoon') {
       url += `?vertegenwoordigdePartij__uuid=${id}`;
