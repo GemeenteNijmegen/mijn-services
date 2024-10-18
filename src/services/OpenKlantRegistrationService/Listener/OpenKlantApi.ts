@@ -37,7 +37,7 @@ export class OpenKlantApi implements IOpenKlantApi {
       throw new ErrorResponse(400, 'Partij identifier is undefined, cannot search for a partij');
     }
 
-    let url = this.props.url + '/partij';
+    let url = this.props.url + '/partijen';
     if (partijSoort == 'organisatie') {
       url += '?partijIdentificator__codeSoortObjectId=KVK';
       url += `&partijIdentificator__objectId=${id}`;
