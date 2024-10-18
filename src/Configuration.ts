@@ -152,7 +152,7 @@ export interface OpenKlantRegistrationServiceConfiguration {
   zakenApiUrl: string;
   debug: boolean;
   roltypesToRegister: ('adviseur'|'behandelaar'|'belanghebbende'|'beslisser'|'initiator'|'klantcontacter'|'zaakcoordinator'|'mede_initiator')[];
-  strategy: ('simple'|'rolregistration'|'rolwithbrpregistration');
+  strategy: ('simple'|'rolregistration'|'rolwithbrpregistration'|'rolregistrationsinglepartij');
 }
 
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
@@ -252,7 +252,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'https://lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
         path: '/open-klant-registration-service-development/callback',
         roltypesToRegister: ['belanghebbende', 'initiator'],
-        strategy: 'simple',
+        strategy: 'rolregistrationsinglepartij',
       },
       {
         cdkId: 'open-klant-registration-service-woweb',
