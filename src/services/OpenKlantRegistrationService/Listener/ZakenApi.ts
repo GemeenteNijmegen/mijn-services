@@ -33,7 +33,7 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
     try {
       console.debug('Updating rol');
       await this.delete(rol.url);
-      const response = await this.post(this.zakenApiUrl + '/zaken/api/v1/rollen', {
+      const response = await this.post(this.zakenApiUrl + '/rollen', {
         body: JSON.stringify({
           ...rol,
           url: undefined,
