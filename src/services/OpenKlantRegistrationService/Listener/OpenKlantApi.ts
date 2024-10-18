@@ -1,5 +1,6 @@
 import { ErrorResponse } from './ErrorResponse';
 import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijenWithUuid, OpenKlantPartijenWithUuidSchema, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from './model/Partij';
+import { StrategyStatics } from './strategies/StrategyStatics';
 
 interface OpenKlantApiProps {
   url: string;
@@ -40,16 +41,15 @@ export class OpenKlantApi implements IOpenKlantApi {
     let url = this.props.url + '/partijen';
     if (partijSoort == 'organisatie') {
       url += '?partijIdentificator__codeRegister=KVK';
-      url += `&partijIdentificator__objectId=${id}`;
     } else if (partijSoort == 'persoon') {
       url += '?partijIdentificator__codeRegister=BRP';
-      url += `&partijIdentificator__objectId=${id}`;
     } else if (partijSoort == 'contactpersoon') {
-      url += `?vertegenwoordigdePartij__uuid=${id}`;
+      url += `?partijIdentificator__codeRegister=${StrategyStatics.PSUEDOID_REGISTER}`;
     } else {
       throw Error('Unknonw partijSoort to query: ' + partijSoort);
     }
 
+    url += `&partijIdentificator__objectId=${id}`;
     url += '&expand=digitaleAdressen';
 
     const response = await this.callApi('GET', url);

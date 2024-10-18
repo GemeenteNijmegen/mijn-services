@@ -1,5 +1,6 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
+import { StrategyStatics } from './StrategyStatics';
 import { Notification } from '../model/Notification';
 import { OpenKlantDigitaalAdresWithUuid, OpenKlantPartijWithUuid } from '../model/Partij';
 import { Rol } from '../model/Rol';
@@ -77,15 +78,10 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     if (rol.betrokkeneType == 'natuurlijk_persoon') {
       return this.configuration.openKlantApi.findPartij(rol.betrokkeneIdentificatie.inpBsn, 'persoon');
     } else if (rol.betrokkeneType == 'niet_natuurlijk_persoon') {
-      const organisatie = await this.configuration.openKlantApi.findPartij(rol.betrokkeneIdentificatie.annIdentificatie, 'organisatie');
-      if (!organisatie) {
-        return undefined;
-      }
-      const contactPersonen = await this.configuration.openKlantApi.findPartijen(organisatie.uuid, 'contactpersoon');
-      return contactPersonen.results.find((p: OpenKlantPartijWithUuid) => {
-        const volledigeNaam = (p.partijIdentificatie as any).volledigeNaam;
-        return volledigeNaam && volledigeNaam == rol.contactpersoonRol?.naam;
-      });
+      const kvk = rol.betrokkeneIdentificatie.annIdentificatie;
+      const name = rol.contactpersoonRol?.naam ?? rol.betrokkeneIdentificatie.geslachtsnaam;
+      const pseudoId = StrategyStatics.constructPseudoId(kvk!, name!);
+      return this.configuration.openKlantApi.findPartij(pseudoId, 'contactpersoon');
     }
     return undefined;
   }
@@ -115,6 +111,19 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
       const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partij.uuid}`;
       const contactpersoonInput = OpenKlantMapper.contactpersoonFromRol(rol, partijUrl, partij.uuid);
       const contactpersoon = await this.configuration.openKlantApi.registerPartij(contactpersoonInput);
+
+      const kvk = rol.betrokkeneIdentificatie.annIdentificatie;
+      const name = rol.contactpersoonRol?.naam ?? rol.betrokkeneIdentificatie.geslachtsnaam;
+      await this.configuration.openKlantApi.addPartijIdentificatie({
+        identificeerdePartij: contactpersoon,
+        partijIdentificator: {
+          codeObjecttype: 'CUSTOM PSEUDO ID CONTACTPERSOON',
+          codeRegister: StrategyStatics.PSUEDOID_REGISTER,
+          codeSoortObjectId: 'Custom PseudoID',
+          objectId: StrategyStatics.constructPseudoId(kvk!, name!),
+        },
+      });
+
       console.debug('Contactpersoon partij created', contactpersoon);
       partijWithDigitaleAdressen = contactpersoon;
     }
@@ -175,5 +184,6 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     });
     console.debug('Partij updates with voorkeur', partijUpdate);
   }
+
 
 }
