@@ -1,4 +1,4 @@
-import { IRegistrationStrategy, SimpleStrategy } from './IRegistrationStrategy';
+import { IRegistrationStrategy } from './IRegistrationStrategy';
 import { RolRegisrationStrategySinglePartij } from './RolRegisrationStrategySinglePartij';
 import { RolRegisrationStrategy } from './RolRegistrationStrategy';
 import { RolWithBRPRegistrationStrategy } from './RolWithBRPRegistrationStrategy';
@@ -15,10 +15,7 @@ export class RegistrationStrategyFactory {
   buildStrategy() : IRegistrationStrategy {
     const strategy = process.env.STRATEGY;
 
-    if (strategy == 'simple') {
-      console.debug('Using simple strategy');
-      return new SimpleStrategy(this.configuration);
-    } else if (strategy == 'rolregistration') {
+    if (strategy == 'rolregistration') {
       console.debug('Using rol registration strategy');
       return new RolRegisrationStrategy(this.configuration);
     } else if (strategy == 'rolregistrationsinglepartij') {
@@ -28,8 +25,8 @@ export class RegistrationStrategyFactory {
       return new RolWithBRPRegistrationStrategy(this.configuration);
     }
 
-    console.warn('Defaulting to simple strategy. This is porbably not what you want.');
-    return new SimpleStrategy(this.configuration);
+    console.warn('Defaulting to RolRegisrationStrategy. This is porbably not what you want.');
+    return new RolRegisrationStrategy(this.configuration);
   }
 
 }

@@ -96,9 +96,27 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
    */
   private async registerPartij(rol: Rol) : Promise<OpenKlantPartijWithUuid> {
     // Create a partij
-    const partijInput = OpenKlantMapper.partijFromRol(rol);
-    const partij = await this.configuration.openKlantApi.registerPartij(partijInput);
-    console.debug('Partij created', partij);
+    let partij = undefined;
+    if (rol.betrokkeneType == 'niet_natuurlijk_persoon') {
+      // Als het om een organisatie gaat bestaat de partij misschien al
+      partij = await this.configuration.openKlantApi.findPartij(rol.betrokkeneIdentificatie.annIdentificatie, 'organisatie');
+      if (!partij) {
+        const partijInput = OpenKlantMapper.partijFromRol(rol);
+        partij = await this.configuration.openKlantApi.registerPartij(partijInput);
+        console.debug('Partij created', partij);
+      } else {
+        console.debug('Found partij', partij);
+      }
+    }
+    if (rol.betrokkeneType == 'natuurlijk_persoon') {
+      const partijInput = OpenKlantMapper.partijFromRol(rol);
+      partij = await this.configuration.openKlantApi.registerPartij(partijInput);
+      console.debug('Partij created', partij);
+    }
+
+    if (!partij) {
+      throw Error('Partij was not found or failed to create.');
+    }
 
     // Create a partij identificatie
     const partijIdentificatieInput = OpenKlantMapper.partijIdentificatieFromRol(rol, partij.uuid);
