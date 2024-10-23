@@ -106,7 +106,7 @@ export class OpenNotificatiesService extends Construct {
       CELERY_BROKER_URL: rabbitMqBrokerUrl,
 
       // Conectivity
-      CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
+      CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}/open-notificaties`).join(','),
 
       // Open notificaties specific stuff
       OPENNOTIFICATIES_ORGANIZATION: Statics.organization,
