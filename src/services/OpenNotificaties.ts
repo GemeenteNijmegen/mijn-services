@@ -113,6 +113,8 @@ export class OpenNotificatiesService extends Construct {
       OPENNOTIFICATIES_DOMAIN: trustedDomains[0],
       AUTORISATIES_API_ROOT: `https://${trustedDomains[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path 'open-zaak'
 
+      LOG_NOTIFICATIONS_IN_DB: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.persitNotifications, false),
+
     };
   }
 

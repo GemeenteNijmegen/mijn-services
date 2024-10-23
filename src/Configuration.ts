@@ -89,6 +89,10 @@ export interface OpenNotificatiesConfiguration {
   rabbitMqImage: string;
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
   debug?: boolean;
+  /**
+   * @default false
+   */
+  persitNotifications?: boolean;
 }
 
 export interface OpenZaakConfiguration {
@@ -177,6 +181,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       rabbitMqImage: 'rabbitmq:3.13.4-alpine',
       logLevel: 'DEBUG',
       debug: true,
+      persitNotifications: true,
     },
     openZaak: {
       image: 'openzaak/open-zaak:1.14.0',
