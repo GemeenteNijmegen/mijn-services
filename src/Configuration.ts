@@ -173,7 +173,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       debug: true,
     },
     openNotificaties: {
-      image: 'openzaak/open-notificaties:1.7.0',
+      image: 'openzaak/open-notificaties:1.7.1',
       rabbitMqImage: 'rabbitmq:3.13.4-alpine',
       logLevel: 'DEBUG',
       debug: true,
