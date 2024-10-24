@@ -247,8 +247,9 @@ export class OpenNotificatiesService extends Construct {
   }
 
   private setupCeleryService() {
+    const VOLUME_NAME = 'tempcelery';
     const task = this.serviceFactory.createTaskDefinition('celery');
-    task.addContainer('celery', {
+    const celeryContainer = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', 'celery', 'inspect', 'ping', '--app', 'nrc'],
@@ -263,6 +264,8 @@ export class OpenNotificatiesService extends Construct {
       }),
       command: ['/celery_worker.sh'],
     });
+    this.serviceFactory.attachEphemeralStorage(celeryContainer, VOLUME_NAME, '/tmp');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, celeryContainer, '/tmp');
     const service = this.serviceFactory.createService({
       task,
       path: undefined, // Not exposed service
