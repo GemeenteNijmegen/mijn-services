@@ -30,7 +30,7 @@ export interface OpenNotificatiesServiceProps {
 
 export class OpenNotificatiesService extends Construct {
 
-  private static RABBIT_MQ_NAME = 'rabbitmq';
+  private static RABBIT_MQ_NAME = 'queue';
   private static RABBIT_MQ_PORT = 5672;
 
   private readonly logs: LogGroup;
