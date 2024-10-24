@@ -8,8 +8,8 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenNotificatiesConfiguration } from '../Configuration';
+import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
-import { ServiceFactory, ServiceFactoryProps } from '../constructs/ServiceFactory';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
 
@@ -17,7 +17,7 @@ export interface OpenNotificatiesServiceProps {
   readonly cache: CacheDatabase;
   readonly cacheDatabaseIndex: number;
   readonly cacheDatabaseIndexCelery: number;
-  readonly service: ServiceFactoryProps;
+  readonly service: EcsServiceFactoryProps;
   readonly path: string;
   readonly hostedzone: IHostedZone;
   readonly alternativeDomainNames?: string[];
@@ -34,7 +34,7 @@ export class OpenNotificatiesService extends Construct {
 
   private readonly logs: LogGroup;
   private readonly props: OpenNotificatiesServiceProps;
-  private readonly serviceFactory: ServiceFactory;
+  private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
   private readonly openNotificatiesCredentials: ISecret;
   private readonly clientCredentialsNotificationsZaak: ISecret;
@@ -44,7 +44,7 @@ export class OpenNotificatiesService extends Construct {
   constructor(scope: Construct, id: string, props: OpenNotificatiesServiceProps) {
     super(scope, id);
     this.props = props;
-    this.serviceFactory = new ServiceFactory(this, props.service);
+    this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);

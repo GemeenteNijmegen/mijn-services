@@ -8,7 +8,7 @@ import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicedisco
 import { Construct } from 'constructs';
 
 
-export interface ServiceFactoryProps {
+export interface EcsServiceFactoryProps {
   link: VpcLink;
   cluster: Cluster;
   api: HttpApi;
@@ -17,7 +17,7 @@ export interface ServiceFactoryProps {
   port: number;
 }
 
-export interface CreateServiceOptions {
+export interface CreateEcsServiceOptions {
   /**
    * Provide an cdk id for the service as the resources are created
    * in the scope provided during factory construction.
@@ -55,12 +55,12 @@ export interface CreateServiceOptions {
   requestParameters?: Record<string, string>;
 }
 
-export class ServiceFactory {
+export class EcsServiceFactory {
 
-  private readonly props: ServiceFactoryProps;
+  private readonly props: EcsServiceFactoryProps;
   private readonly scope: Construct;
 
-  constructor(scope: Construct, props: ServiceFactoryProps) {
+  constructor(scope: Construct, props: EcsServiceFactoryProps) {
     this.scope = scope;
     this.props = props;
   }
@@ -75,7 +75,7 @@ export class ServiceFactory {
     return task;
   }
 
-  createService(options: CreateServiceOptions) {
+  createService(options: CreateEcsServiceOptions) {
     const service = new FargateService(this.scope, `${options.id}-service`, {
       cluster: this.props.cluster,
       taskDefinition: options.task,
@@ -140,7 +140,7 @@ export class ServiceFactory {
     });
   }
 
-  private createFileSytem(service: FargateService, options: CreateServiceOptions) {
+  private createFileSytem(service: FargateService, options: CreateEcsServiceOptions) {
     const privateFileSystemSecurityGroup = new SecurityGroup(this.scope, 'efs-security-group', {
       vpc: this.props.cluster.vpc,
     });

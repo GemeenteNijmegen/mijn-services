@@ -4,13 +4,13 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { OutputManagementComponentConfiguration } from '../Configuration';
-import { ServiceFactory, ServiceFactoryProps } from '../constructs/ServiceFactory';
+import { EcsServiceFactory, Ecs } from '../constructs/EcsServiceFactory';
 import { Statics } from '../Statics';
 
 const DEFAULT_UUID = '00000000-0000-0000-0000-000000000000';
 
 export interface OMCServiceProps {
-  service: ServiceFactoryProps;
+  service: Ecs;
   omcConfiguration: OutputManagementComponentConfiguration;
 }
 
@@ -18,13 +18,13 @@ export class OMCService extends Construct {
 
   private readonly logs: LogGroup;
   private readonly props: OMCServiceProps;
-  private readonly serviceFactory: ServiceFactory;
+  private readonly serviceFactory: EcsServiceFactory;
   private readonly configurationParameters: any;
 
   constructor(scope: Construct, id: string, props: OMCServiceProps) {
     super(scope, id);
     this.props = props;
-    this.serviceFactory = new ServiceFactory(this, props.service);
+    this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
     this.configurationParameters = this.setupConfigurationParameters(id);

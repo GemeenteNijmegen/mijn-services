@@ -8,8 +8,8 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenZaakConfiguration } from '../Configuration';
+import { EcsServiceFactory, Ecs } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
-import { ServiceFactory, ServiceFactoryProps } from '../constructs/ServiceFactory';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
 
@@ -17,7 +17,7 @@ export interface OpenZaakServiceProps {
   cache: CacheDatabase;
   cacheDatabaseIndex: number;
   cacheDatabaseIndexCelery: number;
-  service: ServiceFactoryProps;
+  service: Ecs;
   path: string;
   hostedzone: IHostedZone;
   alternativeDomainNames?: string[];
@@ -29,7 +29,7 @@ export class OpenZaakService extends Construct {
 
   private readonly logs: LogGroup;
   private readonly props: OpenZaakServiceProps;
-  private readonly serviceFactory: ServiceFactory;
+  private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
   private readonly openZaakCredentials: ISecret;
   private readonly secretKey: ISecret;
@@ -39,7 +39,7 @@ export class OpenZaakService extends Construct {
   constructor(scope: Construct, id: string, props: OpenZaakServiceProps) {
     super(scope, id);
     this.props = props;
-    this.serviceFactory = new ServiceFactory(this, props.service);
+    this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
