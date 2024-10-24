@@ -79,15 +79,38 @@ export interface Configuration {
 }
 
 export interface OpenKlantConfiguration {
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
   image: string;
+  /**
+   * Log level for the container
+   */
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
   debug?: boolean;
 }
 
 export interface OpenNotificatiesConfiguration {
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
   image: string;
+  /**
+   * Docker image to use for rabbitMQ
+   */
   rabbitMqImage: string;
+  /**
+   * Log level for the container
+   */
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
   debug?: boolean;
   /**
    * @default false
@@ -96,17 +119,47 @@ export interface OpenNotificatiesConfiguration {
 }
 
 export interface OpenZaakConfiguration {
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
   image: string;
+  /**
+   * Log level for the container
+   */
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
   debug?: boolean;
 }
 
 export interface OutputManagementComponentConfiguration {
+  /**
+   * Construct CDK is. Used as `new OMC(this, props.cdkId, {...});`
+   */
   cdkId: string;
+  /**
+   * Path to mount this OMC on in the API gateway
+   */
   path: string;
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
   image: string;
+  /**
+   * Log level for the container
+   */
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
   debug?: boolean;
+  /**
+   * The OMC component can run in different modes.
+   * Development mode enables additonal logging
+   */
   mode: 'Development' | 'Production';
   /**
    * Set the URL of the open klant component to use (do not include https://)
@@ -126,14 +179,19 @@ export interface OutputManagementComponentConfiguration {
    * configured using the console.
    */
   notificatiesApiUrl: string;
-
+  /**
+   * Information to include in the ZGW token
+   * build for authenticating at other ZGW APIs.
+   */
   zgwTokenInformation: {
     issuer: string;
     audience: string;
     userId: string;
     username: string;
   };
-
+  /**
+   * Template UUIDs defined in NotifyNL to use for notifications.
+   */
   templates: {
     zaakCreateEmail?: string;
     zaakUpdateEmail?: string;
@@ -146,17 +204,38 @@ export interface OutputManagementComponentConfiguration {
     taskAssignedSms?: string;
     messsageSms?: string;
   };
-
 }
 
 export interface OpenKlantRegistrationServiceConfiguration {
+  /**
+   * Construct CDK is. Used as `new OMC(this, props.cdkId, {...});`
+   */
   cdkId: string;
+  /**
+   * Path to mount this OMC on in the API gateway
+   */
   path: string;
+  /**
+   * The API url for OpenKlant (including /api/v1/)
+   */
   openKlantUrl: string;
+  /**
+   * The API url for Zaken API (including /zaken/api/v1/)
+   */
   zakenApiUrl: string;
+  /**
+   * Enable additional logging
+   */
   debug: boolean;
+  /**
+   * Which rol types to accept and register in OpenKlant
+   */
   roltypesToRegister: ('adviseur'|'behandelaar'|'belanghebbende'|'beslisser'|'initiator'|'klantcontacter'|'zaakcoordinator'|'mede_initiator')[];
-  strategy: ('simple'|'rolregistration'|'rolwithbrpregistration'|'rolregistrationsinglepartij');
+  /**
+   * Different strategies that the service will use to register the contactinfo in OpenKlant
+   * See the README of this particular service for more information.
+   */
+  strategy: ('rolregistration'|'rolwithbrpregistration'|'rolregistrationsinglepartij');
 }
 
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
