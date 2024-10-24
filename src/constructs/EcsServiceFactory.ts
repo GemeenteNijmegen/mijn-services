@@ -108,9 +108,8 @@ export class EcsServiceFactory {
       ...options.options,
     });
 
-    service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
-
     if (options.path) {
+      service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
       this.addRoute(service, options.path, options.id, options.requestParameters);
     }
     if (options.filesystem) {
