@@ -219,7 +219,7 @@ export class OpenNotificatiesService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
 
-    // 2nd Configuration - initialization container
+    // 2nd (A) Configuration - initialization container
     const initContainer = task.addContainer('init-config', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       command: ['/setup_configuration.sh'],
@@ -238,8 +238,27 @@ export class OpenNotificatiesService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/log');
 
+    // 2nd (B) Configuration - initialization container
+    const initBContainer = task.addContainer('init-kanalen', {
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      command: ['python', 'src/manage.py', 'register_kanalen'],
+      readonlyRootFilesystem: true,
+      essential: false, // exit after running
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: this.logs,
+      }),
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
+    });
+    container.addContainerDependencies({
+      container: initContainer,
+      condition: ContainerDependencyCondition.SUCCESS,
+    });
+    this.serviceFactory.attachEphemeralStorage(initBContainer, VOLUME_NAME, '/tmp', '/app/log');
+
     // 1st Filesystem write access - initialization container
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/log');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initBContainer, '/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
       id: 'main',
