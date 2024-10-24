@@ -1,7 +1,7 @@
 import { Duration } from 'aws-cdk-lib';
 import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem } from 'aws-cdk-lib/aws-efs';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
@@ -46,13 +46,21 @@ export interface CreateEcsServiceOptions {
    * @default - no filesystem is created
    */
   filesystem?: Record<string, string>;
-
   /**
    * Pass request rewrite paraemters to the API gateway integration.
    * @see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigatewayv2-integration.html#cfn-apigatewayv2-integration-requestparameters
    * @default - none
    */
   requestParameters?: Record<string, string>;
+  /**
+   * Enable cloudmap mapping (service must have port mapping).
+   * @default - True if path is set false otherwise
+   */
+  enableCloudMap?: boolean;
+  /**
+   * Overwrite the port number used by the service factory.
+   */
+  portOverwrite?: number;
 }
 
 export class EcsServiceFactory {
@@ -76,16 +84,22 @@ export class EcsServiceFactory {
   }
 
   createService(options: CreateEcsServiceOptions) {
-    const service = new FargateService(this.scope, `${options.id}-service`, {
-      cluster: this.props.cluster,
-      taskDefinition: options.task,
-      cloudMapOptions: {
+
+    let cloudmap : CloudMapOptions | undefined = undefined;
+    if (options.path || options.enableCloudMap) {
+      cloudmap = {
         cloudMapNamespace: this.props.namespace,
-        containerPort: this.props.port,
+        containerPort: options.portOverwrite ?? this.props.port,
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
         name: options.id,
-      },
+      };
+    }
+
+    const service = new FargateService(this.scope, `${options.id}-service`, {
+      cluster: this.props.cluster,
+      taskDefinition: options.task,
+      cloudMapOptions: cloudmap,
       ...options.options,
     });
 

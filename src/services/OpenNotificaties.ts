@@ -168,6 +168,8 @@ export class OpenNotificatiesService extends Construct {
       options: {
         desiredCount: 1,
       },
+      enableCloudMap: true,
+      portOverwrite: OpenNotificatiesService.RABBIT_MQ_PORT,
     });
     return service;
   }
