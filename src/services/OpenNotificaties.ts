@@ -5,11 +5,12 @@ import { IRole } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
+import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenNotificatiesConfiguration } from '../Configuration';
+import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
-import { ServiceFactory, ServiceFactoryProps } from '../constructs/ServiceFactory';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
 
@@ -17,7 +18,7 @@ export interface OpenNotificatiesServiceProps {
   readonly cache: CacheDatabase;
   readonly cacheDatabaseIndex: number;
   readonly cacheDatabaseIndexCelery: number;
-  readonly service: ServiceFactoryProps;
+  readonly service: EcsServiceFactoryProps;
   readonly path: string;
   readonly hostedzone: IHostedZone;
   readonly alternativeDomainNames?: string[];
@@ -29,14 +30,13 @@ export interface OpenNotificatiesServiceProps {
 
 export class OpenNotificatiesService extends Construct {
 
-  private static RABBIT_MQ_NAME = 'rabbitmq';
+  private static RABBIT_MQ_NAME = 'queue';
   private static RABBIT_MQ_PORT = 5672;
 
   private readonly logs: LogGroup;
   private readonly props: OpenNotificatiesServiceProps;
-  private readonly serviceFactory: ServiceFactory;
+  private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
-  // private readonly rabbitMqCredentials: ISecret;
   private readonly openNotificatiesCredentials: ISecret;
   private readonly clientCredentialsNotificationsZaak: ISecret;
   private readonly clientCredentialsZaakNotifications: ISecret;
@@ -45,14 +45,13 @@ export class OpenNotificatiesService extends Construct {
   constructor(scope: Construct, id: string, props: OpenNotificatiesServiceProps) {
     super(scope, id);
     this.props = props;
-    this.serviceFactory = new ServiceFactory(this, props.service);
+    this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.openNotificatiesCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenNotificatiesCredentials);
     this.clientCredentialsZaakNotifications = SecretParameter.fromSecretNameV2(this, 'client-credentials-zaak-notifications', Statics._ssmClientCredentialsZaakNotifications);
     this.clientCredentialsNotificationsZaak = SecretParameter.fromSecretNameV2(this, 'client-credentials-notifications-zaak', Statics._ssmClientCredentialsNotificationsZaak);
-    // this.rabbitMqCredentials = SecretParameter.fromSecretNameV2(this, 'rabbit-mq-credentials', Statics._ssmRabbitMqCredentials);
     this.secretKey = new SecretParameter(this, 'secret-key', {
       description: 'Open klant secret key',
       generateSecretString: {
@@ -73,11 +72,13 @@ export class OpenNotificatiesService extends Construct {
 
     const cacheHost = this.props.cache.db.attrRedisEndpointAddress + ':' + this.props.cache.db.attrRedisEndpointPort + '/';
 
-    const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
-    trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
+    // const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
+    // trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
 
+    const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
+    trustedDomains.push(this.props.hostedzone.zoneName);
 
-    const rabbitMqHost = `${OpenNotificatiesService.RABBIT_MQ_NAME}.${this.props.service.namespace}`;
+    const rabbitMqHost = `${OpenNotificatiesService.RABBIT_MQ_NAME}.${this.props.service.namespace.namespaceName}`;
     const rabbitMqBrokerUrl = `amqp://guest:guest@${rabbitMqHost}:${OpenNotificatiesService.RABBIT_MQ_PORT}//`;
 
     return {
@@ -91,6 +92,7 @@ export class OpenNotificatiesService extends Construct {
       SUBPATH: '/'+this.props.path,
       IS_HTTPS: 'yes',
       UWSGI_PORT: this.props.service.port.toString(),
+      USE_X_FORWARDED_HOST: 'True',
 
       LOG_LEVEL: this.props.openNotificationsConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
@@ -103,18 +105,24 @@ export class OpenNotificatiesService extends Construct {
       CELERY_WORKER_CONCURRENCY: '4',
       RABBITMQ_HOST: rabbitMqHost,
       CELERY_BROKER_URL: rabbitMqBrokerUrl,
-      // PUBLISH_BROKER_URL: 'amqp://guest:guest@rabbitmq.zgw.local:5672/%2F', // TODO i dont think we need this
 
       // Conectivity
-      CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
-      // CORS_ALLOW_ALL_ORIGINS: 'True', // TODO figure out of we need this?
-
+      CORS_ALLOW_ALL_ORIGINS: 'True',
+      CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
 
       // Open notificaties specific stuff
       OPENNOTIFICATIES_ORGANIZATION: Statics.organization,
-      OPENNOTIFICATIES_DOMAIN: `${trustedOrigins[0]}/${this.props.path}/`,
+      OPENNOTIFICATIES_DOMAIN: trustedDomains[0],
+      AUTORISATIES_API_ROOT: `https://${trustedDomains[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path 'open-zaak'
 
-      AUTORISATIES_API_ROOT: `${trustedOrigins[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path
+      // What configuration steps to run while setup_configuration is called
+      SITES_CONFIG_ENABLE: 'True',
+      AUTHORIZATION_CONFIG_ENABLE: 'True',
+      OPENZAAK_NOTIF_CONFIG_ENABLE: 'True',
+      NOTIFICATION_RETRY_CONFIG_ENABLE: 'False',
+
+
+      LOG_NOTIFICATIONS_IN_DB: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.persitNotifications, false),
 
 
     };
@@ -154,14 +162,13 @@ export class OpenNotificatiesService extends Construct {
         streamPrefix: 'logs',
         logGroup: this.logs,
       }),
+      readonlyRootFilesystem: true,
       portMappings: [{
         containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
       }],
-      secrets: {
-        // RABBITMQ_DEFAULT_USER: Secret.fromSecretsManager(this.rabbitMqCredentials, 'username'), // TODO do we need this?
-        // RABBITMQ_DEFAULT_PASS: Secret.fromSecretsManager(this.rabbitMqCredentials, 'password'), // TODO do we need this?
-      },
+      secrets: {},
       environment: {}, // TODO figgure out if we need any settings?
+      // healthCheck: {} // TODO figure out how to check if this is healthy
     });
     const service = this.serviceFactory.createService({
       task,
@@ -169,6 +176,13 @@ export class OpenNotificatiesService extends Construct {
       id: OpenNotificatiesService.RABBIT_MQ_NAME,
       options: {
         desiredCount: 1,
+      },
+      customCloudMap: {
+        cloudMapNamespace: this.props.service.namespace,
+        containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
+        name: OpenNotificatiesService.RABBIT_MQ_NAME,
+        dnsRecordType: DnsRecordType.A, // Required for lookup
+        dnsTtl: Duration.seconds(60),
       },
     });
     return service;
@@ -205,7 +219,7 @@ export class OpenNotificatiesService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
 
-    // 2nd Configuration - initialization container
+    // 2nd (A) Configuration - initialization container
     const initContainer = task.addContainer('init-config', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       command: ['/setup_configuration.sh'],
@@ -224,8 +238,27 @@ export class OpenNotificatiesService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/log');
 
+    // 2nd (B) Configuration - initialization container
+    const initBContainer = task.addContainer('init-kanalen', {
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      command: ['python', 'src/manage.py', 'register_kanalen'],
+      readonlyRootFilesystem: true,
+      essential: false, // exit after running
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: this.logs,
+      }),
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
+    });
+    container.addContainerDependencies({
+      container: initContainer,
+      condition: ContainerDependencyCondition.SUCCESS,
+    });
+    this.serviceFactory.attachEphemeralStorage(initBContainer, VOLUME_NAME, '/tmp', '/app/log');
+
     // 1st Filesystem write access - initialization container
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/log');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initBContainer, '/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
       id: 'main',
@@ -241,8 +274,11 @@ export class OpenNotificatiesService extends Construct {
   }
 
   private setupCeleryService() {
-    const task = this.serviceFactory.createTaskDefinition('celery');
-    task.addContainer('celery', {
+    const VOLUME_NAME = 'tempcelery';
+    const task = this.serviceFactory.createTaskDefinition('celery', {
+      volumes: [{ name: VOLUME_NAME }],
+    });
+    const celeryContainer = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', 'celery', 'inspect', 'ping', '--app', 'nrc'],
@@ -257,6 +293,8 @@ export class OpenNotificatiesService extends Construct {
       }),
       command: ['/celery_worker.sh'],
     });
+    this.serviceFactory.attachEphemeralStorage(celeryContainer, VOLUME_NAME, '/tmp', '/app/log');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, celeryContainer, '/tmp', '/app/log');
     const service = this.serviceFactory.createService({
       task,
       path: undefined, // Not exposed service

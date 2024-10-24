@@ -8,8 +8,8 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenZaakConfiguration } from '../Configuration';
+import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
-import { ServiceFactory, ServiceFactoryProps } from '../constructs/ServiceFactory';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
 
@@ -17,7 +17,7 @@ export interface OpenZaakServiceProps {
   cache: CacheDatabase;
   cacheDatabaseIndex: number;
   cacheDatabaseIndexCelery: number;
-  service: ServiceFactoryProps;
+  service: EcsServiceFactoryProps;
   path: string;
   hostedzone: IHostedZone;
   alternativeDomainNames?: string[];
@@ -29,7 +29,7 @@ export class OpenZaakService extends Construct {
 
   private readonly logs: LogGroup;
   private readonly props: OpenZaakServiceProps;
-  private readonly serviceFactory: ServiceFactory;
+  private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
   private readonly openZaakCredentials: ISecret;
   private readonly secretKey: ISecret;
@@ -39,7 +39,7 @@ export class OpenZaakService extends Construct {
   constructor(scope: Construct, id: string, props: OpenZaakServiceProps) {
     super(scope, id);
     this.props = props;
-    this.serviceFactory = new ServiceFactory(this, props.service);
+    this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
@@ -73,7 +73,7 @@ export class OpenZaakService extends Construct {
       CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/'+this.props.path,
-      IS_HTTPS: 'yes',
+      IS_HTTPS: 'True',
       UWSGI_PORT: this.props.service.port.toString(),
 
       LOG_LEVEL: this.props.openZaakConfiguration.logLevel,
@@ -93,7 +93,6 @@ export class OpenZaakService extends Construct {
 
       // Conectivity
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
-      // CORS_ALLOW_ALL_ORIGINS: 'True', // TODO figure out of we need this?
 
 
       // Open notificaties specific stuff
@@ -101,7 +100,6 @@ export class OpenZaakService extends Construct {
       OPENZAAK_DOMAIN: trustedDomains[0],
       OPENZAAK_ORGANIZATION: Statics.organization,
       NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notificaties/api/v1/`, // TODO remove hardcoded path
-
 
       // Somehow this is required aswell...
       DEMO_CONFIG_ENABLE: 'False',

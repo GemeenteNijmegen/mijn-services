@@ -1,14 +1,14 @@
 import { Duration } from 'aws-cdk-lib';
 import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem } from 'aws-cdk-lib/aws-efs';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
 
-export interface ServiceFactoryProps {
+export interface EcsServiceFactoryProps {
   link: VpcLink;
   cluster: Cluster;
   api: HttpApi;
@@ -17,7 +17,7 @@ export interface ServiceFactoryProps {
   port: number;
 }
 
-export interface CreateServiceOptions {
+export interface CreateEcsServiceOptions {
   /**
    * Provide an cdk id for the service as the resources are created
    * in the scope provided during factory construction.
@@ -46,14 +46,24 @@ export interface CreateServiceOptions {
    * @default - no filesystem is created
    */
   filesystem?: Record<string, string>;
+  /**
+   * Pass request rewrite paraemters to the API gateway integration.
+   * @see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigatewayv2-integration.html#cfn-apigatewayv2-integration-requestparameters
+   * @default - none
+   */
+  requestParameters?: Record<string, string>;
+  /**
+   * Use a custom cloudmap configuration
+   */
+  customCloudMap?: CloudMapOptions;
 }
 
-export class ServiceFactory {
+export class EcsServiceFactory {
 
-  private readonly props: ServiceFactoryProps;
+  private readonly props: EcsServiceFactoryProps;
   private readonly scope: Construct;
 
-  constructor(scope: Construct, props: ServiceFactoryProps) {
+  constructor(scope: Construct, props: EcsServiceFactoryProps) {
     this.scope = scope;
     this.props = props;
   }
@@ -68,23 +78,31 @@ export class ServiceFactory {
     return task;
   }
 
-  createService(options: CreateServiceOptions) {
-    const service = new FargateService(this.scope, `${options.id}-service`, {
-      cluster: this.props.cluster,
-      taskDefinition: options.task,
-      cloudMapOptions: options.path ? {
+  createService(options: CreateEcsServiceOptions) {
+
+    let cloudmap : CloudMapOptions | undefined = undefined;
+    if (options.path) {
+      cloudmap = {
         cloudMapNamespace: this.props.namespace,
         containerPort: this.props.port,
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
-      } : undefined,
+      };
+    }
+    if (options.customCloudMap) {
+      cloudmap = options.customCloudMap;
+    }
+
+    const service = new FargateService(this.scope, `${options.id}-service`, {
+      cluster: this.props.cluster,
+      taskDefinition: options.task,
+      cloudMapOptions: cloudmap,
       ...options.options,
     });
 
-    service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
-
     if (options.path) {
-      this.addRoute(service, options.path, options.id);
+      service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
+      this.addRoute(service, options.path, options.id, options.requestParameters);
     }
     if (options.filesystem) {
       this.createFileSytem(service, options);
@@ -133,7 +151,7 @@ export class ServiceFactory {
     });
   }
 
-  private createFileSytem(service: FargateService, options: CreateServiceOptions) {
+  private createFileSytem(service: FargateService, options: CreateEcsServiceOptions) {
     const privateFileSystemSecurityGroup = new SecurityGroup(this.scope, 'efs-security-group', {
       vpc: this.props.cluster.vpc,
     });
@@ -188,7 +206,7 @@ export class ServiceFactory {
     });
   }
 
-  private addRoute(service: FargateService, path: string, id: string) {
+  private addRoute(service: FargateService, path: string, id: string, requestParameters?: Record<string, string>) {
     if (!service.cloudMapService) {
       throw Error('Cannot add route if ther\'s no cloudmap service configured');
     }
@@ -200,7 +218,12 @@ export class ServiceFactory {
       integrationUri: service.cloudMapService?.serviceArn,
       integrationMethod: 'ANY',
       payloadFormatVersion: '1.0',
+      requestParameters: {
+        'overwrite:header.X_FORWARDED_PROTO': 'https',
+        ...requestParameters,
+      },
     });
+
     integration.node.addDependency(service);
     integration.node.addDependency(this.props.link);
 

@@ -9,8 +9,10 @@ import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
 import { OpenKlantService } from './services/OpenKlant';
+import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationService/OpenKlantRegistrationService';
 import { OpenNotificatiesService } from './services/OpenNotificaties';
 import { OpenZaakService } from './services/OpenZaak';
+import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
 
 interface MainStackProps extends StackProps, Configurable {}
@@ -50,6 +52,8 @@ export class MainStack extends Stack {
     this.openKlantService(api, platform);
     this.openNotificatiesServices(api, platform);
     this.openZaakServices(api, platform);
+    this.outputManagementComponent(api, platform);
+    this.openKlantRegistrationServices(api);
   }
 
 
@@ -124,6 +128,40 @@ export class MainStack extends Stack {
       },
       openZaakConfiguration: this.configuration.openZaak,
     });
+  }
+
+  private outputManagementComponent(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.outputManagementComponents) {
+      console.warn('No OMC configuration provided. Skipping creation of OMC!');
+      return;
+    }
+    for (const omc of this.configuration.outputManagementComponents) {
+      new OMCService(this, omc.cdkId, {
+        omcConfiguration: omc,
+        service: {
+          api: api.api,
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          port: 80,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+      });
+    }
+  }
+
+  private openKlantRegistrationServices(api: ApiGateway) {
+    if (!this.configuration.openKlantRegistrationServices) {
+      console.warn('No openKlantRegistrationServices configuration provided. Skipping creation!');
+      return;
+    }
+    for (const openKlantRegistrationService of this.configuration.openKlantRegistrationServices) {
+      new OpenKlantRegistrationService(this, openKlantRegistrationService.cdkId, {
+        api: api.api,
+        openKlantRegistrationServiceConfiguration: openKlantRegistrationService,
+      });
+    }
+
   }
 
   private importHostedzone() {

@@ -32,6 +32,10 @@ export class Statics {
   static readonly databaseOpenNotificaties = 'open-notificaties';
   static readonly databaseOpenZaak = 'open-zaak';
 
+  // MARK: Vulservice
+  static readonly ssmHaalCentraalBRPBaseUrl = `/${Statics.projectName}/api/haalcentraalbrp/baseurl`;
+  static readonly ssmHaalCentraalBRPApiKeySecret = `/${Statics.projectName}/api/haalcentraalbrp/apikey`;
+
   /**
    * PRODUCTION
    * List all databases that should be
