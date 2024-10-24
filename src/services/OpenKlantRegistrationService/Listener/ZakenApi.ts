@@ -24,10 +24,19 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
     return RolSchema.parse(result);
   }
 
+  /**
+   * WARNING: THIS CANNOT BE USED IN PRODUCTION AS THIS IS NOT AN ACTUAL
+   * PATCH BUT A DELETE & POST REQUEST.
+   * @param rol
+   * @returns
+   */
   async updateRol(rol: Rol) : Promise<Rol> {
     if (!rol.url) {
       throw Error('Cannot update a rol without URL');
     }
+
+    // TODO fix and remove this after fixing
+    console.warn('THIS CANNOT BE USED IN PRODUCTION AS THIS IS NOT AN ACTUAL PATCH BUT A DELETE & POST REQUEST.');
 
     const originalRol = await this.getRol(rol.url);
     try {
