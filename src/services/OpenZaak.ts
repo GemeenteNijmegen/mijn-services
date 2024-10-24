@@ -8,7 +8,7 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenZaakConfiguration } from '../Configuration';
-import { EcsServiceFactory, Ecs } from '../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
@@ -17,7 +17,7 @@ export interface OpenZaakServiceProps {
   cache: CacheDatabase;
   cacheDatabaseIndex: number;
   cacheDatabaseIndexCelery: number;
-  service: Ecs;
+  service: EcsServiceFactoryProps;
   path: string;
   hostedzone: IHostedZone;
   alternativeDomainNames?: string[];

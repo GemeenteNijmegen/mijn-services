@@ -4,13 +4,13 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { OutputManagementComponentConfiguration } from '../Configuration';
-import { EcsServiceFactory, Ecs } from '../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { Statics } from '../Statics';
 
 const DEFAULT_UUID = '00000000-0000-0000-0000-000000000000';
 
 export interface OMCServiceProps {
-  service: Ecs;
+  service: EcsServiceFactoryProps;
   omcConfiguration: OutputManagementComponentConfiguration;
 }
 

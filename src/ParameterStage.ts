@@ -36,7 +36,6 @@ export class ParameterStack extends Stack {
     this.addDatabaseCredentials();
     this.addOpenNotificatiesParameters();
     this.addOpenZaakParameters();
-    this.addOutputManagementComponentParameters();
     this.addHaalCentraalBrpParameters();
 
   }
@@ -135,24 +134,6 @@ export class ParameterStack extends Stack {
         generateStringKey: 'password',
       },
       secretName: Statics._ssmDatabaseCredentials,
-    });
-  }
-
-  private addOutputManagementComponentParameters() {
-    new Secret(this, 'omc-jwt', {
-      description: 'Signing secret for ZGW token used to authenticate at OMC',
-      generateSecretString: {
-        excludePunctuation: true,
-      },
-      secretName: Statics._ssmOmcOmcJwtSecret,
-    });
-
-    new Secret(this, 'zgw-jwt', {
-      description: 'Signing secret for ZGW token used by OMC',
-      generateSecretString: {
-        excludePunctuation: true,
-      },
-      secretName: Statics._ssmOmcZgwJwtSecret,
     });
   }
 

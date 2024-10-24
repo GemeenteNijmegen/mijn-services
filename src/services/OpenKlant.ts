@@ -7,7 +7,7 @@ import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { EcsServiceFactory, Ecs } from '../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
 
@@ -17,7 +17,7 @@ export interface OpenKlantServiceProps {
   cacheDatabaseIndex: number;
   cacheDatabaseIndexCelery: number;
   logLevel: string;
-  service: Ecs;
+  service: EcsServiceFactoryProps;
   path: string;
   hostedzone: IHostedZone;
   alternativeDomainNames?: string[];
