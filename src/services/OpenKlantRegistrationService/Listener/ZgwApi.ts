@@ -21,7 +21,7 @@ export abstract class ZgwApi {
   }
 
   protected patch(url: string, options?: RequestInit) {
-    return this.callApi('POST', url, options);
+    return this.callApi('PATCH', url, options);
   }
 
   protected delete(url: string, options?: RequestInit) {
