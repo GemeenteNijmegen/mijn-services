@@ -61,6 +61,11 @@ export interface CreateEcsServiceOptions {
    * Overwrite the port number used by the service factory.
    */
   portOverwrite?: number;
+  /**
+   * Set the name of the cloudmap service.
+   * For easy references from other containers e.g. servicename.mijn-services.local
+   */
+  cloudmapServiceName?: string;
 }
 
 export class EcsServiceFactory {
@@ -92,7 +97,7 @@ export class EcsServiceFactory {
         containerPort: options.portOverwrite ?? this.props.port,
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
-        name: options.id,
+        name: options.cloudmapServiceName,
       };
     }
 
