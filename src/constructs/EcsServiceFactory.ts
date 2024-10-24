@@ -79,12 +79,13 @@ export class EcsServiceFactory {
     const service = new FargateService(this.scope, `${options.id}-service`, {
       cluster: this.props.cluster,
       taskDefinition: options.task,
-      cloudMapOptions: options.path ? {
+      cloudMapOptions: {
         cloudMapNamespace: this.props.namespace,
         containerPort: this.props.port,
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
-      } : undefined,
+        name: options.id,
+      },
       ...options.options,
     });
 
