@@ -5,6 +5,7 @@ import { IRole } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
+import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenNotificatiesConfiguration } from '../Configuration';
@@ -168,9 +169,13 @@ export class OpenNotificatiesService extends Construct {
       options: {
         desiredCount: 1,
       },
-      enableCloudMap: true,
-      portOverwrite: OpenNotificatiesService.RABBIT_MQ_PORT,
-      cloudmapServiceName: OpenNotificatiesService.RABBIT_MQ_NAME,
+      customCloudMap: {
+        cloudMapNamespace: this.props.service.namespace,
+        containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
+        name: OpenNotificatiesService.RABBIT_MQ_NAME,
+        dnsRecordType: DnsRecordType.A, // Required for lookup
+        dnsTtl: Duration.seconds(60),
+      },
     });
     return service;
   }

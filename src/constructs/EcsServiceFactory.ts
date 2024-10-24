@@ -53,19 +53,9 @@ export interface CreateEcsServiceOptions {
    */
   requestParameters?: Record<string, string>;
   /**
-   * Enable cloudmap mapping (service must have port mapping).
-   * @default - True if path is set false otherwise
+   * Use a custom cloudmap configuration
    */
-  enableCloudMap?: boolean;
-  /**
-   * Overwrite the port number used by the service factory.
-   */
-  portOverwrite?: number;
-  /**
-   * Set the name of the cloudmap service.
-   * For easy references from other containers e.g. servicename.mijn-services.local
-   */
-  cloudmapServiceName?: string;
+  customCloudMap?: CloudMapOptions;
 }
 
 export class EcsServiceFactory {
@@ -91,14 +81,16 @@ export class EcsServiceFactory {
   createService(options: CreateEcsServiceOptions) {
 
     let cloudmap : CloudMapOptions | undefined = undefined;
-    if (options.path || options.enableCloudMap) {
+    if (options.path) {
       cloudmap = {
         cloudMapNamespace: this.props.namespace,
-        containerPort: options.portOverwrite ?? this.props.port,
+        containerPort: this.props.port,
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
-        name: options.cloudmapServiceName,
       };
+    }
+    if (options.customCloudMap) {
+      cloudmap = options.customCloudMap;
     }
 
     const service = new FargateService(this.scope, `${options.id}-service`, {
