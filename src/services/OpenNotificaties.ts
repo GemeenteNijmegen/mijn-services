@@ -266,8 +266,8 @@ export class OpenNotificatiesService extends Construct {
       }),
       command: ['/celery_worker.sh'],
     });
-    this.serviceFactory.attachEphemeralStorage(celeryContainer, VOLUME_NAME, '/tmp', '/app');
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, celeryContainer, '/tmp', '/app');
+    this.serviceFactory.attachEphemeralStorage(celeryContainer, VOLUME_NAME, '/tmp', '/app/log');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, celeryContainer, '/tmp', '/app/log');
     const service = this.serviceFactory.createService({
       task,
       path: undefined, // Not exposed service
