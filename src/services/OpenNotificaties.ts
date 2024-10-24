@@ -248,7 +248,9 @@ export class OpenNotificatiesService extends Construct {
 
   private setupCeleryService() {
     const VOLUME_NAME = 'tempcelery';
-    const task = this.serviceFactory.createTaskDefinition('celery');
+    const task = this.serviceFactory.createTaskDefinition('celery', {
+      volumes: [{ name: VOLUME_NAME }],
+    });
     const celeryContainer = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       healthCheck: {
