@@ -345,7 +345,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'https://openzaak.woweb.app/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'rolregistration',
+        strategy: 'rolregistrationsinglepartij',
       },
     ],
   },
