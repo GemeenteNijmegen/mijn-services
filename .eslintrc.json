@@ -149,6 +149,7 @@
           "**/test/**",
           "**/build-tools/**",
           "src/custom-resources/create-databases/create-databases.lambda.ts",
+          "src/services/OpenKlantRegistrationService/Listener/listener.lambda.ts",
           ".projenrc.ts",
           "projenrc/**/*.ts"
         ],
@@ -223,6 +224,16 @@
     ]
   },
   "overrides": [
+    {
+      "rules": {
+        "import/no-extraneous-dependencies": [
+          "off"
+        ]
+      },
+      "files": [
+        "*.ts"
+      ]
+    },
     {
       "files": [
         ".projenrc.ts"

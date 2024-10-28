@@ -17,6 +17,7 @@
     "cdk.json",
     "LICENSE",
     "src/custom-resources/create-databases/create-databases-function.ts",
+    "src/services/OpenKlantRegistrationService/Listener/listener-function.ts",
     "tsconfig.dev.json",
     "tsconfig.json"
   ],

@@ -6,15 +6,36 @@ const project = new GemeenteNijmegenCdkApp({
   projenrcTs: true,
   devDeps: [
     '@gemeentenijmegen/projen-project-type',
-    '@types/aws-lambda',
     '@types/pg',
+    '@types/jsonwebtoken',
   ],
   deps: [
     'dotenv',
+    '@types/aws-lambda',
     '@gemeentenijmegen/aws-constructs',
     '@gemeentenijmegen/utils',
+    '@gemeentenijmegen/apigateway-http',
     'cdk-remote-stack',
     'pg', // Postgres client 🐘
+    'zod',
+    'jsonwebtoken',
+    'dotenv',
   ],
+  jestOptions: {
+    jestConfig: {
+      setupFiles: ['dotenv/config'],
+    },
+  },
 });
+
+/**
+ * Supress the 'dependency should be included in the project dependencies' error.
+ */
+project.eslint?.addOverride({
+  rules: {
+    'import/no-extraneous-dependencies': ['off'],
+  },
+  files: ['*.ts'],
+});
+
 project.synth();
