@@ -1,6 +1,7 @@
 import { ErrorResponse } from './ErrorResponse';
 import { OpenKlantDigitaalAdres, OpenKlantPartij, OpenKlantPartijIdentificiatie } from './model/Partij';
 import { Rol } from './model/Rol';
+import { StrategyStatics } from './strategies/StrategyStatics';
 
 /**
  * Mapping functinos to convert from zaken API to
@@ -258,10 +259,10 @@ export class OpenKlantMapper {
         uuid: partijUuid,
       },
       partijIdentificator: {
-        codeObjecttype: 'VULSERVICE PSUEOID REGISTER',
+        codeObjecttype: 'REGISTRATION SERVICE PSUEOID REGISTER',
         codeSoortObjectId: 'pseudoid',
         objectId: pseudoId, // Maps null | undefined to undefined...
-        codeRegister: 'BRP',
+        codeRegister: StrategyStatics.PSUEDOID_REGISTER,
       },
     };
 
