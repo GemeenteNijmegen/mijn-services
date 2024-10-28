@@ -31,7 +31,7 @@ runTest('Create zaak run live tests', () => {
   });
 
 
-  test('Create test zaak live (BSN)', async () => {
+  test('Create test zaak live (kvk)', async () => {
 
     const client = new ZgwClient({
       name: process.env.ZAKEN_API_CLIENT_ID!,

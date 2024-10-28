@@ -140,10 +140,13 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
 
 
   private async removeOldDigitaleAdressen(partij: OpenKlantPartijWithUuid) {
-    if (!partij._expand?.digitale_adressen || partij._expand?.digitale_adressen.length == 0) {
+    console.debug('Removing digital adressen for pertij...');
+    if (!partij.digitaleAdressen || partij.digitaleAdressen.length == 0) {
+      console.debug('Partij does not seem to have any digitale adressen');
       return;
     }
-    for (const digitaalAdres of partij._expand.digitale_adressen) {
+    for (const digitaalAdres of partij.digitaleAdressen) {
+      console.debug('Removing digitaal adres', digitaalAdres.uuid);
       await this.configuration.openKlantApi.deleteDigitaalAdres(digitaalAdres.uuid);
     }
   }
