@@ -121,6 +121,8 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
         console.debug('No organisation found, creating a new organisation...');
         const organisatieInput = OpenKlantMapper.organisatiePartijFromRol(rol);
         organisatie = await this.configuration.openKlantApi.registerPartij(organisatieInput);
+        const organisatieIdentificatieInput = OpenKlantMapper.organisatieIdentificatieFromRol(rol, organisatie.uuid);
+        await this.configuration.openKlantApi.addPartijIdentificatie(organisatieIdentificatieInput);
       }
 
       // 2.b.3. Create the contactpersoon that works for the organisatie
@@ -128,6 +130,8 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
       const orgnisatieUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${organisatie.uuid}`;
       const contactpersoonInput = OpenKlantMapper.contactpersoonPartijFromRol(rol, orgnisatieUrl, organisatie.uuid);
       contactpersoon = await this.configuration.openKlantApi.registerPartij(contactpersoonInput);
+      const contactpersoonIdentificatie = OpenKlantMapper.contactpersoonIdentificatieFromPseudoId(rol, contactpersoon.uuid, pseudoId);
+      await this.configuration.openKlantApi.addPartijIdentificatie(contactpersoonIdentificatie);
 
     }
 

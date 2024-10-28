@@ -113,42 +113,6 @@ export class OpenKlantMapper {
     };
   }
 
-  /**
-   * @deprecated Use individual mapping fuctions instead persoonPartijFromRol contactpersoonPartijFromRol or organisatiePartijFromRol
-   * @param rol
-   * @param name
-   * @returns
-   */
-  static partijFromRol(rol: Rol, name?: string) : OpenKlantPartij {
-    if (process.env.DEBUG === 'true') {
-      console.debug('Mapping rol to partij', rol);
-    }
-    const isOrganization = rol.betrokkeneIdentificatie.annIdentificatie != undefined;
-    const isPersoon = rol.betrokkeneType == 'natuurlijk_persoon';
-
-    // Map correct name depending on information in rol.
-    // TODO we need to verify and expend this logic later on.
-    if (isOrganization) {
-      const usedName = name ?? rol.betrokkeneIdentificatie.statutaireNaam;
-      return this.partijFromRolWithName(rol, usedName, 'organisatie');
-    } else if (isPersoon) {
-      const usedName = name ?? rol.contactpersoonRol?.naam ?? rol?.betrokkeneIdentificatie.geslachtsnaam;
-      return this.partijFromRolWithName(rol, usedName, 'persoon');
-    }
-
-    throw Error('Rol is not a organisation or a person.');
-  }
-
-  static contactpersoonFromRol(rol: Rol, organisatiePartijUrl: string, organisatiePartijUuid: string) : OpenKlantPartij {
-    const name = rol.contactpersoonRol?.naam;
-    const contactpersoon = this.partijFromRolWithName(rol, name, 'contactpersoon');
-    contactpersoon.partijIdentificatie.werkteVoorPartij = {
-      uuid: organisatiePartijUuid,
-      url: organisatiePartijUrl,
-    };
-    return contactpersoon;
-  }
-
   static digitaalAdressenFromRol(rol: Rol, partijUuid: string) : OpenKlantDigitaalAdres[] {
 
     if (process.env.DEBUG === 'true') {
@@ -188,12 +152,74 @@ export class OpenKlantMapper {
     return adressen;
   }
 
+  static persoonIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to persoon partij identificatie', rol);
+    }
+
+    const bsn = rol.betrokkeneIdentificatie.inpBsn;
+    if (!bsn) {
+      throw new ErrorResponse(400, 'Could not map rol to partijIdentificatie: no identification information found in rol');
+    }
+
+    return {
+      identificeerdePartij: {
+        uuid: partijUuid,
+      },
+      partijIdentificator: {
+        codeObjecttype: 'INGESCHREVEN NATUURLIJK PERSOON',
+        codeSoortObjectId: 'Burgerservicenummer',
+        objectId: bsn ?? undefined, // Maps null | undefined to undefined...
+        codeRegister: 'BRP',
+      },
+    };
+
+  }
+
+  static organisatieIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to persoon partij identificatie', rol);
+    }
+    const kvk = rol.betrokkeneIdentificatie.annIdentificatie;
+    if (!kvk) {
+      throw new ErrorResponse(400, 'Could not map rol to organisatie partijIdentificatie: no annIdentificatie field found in rol');
+    }
+
+    return {
+      identificeerdePartij: {
+        uuid: partijUuid,
+      },
+      partijIdentificator: {
+        codeObjecttype: 'NIET NATUURLIJK PERSOON',
+        codeSoortObjectId: 'Kvknummer',
+        objectId: kvk,
+        codeRegister: 'KVK',
+      },
+    };
+
+  }
+
+  static contactpersoonIdentificatieFromPseudoId(rol: Rol, partijUuid: string, pseudoId: string) : OpenKlantPartijIdentificiatie {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to contactpersoon partij identificatie', rol);
+    }
+
+    return {
+      identificeerdePartij: {
+        uuid: partijUuid,
+      },
+      partijIdentificator: {
+        codeObjecttype: 'VULSERVICE PSUEOID REGISTER',
+        codeSoortObjectId: 'pseudoid',
+        objectId: pseudoId, // Maps null | undefined to undefined...
+        codeRegister: 'BRP',
+      },
+    };
+
+  }
+
   /**
-   *
-   * TODO make this configurable so we can use this for organizations as well...
-   * @param rol
-   * @param partijUuid
-   * @returns
+   * @deprecated Use specific functions instead e.g. persoonIdentificatieFromRol
    */
   static partijIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
 
@@ -233,33 +259,45 @@ export class OpenKlantMapper {
 
   }
 
-  static persoonIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
+  /**
+   * @deprecated Use individual mapping fuctions instead persoonPartijFromRol contactpersoonPartijFromRol or organisatiePartijFromRol
+   */
+  static partijFromRol(rol: Rol, name?: string) : OpenKlantPartij {
     if (process.env.DEBUG === 'true') {
-      console.debug('Mapping rol to persoon partij identificatie', rol);
+      console.debug('Mapping rol to partij', rol);
+    }
+    const isOrganization = rol.betrokkeneIdentificatie.annIdentificatie != undefined;
+    const isPersoon = rol.betrokkeneType == 'natuurlijk_persoon';
+
+    // Map correct name depending on information in rol.
+    // TODO we need to verify and expend this logic later on.
+    if (isOrganization) {
+      const usedName = name ?? rol.betrokkeneIdentificatie.statutaireNaam;
+      return this.partijFromRolWithName(rol, usedName, 'organisatie');
+    } else if (isPersoon) {
+      const usedName = name ?? rol.contactpersoonRol?.naam ?? rol?.betrokkeneIdentificatie.geslachtsnaam;
+      return this.partijFromRolWithName(rol, usedName, 'persoon');
     }
 
-    const bsn = rol.betrokkeneIdentificatie.inpBsn;
-    if (!bsn) {
-      throw new ErrorResponse(400, 'Could not map rol to partijIdentificatie: no identification information found in rol');
-    }
-
-    let partijIdentificator = {
-      codeObjecttype: 'INGESCHREVEN NATUURLIJK PERSOON',
-      codeSoortObjectId: 'Burgerservicenummer',
-      objectId: bsn ?? undefined, // Maps null | undefined to undefined...
-      codeRegister: 'BRP',
-    };
-
-    return {
-      identificeerdePartij: {
-        uuid: partijUuid,
-      },
-      partijIdentificator,
-      // anderePartijIdentificator: 'string', // Vrij tekstveld om de verwijzing naar een niet-voorgedefinieerd objecttype, soort objectID of Register vast te leggen.
-    };
-
+    throw Error('Rol is not a organisation or a person.');
   }
 
+  /**
+   * @deprecated Use contactPersoonPartijFromRol instead
+   */
+  static contactpersoonFromRol(rol: Rol, organisatiePartijUrl: string, organisatiePartijUuid: string) : OpenKlantPartij {
+    const name = rol.contactpersoonRol?.naam;
+    const contactpersoon = this.partijFromRolWithName(rol, name, 'contactpersoon');
+    contactpersoon.partijIdentificatie.werkteVoorPartij = {
+      uuid: organisatiePartijUuid,
+      url: organisatiePartijUrl,
+    };
+    return contactpersoon;
+  }
+
+  /**
+   * @deprecated Used by other deprecated functions only
+   */
   private static partijFromRolWithName(rol: Rol, name: string | undefined | null, soortPartij: 'persoon' | 'organisatie' | 'contactpersoon') {
     if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to partij', rol);
