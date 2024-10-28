@@ -11,6 +11,11 @@ export class OpenKlantMapper {
   static readonly TELEFOONNUMMER = 'Telefoon'; // Expected by OMC
   static readonly EMAIL = 'Email'; // Expected by OMC
 
+  /**
+   * Map a rol to a open-klant persoon (subtype of partij)
+   * @param rol
+   * @returns
+   */
   static persoonPartijFromRol(rol: Rol) : OpenKlantPartij {
     if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to persoon partij', rol);
@@ -45,6 +50,11 @@ export class OpenKlantMapper {
     };
   }
 
+  /**
+   * Map a rol to a open-klant organisatie (subtype of partij)
+   * @param rol
+   * @returns
+   */
   static organisatiePartijFromRol(rol: Rol) : OpenKlantPartij {
     if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to organisatie partij', rol);
@@ -75,6 +85,14 @@ export class OpenKlantMapper {
     };
   }
 
+  /**
+   * Map a rol to a open-klant contactpersoon (subtype of partij)
+   * Note: a contactpersoon is related to a organisatie.
+   * @param rol
+   * @param organisatieUrl
+   * @param organisatieUuid
+   * @returns
+   */
   static contactpersoonPartijFromRol(rol: Rol, organisatieUrl: string, organisatieUuid: string) : OpenKlantPartij {
     if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to contactpersoon partij', rol);
@@ -113,6 +131,14 @@ export class OpenKlantMapper {
     };
   }
 
+  /**
+   * Map a rol to one or more open-klant digitaal adres objecten.
+   * Two types are supported: email and telefoonummer.
+   * Note: a digitaal adres is related to a partij (persoon, organisatie or contactpersoon).
+   * @param rol
+   * @param partijUuid
+   * @returns
+   */
   static digitaalAdressenFromRol(rol: Rol, partijUuid: string) : OpenKlantDigitaalAdres[] {
 
     if (process.env.DEBUG === 'true') {
@@ -152,6 +178,13 @@ export class OpenKlantMapper {
     return adressen;
   }
 
+  /**
+   * Map a rol a open-klant persoon identificatie (identifies a persoon partij).
+   * I.e. store the BSN to identify a persoon.
+   * @param rol
+   * @param partijUuid
+   * @returns
+   */
   static persoonIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
     if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to persoon partij identificatie', rol);
@@ -176,6 +209,13 @@ export class OpenKlantMapper {
 
   }
 
+  /**
+   * Map a rol a open-klant organisatie identificatie (identifies a organisatie partij).
+   * I.e. store the kvk to identify a organisatie.
+   * @param rol
+   * @param partijUuid
+   * @returns
+   */
   static organisatieIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
     if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to persoon partij identificatie', rol);
@@ -199,6 +239,15 @@ export class OpenKlantMapper {
 
   }
 
+  /**
+   * Create a contacptersoon identificatie based on a Pseudo ID. The Pseudo ID
+   * can be used by the registration service to do first order retreival of
+   * a contactpersoon.
+   * @param rol
+   * @param partijUuid
+   * @param pseudoId
+   * @returns
+   */
   static contactpersoonIdentificatieFromPseudoId(rol: Rol, partijUuid: string, pseudoId: string) : OpenKlantPartijIdentificiatie {
     if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to contactpersoon partij identificatie', rol);
@@ -220,6 +269,7 @@ export class OpenKlantMapper {
 
   /**
    * @deprecated Use specific functions instead e.g. persoonIdentificatieFromRol
+   * This used a more generic approch, however this approach is abondoned as it let to complex code
    */
   static partijIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
 
@@ -261,6 +311,7 @@ export class OpenKlantMapper {
 
   /**
    * @deprecated Use individual mapping fuctions instead persoonPartijFromRol contactpersoonPartijFromRol or organisatiePartijFromRol
+   * This used a more generic approch, however this approach is abondoned as it let to complex code
    */
   static partijFromRol(rol: Rol, name?: string) : OpenKlantPartij {
     if (process.env.DEBUG === 'true') {
@@ -284,6 +335,7 @@ export class OpenKlantMapper {
 
   /**
    * @deprecated Use contactPersoonPartijFromRol instead
+   * This used a more generic approch, however this approach is abondoned as it let to complex code
    */
   static contactpersoonFromRol(rol: Rol, organisatiePartijUrl: string, organisatiePartijUuid: string) : OpenKlantPartij {
     const name = rol.contactpersoonRol?.naam;
@@ -297,6 +349,7 @@ export class OpenKlantMapper {
 
   /**
    * @deprecated Used by other deprecated functions only
+   * This used a more generic approch, however this approach is abondoned as it let to complex code
    */
   private static partijFromRolWithName(rol: Rol, name: string | undefined | null, soortPartij: 'persoon' | 'organisatie' | 'contactpersoon') {
     if (process.env.DEBUG === 'true') {
