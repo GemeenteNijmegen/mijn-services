@@ -1,6 +1,7 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
 import { StrategyStatics } from './StrategyStatics';
+import { ErrorResponse } from '../ErrorResponse';
 import { Notification } from '../model/Notification';
 import { OpenKlantDigitaalAdresWithUuid, OpenKlantPartijWithUuid } from '../model/Partij';
 import { Rol } from '../model/Rol';
@@ -52,112 +53,91 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     }
     console.debug('Found a rol of the target type to forward to open klant.');
 
-    let partij = await this.findPartijIfItExists(rol);
-    if (partij) {
-      console.debug('Found existing partij.');
-      // Validate contactgevens and update if nessecary
-      await this.updateDigitaleAdressen(partij, rol);
-    } else {
-      console.debug('No existing partij found, creating new partij...');
-      partij = await this.registerPartij(rol);
+    let partij: OpenKlantPartijWithUuid | undefined = undefined;
+    if (rol.betrokkeneType == 'natuurlijk_persoon') {
+      partij = await this.handleNatuurlijkPersoon(rol);
     }
 
+    if (rol.betrokkeneType == 'niet_natuurlijk_persoon') {
+      partij = await this.handleNietNatuurlijkPersoon(rol);
+    }
+
+    if (!partij) {
+      throw new ErrorResponse(500, 'No partij was found or created');
+    }
     await this.updateRolWithParijUrl(partij.uuid, rol);
 
     return Response.ok();
   }
 
+  private async handleNatuurlijkPersoon(rol: Rol) {
 
-  /**
-   * Uses the rol to find the persoon or contactpersoon
-   * that is identified with the rol.
-   * @param rol
-   * @returns
-   */
-  private async findPartijIfItExists(rol: Rol) : Promise<OpenKlantPartijWithUuid | undefined> {
-    if (rol.betrokkeneType == 'natuurlijk_persoon') {
-      return this.configuration.openKlantApi.findPartij(rol.betrokkeneIdentificatie.inpBsn, 'persoon');
-    } else if (rol.betrokkeneType == 'niet_natuurlijk_persoon') {
-      const kvk = rol.betrokkeneIdentificatie.annIdentificatie;
-      const name = rol.contactpersoonRol?.naam ?? rol.betrokkeneIdentificatie.geslachtsnaam;
-      const pseudoId = StrategyStatics.constructPseudoId(kvk!, name!);
-      return this.configuration.openKlantApi.findPartij(pseudoId, 'contactpersoon');
+    // 1. Check if the person exists
+    let persoon = await this.configuration.openKlantApi.findPartij(rol.betrokkeneIdentificatie.inpBsn, 'persoon');
+
+
+    if (persoon) { // 2a. If a persoon exists, remove known digitale adressen
+      await this.removeOldDigitaleAdressen(persoon);
+    } else { // 2b. If persoon does not exist, create it
+      const partijInput = OpenKlantMapper.persoonPartijFromRol(rol);
+      persoon = await this.configuration.openKlantApi.registerPartij(partijInput);
+      console.debug('Persoon partij created', persoon);
+      const identificatieInput = OpenKlantMapper.persoonIdentificatieFromRol(rol, persoon.uuid);
+      const identificatie = await this.configuration.openKlantApi.addPartijIdentificatie(identificatieInput);
+      console.debug('Persoon partij identificatie created', identificatie);
     }
-    return undefined;
+
+    // 3. Add new digitale adressen
+    console.debug('Setting digitale adressen for persoon...');
+    await this.setDigitaleAdressenForPartijFromRol(persoon, rol);
+
+    return persoon;
+
   }
 
+  private async handleNietNatuurlijkPersoon(rol: Rol) {
 
-  /**
-   * Create a new partij including digitale adressen en identificatie.
-   * If the partij is a orgnisation creates a contactpersoon that works for
-   * the organisation.
-   * @param rol
-   * @returns
-   */
-  private async registerPartij(rol: Rol) : Promise<OpenKlantPartijWithUuid> {
-    // Create a partij
-    let partij = undefined;
-    if (rol.betrokkeneType == 'niet_natuurlijk_persoon') {
-      // Als het om een organisatie gaat bestaat de partij misschien al
-      partij = await this.configuration.openKlantApi.findPartij(rol.betrokkeneIdentificatie.annIdentificatie, 'organisatie');
-      if (!partij) {
-        const partijInput = OpenKlantMapper.partijFromRol(rol);
-        partij = await this.configuration.openKlantApi.registerPartij(partijInput);
-        console.debug('Partij created', partij);
-      } else {
-        console.debug('Found partij', partij);
+    // 1. Check if the contactpersoon exists
+    const kvk = rol.betrokkeneIdentificatie.annIdentificatie;
+    const name = rol.contactpersoonRol?.naam ?? rol.betrokkeneIdentificatie.geslachtsnaam;
+    const pseudoId = StrategyStatics.constructPseudoId(kvk!, name!);
+    console.debug('Checking if the contactpersoon alreay exists...');
+    let contactpersoon = await this.configuration.openKlantApi.findPartij(pseudoId, 'contactpersoon');
+
+    if (contactpersoon) {
+      // 2.a. If a persoon exists, remove known digitale adressen
+      console.debug('Removing known digitale adressen...');
+      await this.removeOldDigitaleAdressen(contactpersoon);
+    } else {
+      // 2.b. If persoon does not exist, create it
+      console.debug('Did not find contactpersoon for this case, creating a new contactpersoon...');
+
+      // 2.b.1. Check if organisatie exists
+      console.debug('Checking if organisation exists...');
+      let organisatie = await this.configuration.openKlantApi.findPartij(kvk, 'organisatie');
+
+      // 2.b.2. If it does not exist create the organisatie
+      if (!organisatie) {
+        console.debug('No organisation found, creating a new organisation...');
+        const organisatieInput = OpenKlantMapper.organisatiePartijFromRol(rol);
+        organisatie = await this.configuration.openKlantApi.registerPartij(organisatieInput);
       }
-    }
-    if (rol.betrokkeneType == 'natuurlijk_persoon') {
-      const partijInput = OpenKlantMapper.partijFromRol(rol);
-      partij = await this.configuration.openKlantApi.registerPartij(partijInput);
-      console.debug('Partij created', partij);
-    }
 
-    if (!partij) {
-      throw Error('Partij was not found or failed to create.');
+      // 2.b.3. Create the contactpersoon that works for the organisatie
+      console.debug('Creating a contactpersoon...');
+      const orgnisatieUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${organisatie.uuid}`;
+      const contactpersoonInput = OpenKlantMapper.contactpersoonPartijFromRol(rol, orgnisatieUrl, organisatie.uuid);
+      contactpersoon = await this.configuration.openKlantApi.registerPartij(contactpersoonInput);
+
     }
 
-    // Create a partij identificatie
-    const partijIdentificatieInput = OpenKlantMapper.partijIdentificatieFromRol(rol, partij.uuid);
-    const partijIdentificatie = await this.configuration.openKlantApi.addPartijIdentificatie(partijIdentificatieInput);
-    console.debug('Partij identificatie created', partijIdentificatie);
+    // 3. Add new digitale adressen
+    console.debug('Setting digitale adressen for contactpersoon...');
+    await this.setDigitaleAdressenForPartijFromRol(contactpersoon, rol);
 
-    let partijWithDigitaleAdressen = partij;
-    if (partij.soortPartij == 'organisatie') {
-      console.debug('Partij is an organisatie, storing contactgegevens in contactpersoon partij...');
-      const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partij.uuid}`;
-      const contactpersoonInput = OpenKlantMapper.contactpersoonFromRol(rol, partijUrl, partij.uuid);
-      const contactpersoon = await this.configuration.openKlantApi.registerPartij(contactpersoonInput);
-
-      const kvk = rol.betrokkeneIdentificatie.annIdentificatie;
-      const name = rol.contactpersoonRol?.naam ?? rol.betrokkeneIdentificatie.geslachtsnaam;
-      await this.configuration.openKlantApi.addPartijIdentificatie({
-        identificeerdePartij: contactpersoon,
-        partijIdentificator: {
-          codeObjecttype: 'CUSTOM PSEUDO ID CONTACTPERSOON',
-          codeRegister: StrategyStatics.PSUEDOID_REGISTER,
-          codeSoortObjectId: 'Custom PseudoID',
-          objectId: StrategyStatics.constructPseudoId(kvk!, name!),
-        },
-      });
-
-      console.debug('Contactpersoon partij created', contactpersoon);
-      partijWithDigitaleAdressen = contactpersoon;
-    }
-
-    await this.setDigitaleAdressenForPartijFromRol(partijWithDigitaleAdressen, rol);
-
-    return partijWithDigitaleAdressen;
+    return contactpersoon;
   }
 
-  private async updateDigitaleAdressen(partij: OpenKlantPartijWithUuid, rol: Rol) {
-    console.warn('We do not know which is the perefered adres, old ones are removed and the new ones are added.');
-    if (partij._expand?.digitale_adressen) {
-      await this.removeOldDigitaleAdressen(partij);
-    }
-    return this.setDigitaleAdressenForPartijFromRol(partij, rol);
-  }
 
   private async removeOldDigitaleAdressen(partij: OpenKlantPartijWithUuid) {
     if (!partij._expand?.digitale_adressen || partij._expand?.digitale_adressen.length == 0) {
@@ -202,6 +182,5 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     });
     console.debug('Partij updates with voorkeur', partijUpdate);
   }
-
 
 }

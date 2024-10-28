@@ -24,6 +24,10 @@ export const OpenKlantPartijSchema = z.object({
     z.object({
       contactnaam: z.union([z.null(), z.object({})]),
       volledigeNaam: z.string(),
+      werkteVoorPartij: z.object({
+        uuid: z.string(),
+        url: z.string(),
+      }).nullish(),
     }),
     z.object({
       naam: z.string(),

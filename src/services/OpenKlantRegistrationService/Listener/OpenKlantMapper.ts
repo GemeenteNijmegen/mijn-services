@@ -11,7 +11,114 @@ export class OpenKlantMapper {
   static readonly TELEFOONNUMMER = 'Telefoon'; // Expected by OMC
   static readonly EMAIL = 'Email'; // Expected by OMC
 
+  static persoonPartijFromRol(rol: Rol) : OpenKlantPartij {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to persoon partij', rol);
+    }
+    if (rol.betrokkeneType != 'natuurlijk_persoon') {
+      throw Error('Can only map natuurlijk_persoon rollen to persoon partij');
+    }
+    const usedName = rol.contactpersoonRol?.naam ?? rol?.betrokkeneIdentificatie.geslachtsnaam;
+    if (!usedName) {
+      throw new ErrorResponse(400, 'No name found in rol');
+    }
 
+    // Map to correct partijIdentificatie
+    // This field must be filled differently for organisatie or persoon...
+    // See: https://github.com/maykinmedia/open-klant/issues/227
+    return {
+      digitaleAdressen: [],
+      indicatieActief: true,
+      partijIdentificatie: {
+        volledigeNaam: usedName,
+        contactnaam: {
+          voornaam: usedName,
+          achternaam: '',
+        },
+      },
+      rekeningnummers: [],
+      soortPartij: 'persoon',
+      voorkeursDigitaalAdres: null,
+      voorkeursRekeningnummer: null,
+      voorkeurstaal: 'dut',
+      indicatieGeheimhouding: false,
+    };
+  }
+
+  static organisatiePartijFromRol(rol: Rol) : OpenKlantPartij {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to organisatie partij', rol);
+    }
+    if (rol.betrokkeneType != 'niet_natuurlijk_persoon') {
+      throw Error('Can only map niet_natuurlijk_persoon rollen to organisatie partij');
+    }
+    const usedName = rol.betrokkeneIdentificatie.statutaireNaam;
+    if (!usedName) {
+      throw new ErrorResponse(400, 'No orgnisatie name found in rol');
+    }
+
+    // Map to correct partijIdentificatie
+    // This field must be filled differently for organisatie or persoon...
+    // See: https://github.com/maykinmedia/open-klant/issues/227
+    return {
+      digitaleAdressen: [],
+      indicatieActief: true,
+      partijIdentificatie: {
+        naam: usedName,
+      },
+      rekeningnummers: [],
+      soortPartij: 'organisatie',
+      voorkeursDigitaalAdres: null,
+      voorkeursRekeningnummer: null,
+      voorkeurstaal: 'dut',
+      indicatieGeheimhouding: false,
+    };
+  }
+
+  static contactpersoonPartijFromRol(rol: Rol, organisatieUrl: string, organisatieUuid: string) : OpenKlantPartij {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to contactpersoon partij', rol);
+    }
+    if (rol.betrokkeneType != 'niet_natuurlijk_persoon') {
+      throw Error('Can only map niet_natuurlijk_persoon rollen to contactpersoon partij');
+    }
+    const usedName = rol.contactpersoonRol?.naam ?? rol?.betrokkeneIdentificatie.geslachtsnaam;
+    if (!usedName) {
+      throw new ErrorResponse(400, 'No orgnisatie name found in rol');
+    }
+
+    // Map to correct partijIdentificatie
+    // This field must be filled differently for organisatie or persoon...
+    // See: https://github.com/maykinmedia/open-klant/issues/227
+    return {
+      digitaleAdressen: [],
+      indicatieActief: true,
+      partijIdentificatie: {
+        volledigeNaam: usedName,
+        contactnaam: {
+          voornaam: usedName,
+          achternaam: '',
+        },
+        werkteVoorPartij: {
+          uuid: organisatieUuid,
+          url: organisatieUrl,
+        },
+      },
+      rekeningnummers: [],
+      soortPartij: 'contactpersoon',
+      voorkeursDigitaalAdres: null,
+      voorkeursRekeningnummer: null,
+      voorkeurstaal: 'dut',
+      indicatieGeheimhouding: false,
+    };
+  }
+
+  /**
+   * @deprecated Use individual mapping fuctions instead persoonPartijFromRol contactpersoonPartijFromRol or organisatiePartijFromRol
+   * @param rol
+   * @param name
+   * @returns
+   */
   static partijFromRol(rol: Rol, name?: string) : OpenKlantPartij {
     if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to partij', rol);
@@ -115,6 +222,33 @@ export class OpenKlantMapper {
         codeRegister: 'KVK',
       };
     }
+
+    return {
+      identificeerdePartij: {
+        uuid: partijUuid,
+      },
+      partijIdentificator,
+      // anderePartijIdentificator: 'string', // Vrij tekstveld om de verwijzing naar een niet-voorgedefinieerd objecttype, soort objectID of Register vast te leggen.
+    };
+
+  }
+
+  static persoonIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to persoon partij identificatie', rol);
+    }
+
+    const bsn = rol.betrokkeneIdentificatie.inpBsn;
+    if (!bsn) {
+      throw new ErrorResponse(400, 'Could not map rol to partijIdentificatie: no identification information found in rol');
+    }
+
+    let partijIdentificator = {
+      codeObjecttype: 'INGESCHREVEN NATUURLIJK PERSOON',
+      codeSoortObjectId: 'Burgerservicenummer',
+      objectId: bsn ?? undefined, // Maps null | undefined to undefined...
+      codeRegister: 'BRP',
+    };
 
     return {
       identificeerdePartij: {
