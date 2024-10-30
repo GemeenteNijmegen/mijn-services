@@ -4,6 +4,22 @@ import { ZgwClient } from './ZgwClient';
 
 const runTest = process.env.CREATE_TEST_ZAAK_LIVE === 'true' ? describe : describe.skip;
 
+/**
+ * Tests in this file can be used to create a new zaak incl. rol & status
+ * This is usefull for triggering the open-klant registrataion service and
+ * OMC to send notifications.
+ * Below is an example of what environment variables to set in your .env file to run these tests
+ * ```
+ * CREATE_TEST_ZAAK_LIVE=true
+ * CREATE_TEST_ZAAK_API=https://...
+ * CREATE_TEST_ZAAK_ZAAKTYPE=https://...
+ * CREATE_TEST_ZAAK_ROLTYPE=https://...
+ * CREATE_TEST_ZAAK_STATUSTYPE=https://...
+ * CREATE_TEST_ZAAK_CONTACTPERSOON_NAAM=H. de Jong
+ * CREATE_TEST_ZAAK_CONTACTPERSOON_EMAIL=...@nijmegen.nl
+ * CREATE_TEST_ZAAK_CONTACTPERSOON_TELEFOON=0612345656
+ * ```
+ */
 runTest('Create zaak run live tests', () => {
 
   test('Create test zaak live (BSN)', async () => {
