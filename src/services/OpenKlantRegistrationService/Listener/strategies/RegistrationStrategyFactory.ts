@@ -1,4 +1,5 @@
 import { IRegistrationStrategy } from './IRegistrationStrategy';
+import { PartijPerRolStrategy } from './PartijPerRolStrategy';
 import { RolRegisrationStrategySinglePartij } from './RolRegisrationStrategySinglePartij';
 import { RolRegisrationStrategy } from './RolRegistrationStrategy';
 import { RolWithBRPRegistrationStrategy } from './RolWithBRPRegistrationStrategy';
@@ -23,6 +24,8 @@ export class RegistrationStrategyFactory {
       return new RolRegisrationStrategySinglePartij(this.configuration);
     } else if (strategy == 'rolwithbrpregistration') {
       return new RolWithBRPRegistrationStrategy(this.configuration);
+    } else if (strategy == 'partijperrol') {
+      return new PartijPerRolStrategy(this.configuration);
     }
 
     console.warn('Defaulting to RolRegisrationStrategy. This is porbably not what you want.');
