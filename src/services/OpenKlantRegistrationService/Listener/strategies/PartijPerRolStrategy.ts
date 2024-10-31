@@ -87,6 +87,10 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
   }
 
   private async handleNietNatuurlijkPersoon(rol: Rol) {
+    // Act as if the rol is actually a natuurlijk persoon for converting it to a persoon partij.
+    // Note that we can do this in this particular situation as we do not use the rol.betrokkeneIdentificatie
+    //  but instead use a random ID so that we can remove these partijen later.
+    rol.betrokkeneType = 'natuurlijk_persoon';
     // Create the partij
     const partijInput = OpenKlantMapper.persoonPartijFromRol(rol);
     const persoon = await this.configuration.openKlantApi.registerPartij(partijInput);
