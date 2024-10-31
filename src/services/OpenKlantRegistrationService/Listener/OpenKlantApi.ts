@@ -68,7 +68,7 @@ export class OpenKlantApi implements IOpenKlantApi {
 
   async deleteDigitaalAdres(uuid: string) {
     const url = this.props.url + `/digitaleadressen/${uuid}`;
-    const response = await this.callApi('CELETE', url);
+    const response = await this.callApi('DELETE', url);
     return response.ok;
   }
 

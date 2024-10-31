@@ -1,6 +1,7 @@
 import { ErrorResponse } from './ErrorResponse';
 import { OpenKlantDigitaalAdres, OpenKlantPartij, OpenKlantPartijIdentificiatie } from './model/Partij';
 import { Rol } from './model/Rol';
+import { StrategyStatics } from './strategies/StrategyStatics';
 
 /**
  * Mapping functinos to convert from zaken API to
@@ -11,37 +12,134 @@ export class OpenKlantMapper {
   static readonly TELEFOONNUMMER = 'Telefoon'; // Expected by OMC
   static readonly EMAIL = 'Email'; // Expected by OMC
 
-
-  static partijFromRol(rol: Rol, name?: string) : OpenKlantPartij {
+  /**
+   * Map a rol to a open-klant persoon (subtype of partij)
+   * @param rol
+   * @returns
+   */
+  static persoonPartijFromRol(rol: Rol) : OpenKlantPartij {
     if (process.env.DEBUG === 'true') {
-      console.debug('Mapping rol to partij', rol);
+      console.debug('Mapping rol to persoon partij', rol);
     }
-    const isOrganization = rol.betrokkeneIdentificatie.annIdentificatie != undefined;
-    const isPersoon = rol.betrokkeneType == 'natuurlijk_persoon';
-
-    // Map correct name depending on information in rol.
-    // TODO we need to verify and expend this logic later on.
-    if (isOrganization) {
-      const usedName = name ?? rol.betrokkeneIdentificatie.statutaireNaam;
-      return this.partijFromRolWithName(rol, usedName, 'organisatie');
-    } else if (isPersoon) {
-      const usedName = name ?? rol.contactpersoonRol?.naam ?? rol?.betrokkeneIdentificatie.geslachtsnaam;
-      return this.partijFromRolWithName(rol, usedName, 'persoon');
+    if (rol.betrokkeneType != 'natuurlijk_persoon') {
+      throw Error('Can only map natuurlijk_persoon rollen to persoon partij');
+    }
+    const usedName = rol.contactpersoonRol?.naam ?? rol?.betrokkeneIdentificatie.geslachtsnaam;
+    if (!usedName) {
+      throw new ErrorResponse(400, 'No name found in rol');
     }
 
-    throw Error('Rol is not a organisation or a person.');
-  }
-
-  static contactpersoonFromRol(rol: Rol, organisatiePartijUrl: string, organisatiePartijUuid: string) : OpenKlantPartij {
-    const name = rol.contactpersoonRol?.naam;
-    const contactpersoon = this.partijFromRolWithName(rol, name, 'contactpersoon');
-    contactpersoon.partijIdentificatie.werkteVoorPartij = {
-      uuid: organisatiePartijUuid,
-      url: organisatiePartijUrl,
+    // Map to correct partijIdentificatie
+    // This field must be filled differently for organisatie or persoon...
+    // See: https://github.com/maykinmedia/open-klant/issues/227
+    return {
+      digitaleAdressen: [],
+      indicatieActief: true,
+      partijIdentificatie: {
+        volledigeNaam: usedName,
+        contactnaam: {
+          voornaam: usedName,
+          achternaam: '',
+        },
+      },
+      rekeningnummers: [],
+      soortPartij: 'persoon',
+      voorkeursDigitaalAdres: null,
+      voorkeursRekeningnummer: null,
+      voorkeurstaal: 'dut',
+      indicatieGeheimhouding: false,
     };
-    return contactpersoon;
   }
 
+  /**
+   * Map a rol to a open-klant organisatie (subtype of partij)
+   * @param rol
+   * @returns
+   */
+  static organisatiePartijFromRol(rol: Rol) : OpenKlantPartij {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to organisatie partij', rol);
+    }
+    if (rol.betrokkeneType != 'niet_natuurlijk_persoon') {
+      throw Error('Can only map niet_natuurlijk_persoon rollen to organisatie partij');
+    }
+    const usedName = rol.betrokkeneIdentificatie.statutaireNaam;
+    if (!usedName) {
+      throw new ErrorResponse(400, 'No orgnisatie name found in rol');
+    }
+
+    // Map to correct partijIdentificatie
+    // This field must be filled differently for organisatie or persoon...
+    // See: https://github.com/maykinmedia/open-klant/issues/227
+    return {
+      digitaleAdressen: [],
+      indicatieActief: true,
+      partijIdentificatie: {
+        naam: usedName,
+      },
+      rekeningnummers: [],
+      soortPartij: 'organisatie',
+      voorkeursDigitaalAdres: null,
+      voorkeursRekeningnummer: null,
+      voorkeurstaal: 'dut',
+      indicatieGeheimhouding: false,
+    };
+  }
+
+  /**
+   * Map a rol to a open-klant contactpersoon (subtype of partij)
+   * Note: a contactpersoon is related to a organisatie.
+   * @param rol
+   * @param organisatieUrl
+   * @param organisatieUuid
+   * @returns
+   */
+  static contactpersoonPartijFromRol(rol: Rol, organisatieUrl: string, organisatieUuid: string) : OpenKlantPartij {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to contactpersoon partij', rol);
+    }
+    if (rol.betrokkeneType != 'niet_natuurlijk_persoon') {
+      throw Error('Can only map niet_natuurlijk_persoon rollen to contactpersoon partij');
+    }
+    const usedName = rol.contactpersoonRol?.naam ?? rol?.betrokkeneIdentificatie.geslachtsnaam;
+    if (!usedName) {
+      throw new ErrorResponse(400, 'No orgnisatie name found in rol');
+    }
+
+    // Map to correct partijIdentificatie
+    // This field must be filled differently for organisatie or persoon...
+    // See: https://github.com/maykinmedia/open-klant/issues/227
+    return {
+      digitaleAdressen: [],
+      indicatieActief: true,
+      partijIdentificatie: {
+        volledigeNaam: usedName,
+        contactnaam: {
+          voornaam: usedName,
+          achternaam: '',
+        },
+        werkteVoorPartij: {
+          uuid: organisatieUuid,
+          url: organisatieUrl,
+        },
+      },
+      rekeningnummers: [],
+      soortPartij: 'contactpersoon',
+      voorkeursDigitaalAdres: null,
+      voorkeursRekeningnummer: null,
+      voorkeurstaal: 'dut',
+      indicatieGeheimhouding: false,
+    };
+  }
+
+  /**
+   * Map a rol to one or more open-klant digitaal adres objecten.
+   * Two types are supported: email and telefoonummer.
+   * Note: a digitaal adres is related to a partij (persoon, organisatie or contactpersoon).
+   * @param rol
+   * @param partijUuid
+   * @returns
+   */
   static digitaalAdressenFromRol(rol: Rol, partijUuid: string) : OpenKlantDigitaalAdres[] {
 
     if (process.env.DEBUG === 'true') {
@@ -82,11 +180,97 @@ export class OpenKlantMapper {
   }
 
   /**
-   *
-   * TODO make this configurable so we can use this for organizations as well...
+   * Map a rol a open-klant persoon identificatie (identifies a persoon partij).
+   * I.e. store the BSN to identify a persoon.
    * @param rol
    * @param partijUuid
    * @returns
+   */
+  static persoonIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to persoon partij identificatie', rol);
+    }
+
+    const bsn = rol.betrokkeneIdentificatie.inpBsn;
+    if (!bsn) {
+      throw new ErrorResponse(400, 'Could not map rol to partijIdentificatie: no identification information found in rol');
+    }
+
+    return {
+      identificeerdePartij: {
+        uuid: partijUuid,
+      },
+      partijIdentificator: {
+        codeObjecttype: 'INGESCHREVEN NATUURLIJK PERSOON',
+        codeSoortObjectId: 'Burgerservicenummer',
+        objectId: bsn ?? undefined, // Maps null | undefined to undefined...
+        codeRegister: 'BRP',
+      },
+    };
+
+  }
+
+  /**
+   * Map a rol a open-klant organisatie identificatie (identifies a organisatie partij).
+   * I.e. store the kvk to identify a organisatie.
+   * @param rol
+   * @param partijUuid
+   * @returns
+   */
+  static organisatieIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to persoon partij identificatie', rol);
+    }
+    const kvk = rol.betrokkeneIdentificatie.annIdentificatie;
+    if (!kvk) {
+      throw new ErrorResponse(400, 'Could not map rol to organisatie partijIdentificatie: no annIdentificatie field found in rol');
+    }
+
+    return {
+      identificeerdePartij: {
+        uuid: partijUuid,
+      },
+      partijIdentificator: {
+        codeObjecttype: 'NIET NATUURLIJK PERSOON',
+        codeSoortObjectId: 'Kvknummer',
+        objectId: kvk,
+        codeRegister: 'KVK',
+      },
+    };
+
+  }
+
+  /**
+   * Create a contacptersoon identificatie based on a Pseudo ID. The Pseudo ID
+   * can be used by the registration service to do first order retreival of
+   * a contactpersoon.
+   * @param rol
+   * @param partijUuid
+   * @param pseudoId
+   * @returns
+   */
+  static contactpersoonIdentificatieFromPseudoId(rol: Rol, partijUuid: string, pseudoId: string) : OpenKlantPartijIdentificiatie {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to contactpersoon partij identificatie', rol);
+    }
+
+    return {
+      identificeerdePartij: {
+        uuid: partijUuid,
+      },
+      partijIdentificator: {
+        codeObjecttype: 'REGISTRATION SERVICE PSUEOID REGISTER',
+        codeSoortObjectId: 'pseudoid',
+        objectId: pseudoId, // Maps null | undefined to undefined...
+        codeRegister: StrategyStatics.PSUEDOID_REGISTER,
+      },
+    };
+
+  }
+
+  /**
+   * @deprecated Use specific functions instead e.g. persoonIdentificatieFromRol
+   * This used a more generic approch, however this approach is abondoned as it let to complex code
    */
   static partijIdentificatieFromRol(rol: Rol, partijUuid: string) : OpenKlantPartijIdentificiatie {
 
@@ -126,6 +310,48 @@ export class OpenKlantMapper {
 
   }
 
+  /**
+   * @deprecated Use individual mapping fuctions instead persoonPartijFromRol contactpersoonPartijFromRol or organisatiePartijFromRol
+   * This used a more generic approch, however this approach is abondoned as it let to complex code
+   */
+  static partijFromRol(rol: Rol, name?: string) : OpenKlantPartij {
+    if (process.env.DEBUG === 'true') {
+      console.debug('Mapping rol to partij', rol);
+    }
+    const isOrganization = rol.betrokkeneIdentificatie.annIdentificatie != undefined;
+    const isPersoon = rol.betrokkeneType == 'natuurlijk_persoon';
+
+    // Map correct name depending on information in rol.
+    // TODO we need to verify and expend this logic later on.
+    if (isOrganization) {
+      const usedName = name ?? rol.betrokkeneIdentificatie.statutaireNaam;
+      return this.partijFromRolWithName(rol, usedName, 'organisatie');
+    } else if (isPersoon) {
+      const usedName = name ?? rol.contactpersoonRol?.naam ?? rol?.betrokkeneIdentificatie.geslachtsnaam;
+      return this.partijFromRolWithName(rol, usedName, 'persoon');
+    }
+
+    throw Error('Rol is not a organisation or a person.');
+  }
+
+  /**
+   * @deprecated Use contactPersoonPartijFromRol instead
+   * This used a more generic approch, however this approach is abondoned as it let to complex code
+   */
+  static contactpersoonFromRol(rol: Rol, organisatiePartijUrl: string, organisatiePartijUuid: string) : OpenKlantPartij {
+    const name = rol.contactpersoonRol?.naam;
+    const contactpersoon = this.partijFromRolWithName(rol, name, 'contactpersoon');
+    contactpersoon.partijIdentificatie.werkteVoorPartij = {
+      uuid: organisatiePartijUuid,
+      url: organisatiePartijUrl,
+    };
+    return contactpersoon;
+  }
+
+  /**
+   * @deprecated Used by other deprecated functions only
+   * This used a more generic approch, however this approach is abondoned as it let to complex code
+   */
   private static partijFromRolWithName(rol: Rol, name: string | undefined | null, soortPartij: 'persoon' | 'organisatie' | 'contactpersoon') {
     if (process.env.DEBUG === 'true') {
       console.debug('Mapping rol to partij', rol);

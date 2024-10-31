@@ -235,7 +235,12 @@ export interface OpenKlantRegistrationServiceConfiguration {
    * Different strategies that the service will use to register the contactinfo in OpenKlant
    * See the README of this particular service for more information.
    */
-  strategy: ('rolregistration'|'rolwithbrpregistration'|'rolregistrationsinglepartij');
+  strategy: (
+    'rolregistration' // Convert the rol to a partij and store the partij id in the rol.
+    |'rolwithbrpregistration' // Convert the rol to a partij and store the partij id in the rol (includes a BRP call for obtaining the name using the BSN in the rol to store in open klant)
+    |'rolregistrationsinglepartij' // Convert the rol to a partij and store the partij id in the rol. Check if the partij exists and update digitale addressen (cannot be used in production)
+    |'partijperrol' // Convert the rol to a partij en store the partij id in the rol. Uses a dummy partij identificatie to keep each partij unique and for easy removal later on.
+  );
 }
 
 const EnvironmentConfigurations: {[key:string]: Configuration} = {
@@ -335,8 +340,8 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
         path: '/open-klant-registration-service-development/callback',
-        roltypesToRegister: ['belanghebbende', 'initiator'],
-        strategy: 'rolregistrationsinglepartij',
+        roltypesToRegister: ['initiator'],
+        strategy: 'partijperrol',
       },
       {
         cdkId: 'open-klant-registration-service-woweb',
@@ -345,7 +350,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'https://openzaak.woweb.app/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'rolregistration',
+        strategy: 'partijperrol',
       },
     ],
   },
