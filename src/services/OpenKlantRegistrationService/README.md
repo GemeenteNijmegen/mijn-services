@@ -6,6 +6,11 @@ Dit geeft de volgende componenten:
 ![Notificatie flow](./docs/notificaties-flow.drawio.png)
 
 
+## Domain
+Een klein stukje overzicht van het domein en de objecten die daarin zitten.
+![Domain relations](./docs/domain.drawio.png)
+Note: zie ook https://github.com/maykinmedia/open-klant/issues/227
+
 ## Implementatie details
 ![Implementatie details](./docs/implementatie.drawio.png)
 
