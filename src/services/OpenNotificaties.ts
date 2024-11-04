@@ -169,7 +169,7 @@ export class OpenNotificatiesService extends Construct {
       }],
       secrets: {},
       environment: {}, // TODO figgure out if we need any settings?
-      // healthCheck: { // TODO figure out how to get this to work
+      // healthCheck: { // TODO Running this health check before rabbitmq is fully started will prevent the container from starting
       //   command: ['rabbitmq-diagnostics', '-q', 'check_port_connectivity'],
       // },
     });

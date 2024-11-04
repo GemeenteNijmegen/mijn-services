@@ -366,7 +366,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     },
     databases: Statics.databasesProduction,
     openklant: {
-      image: 'maykinmedia/open-klant:2.1.0',
+      image: 'maykinmedia/open-klant:2.3.0',
       logLevel: 'INFO',
     },
   },
