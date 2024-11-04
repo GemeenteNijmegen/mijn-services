@@ -96,6 +96,7 @@ export class OpenNotificatiesService extends Construct {
 
       LOG_LEVEL: this.props.openNotificationsConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
+      LOG_OUTGOING_REQUESTS_DB_SAVE: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
       LOG_QUERIES: 'False',
       DEBUG: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
 
