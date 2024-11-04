@@ -169,7 +169,9 @@ export class OpenNotificatiesService extends Construct {
       }],
       secrets: {},
       environment: {}, // TODO figgure out if we need any settings?
-      // healthCheck: {} // TODO figure out how to check if this is healthy
+      healthCheck: {
+        command: ['rabbitmq-diagnostics', '-q', 'check_port_connectivity'],
+      },
     });
     const service = this.serviceFactory.createService({
       task,
