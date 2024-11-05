@@ -335,13 +335,13 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         strategy: 'rolwithbrpregistration',
       },
       {
-        cdkId: 'open-klant-registration-service-development',
+        cdkId: 'open-klant-registration-service-test',
         debug: true,
         openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'https://lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
-        path: '/open-klant-registration-service-development/callback',
+        zakenApiUrl: 'https://mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
+        path: '/open-klant-registration-service-test/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol',
+        strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
       },
       {
         cdkId: 'open-klant-registration-service-woweb',
@@ -350,7 +350,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'https://openzaak.woweb.app/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol',
+        strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
       },
     ],
   },
