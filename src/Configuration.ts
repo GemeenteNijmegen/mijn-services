@@ -276,13 +276,13 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       {
         cdkId: 'test-omc',
         path: 'test-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.10.2',
+        image: 'worthnl/notifynl-omc:1.11.3',
         logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
-        notificatiesApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-notificaties/api/v1',
+        zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
+        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'OMC',
@@ -301,7 +301,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       {
         cdkId: 'vrijbrp-omc',
         path: 'vrijbrp-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.10.2',
+        image: 'worthnl/notifynl-omc:1.11.3',
         logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
