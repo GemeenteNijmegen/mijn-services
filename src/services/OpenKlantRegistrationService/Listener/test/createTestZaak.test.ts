@@ -36,15 +36,25 @@ runTest('Create zaak run live tests', () => {
 
     const zaak = await client.createZaak(`TEST-VUL-SERVICE-ZAAK-${Date.now()}`, 'TestVulService');
 
+    await sleep(3000);
+
     await client.addBsnRoleToZaak(zaak.url, new Bsn('999999333'), {
       naam: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_NAAM!,
       telefoonnummer: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_TELEFOON,
       emailadres: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_EMAIL,
     });
 
+    await sleep(3000);
+
     await client.addStatusToZaak(zaak.url, 'Trigger vul service vanaf lokaal (bsn)');
 
-  });
+  }, 30*1000);
+
+  async function sleep(ms: number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
 
 
   test('Create test zaak live (kvk)', async () => {

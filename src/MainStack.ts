@@ -90,8 +90,8 @@ export class MainStack extends Stack {
     new OpenNotificatiesService(this, 'open-notificaties', {
       hostedzone: this.hostedzone,
       cache: this.cache,
-      cacheDatabaseIndex: 1,
-      cacheDatabaseIndexCelery: 2,
+      cacheDatabaseIndex: 3,
+      cacheDatabaseIndexCelery: 4,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
       path: 'open-notificaties',
       service: {
@@ -114,8 +114,8 @@ export class MainStack extends Stack {
     new OpenZaakService(this, 'open-zaak', {
       hostedzone: this.hostedzone,
       cache: this.cache,
-      cacheDatabaseIndex: 1,
-      cacheDatabaseIndexCelery: 2,
+      cacheDatabaseIndex: 5,
+      cacheDatabaseIndexCelery: 6,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
       path: 'open-zaak',
       service: {
