@@ -159,6 +159,7 @@ export class MainStack extends Stack {
       new OpenKlantRegistrationService(this, openKlantRegistrationService.cdkId, {
         api: api.api,
         openKlantRegistrationServiceConfiguration: openKlantRegistrationService,
+        criticality: this.configuration.criticality,
       });
     }
 

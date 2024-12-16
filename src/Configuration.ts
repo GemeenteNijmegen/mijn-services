@@ -1,3 +1,4 @@
+import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Environment } from 'aws-cdk-lib';
 import { Statics } from './Statics';
 
@@ -32,6 +33,11 @@ export interface Configuration {
    * the workload AWS account in our default region.
    */
   deploymentEnvironment: Required<Environment>;
+
+  /**
+   * Base criticality for monitoring deployed for this branch.
+   */
+  criticality: Criticality;
 
   /**
    * Provie alternative domain names
@@ -248,6 +254,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     branch: 'acceptance',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesAccp,
+    criticality: new Criticality('medium'),
     alternativeDomainNames: [
       'mijn-services.accp.nijmegen.nl',
     ],
@@ -324,6 +331,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     branch: 'main',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
+    criticality: new Criticality('high'),
     alternativeDomainNames: [
       'mijn-services.nijmegen.nl',
     ],

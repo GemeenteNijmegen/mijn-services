@@ -1,7 +1,9 @@
+import { Criticality, LambdaMonitoringAlarm } from '@gemeentenijmegen/aws-constructs';
 import { Duration } from 'aws-cdk-lib';
 import { HttpApi, HttpMethod, MappingValue, ParameterMapping } from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { Function } from 'aws-cdk-lib/aws-lambda';
+import { FilterPattern } from 'aws-cdk-lib/aws-logs';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -12,6 +14,7 @@ import { Statics } from '../../Statics';
 export interface OpenKlantRegistrationServiceProps {
   openKlantRegistrationServiceConfiguration: OpenKlantRegistrationServiceConfiguration;
   api: HttpApi;
+  criticality: Criticality;
 }
 
 export class OpenKlantRegistrationService extends Construct {
@@ -48,6 +51,7 @@ export class OpenKlantRegistrationService extends Construct {
     params.authentication.grantRead(service);
     haalcentraalApiKey.grantRead(service);
 
+    this.setupMonitoring(service);
     this.setupRoute(service);
 
   }
@@ -100,6 +104,22 @@ export class OpenKlantRegistrationService extends Construct {
       integration: new HttpLambdaIntegration('integration', handler, {
         parameterMapping: new ParameterMapping().appendHeader('X-Authorization', MappingValue.requestHeader('Authorization')),
       }),
+    });
+  }
+
+
+  private setupMonitoring(service: ListenerFunction) {
+    new LambdaMonitoringAlarm(this, 'monitor-errors', {
+      criticality: this.props.criticality,
+      lambda: service,
+    });
+
+    new LambdaMonitoringAlarm(this, 'monitor-rol-update', {
+      criticality: this.props.criticality.increase(), // Bump by 1 as this is a must handle alarm
+      lambda: service,
+      errorRateProps: {
+        filterPattern: FilterPattern.anyTerm('ROL UPDATE FAILED'),
+      },
     });
   }
 
