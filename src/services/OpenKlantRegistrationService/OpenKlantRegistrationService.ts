@@ -109,12 +109,12 @@ export class OpenKlantRegistrationService extends Construct {
 
 
   private setupMonitoring(service: ListenerFunction) {
-    new ErrorMonitoringAlarm(this, 'monitor-errors', {
+    new ErrorMonitoringAlarm(this, `${this.node.id}-monitor-errors`, {
       criticality: this.props.criticality,
       lambda: service,
     });
 
-    new ErrorMonitoringAlarm(this, 'monitor-rol-update', {
+    new ErrorMonitoringAlarm(this, `${this.node.id}-monitor-rol-update`, {
       criticality: this.props.criticality.increase(), // Bump by 1 as this is a must handle alarm
       lambda: service,
       errorRateProps: {
