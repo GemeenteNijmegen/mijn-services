@@ -41,7 +41,7 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
     const originalRol = await this.getRol(rol.url);
     try {
       console.debug('Updating rol');
-      await this.delete(rol.url);
+
       const response = await this.post(this.zakenApiUrl + '/rollen', {
         body: JSON.stringify({
           ...rol,
@@ -50,6 +50,12 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
           registratiedatum: undefined,
         }),
       });
+
+      // Remove the old role if the POST was 2XX
+      if (response.ok) {
+        await this.delete(rol.url);
+      }
+
       const result = await response.json();
       return RolSchema.parse(result);
     } catch (error) {
