@@ -1,4 +1,4 @@
-import { Criticality, LambdaMonitoringAlarm } from '@gemeentenijmegen/aws-constructs';
+import { Criticality, ErrorMonitoringAlarm } from '@gemeentenijmegen/aws-constructs';
 import { Duration } from 'aws-cdk-lib';
 import { HttpApi, HttpMethod, MappingValue, ParameterMapping } from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
@@ -109,12 +109,12 @@ export class OpenKlantRegistrationService extends Construct {
 
 
   private setupMonitoring(service: ListenerFunction) {
-    new LambdaMonitoringAlarm(this, 'monitor-errors', {
+    new ErrorMonitoringAlarm(this, 'monitor-errors', {
       criticality: this.props.criticality,
       lambda: service,
     });
 
-    new LambdaMonitoringAlarm(this, 'monitor-rol-update', {
+    new ErrorMonitoringAlarm(this, 'monitor-rol-update', {
       criticality: this.props.criticality.increase(), // Bump by 1 as this is a must handle alarm
       lambda: service,
       errorRateProps: {
