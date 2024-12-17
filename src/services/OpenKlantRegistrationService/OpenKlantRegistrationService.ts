@@ -119,6 +119,9 @@ export class OpenKlantRegistrationService extends Construct {
       lambda: service,
       errorRateProps: {
         filterPattern: FilterPattern.anyTerm('ROL UPDATE FAILED'),
+        alarmEvaluationPeriod: Duration.minutes(1),
+        alarmEvaluationPeriods: 1,
+        alarmThreshold: 1,
       },
     });
   }
