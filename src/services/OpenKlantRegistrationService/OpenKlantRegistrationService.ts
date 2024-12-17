@@ -117,6 +117,7 @@ export class OpenKlantRegistrationService extends Construct {
     new ErrorMonitoringAlarm(this, `${this.node.id}-monitor-rol-update`, {
       criticality: this.props.criticality.increase(), // Bump by 1 as this is a must handle alarm
       lambda: service,
+      metricNameSpace: `${this.node.id}-monitor-rol-update-errors`,
       errorRateProps: {
         filterPattern: FilterPattern.anyTerm('ROL UPDATE FAILED'),
         alarmEvaluationPeriod: Duration.minutes(1),
