@@ -53,6 +53,7 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
       const result = await response.json();
       return RolSchema.parse(result);
     } catch (error) {
+      console.error('ROL UPDATE FAILED'); // This is picked up by a critical level alarm
       console.error('Failed to delete and recreate rol! This is the original role:', originalRol);
       throw Error('Could not update rol');
     }
