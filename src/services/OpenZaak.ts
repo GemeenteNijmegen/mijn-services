@@ -78,6 +78,7 @@ export class OpenZaakService extends Construct {
 
       LOG_LEVEL: this.props.openZaakConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
+      LOG_OUTGOING_REQUESTS_DB_SAVE: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
       LOG_QUERIES: 'False',
       DEBUG: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
 

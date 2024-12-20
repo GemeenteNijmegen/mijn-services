@@ -96,6 +96,7 @@ export class OpenNotificatiesService extends Construct {
 
       LOG_LEVEL: this.props.openNotificationsConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
+      LOG_OUTGOING_REQUESTS_DB_SAVE: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
       LOG_QUERIES: 'False',
       DEBUG: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
 
@@ -168,7 +169,9 @@ export class OpenNotificatiesService extends Construct {
       }],
       secrets: {},
       environment: {}, // TODO figgure out if we need any settings?
-      // healthCheck: {} // TODO figure out how to check if this is healthy
+      // healthCheck: { // TODO Running this health check before rabbitmq is fully started will prevent the container from starting
+      //   command: ['rabbitmq-diagnostics', '-q', 'check_port_connectivity'],
+      // },
     });
     const service = this.serviceFactory.createService({
       task,

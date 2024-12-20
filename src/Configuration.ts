@@ -1,3 +1,4 @@
+import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Environment } from 'aws-cdk-lib';
 import { Statics } from './Statics';
 
@@ -32,6 +33,11 @@ export interface Configuration {
    * the workload AWS account in our default region.
    */
   deploymentEnvironment: Required<Environment>;
+
+  /**
+   * Base criticality for monitoring deployed for this branch.
+   */
+  criticality: Criticality;
 
   /**
    * Provie alternative domain names
@@ -236,10 +242,9 @@ export interface OpenKlantRegistrationServiceConfiguration {
    * See the README of this particular service for more information.
    */
   strategy: (
-    'rolregistration' // Convert the rol to a partij and store the partij id in the rol.
-    |'rolwithbrpregistration' // Convert the rol to a partij and store the partij id in the rol (includes a BRP call for obtaining the name using the BSN in the rol to store in open klant)
     |'rolregistrationsinglepartij' // Convert the rol to a partij and store the partij id in the rol. Check if the partij exists and update digitale addressen (cannot be used in production)
     |'partijperrol' // Convert the rol to a partij en store the partij id in the rol. Uses a dummy partij identificatie to keep each partij unique and for easy removal later on.
+    |'partijperroldry' // Without updating the rol in the Zaken api
   );
 }
 
@@ -248,6 +253,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     branch: 'acceptance',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesAccp,
+    criticality: new Criticality('medium'),
     alternativeDomainNames: [
       'mijn-services.accp.nijmegen.nl',
     ],
@@ -256,19 +262,19 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     },
     databases: Statics.databasesAcceptance,
     openklant: {
-      image: 'maykinmedia/open-klant:2.1.0',
+      image: 'maykinmedia/open-klant:2.3.0',
       logLevel: 'DEBUG',
       debug: true,
     },
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.7.1',
-      rabbitMqImage: 'rabbitmq:3.13.4-alpine',
+      rabbitMqImage: 'rabbitmq:4.0.3-alpine',
       logLevel: 'DEBUG',
       debug: true,
       persitNotifications: true,
     },
     openZaak: {
-      image: 'openzaak/open-zaak:1.14.0',
+      image: 'openzaak/open-zaak:1.15.0',
       logLevel: 'DEBUG',
       debug: true,
     },
@@ -276,13 +282,13 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       {
         cdkId: 'test-omc',
         path: 'test-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.10.2',
+        image: 'worthnl/notifynl-omc:1.11.3',
         logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
-        notificatiesApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-notificaties/api/v1',
+        zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
+        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'OMC',
@@ -298,50 +304,16 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
           zaakCloseSms: 'ac885f24-09d8-4702-845f-2f53cd045790',
         },
       },
-      {
-        cdkId: 'vrijbrp-omc',
-        path: 'vrijbrp-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.10.2',
-        logLevel: 'DEBUG',
-        debug: true,
-        mode: 'Development',
-        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'notificaties.test.common-gateway.commonground.nu/api/zrc/v1',
-        notificatiesApiUrl: 'lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-notificaties/api/v1', // TODO currently pointed at us, do we need this?
-        zgwTokenInformation: {
-          audience: 'OMC',
-          issuer: 'zgw_nijmegen_notificatie',
-          userId: 'zgw_nijmegen_notificatie',
-          username: 'zgw_nijmegen_notificatie',
-        },
-        templates: {
-          zaakCreateEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
-          zaakUpdateEmail: 'e868044f-4a30-42c9-b1bf-8ad95ec2a6b8',
-          zaakCloseEmail: '14cebdee-a179-4e0e-b7de-c660fdd47c57',
-          zaakCreateSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
-          zaakUpdateSms: '0ff5f21a-2af1-4fd4-8080-45cff34e0df7',
-          zaakCloseSms: 'ac885f24-09d8-4702-845f-2f53cd045790',
-        },
-      },
     ],
     openKlantRegistrationServices: [
       {
-        cdkId: 'open-klant-registration-service-vrijbrp',
+        cdkId: 'open-klant-registration-service-test',
         debug: true,
         openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'https://notificaties.test.common-gateway.commonground.nu/api/zrc/v1',
-        path: '/open-klant-registration-service-vrijbrp/callback',
+        zakenApiUrl: 'https://mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
+        path: '/open-klant-registration-service-test/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'rolwithbrpregistration',
-      },
-      {
-        cdkId: 'open-klant-registration-service-development',
-        debug: true,
-        openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'https://lb.zgw.sandbox-marnix.csp-nijmegen.nl/open-zaak/zaken/api/v1',
-        path: '/open-klant-registration-service-development/callback',
-        roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol',
+        strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
       },
       {
         cdkId: 'open-klant-registration-service-woweb',
@@ -350,7 +322,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'https://openzaak.woweb.app/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol',
+        strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
       },
     ],
   },
@@ -358,6 +330,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     branch: 'main',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
+    criticality: new Criticality('high'),
     alternativeDomainNames: [
       'mijn-services.nijmegen.nl',
     ],
@@ -366,7 +339,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     },
     databases: Statics.databasesProduction,
     openklant: {
-      image: 'maykinmedia/open-klant:2.1.0',
+      image: 'maykinmedia/open-klant:2.3.0',
       logLevel: 'INFO',
     },
   },

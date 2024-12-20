@@ -12,8 +12,10 @@ import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandl
 export class PartijPerRolStrategy implements IRegistrationStrategy {
 
   private readonly configuration: OpenKlantRegistrationServiceProps;
-  constructor(configuration: OpenKlantRegistrationServiceProps) {
+  private readonly updateRolInZaakApi: boolean;
+  constructor(configuration: OpenKlantRegistrationServiceProps, updateRolInZaakApi?: boolean) {
     this.configuration = configuration;
+    this.updateRolInZaakApi = updateRolInZaakApi ?? true;
   }
 
   validateNotification(notification: Notification): string[] | undefined {
@@ -66,7 +68,11 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
       throw new ErrorResponse(500, 'No partij was found or created');
     }
 
-    await this.updateRolWithParijUrl(partij.uuid, rol);
+    if (this.updateRolInZaakApi == true) {
+      await this.updateRolWithParijUrl(partij.uuid, rol);
+    } else {
+      console.debug('Skipping update of role in zaken api as updateRolInZaakApi is false');
+    }
 
     return Response.ok();
   }
