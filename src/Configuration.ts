@@ -242,10 +242,9 @@ export interface OpenKlantRegistrationServiceConfiguration {
    * See the README of this particular service for more information.
    */
   strategy: (
-    'rolregistration' // Convert the rol to a partij and store the partij id in the rol.
-    |'rolwithbrpregistration' // Convert the rol to a partij and store the partij id in the rol (includes a BRP call for obtaining the name using the BSN in the rol to store in open klant)
     |'rolregistrationsinglepartij' // Convert the rol to a partij and store the partij id in the rol. Check if the partij exists and update digitale addressen (cannot be used in production)
     |'partijperrol' // Convert the rol to a partij en store the partij id in the rol. Uses a dummy partij identificatie to keep each partij unique and for easy removal later on.
+    |'partijperroldry' // Without updating the rol in the Zaken api
   );
 }
 
