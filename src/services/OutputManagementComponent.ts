@@ -1,12 +1,12 @@
 import { Duration } from 'aws-cdk-lib';
 import { AwsLogDriver, ContainerImage, Secret as EcsSecret, Protocol } from 'aws-cdk-lib/aws-ecs';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { OutputManagementComponentConfiguration } from '../Configuration';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { Statics } from '../Statics';
-import { Key } from 'aws-cdk-lib/aws-kms';
 
 const DEFAULT_UUID = '00000000-0000-0000-0000-000000000000';
 
@@ -19,6 +19,7 @@ export interface OMCServiceProps {
 export class OMCService extends Construct {
 
   private readonly logs: LogGroup;
+  private readonly logs2: LogGroup;
   private readonly props: OMCServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly configurationParameters: any;
@@ -28,6 +29,8 @@ export class OMCService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+    this.logs2 = this.logGroup2();
+    console.log(this.logs);
 
     this.configurationParameters = this.setupConfigurationParameters(id);
     this.setupService();
@@ -174,7 +177,7 @@ export class OMCService extends Construct {
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
         streamPrefix: 'logs',
-        logGroup: this.logs,
+        logGroup: this.logs2,
       }),
     });
 
@@ -199,7 +202,13 @@ export class OMCService extends Construct {
   }
 
   private logGroup() {
-    return new LogGroup(this, 'omc-logs', {
+    return new LogGroup(this, 'logs', {
+      retention: RetentionDays.ONE_MONTH,
+    });
+  }
+
+  private logGroup2() {
+    return new LogGroup(this, 'logs-omc', {
       retention: RetentionDays.ONE_MONTH,
       encryptionKey: this.props.key,
     });
