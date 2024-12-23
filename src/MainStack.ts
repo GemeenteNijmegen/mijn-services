@@ -140,6 +140,7 @@ export class MainStack extends Stack {
     for (const omc of this.configuration.outputManagementComponents) {
       new OMCService(this, omc.cdkId, {
         omcConfiguration: omc,
+        key: this.key,
         service: {
           api: api.api,
           cluster: platform.cluster,

@@ -6,12 +6,14 @@ import { Construct } from 'constructs';
 import { OutputManagementComponentConfiguration } from '../Configuration';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { Statics } from '../Statics';
+import { Key } from 'aws-cdk-lib/aws-kms';
 
 const DEFAULT_UUID = '00000000-0000-0000-0000-000000000000';
 
 export interface OMCServiceProps {
   service: EcsServiceFactoryProps;
   omcConfiguration: OutputManagementComponentConfiguration;
+  key: Key;
 }
 
 export class OMCService extends Construct {
@@ -195,6 +197,7 @@ export class OMCService extends Construct {
   private logGroup() {
     return new LogGroup(this, 'logs', {
       retention: RetentionDays.ONE_MONTH,
+      encryptionKey: this.props.key,
     });
   }
 
