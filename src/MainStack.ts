@@ -1,5 +1,6 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
 import { Stack, StackProps } from 'aws-cdk-lib';
+import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -16,7 +17,7 @@ import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
 
-interface MainStackProps extends StackProps, Configurable {}
+interface MainStackProps extends StackProps, Configurable { }
 
 export class MainStack extends Stack {
   private readonly configuration;
@@ -177,9 +178,33 @@ export class MainStack extends Stack {
   }
 
   private setupGeneralEncryptionKey() {
-    return new Key(this, 'key', {
+    const key = new Key(this, 'key', {
       description: 'General encryption key used for mijn-services',
     });
+
+    const stack = Stack.of(this);
+    key.addToResourcePolicy(new PolicyStatement({
+      effect: Effect.ALLOW,
+      sid: 'Allow KMS key usage by CloudWatch in this account',
+      principals: [
+        new ServicePrincipal(`logs.${stack.region}.amazonaws.com`),
+      ],
+      actions: [
+        'kms:Encrypt*',
+        'kms:Decrypt*',
+        'kms:ReEncrypt*',
+        'kms:GenerateDataKey*',
+        'kms:Describe*',
+      ],
+      resources: ['*'],
+      conditions: {
+        ArnLike: {
+          'kms:EncryptionContext:aws:logs:arn': `arn:aws:logs:${stack.region}:${stack.account}:*`,
+        },
+      },
+    }));
+
+    return key;
   }
 
 

@@ -19,7 +19,6 @@ export interface OMCServiceProps {
 export class OMCService extends Construct {
 
   private readonly logs: LogGroup;
-  private readonly logs2: LogGroup;
   private readonly props: OMCServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly configurationParameters: any;
@@ -29,8 +28,6 @@ export class OMCService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
-    this.logs2 = this.logGroup2();
-    console.log(this.logs);
 
     this.configurationParameters = this.setupConfigurationParameters(id);
     this.setupService();
@@ -177,7 +174,7 @@ export class OMCService extends Construct {
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
         streamPrefix: 'logs',
-        logGroup: this.logs2,
+        logGroup: this.logs,
       }),
     });
 
@@ -203,12 +200,6 @@ export class OMCService extends Construct {
 
   private logGroup() {
     return new LogGroup(this, 'logs', {
-      retention: RetentionDays.ONE_MONTH,
-    });
-  }
-
-  private logGroup2() {
-    return new LogGroup(this, 'logs-omc', {
       retention: RetentionDays.ONE_MONTH,
       encryptionKey: this.props.key,
     });
