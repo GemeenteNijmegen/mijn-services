@@ -2,8 +2,9 @@ import { Criticality, ErrorMonitoringAlarm } from '@gemeentenijmegen/aws-constru
 import { Duration } from 'aws-cdk-lib';
 import { HttpApi, HttpMethod, MappingValue, ParameterMapping } from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import { Function } from 'aws-cdk-lib/aws-lambda';
-import { FilterPattern } from 'aws-cdk-lib/aws-logs';
+import { FilterPattern, LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -15,6 +16,7 @@ export interface OpenKlantRegistrationServiceProps {
   openKlantRegistrationServiceConfiguration: OpenKlantRegistrationServiceConfiguration;
   api: HttpApi;
   criticality: Criticality;
+  key: Key;
 }
 
 export class OpenKlantRegistrationService extends Construct {
@@ -23,6 +25,11 @@ export class OpenKlantRegistrationService extends Construct {
   constructor(scope: Construct, id: string, props: OpenKlantRegistrationServiceProps) {
     super(scope, id);
     this.props = props;
+
+    const logs = new LogGroup(this, 'logs', {
+      encryptionKey: props.key,
+      retention: RetentionDays.SIX_MONTHS,
+    });
 
     const haalcentraalApiKey = Secret.fromSecretNameV2(this, 'haalcentraal-apikey', Statics.ssmHaalCentraalBRPApiKeySecret);
     const params = this.setupVulServiceConfiguration(id);
@@ -43,6 +50,7 @@ export class OpenKlantRegistrationService extends Construct {
         HAALCENTRAAL_BRP_BASEURL: StringParameter.fromStringParameterName(this, 'haalcentraal-apibaseurl', Statics.ssmHaalCentraalBRPBaseUrl).stringValue,
         STRATEGY: this.props.openKlantRegistrationServiceConfiguration.strategy,
       },
+      logGroup: logs,
     });
 
     params.openklant.grantRead(service);

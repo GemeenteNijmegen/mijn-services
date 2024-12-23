@@ -1,5 +1,6 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
 import { Stack, StackProps } from 'aws-cdk-lib';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -22,11 +23,12 @@ export class MainStack extends Stack {
   private readonly hostedzone: IHostedZone;
   private readonly vpc: GemeenteNijmegenVpc;
   private readonly cache: CacheDatabase;
+  private readonly key: Key;
   constructor(scope: Construct, id: string, props: MainStackProps) {
     super(scope, id, props);
     this.configuration = props.configuration;
 
-
+    this.key = this.setupGeneralEncryptionKey();
     this.hostedzone = this.importHostedzone();
     this.vpc = new GemeenteNijmegenVpc(this, 'vpc');
 
@@ -160,6 +162,7 @@ export class MainStack extends Stack {
         api: api.api,
         openKlantRegistrationServiceConfiguration: openKlantRegistrationService,
         criticality: this.configuration.criticality,
+        key: this.key,
       });
     }
 
@@ -169,6 +172,12 @@ export class MainStack extends Stack {
     return HostedZone.fromHostedZoneAttributes(this, 'hostedzone', {
       hostedZoneId: StringParameter.valueForStringParameter(this, Statics.ssmAccountRootHostedZoneId),
       zoneName: StringParameter.valueForStringParameter(this, Statics.ssmAccountRootHostedZoneName),
+    });
+  }
+
+  private setupGeneralEncryptionKey() {
+    return new Key(this, 'key', {
+      description: 'General encryption key used for mijn-services',
     });
   }
 
