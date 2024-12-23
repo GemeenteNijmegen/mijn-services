@@ -53,6 +53,7 @@ export class OpenKlantRegistrationService extends Construct {
       logGroup: logs,
     });
 
+    props.key.grantEncrypt(service);
     params.openklant.grantRead(service);
     params.zgw.id.grantRead(service);
     params.zgw.secret.grantRead(service);
