@@ -93,6 +93,7 @@ export class MainStack extends Stack {
     }
     new OpenNotificatiesService(this, 'open-notificaties', {
       hostedzone: this.hostedzone,
+      key: this.key,
       cache: this.cache,
       cacheDatabaseIndex: 3,
       cacheDatabaseIndexCelery: 4,
