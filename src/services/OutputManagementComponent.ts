@@ -199,7 +199,7 @@ export class OMCService extends Construct {
   }
 
   private logGroup() {
-    return new LogGroup(this, 'logs', {
+    return new LogGroup(this, 'omc-logs', {
       retention: RetentionDays.ONE_MONTH,
       encryptionKey: this.props.key,
     });
