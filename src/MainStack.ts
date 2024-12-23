@@ -67,6 +67,7 @@ export class MainStack extends Stack {
     }
     new OpenKlantService(this, 'open-klant', {
       hostedzone: this.hostedzone,
+      key: this.key,
       cache: this.cache,
       cacheDatabaseIndex: 1,
       cacheDatabaseIndexCelery: 2,
