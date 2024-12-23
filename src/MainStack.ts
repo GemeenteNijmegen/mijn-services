@@ -183,6 +183,8 @@ export class MainStack extends Stack {
       description: 'General encryption key used for mijn-services',
     });
 
+    key.addAlias('mijn-services-general-encryption');
+
     const stack = Stack.of(this);
     key.addToResourcePolicy(new PolicyStatement({
       effect: Effect.ALLOW,
