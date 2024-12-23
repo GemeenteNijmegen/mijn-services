@@ -118,6 +118,7 @@ export class MainStack extends Stack {
     }
     new OpenZaakService(this, 'open-zaak', {
       hostedzone: this.hostedzone,
+      key: this.key,
       cache: this.cache,
       cacheDatabaseIndex: 5,
       cacheDatabaseIndexCelery: 6,

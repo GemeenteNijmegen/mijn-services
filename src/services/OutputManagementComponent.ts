@@ -192,9 +192,6 @@ export class OMCService extends Construct {
       },
     });
 
-    // Allow to use the KMS key for encrypting logs
-    this.props.key.grantEncrypt(task.taskRole);
-
     return service;
   }
 

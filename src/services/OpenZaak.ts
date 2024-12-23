@@ -12,6 +12,7 @@ import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServ
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
+import { Key } from 'aws-cdk-lib/aws-kms';
 
 export interface OpenZaakServiceProps {
   cache: CacheDatabase;
@@ -21,7 +22,7 @@ export interface OpenZaakServiceProps {
   path: string;
   hostedzone: IHostedZone;
   alternativeDomainNames?: string[];
-
+  key: Key;
   openZaakConfiguration: OpenZaakConfiguration;
 }
 
@@ -241,6 +242,7 @@ export class OpenZaakService extends Construct {
   private logGroup() {
     return new LogGroup(this, 'logs', {
       retention: RetentionDays.ONE_MONTH,
+      encryptionKey: this.props.key,
     });
   }
 

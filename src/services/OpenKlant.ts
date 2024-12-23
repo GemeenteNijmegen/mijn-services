@@ -138,7 +138,6 @@ export class OpenKlantService extends Construct {
     });
     this.setupConnectivity('init', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
-    this.props.key.grantEncrypt(task.taskRole);
   }
 
   setupService() {
@@ -165,7 +164,6 @@ export class OpenKlantService extends Construct {
         logGroup: this.logs,
       }),
     });
-    this.props.key.grantEncrypt(task.taskRole);
 
     const service = this.serviceFactory.createService({
       id: 'main',
@@ -219,8 +217,6 @@ export class OpenKlantService extends Construct {
       condition: ContainerDependencyCondition.SUCCESS,
     });
     this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
-
-    this.props.key.grantEncrypt(task.taskRole);
 
     // Construct the service and setup conectivity and secrets access
     const service = this.serviceFactory.createService({
