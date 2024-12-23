@@ -2,6 +2,7 @@ import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
@@ -13,7 +14,6 @@ import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServ
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
-import { Key } from 'aws-cdk-lib/aws-kms';
 
 export interface OpenNotificatiesServiceProps {
   readonly cache: CacheDatabase;
