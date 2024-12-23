@@ -2,6 +2,7 @@ import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
@@ -26,6 +27,7 @@ export interface OpenNotificatiesServiceProps {
    * The configuration for the open configuration installation
    */
   readonly openNotificationsConfiguration: OpenNotificatiesConfiguration;
+  readonly key: Key;
 }
 
 export class OpenNotificatiesService extends Construct {
@@ -160,7 +162,7 @@ export class OpenNotificatiesService extends Construct {
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.rabbitMqImage),
       logging: new AwsLogDriver({
-        streamPrefix: 'logs',
+        streamPrefix: 'rabbit-mq',
         logGroup: this.logs,
       }),
       readonlyRootFilesystem: true,
@@ -216,7 +218,7 @@ export class OpenNotificatiesService extends Construct {
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
-        streamPrefix: 'logs',
+        streamPrefix: 'setup-service',
         logGroup: this.logs,
       }),
     });
@@ -229,7 +231,7 @@ export class OpenNotificatiesService extends Construct {
       readonlyRootFilesystem: true,
       essential: false, // exit after running
       logging: new AwsLogDriver({
-        streamPrefix: 'logs',
+        streamPrefix: 'setup-service',
         logGroup: this.logs,
       }),
       secrets: this.getSecretConfiguration(),
@@ -248,7 +250,7 @@ export class OpenNotificatiesService extends Construct {
       readonlyRootFilesystem: true,
       essential: false, // exit after running
       logging: new AwsLogDriver({
-        streamPrefix: 'logs',
+        streamPrefix: 'setup-service',
         logGroup: this.logs,
       }),
       secrets: this.getSecretConfiguration(),
@@ -291,7 +293,7 @@ export class OpenNotificatiesService extends Construct {
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
-        streamPrefix: 'logs',
+        streamPrefix: 'celery-service',
         logGroup: this.logs,
       }),
       command: ['/celery_worker.sh'],
@@ -327,7 +329,7 @@ export class OpenNotificatiesService extends Construct {
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
-        streamPrefix: 'logs',
+        streamPrefix: 'celery-beat-service',
         logGroup: this.logs,
       }),
       command: ['/celery_beat.sh'],
@@ -351,6 +353,7 @@ export class OpenNotificatiesService extends Construct {
   private logGroup() {
     return new LogGroup(this, 'logs', {
       retention: RetentionDays.ONE_MONTH,
+      encryptionKey: this.props.key,
     });
   }
 

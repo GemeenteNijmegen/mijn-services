@@ -2,6 +2,7 @@ import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
@@ -21,7 +22,7 @@ export interface OpenZaakServiceProps {
   path: string;
   hostedzone: IHostedZone;
   alternativeDomainNames?: string[];
-
+  key: Key;
   openZaakConfiguration: OpenZaakConfiguration;
 }
 
@@ -241,6 +242,7 @@ export class OpenZaakService extends Construct {
   private logGroup() {
     return new LogGroup(this, 'logs', {
       retention: RetentionDays.ONE_MONTH,
+      encryptionKey: this.props.key,
     });
   }
 

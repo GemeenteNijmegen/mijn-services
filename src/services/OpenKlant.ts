@@ -2,6 +2,7 @@ import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
@@ -21,6 +22,7 @@ export interface OpenKlantServiceProps {
   path: string;
   hostedzone: IHostedZone;
   alternativeDomainNames?: string[];
+  key: Key;
 }
 
 export class OpenKlantService extends Construct {
@@ -118,7 +120,7 @@ export class OpenKlantService extends Construct {
       command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'],
       portMappings: [],
       logging: new AwsLogDriver({
-        streamPrefix: 'logs',
+        streamPrefix: 'init',
         logGroup: this.logs,
       }),
       readonlyRootFilesystem: true,
@@ -158,7 +160,7 @@ export class OpenKlantService extends Construct {
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
-        streamPrefix: 'logs',
+        streamPrefix: 'main',
         logGroup: this.logs,
       }),
     });
@@ -192,7 +194,7 @@ export class OpenKlantService extends Construct {
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
-        streamPrefix: 'logs',
+        streamPrefix: 'celery',
         logGroup: this.logs,
       }),
       command: ['/celery_worker.sh'],
@@ -232,6 +234,7 @@ export class OpenKlantService extends Construct {
   private logGroup() {
     return new LogGroup(this, 'logs', {
       retention: RetentionDays.ONE_MONTH,
+      encryptionKey: this.props.key,
     });
   }
 

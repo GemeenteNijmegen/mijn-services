@@ -1,5 +1,7 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
 import { Stack, StackProps } from 'aws-cdk-lib';
+import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -15,18 +17,19 @@ import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
 
-interface MainStackProps extends StackProps, Configurable {}
+interface MainStackProps extends StackProps, Configurable { }
 
 export class MainStack extends Stack {
   private readonly configuration;
   private readonly hostedzone: IHostedZone;
   private readonly vpc: GemeenteNijmegenVpc;
   private readonly cache: CacheDatabase;
+  private readonly key: Key;
   constructor(scope: Construct, id: string, props: MainStackProps) {
     super(scope, id, props);
     this.configuration = props.configuration;
 
-
+    this.key = this.setupGeneralEncryptionKey();
     this.hostedzone = this.importHostedzone();
     this.vpc = new GemeenteNijmegenVpc(this, 'vpc');
 
@@ -64,6 +67,7 @@ export class MainStack extends Stack {
     }
     new OpenKlantService(this, 'open-klant', {
       hostedzone: this.hostedzone,
+      key: this.key,
       cache: this.cache,
       cacheDatabaseIndex: 1,
       cacheDatabaseIndexCelery: 2,
@@ -89,6 +93,7 @@ export class MainStack extends Stack {
     }
     new OpenNotificatiesService(this, 'open-notificaties', {
       hostedzone: this.hostedzone,
+      key: this.key,
       cache: this.cache,
       cacheDatabaseIndex: 3,
       cacheDatabaseIndexCelery: 4,
@@ -113,6 +118,7 @@ export class MainStack extends Stack {
     }
     new OpenZaakService(this, 'open-zaak', {
       hostedzone: this.hostedzone,
+      key: this.key,
       cache: this.cache,
       cacheDatabaseIndex: 5,
       cacheDatabaseIndexCelery: 6,
@@ -138,6 +144,7 @@ export class MainStack extends Stack {
     for (const omc of this.configuration.outputManagementComponents) {
       new OMCService(this, omc.cdkId, {
         omcConfiguration: omc,
+        key: this.key,
         service: {
           api: api.api,
           cluster: platform.cluster,
@@ -160,6 +167,7 @@ export class MainStack extends Stack {
         api: api.api,
         openKlantRegistrationServiceConfiguration: openKlantRegistrationService,
         criticality: this.configuration.criticality,
+        key: this.key,
       });
     }
 
@@ -170,6 +178,38 @@ export class MainStack extends Stack {
       hostedZoneId: StringParameter.valueForStringParameter(this, Statics.ssmAccountRootHostedZoneId),
       zoneName: StringParameter.valueForStringParameter(this, Statics.ssmAccountRootHostedZoneName),
     });
+  }
+
+  private setupGeneralEncryptionKey() {
+    const key = new Key(this, 'key', {
+      description: 'General encryption key used for mijn-services',
+    });
+
+    key.addAlias('mijn-services-general-encryption');
+
+    const stack = Stack.of(this);
+    key.addToResourcePolicy(new PolicyStatement({
+      effect: Effect.ALLOW,
+      sid: 'Allow KMS key usage by CloudWatch in this account',
+      principals: [
+        new ServicePrincipal(`logs.${stack.region}.amazonaws.com`),
+      ],
+      actions: [
+        'kms:Encrypt*',
+        'kms:Decrypt*',
+        'kms:ReEncrypt*',
+        'kms:GenerateDataKey*',
+        'kms:Describe*',
+      ],
+      resources: ['*'],
+      conditions: {
+        ArnLike: {
+          'kms:EncryptionContext:aws:logs:arn': `arn:aws:logs:${stack.region}:${stack.account}:*`,
+        },
+      },
+    }));
+
+    return key;
   }
 
 
