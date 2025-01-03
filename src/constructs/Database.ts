@@ -42,6 +42,7 @@ export class Database extends Construct {
       parameters: {
         'rds.force_ssl': '0',
       },
+      deletionProtection: true,
     });
 
     new StringParameter(this, 'db-arn', {
