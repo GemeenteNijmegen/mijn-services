@@ -22,6 +22,8 @@ export class Database extends Construct {
 
     const dbKmsKey = new kms.Key(this, 'db-kms-key', {
       removalPolicy: RemovalPolicy.DESTROY,
+      description: 'Mijn Services DB encryption key',
+      alias: 'mijn-services-db-key',
     });
 
     this.db = new rds.DatabaseInstance(this, 'db-instance', {
