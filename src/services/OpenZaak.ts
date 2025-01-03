@@ -102,6 +102,7 @@ export class OpenZaakService extends Construct {
       OPENZAAK_DOMAIN: trustedDomains[0],
       OPENZAAK_ORGANIZATION: Statics.organization,
       NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notificaties/api/v1/`, // TODO remove hardcoded path
+      OPENZAAK_NOTIF_CONFIG_ENABLE: 'True', // Enable the configuration setup for connecting to open-notificaties
 
       // Somehow this is required aswell...
       DEMO_CONFIG_ENABLE: 'False',
