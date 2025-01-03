@@ -1,6 +1,5 @@
 import {
-  aws_rds as rds, aws_ec2 as ec2, aws_kms as kms,
-  RemovalPolicy,
+  aws_rds as rds, aws_ec2 as ec2, aws_kms as kms
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -21,7 +20,6 @@ export class Database extends Construct {
     super(scope, id);
 
     const dbKmsKey = new kms.Key(this, 'db-kms-key', {
-      removalPolicy: RemovalPolicy.DESTROY,
       description: 'Mijn Services DB encryption key',
       alias: 'mijn-services-db-key',
     });
