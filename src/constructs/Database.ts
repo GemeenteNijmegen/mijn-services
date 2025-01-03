@@ -20,11 +20,11 @@ export class Database extends Construct {
   constructor(scope: Construct, id: string, props: DatabaseProps) {
     super(scope, id);
 
-    const postgresKmsKey = new kms.Key(this, 'postgres-kms-key', {
+    const dbKmsKey = new kms.Key(this, 'db-kms-key', {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    this.db = new rds.DatabaseInstance(this, 'postgres-instance', {
+    this.db = new rds.DatabaseInstance(this, 'db-instance', {
       engine: rds.DatabaseInstanceEngine.postgres({
         version: rds.PostgresEngineVersion.VER_16_4,
       }),
@@ -35,7 +35,7 @@ export class Database extends Construct {
       },
       vpc: props.vpc,
       databaseName: Statics.defaultDatabaseName, // Note: the default database is not used. We have a lambda to create the DBs
-      storageEncryptionKey: postgresKmsKey,
+      storageEncryptionKey: dbKmsKey,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_ISOLATED,
       },
