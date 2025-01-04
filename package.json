@@ -54,9 +54,9 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@gemeentenijmegen/apigateway-http": "^0.0.19",
+    "@gemeentenijmegen/apigateway-http": "^0.0.20",
     "@gemeentenijmegen/aws-constructs": "^0.0.26",
-    "@gemeentenijmegen/utils": "^0.0.22",
+    "@gemeentenijmegen/utils": "^0.0.23",
     "@types/aws-lambda": "^8.10.147",
     "aws-cdk-lib": "^2.1.0",
     "cdk-remote-stack": "^2.1.0",
