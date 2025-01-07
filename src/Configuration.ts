@@ -350,7 +350,8 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
         zakenApiUrl: 'https://openzaak.nijmegen.cloud/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
+        strategy: 'partijperroldry', // Unique partij per rol (of zaak dus) 
+        // TODO change from dryrun later (but do not yet write results back to openzaak)
       },
     ]
   },
