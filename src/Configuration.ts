@@ -342,6 +342,18 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
       image: 'maykinmedia/open-klant:2.3.0',
       logLevel: 'INFO',
     },
+    openKlantRegistrationServices: [
+      {
+        cdkId: 'open-klant-registration-service-woweb',
+        debug: true,
+        openKlantUrl: 'https://mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        zakenApiUrl: 'https://openzaak.nijmegen.cloud/zaken/api/v1',
+        path: '/open-klant-registration-service-woweb/callback',
+        roltypesToRegister: ['initiator'],
+        strategy: 'partijperroldry', // Unique partij per rol (of zaak dus)
+        // TODO change from dryrun later (but do not yet write results back to openzaak)
+      },
+    ],
   },
 };
 
