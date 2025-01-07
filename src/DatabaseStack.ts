@@ -51,6 +51,7 @@ export class DatabaseStack extends Stack {
         DB_HOST: hostname,
         DB_PORT: port.toString(),
         DB_NAME: Statics.defaultDatabaseName,
+        BUMP: '1',
       },
     });
     this.credentials.grantRead(createDatabaseFunction);
