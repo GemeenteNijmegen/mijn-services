@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@gemeentenijmegen/apigateway-http": "^0.0.20",
-    "@gemeentenijmegen/aws-constructs": "^0.0.26",
+    "@gemeentenijmegen/aws-constructs": "^0.0.28",
     "@gemeentenijmegen/utils": "^0.0.23",
     "@types/aws-lambda": "^8.10.147",
     "aws-cdk-lib": "^2.1.0",
