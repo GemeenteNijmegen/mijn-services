@@ -1,7 +1,7 @@
-import { ApiGatewayV2Response } from '@gemeentenijmegen/apigateway-http';
 import { randomUUID } from 'crypto';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { ApiGatewayV2Response } from '@gemeentenijmegen/apigateway-http';
 import { NotificationSchema } from '../../Shared/model/Notification';
 import { CatalogiApiMock } from '../CatalogiApi';
 import { OpenKlantApiMock } from '../OpenKlantApi';

@@ -150,7 +150,6 @@
           "**/test/**",
           "**/build-tools/**",
           "src/custom-resources/create-databases/create-databases.lambda.ts",
-          "src/services/OpenKlantRegistrationService/Listener/listener.lambda.ts",
           "src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts",
           "src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts",
           ".projenrc.ts",

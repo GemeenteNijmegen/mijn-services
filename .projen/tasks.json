@@ -50,9 +50,6 @@
           "spawn": "bundle:custom-resources/create-databases/create-databases.lambda"
         },
         {
-          "spawn": "bundle:services/OpenKlantRegistrationService/Listener/listener.lambda"
-        },
-        {
           "spawn": "bundle:services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda"
         },
         {
@@ -75,24 +72,6 @@
       "steps": [
         {
           "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
-        }
-      ]
-    },
-    "bundle:services/OpenKlantRegistrationService/Listener/listener.lambda": {
-      "name": "bundle:services/OpenKlantRegistrationService/Listener/listener.lambda",
-      "description": "Create a JavaScript bundle from src/services/OpenKlantRegistrationService/Listener/listener.lambda.ts",
-      "steps": [
-        {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/Listener/listener.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/Listener/listener.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
-        }
-      ]
-    },
-    "bundle:services/OpenKlantRegistrationService/Listener/listener.lambda:watch": {
-      "name": "bundle:services/OpenKlantRegistrationService/Listener/listener.lambda:watch",
-      "description": "Continuously update the JavaScript bundle from src/services/OpenKlantRegistrationService/Listener/listener.lambda.ts",
-      "steps": [
-        {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/Listener/listener.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/Listener/listener.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },

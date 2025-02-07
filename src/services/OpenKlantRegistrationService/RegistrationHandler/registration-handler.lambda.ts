@@ -1,12 +1,12 @@
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { SQSEvent } from 'aws-lambda';
-import { ErrorResponse } from '../Shared/ErrorResponse';
-import { logger } from '../Shared/Logger';
-import { Notification, NotificationSchema } from '../Shared/model/Notification';
 import { CatalogiApi } from './CatalogiApi';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
+import { ErrorResponse } from '../Shared/ErrorResponse';
+import { logger } from '../Shared/Logger';
+import { Notification, NotificationSchema } from '../Shared/model/Notification';
 
 
 async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
@@ -84,7 +84,7 @@ function parseNotificationFromBody(event: SQSEvent): Notification[] {
       if (!record.body) {
         throw Error('Received notification without notification body!');
       }
-      const notification = NotificationSchema.parse(JSON.parse(record.body))
+      const notification = NotificationSchema.parse(JSON.parse(record.body));
       notifications.push(notification);
     }
 
