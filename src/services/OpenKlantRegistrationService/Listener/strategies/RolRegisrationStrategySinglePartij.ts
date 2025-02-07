@@ -2,12 +2,12 @@ import { Response } from '@gemeentenijmegen/apigateway-http';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
 import { StrategyStatics } from './StrategyStatics';
 import { ErrorResponse } from '../ErrorResponse';
+import { logger } from '../Logger';
 import { Notification } from '../model/Notification';
 import { OpenKlantDigitaalAdresWithUuid, OpenKlantPartijWithUuid } from '../model/Partij';
 import { Rol } from '../model/Rol';
 import { OpenKlantMapper } from '../OpenKlantMapper';
 import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
-import { logger } from '../Logger';
 
 
 export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy {
@@ -29,7 +29,7 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     }
 
     if (errors.length > 0) {
-      logger.info('Notification validation failed', {errors});
+      logger.info('Notification validation failed', { errors });
     }
     return errors.length == 0 ? undefined : errors;
   }

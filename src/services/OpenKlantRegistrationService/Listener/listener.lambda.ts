@@ -5,11 +5,11 @@ import { authenticate } from './authenticate';
 import { BRPApi } from './BRPApi';
 import { CatalogiApi } from './CatalogiApi';
 import { ErrorResponse } from './ErrorResponse';
+import { logger } from './Logger';
 import { Notification, NotificationSchema } from './model/Notification';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
-import { logger } from './Logger';
 
 
 async function initalize() : Promise<OpenKlantRegistrationServiceProps> {

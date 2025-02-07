@@ -52,7 +52,7 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
       return RolSchema.parse(result);
     } catch (error) {
       logger.error('ROL UPDATE FAILED'); // This is picked up by a critical level alarm
-      logger.error('Failed to delete and recreate rol! This is the original role:', { originalRol }); 
+      logger.error('Failed to delete and recreate rol! This is the original role:', { originalRol });
       // Note: we use this to recover from failure manually thats why the original role is in the logs
       throw Error('Could not update rol');
     }

@@ -129,7 +129,7 @@ export class OpenKlantApi implements IOpenKlantApi {
       if (!response.ok) {
         const responseBody = await response.text();
         const statusCode = response.status.toString();
-        logger.error('Request failed for url', {statusCode, response: responseBody});
+        logger.error('Request failed for url', { statusCode, response: responseBody });
         throw Error('Request failed');
       }
       return response;

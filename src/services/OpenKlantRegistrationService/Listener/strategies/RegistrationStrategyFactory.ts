@@ -1,8 +1,8 @@
 import { IRegistrationStrategy } from './IRegistrationStrategy';
 import { PartijPerRolStrategy } from './PartijPerRolStrategy';
 import { RolRegisrationStrategySinglePartij } from './RolRegisrationStrategySinglePartij';
-import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
 import { logger } from '../Logger';
+import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
 
 
 export class RegistrationStrategyFactory {

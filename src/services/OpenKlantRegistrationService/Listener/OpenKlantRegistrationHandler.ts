@@ -1,11 +1,11 @@
 import { ApiGatewayV2Response, Response } from '@gemeentenijmegen/apigateway-http';
 import { BRPApi } from './BRPApi';
 import { ICatalogiApi } from './CatalogiApi';
+import { logger } from './Logger';
 import { Notification } from './model/Notification';
 import { IOpenKlantApi } from './OpenKlantApi';
 import { RegistrationStrategyFactory } from './strategies/RegistrationStrategyFactory';
 import { IZakenApi } from './ZakenApi';
-import { logger } from './Logger';
 
 export interface OpenKlantRegistrationServiceProps {
   readonly zakenApiUrl: string;
