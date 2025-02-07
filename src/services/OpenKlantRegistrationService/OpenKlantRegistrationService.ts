@@ -135,7 +135,15 @@ export class OpenKlantRegistrationService extends Construct {
       lambda: service,
     });
 
-    // this.setupRoute(service); // TODO enable later to start using this lambda as the reciever endpoint
+    // Create a new endpoint to test this lambda and queue publishing
+    this.props.api.addRoutes({
+      path: this.props.openKlantRegistrationServiceConfiguration.path + '-test',
+      methods: [HttpMethod.POST],
+      integration: new HttpLambdaIntegration('integration', service, {
+        parameterMapping: new ParameterMapping().appendHeader('X-Authorization', MappingValue.requestHeader('Authorization')),
+      }),
+    });
+
   }
 
   private setupVulServiceConfiguration(id: string) {
@@ -188,7 +196,6 @@ export class OpenKlantRegistrationService extends Construct {
       }),
     });
   }
-
 
   private setupMonitoring(service: RegistrationHandlerFunction) {
     new ErrorMonitoringAlarm(this, `${this.node.id}-monitor-errors`, {
