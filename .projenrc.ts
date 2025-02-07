@@ -21,6 +21,7 @@ const project = new GemeenteNijmegenCdkApp({
     'jsonwebtoken',
     'dotenv',
     '@aws-lambda-powertools/logger',
+    '@aws-sdk/client-sqs',
   ],
   jestOptions: {
     jestConfig: {

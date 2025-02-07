@@ -1,8 +1,8 @@
-import { ErrorResponse } from './ErrorResponse';
-import { logger } from './Logger';
-import { OpenKlantDigitaalAdres, OpenKlantPartij, OpenKlantPartijIdentificiatie } from './model/Partij';
-import { Rol } from './model/Rol';
+import { ErrorResponse } from '../Shared/ErrorResponse';
+import { logger } from '../Shared/Logger';
 import { StrategyStatics } from './strategies/StrategyStatics';
+import { OpenKlantDigitaalAdres, OpenKlantPartij, OpenKlantPartijIdentificiatie } from '../Shared/model/Partij';
+import { Rol } from '../Shared/model/Rol';
 
 /**
  * Mapping functinos to convert from zaken API to

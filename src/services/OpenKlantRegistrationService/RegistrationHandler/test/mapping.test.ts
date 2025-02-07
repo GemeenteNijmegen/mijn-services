@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { Rol } from '../model/Rol';
+import { Rol } from '../../Shared/model/Rol';
 import { OpenKlantMapper } from '../OpenKlantMapper';
 
 

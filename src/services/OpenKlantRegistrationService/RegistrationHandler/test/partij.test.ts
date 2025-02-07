@@ -1,4 +1,4 @@
-import { OpenKlantPartij } from '../model/Partij';
+import { OpenKlantPartij } from '../../Shared/model/Partij';
 
 
 test('persoon partij', () => {

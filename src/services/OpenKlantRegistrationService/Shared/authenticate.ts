@@ -36,12 +36,12 @@ export async function authenticate(event: APIGatewayProxyEventV2) {
 
   if (!header) {
     logger.error('No Authorization header found in the request.');
-    return Response.error(401, 'No Authorization header found in the request.' );
+    return Response.error(401, 'No Authorization header found in the request.');
   }
 
   if (!header.startsWith('Token ')) {
     logger.error('Header is missing the \'Token \' prefix');
-    return Response.error(401, 'Authorization header must be of type Token' );
+    return Response.error(401, 'Authorization header must be of type Token');
   }
 
   if (header.substring('Token '.length) === API_KEY) {

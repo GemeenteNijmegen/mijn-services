@@ -1,7 +1,7 @@
-import { ErrorResponse } from './ErrorResponse';
-import { logger } from './Logger';
-import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijenWithUuid, OpenKlantPartijenWithUuidSchema, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from './model/Partij';
+import { ErrorResponse } from '../Shared/ErrorResponse';
+import { logger } from '../Shared/Logger';
 import { StrategyStatics } from './strategies/StrategyStatics';
+import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijenWithUuid, OpenKlantPartijenWithUuidSchema, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from '../Shared/model/Partij';
 
 interface OpenKlantApiProps {
   url: string;
@@ -9,13 +9,13 @@ interface OpenKlantApiProps {
 }
 
 export interface IOpenKlantApi {
-  findPartij(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon') : Promise<OpenKlantPartijWithUuid | undefined>;
-  findPartijen(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon') : Promise<OpenKlantPartijenWithUuid>;
-  registerPartij(partij: OpenKlantPartij) : Promise<OpenKlantPartijWithUuid>;
-  updatePartij(partij: Partial<OpenKlantPartijWithUuid>) : Promise<OpenKlantPartijWithUuid>;
+  findPartij(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid | undefined>;
+  findPartijen(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijenWithUuid>;
+  registerPartij(partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid>;
+  updatePartij(partij: Partial<OpenKlantPartijWithUuid>): Promise<OpenKlantPartijWithUuid>;
   addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid>;
-  addDigitaalAdres(address: OpenKlantDigitaalAdres) : Promise<OpenKlantDigitaalAdresWithUuid>;
-  deleteDigitaalAdres(uuid: string) : Promise<boolean>;
+  addDigitaalAdres(address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid>;
+  deleteDigitaalAdres(uuid: string): Promise<boolean>;
   getEndpoint(): string;
 }
 
@@ -74,7 +74,7 @@ export class OpenKlantApi implements IOpenKlantApi {
   }
 
   async addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid> {
-    const url =this.props.url + '/partij-identificatoren';
+    const url = this.props.url + '/partij-identificatoren';
     const response = await this.callApi('POST', url, {
       body: JSON.stringify(identificatie),
     });
@@ -150,7 +150,7 @@ export class OpenKlantApiMock implements IOpenKlantApi {
   findPartijen(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijenWithUuid> {
     throw new Error('Method should be mocked.');
   }
-  findPartij(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid| undefined> {
+  findPartij(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid | undefined> {
     throw new Error('Method should be mocked.');
   }
   getEndpoint(): string {

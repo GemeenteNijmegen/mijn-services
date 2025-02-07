@@ -1,6 +1,6 @@
-import { logger } from './Logger';
-import { Rol, RolSchema } from './model/Rol';
 import { ZgwApi, ZgwApiProps } from './ZgwApi';
+import { logger } from '../Shared/Logger';
+import { Rol, RolSchema } from '../Shared/model/Rol';
 
 export interface IZakenApi {
   getRol(url: string): Promise<Rol>;
