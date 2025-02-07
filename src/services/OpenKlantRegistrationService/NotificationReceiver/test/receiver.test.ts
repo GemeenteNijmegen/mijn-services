@@ -1,40 +1,40 @@
-import { validateNotification } from "../receiver.lambda";
+import { validateNotification } from '../receiver.lambda';
 
-test('validateNotifications', async () => {
-  process.env.ZAKEN_URL = 'https://zaak';
+test('Accept notifications of right type', async () => {
+  process.env.ZAKEN_API_URL = 'https://zgw/';
   const ignoreReasons = validateNotification({
     kanaal: 'zaken',
     actie: 'create',
     resource: 'rol',
     aanmaakdatum: '',
-    hoofdObject: 'https://zaak/zaakuuid',
-    resourceUrl: "https://rol/roluuid"
+    hoofdObject: 'https://zgw/zaakuuid',
+    resourceUrl: 'https://zgw/roluuid',
   });
-  expect(ignoreReasons).toBeUndefined()
+  expect(ignoreReasons).toBeUndefined();
 });
 
 test('Ignore notification different url', async () => {
-  process.env.ZAKEN_URL = 'https://zaak';
+  process.env.ZAKEN_API_URL = 'https://zgw';
   const ignoreReasons = validateNotification({
     kanaal: 'zaken',
     actie: 'create',
     resource: 'rol',
     aanmaakdatum: '',
     hoofdObject: 'https://differenturl/zaakuuid',
-    resourceUrl: "https://rol/roluuid"
+    resourceUrl: 'https://differenturl/roluuid',
   });
   expect(ignoreReasons).not.toBeUndefined();
 });
 
 test('Ignore notification differnt resource', async () => {
-  process.env.ZAKEN_URL = 'https://zaak';
+  process.env.ZAKEN_API_URL = 'https://zgw';
   const ignoreReasons = validateNotification({
     kanaal: 'zaken',
     actie: 'create',
     resource: 'zaak',
     aanmaakdatum: '',
-    hoofdObject: 'https://zaak/zaakuuid',
-    resourceUrl: "https://rol/roluuid"
+    hoofdObject: 'https://zgw/zaakuuid',
+    resourceUrl: 'https://zgw/roluuid',
   });
   expect(ignoreReasons).not.toBeUndefined();
-})
+});
