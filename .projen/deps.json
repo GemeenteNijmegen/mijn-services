@@ -92,6 +92,10 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-sqs",
+      "type": "runtime"
+    },
+    {
       "name": "@gemeentenijmegen/apigateway-http",
       "type": "runtime"
     },

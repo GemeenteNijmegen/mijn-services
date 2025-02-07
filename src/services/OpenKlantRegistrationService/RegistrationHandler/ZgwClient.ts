@@ -1,6 +1,6 @@
 import { AWS, Bsn } from '@gemeentenijmegen/utils';
 import * as jwt from 'jsonwebtoken';
-import { logger } from '../Logger';
+import { logger } from '../Shared/Logger';
 
 interface ZgwClientOptions {
   /**

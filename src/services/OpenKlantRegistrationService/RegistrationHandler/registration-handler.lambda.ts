@@ -1,18 +1,18 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
-import { authenticate } from './authenticate';
 import { BRPApi } from './BRPApi';
 import { CatalogiApi } from './CatalogiApi';
-import { ErrorResponse } from './ErrorResponse';
-import { logger } from './Logger';
-import { Notification, NotificationSchema } from './model/Notification';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
+import { authenticate } from '../Shared/authenticate';
+import { ErrorResponse } from '../Shared/ErrorResponse';
+import { logger } from '../Shared/Logger';
+import { Notification, NotificationSchema } from '../Shared/model/Notification';
 
 
-async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
+async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
   const env = environmentVariables([
     'OPEN_KLANT_API_URL',
     'OPEN_KLANT_API_KEY_ARN',
@@ -52,7 +52,7 @@ async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
 
 }
 
-let configuration : undefined | OpenKlantRegistrationServiceProps = undefined;
+let configuration: undefined | OpenKlantRegistrationServiceProps = undefined;
 export async function handler(event: APIGatewayProxyEventV2) {
 
   logger.debug('Incomming event', JSON.stringify(event));
@@ -86,7 +86,7 @@ export async function handler(event: APIGatewayProxyEventV2) {
   }
 }
 
-function parseNotificationFromBody(event: APIGatewayProxyEventV2) : Notification {
+function parseNotificationFromBody(event: APIGatewayProxyEventV2): Notification {
   try {
     if (!event.body) {
       throw Error('Received notification without notification body!');
