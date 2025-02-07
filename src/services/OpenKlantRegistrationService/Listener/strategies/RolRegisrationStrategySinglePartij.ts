@@ -29,7 +29,7 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     }
 
     if (errors.length > 0) {
-      logger.info('Notification validation failed', { errors });
+      logger.info('Notification ignored', { errors });
     }
     return errors.length == 0 ? undefined : errors;
   }
