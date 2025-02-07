@@ -46,7 +46,7 @@ export class OpenKlantRegistrationService extends Construct {
       alarmCriticality: this.props.criticality.increase(),
       queueOptions: {
         fifo: true,
-      }
+      },
     });
 
     const queue = new Queue(this, 'queue', {
