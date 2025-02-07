@@ -66,7 +66,7 @@ function parseNotificationFromBody(event: APIGatewayProxyEventV2): Notification 
   }
 }
 
-function validateNotification(notification: Notification): string[] | undefined {
+export function validateNotification(notification: Notification): string[] | undefined {
   const errors: string[] = [];
 
   if (notification.actie !== 'create' || notification.resource !== 'rol') {
