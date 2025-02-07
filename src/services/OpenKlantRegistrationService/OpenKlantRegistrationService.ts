@@ -69,7 +69,6 @@ export class OpenKlantRegistrationService extends Construct {
     return queue;
   }
 
-
   private setupListenerToBeDepricated(id: string) {
 
     const logs = new LogGroup(this, 'logs', {

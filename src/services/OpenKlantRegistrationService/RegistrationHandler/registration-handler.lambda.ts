@@ -1,15 +1,14 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
-import { BRPApi } from './BRPApi';
-import { CatalogiApi } from './CatalogiApi';
-import { OpenKlantApi } from './OpenKlantApi';
-import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
-import { ZakenApi } from './ZakenApi';
 import { authenticate } from '../Shared/authenticate';
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
 import { Notification, NotificationSchema } from '../Shared/model/Notification';
+import { CatalogiApi } from './CatalogiApi';
+import { OpenKlantApi } from './OpenKlantApi';
+import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
+import { ZakenApi } from './ZakenApi';
 
 
 async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
@@ -24,11 +23,10 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
     'HAALCENTRAAL_BRP_BASEURL',
   ]);
 
-  const [openKlantApiKey, zgwClientId, zgwClientSecret, brpHaalCentraalSecret] = await Promise.all([
+  const [openKlantApiKey, zgwClientId, zgwClientSecret] = await Promise.all([
     AWS.getSecret(env.OPEN_KLANT_API_KEY_ARN),
     AWS.getSecret(env.ZGW_TOKEN_CLIENT_ID_ARN),
     AWS.getSecret(env.ZGW_TOKEN_CLIENT_SECRET_ARN),
-    AWS.getSecret(env.HAALCENTRAAL_BRP_APIKEY_ARN),
   ]);
 
   return {
@@ -47,7 +45,6 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
       clientSecret: zgwClientSecret,
     }),
     roltypesToRegister: env.ROLTYPES_TO_REGISTER.split(','),
-    brpApi: new BRPApi({ apiKey: brpHaalCentraalSecret, baseUrl: env.HAALCENTRAAL_BRP_BASEURL }),
   };
 
 }
