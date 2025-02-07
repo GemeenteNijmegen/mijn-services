@@ -44,6 +44,9 @@ export class OpenKlantRegistrationService extends Construct {
       alarm: true,
       kmsKey: this.props.key,
       alarmCriticality: this.props.criticality.increase(),
+      queueOptions: {
+        fifo: true,
+      }
     });
 
     const queue = new Queue(this, 'queue', {
@@ -139,7 +142,7 @@ export class OpenKlantRegistrationService extends Construct {
     this.props.api.addRoutes({
       path: this.props.openKlantRegistrationServiceConfiguration.path + '-test',
       methods: [HttpMethod.POST],
-      integration: new HttpLambdaIntegration('integration', service, {
+      integration: new HttpLambdaIntegration('integration-notification-receiver', service, {
         parameterMapping: new ParameterMapping().appendHeader('X-Authorization', MappingValue.requestHeader('Authorization')),
       }),
     });
