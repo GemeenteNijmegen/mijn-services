@@ -26,6 +26,7 @@ export class DatabaseStack extends Stack {
     this.database = new Database(this, 'database', {
       databaseSecret: this.credentials,
       vpc: this.vpc.vpc,
+      databaseSnapshotRetentionDays: props.configuration.databaseSnapshotRetentionDays ?? 35,
     });
 
     if (props.configuration.databases) {

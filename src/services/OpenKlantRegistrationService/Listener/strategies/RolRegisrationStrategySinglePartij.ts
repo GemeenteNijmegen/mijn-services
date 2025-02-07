@@ -2,6 +2,7 @@ import { Response } from '@gemeentenijmegen/apigateway-http';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
 import { StrategyStatics } from './StrategyStatics';
 import { ErrorResponse } from '../ErrorResponse';
+import { logger } from '../Logger';
 import { Notification } from '../model/Notification';
 import { OpenKlantDigitaalAdresWithUuid, OpenKlantPartijWithUuid } from '../model/Partij';
 import { Rol } from '../model/Rol';
@@ -28,7 +29,7 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     }
 
     if (errors.length > 0) {
-      console.error('Notification validation failed', errors);
+      logger.info('Notification ignored', { errors });
     }
     return errors.length == 0 ? undefined : errors;
   }
@@ -41,17 +42,17 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     const rolType = await this.configuration.catalogiApi.getRolType(rol.roltype);
 
     if (rol.betrokkene) {
-      console.debug('Rol alreay had betrokkene url set. Skipping update...');
+      logger.debug('Rol alreay had betrokkene url set. Skipping update...');
       return Response.ok();
     }
 
     // Check if role is of the target role type, otherwise return 200 but do not handle the notification
     const isTargetRolType = this.configuration.roltypesToRegister.includes(rolType.omschrijvingGeneriek.toLocaleLowerCase());
     if (!isTargetRolType) {
-      console.debug('Role is not of the type to forward to open klant. Ignoring this notification.');
+      logger.debug('Role is not of the type to forward to open klant. Ignoring this notification.');
       return Response.ok();
     }
-    console.debug('Found a rol of the target type to forward to open klant.');
+    logger.debug('Found a rol of the target type to forward to open klant.');
 
     let partij: OpenKlantPartijWithUuid | undefined = undefined;
     if (rol.betrokkeneType == 'natuurlijk_persoon') {
@@ -81,14 +82,14 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     } else { // 2b. If persoon does not exist, create it
       const partijInput = OpenKlantMapper.persoonPartijFromRol(rol);
       persoon = await this.configuration.openKlantApi.registerPartij(partijInput);
-      console.debug('Persoon partij created', persoon);
+      logger.debug('Persoon partij created', persoon);
       const identificatieInput = OpenKlantMapper.persoonIdentificatieFromRol(rol, persoon.uuid);
       const identificatie = await this.configuration.openKlantApi.addPartijIdentificatie(identificatieInput);
-      console.debug('Persoon partij identificatie created', identificatie);
+      logger.debug('Persoon partij identificatie created', identificatie);
     }
 
     // 3. Add new digitale adressen
-    console.debug('Setting digitale adressen for persoon...');
+    logger.debug('Setting digitale adressen for persoon...');
     await this.setDigitaleAdressenForPartijFromRol(persoon, rol);
 
     return persoon;
@@ -101,24 +102,24 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     const kvk = rol.betrokkeneIdentificatie.annIdentificatie;
     const name = rol.contactpersoonRol?.naam ?? rol.betrokkeneIdentificatie.geslachtsnaam;
     const pseudoId = StrategyStatics.constructPseudoId(kvk!, name!);
-    console.debug('Checking if the contactpersoon alreay exists...');
+    logger.debug('Checking if the contactpersoon alreay exists...');
     let contactpersoon = await this.configuration.openKlantApi.findPartij(pseudoId, 'contactpersoon');
 
     if (contactpersoon) {
       // 2.a. If a persoon exists, remove known digitale adressen
-      console.debug('Removing known digitale adressen...');
+      logger.debug('Removing known digitale adressen...');
       await this.removeOldDigitaleAdressen(contactpersoon);
     } else {
       // 2.b. If persoon does not exist, create it
-      console.debug('Did not find contactpersoon for this case, creating a new contactpersoon...');
+      logger.debug('Did not find contactpersoon for this case, creating a new contactpersoon...');
 
       // 2.b.1. Check if organisatie exists
-      console.debug('Checking if organisation exists...');
+      logger.debug('Checking if organisation exists...');
       let organisatie = await this.configuration.openKlantApi.findPartij(kvk, 'organisatie');
 
       // 2.b.2. If it does not exist create the organisatie
       if (!organisatie) {
-        console.debug('No organisation found, creating a new organisation...');
+        logger.debug('No organisation found, creating a new organisation...');
         const organisatieInput = OpenKlantMapper.organisatiePartijFromRol(rol);
         organisatie = await this.configuration.openKlantApi.registerPartij(organisatieInput);
         const organisatieIdentificatieInput = OpenKlantMapper.organisatieIdentificatieFromRol(rol, organisatie.uuid);
@@ -126,7 +127,7 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
       }
 
       // 2.b.3. Create the contactpersoon that works for the organisatie
-      console.debug('Creating a contactpersoon...');
+      logger.debug('Creating a contactpersoon...');
       const orgnisatieUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${organisatie.uuid}`;
       const contactpersoonInput = OpenKlantMapper.contactpersoonPartijFromRol(rol, orgnisatieUrl, organisatie.uuid);
       contactpersoon = await this.configuration.openKlantApi.registerPartij(contactpersoonInput);
@@ -136,7 +137,7 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     }
 
     // 3. Add new digitale adressen
-    console.debug('Setting digitale adressen for contactpersoon...');
+    logger.debug('Setting digitale adressen for contactpersoon...');
     await this.setDigitaleAdressenForPartijFromRol(contactpersoon, rol);
 
     return contactpersoon;
@@ -144,13 +145,13 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
 
 
   private async removeOldDigitaleAdressen(partij: OpenKlantPartijWithUuid) {
-    console.debug('Removing digital adressen for pertij...');
+    logger.debug('Removing digital adressen for pertij...');
     if (!partij.digitaleAdressen || partij.digitaleAdressen.length == 0) {
-      console.debug('Partij does not seem to have any digitale adressen');
+      logger.debug('Partij does not seem to have any digitale adressen');
       return;
     }
     for (const digitaalAdres of partij.digitaleAdressen) {
-      console.debug('Removing digitaal adres', digitaalAdres.uuid);
+      logger.debug('Removing digitaal adres', digitaalAdres.uuid);
       await this.configuration.openKlantApi.deleteDigitaalAdres(digitaalAdres.uuid);
     }
   }
@@ -158,8 +159,8 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
   private async updateRolWithParijUrl(partijUuid: string, rol: Rol) {
     const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partijUuid}`;
     rol.betrokkene = partijUrl;
-    const rolUpdate = await this.configuration.zakenApi.updateRol(rol);
-    console.debug('Rol updated with betrokkene', rolUpdate);
+    const updatedRole = await this.configuration.zakenApi.updateRol(rol);
+    logger.debug('Rol updated with betrokkene', { updatedRole });
   }
 
   private async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, rol: Rol) {
@@ -170,7 +171,7 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
       promises.push(this.configuration.openKlantApi.addDigitaalAdres(digitaalAdres));
     });
     const digitaleAdressen = await Promise.all(promises);
-    digitaleAdressen.forEach(adres => console.log('Digitaal adres created', adres));
+    digitaleAdressen.forEach(adres => logger.debug('Digitaal adres created', adres));
 
     // Store the first digitaal adres as the prefered
     // TODO figure out what the primary should be of the returned adressen?
@@ -187,7 +188,7 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
         uuid: voorkeur,
       },
     });
-    console.debug('Partij updates with voorkeur', partijUpdate);
+    logger.debug('Partij updates with voorkeur', partijUpdate);
   }
 
 }

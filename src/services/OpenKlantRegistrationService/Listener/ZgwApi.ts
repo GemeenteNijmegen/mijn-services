@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken';
+import { logger } from './Logger';
 
 export interface ZgwApiProps {
   clientId: string;
@@ -40,7 +41,11 @@ export abstract class ZgwApi {
     });
 
     if (!response.ok) {
-      console.log(method, 'failed for', url, response.status, response.statusText, await response.text());
+      logger.error(`[ZGW] ${method} failed for ${url}`, {
+        status: response.status,
+        statusText: response.statusText,
+        response: await response.text(),
+      });
       throw new Error(method + ' request failed');
     }
     return response;
