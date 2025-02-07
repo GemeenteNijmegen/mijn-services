@@ -101,6 +101,19 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
+"@aws-lambda-powertools/commons@^2.13.1":
+  version "2.13.1"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-2.13.1.tgz#9f95b59a9cad16313011bb5f073e632c2cf04518"
+  integrity sha512-R9y4XhFyz7KuYXwpvVonUWmVZMarKaK+4WUjG+SXkNad9m247uwIX6UM/GmliCIX0z+YpN6M9HoEBRTVofLfZw==
+
+"@aws-lambda-powertools/logger@^2.13.1":
+  version "2.13.1"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/logger/-/logger-2.13.1.tgz#eda28e614a73cfbc0197ec3c15414fab5049e81c"
+  integrity sha512-yM93J0EO8mmmKMGJ3sbnKgeioMc1jLZVKHssagHQp/3S/NaRJp6pX4ukEFA8bq3mkMfkAtcsqTAaL6CTRKiHIA==
+  dependencies:
+    "@aws-lambda-powertools/commons" "^2.13.1"
+    lodash.merge "^4.6.2"
+
 "@aws-sdk/client-s3@^3.721.0":
   version "3.723.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/client-s3/-/client-s3-3.723.0.tgz#0bde044e1737f527080cc1d156596db62055ebdf"

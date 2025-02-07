@@ -1,4 +1,5 @@
 import { Bsn } from '@gemeentenijmegen/utils';
+import { logger } from './Logger';
 
 interface Config {
   apiKey: string;
@@ -64,7 +65,7 @@ export class BRPApi {
       fields: requestConfiguration.fields,
       burgerservicenummer: requestConfiguration.burgerservicenummer.map(bsn => bsn.bsn),
     });
-    console.debug(url, body);
+    logger.debug(url, body);
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -74,12 +75,12 @@ export class BRPApi {
       body,
     });
     if (!response.ok) {
-      console.error('[HAAL CENTRAAL BRP] request failed', response.status);
+      logger.error('[HAAL CENTRAAL BRP] request failed', response.status?.toString());
       throw Error('Request failed');
     }
     return response.json();
   } catch (error: any) {
-    console.error(error);
+    logger.error(error);
     throw Error('Haal Centraal request failed');
   }
 }

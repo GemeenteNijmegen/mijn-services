@@ -54,6 +54,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.13.1",
     "@gemeentenijmegen/apigateway-http": "^0.0.20",
     "@gemeentenijmegen/aws-constructs": "^0.0.26",
     "@gemeentenijmegen/utils": "^0.0.23",

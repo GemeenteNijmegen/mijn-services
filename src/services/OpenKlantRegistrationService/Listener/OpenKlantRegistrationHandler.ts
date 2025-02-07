@@ -5,6 +5,7 @@ import { Notification } from './model/Notification';
 import { IOpenKlantApi } from './OpenKlantApi';
 import { RegistrationStrategyFactory } from './strategies/RegistrationStrategyFactory';
 import { IZakenApi } from './ZakenApi';
+import { logger } from './Logger';
 
 export interface OpenKlantRegistrationServiceProps {
   readonly zakenApiUrl: string;
@@ -22,15 +23,11 @@ export class OpenKlantRegistrationHandler {
   constructor(configuration: OpenKlantRegistrationServiceProps) {
     this.configuration = configuration;
     this.strategyFactorty = new RegistrationStrategyFactory(this.configuration);
-    if (process.env.DEBUG === 'true') {
-      console.log('Configured using:', this.configuration);
-    }
+    logger.debug('Configured using:', { configuration: this.configuration });
   }
 
-  async handleNotification(notification: Notification) : Promise<ApiGatewayV2Response> {
-    if (process.env.DEBUG === 'true') {
-      console.log('Recevied notification', notification);
-    }
+  async handleNotification(notification: Notification): Promise<ApiGatewayV2Response> {
+    logger.debug('Recevied notification', { notification });
 
     // Get the strategy that is in use currently
     const strategy = this.strategyFactorty.buildStrategy();
@@ -44,6 +41,5 @@ export class OpenKlantRegistrationHandler {
     // Handle notification as defined by the strategy
     return strategy.register(notification);
   }
-
 
 }

@@ -1,6 +1,7 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
+import { logger } from './Logger';
 
 const ALLOWED_HEADERS = [
   'X-Authorization',
@@ -18,7 +19,7 @@ export async function authenticate(event: APIGatewayProxyEventV2) {
   }
 
   if (!API_KEY) {
-    console.error('API_KEY was not loaded, cannot authenticate request');
+    logger.error('API_KEY was not loaded, cannot authenticate request');
     return Response.error(401);
   }
 
@@ -34,12 +35,12 @@ export async function authenticate(event: APIGatewayProxyEventV2) {
   const header = event.headers[usedHeader];
 
   if (!header) {
-    console.error('No Authorization header found in the request.');
+    logger.error('No Authorization header found in the request.');
     return Response.error(401, 'No Authorization header found in the request.' );
   }
 
   if (!header.startsWith('Token ')) {
-    console.error('Header is missing the \'Token \' prefix');
+    logger.error('Header is missing the \'Token \' prefix');
     return Response.error(401, 'Authorization header must be of type Token' );
   }
 
@@ -47,7 +48,7 @@ export async function authenticate(event: APIGatewayProxyEventV2) {
     return true;
   }
 
-  console.error('Invalid API key');
+  logger.error('Invalid API key');
   return Response.error(401, 'Invalid API key.');
 
 }

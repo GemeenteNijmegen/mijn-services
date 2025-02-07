@@ -1,4 +1,5 @@
 import { ErrorResponse } from './ErrorResponse';
+import { logger } from './Logger';
 import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijenWithUuid, OpenKlantPartijenWithUuidSchema, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from './model/Partij';
 import { StrategyStatics } from './strategies/StrategyStatics';
 
@@ -126,12 +127,14 @@ export class OpenKlantApi implements IOpenKlantApi {
       });
 
       if (!response.ok) {
-        console.error('Request failed for url', response.status, await response.text());
+        const responseBody = await response.text();
+        const statusCode = response.status.toString();
+        logger.error('Request failed for url', {statusCode, response: responseBody});
         throw Error('Request failed');
       }
       return response;
     } catch (error) {
-      console.error(error);
+      logger.error('OpenKlant API call failed', error as Error);
       throw Error('OpenKlantApi request failed');
     }
 
