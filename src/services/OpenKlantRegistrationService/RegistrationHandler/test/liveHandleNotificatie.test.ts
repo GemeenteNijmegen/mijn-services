@@ -1,6 +1,6 @@
+import { Notification } from '../../Shared/model/Notification';
 import { BRPApi } from '../BRPApi';
 import { CatalogiApi } from '../CatalogiApi';
-import { Notification } from '../model/Notification';
 import { OpenKlantApi } from '../OpenKlantApi';
 import { OpenKlantRegistrationHandler } from '../OpenKlantRegistrationHandler';
 import { ZakenApi } from '../ZakenApi';
@@ -40,7 +40,7 @@ runLiveTests('Live tests handle notification', () => {
 
 });
 
-function composeNotification() : Notification {
+function composeNotification(): Notification {
   return {
     kanaal: 'zaken',
     hoofdObject: process.env.ZAKEN_API_TEST_ZAAK_WITH_ROL!,

@@ -1,5 +1,5 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
-import { Notification } from '../model/Notification';
+import { Notification } from '../../Shared/model/Notification';
 
 /**
  * Defines the strategy interface for configuring different
@@ -11,7 +11,7 @@ export interface IRegistrationStrategy {
    * Checks if a notification should be handled for this strategy
    * @param notification
    */
-  validateNotification(notification: Notification) : string[] | undefined;
+  validateNotification(notification: Notification): string[] | undefined;
 
   /**
    * Handles the registration of the user's information

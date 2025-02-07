@@ -1,6 +1,6 @@
 
 import { Bsn } from '@gemeentenijmegen/utils';
-import { ZgwClient } from './ZgwClient';
+import { ZgwClient } from '../ZgwClient';
 
 const runTest = process.env.CREATE_TEST_ZAAK_LIVE === 'true' ? describe : describe.skip;
 
@@ -48,7 +48,7 @@ runTest('Create zaak run live tests', () => {
 
     await client.addStatusToZaak(zaak.url, 'Trigger vul service vanaf lokaal (bsn)');
 
-  }, 30*1000);
+  }, 30 * 1000);
 
   async function sleep(ms: number) {
     return new Promise((resolve) => {

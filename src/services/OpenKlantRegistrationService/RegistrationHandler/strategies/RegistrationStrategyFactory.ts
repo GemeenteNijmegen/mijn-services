@@ -1,8 +1,8 @@
+import { logger } from '../../Shared/Logger';
+import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
 import { PartijPerRolStrategy } from './PartijPerRolStrategy';
 import { RolRegisrationStrategySinglePartij } from './RolRegisrationStrategySinglePartij';
-import { logger } from '../Logger';
-import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
 
 
 export class RegistrationStrategyFactory {
@@ -12,7 +12,7 @@ export class RegistrationStrategyFactory {
     this.configuration = configuration;
   }
 
-  buildStrategy() : IRegistrationStrategy {
+  buildStrategy(): IRegistrationStrategy {
     const strategy = process.env.STRATEGY;
 
     if (strategy == 'rolregistrationsinglepartij') {

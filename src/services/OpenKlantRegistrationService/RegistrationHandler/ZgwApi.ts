@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import { logger } from './Logger';
+import { logger } from '../Shared/Logger';
 
 export interface ZgwApiProps {
   clientId: string;

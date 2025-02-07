@@ -1,5 +1,5 @@
 import { Bsn } from '@gemeentenijmegen/utils';
-import { logger } from './Logger';
+import { logger } from '../Shared/Logger';
 
 interface Config {
   apiKey: string;
@@ -79,7 +79,7 @@ export class BRPApi {
       throw Error('Request failed');
     }
     return response.json();
-  } catch (error: any) {
+  } catch(error: any) {
     logger.error(error);
     throw Error('Haal Centraal request failed');
   }

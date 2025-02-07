@@ -1,9 +1,10 @@
 import { randomUUID } from 'crypto';
 import { readFileSync } from 'fs';
+import { join } from 'path';
 import { ApiGatewayV2Response } from '@gemeentenijmegen/apigateway-http';
+import { NotificationSchema } from '../../Shared/model/Notification';
 import { BRPApi } from '../BRPApi';
 import { CatalogiApiMock } from '../CatalogiApi';
-import { NotificationSchema } from '../model/Notification';
 import { OpenKlantApiMock } from '../OpenKlantApi';
 import { OpenKlantRegistrationHandler } from '../OpenKlantRegistrationHandler';
 import { ZakenApiMock } from '../ZakenApi';
@@ -17,7 +18,7 @@ test('Creation of handler class', () => {
 });
 
 test('Unsupported notification returns error', async () => {
-  const file = readFileSync('./src/services/OpenKlantRegistrationService/Listener/test/notification-zaak.json').toString('utf-8');
+  const file = readFileSync(join(__dirname, 'notification-zaak.json')).toString('utf-8');
   const notification = NotificationSchema.parse(JSON.parse(file));
   const handler = createHandler();
   const response = await handler.handleNotification(notification);
@@ -25,7 +26,7 @@ test('Unsupported notification returns error', async () => {
 });
 
 test('Do not handle rol of wrong type', async () => {
-  const file = readFileSync('./src/services/OpenKlantRegistrationService/Listener/test/notification-rol.json').toString('utf-8');
+  const file = readFileSync(join(__dirname, 'notification-rol.json')).toString('utf-8');
   const notification = NotificationSchema.parse(JSON.parse(file));
   const handler = createHandler('behandelaar');
   const response = await handler.handleNotification(notification);

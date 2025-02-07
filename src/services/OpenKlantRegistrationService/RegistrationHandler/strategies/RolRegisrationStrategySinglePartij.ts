@@ -1,13 +1,13 @@
 import { Response } from '@gemeentenijmegen/apigateway-http';
-import { IRegistrationStrategy } from './IRegistrationStrategy';
-import { StrategyStatics } from './StrategyStatics';
-import { ErrorResponse } from '../ErrorResponse';
-import { logger } from '../Logger';
-import { Notification } from '../model/Notification';
-import { OpenKlantDigitaalAdresWithUuid, OpenKlantPartijWithUuid } from '../model/Partij';
-import { Rol } from '../model/Rol';
+import { ErrorResponse } from '../../Shared/ErrorResponse';
+import { logger } from '../../Shared/Logger';
+import { Notification } from '../../Shared/model/Notification';
+import { OpenKlantDigitaalAdresWithUuid, OpenKlantPartijWithUuid } from '../../Shared/model/Partij';
+import { Rol } from '../../Shared/model/Rol';
 import { OpenKlantMapper } from '../OpenKlantMapper';
 import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
+import { IRegistrationStrategy } from './IRegistrationStrategy';
+import { StrategyStatics } from './StrategyStatics';
 
 
 export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy {
