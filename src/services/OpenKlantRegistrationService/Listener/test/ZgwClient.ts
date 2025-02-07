@@ -1,5 +1,6 @@
 import { AWS, Bsn } from '@gemeentenijmegen/utils';
 import * as jwt from 'jsonwebtoken';
+import { logger } from '../Logger';
 
 interface ZgwClientOptions {
   /**
@@ -164,9 +165,8 @@ export class ZgwClient {
         'Accept-Crs': 'EPSG:4326',
       },
     });
-    console.debug(response);
     const json = await response.json() as any;
-    console.debug(json);
+    logger.debug('Response', { json });
     if (response.status < 200 || response.status > 300) {
       throw Error('Not a 2xx response');
     }
@@ -187,11 +187,11 @@ export class ZgwClient {
     if (!start.endsWith('/')) {
       start = `${start}/`;
     }
-    return start + args.map( pathPart => pathPart.replace(/(^\/|\/$)/g, '') ).join('/');
+    return start + args.map(pathPart => pathPart.replace(/(^\/|\/$)/g, '')).join('/');
   }
 
 
 }
 
 
-export class ZaakNotFoundError extends Error {}
+export class ZaakNotFoundError extends Error { }

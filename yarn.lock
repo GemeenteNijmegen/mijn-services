@@ -112,6 +112,19 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
+"@aws-lambda-powertools/commons@^2.13.1":
+  version "2.13.1"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-2.13.1.tgz#9f95b59a9cad16313011bb5f073e632c2cf04518"
+  integrity sha512-R9y4XhFyz7KuYXwpvVonUWmVZMarKaK+4WUjG+SXkNad9m247uwIX6UM/GmliCIX0z+YpN6M9HoEBRTVofLfZw==
+
+"@aws-lambda-powertools/logger@^2.13.1":
+  version "2.13.1"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/logger/-/logger-2.13.1.tgz#eda28e614a73cfbc0197ec3c15414fab5049e81c"
+  integrity sha512-yM93J0EO8mmmKMGJ3sbnKgeioMc1jLZVKHssagHQp/3S/NaRJp6pX4ukEFA8bq3mkMfkAtcsqTAaL6CTRKiHIA==
+  dependencies:
+    "@aws-lambda-powertools/commons" "^2.13.1"
+    lodash.merge "^4.6.2"
+
 "@aws-sdk/client-s3@^3.741.0":
   version "3.743.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/client-s3/-/client-s3-3.743.0.tgz#1c0e85e6a10e1156869f63e8ceccd825d05a2766"
@@ -2597,9 +2610,9 @@ aws-cdk-lib@^2.1.0:
     yaml "1.10.2"
 
 aws-cdk@^2:
-  version "2.177.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.177.0.tgz#39ab8cf445d1ad1902dca7fe7683eb3e3ca920cc"
-  integrity sha512-TiBoyE5wMB5q4jX1bELwkklgbs5eLY1Phjfnb4Mof0K9tOSRJ9UEq6xEamF0esMS+TuYU7a/ESTpmKX3iYqA3w==
+  version "2.178.1"
+  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.178.1.tgz#b86722d1ccd2f8cba2635c0ef05785aed0e80626"
+  integrity sha512-64z9ARFI90jhX6sfjqqJghGxkfh1T4STxY3ccuRY8OxzAK1FY6XLjKBxSyXi9jJFa3v9nN57x7W32u4hZDj6gw==
   optionalDependencies:
     fsevents "2.3.2"
 

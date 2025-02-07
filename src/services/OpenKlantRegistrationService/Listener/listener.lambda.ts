@@ -5,6 +5,7 @@ import { authenticate } from './authenticate';
 import { BRPApi } from './BRPApi';
 import { CatalogiApi } from './CatalogiApi';
 import { ErrorResponse } from './ErrorResponse';
+import { logger } from './Logger';
 import { Notification, NotificationSchema } from './model/Notification';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
@@ -54,13 +55,10 @@ async function initalize() : Promise<OpenKlantRegistrationServiceProps> {
 let configuration : undefined | OpenKlantRegistrationServiceProps = undefined;
 export async function handler(event: APIGatewayProxyEventV2) {
 
+  logger.debug('Incomming event', JSON.stringify(event));
+
   if (!configuration) {
     configuration = await initalize();
-  }
-
-  // Log the event in debug modes
-  if (process.env.DEBUG === 'true') {
-    console.log(event);
   }
 
   try {
@@ -83,7 +81,7 @@ export async function handler(event: APIGatewayProxyEventV2) {
     if (error instanceof ErrorResponse) {
       return Response.error(error.statusCode, error.message);
     }
-    console.error(error);
+    logger.error('Error during processing of event', error as Error);
     return Response.error(500);
   }
 }
@@ -99,7 +97,7 @@ function parseNotificationFromBody(event: APIGatewayProxyEventV2) : Notification
     }
     return NotificationSchema.parse(JSON.parse(body));
   } catch (error) {
-    console.error(error);
+    logger.error('Could ont parse notification', error as Error);
     throw new ErrorResponse(400, 'Error parsing body');
   }
 }

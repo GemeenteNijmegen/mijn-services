@@ -2,12 +2,12 @@ import { randomUUID } from 'crypto';
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
 import { ErrorResponse } from '../ErrorResponse';
+import { logger } from '../Logger';
 import { Notification } from '../model/Notification';
 import { OpenKlantDigitaalAdresWithUuid, OpenKlantPartijWithUuid } from '../model/Partij';
 import { Rol } from '../model/Rol';
 import { OpenKlantMapper } from '../OpenKlantMapper';
 import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
-
 
 export class PartijPerRolStrategy implements IRegistrationStrategy {
 
@@ -30,7 +30,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     }
 
     if (errors.length > 0) {
-      console.error('Notification validation failed', errors);
+      logger.info('Notification ignored', { errors });
     }
     return errors.length == 0 ? undefined : errors;
   }
@@ -43,17 +43,17 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     const rolType = await this.configuration.catalogiApi.getRolType(rol.roltype);
 
     if (rol.betrokkene) {
-      console.debug('Rol alreay had betrokkene url set. Skipping update...');
+      logger.debug('Rol alreay had betrokkene url set. Skipping update...');
       return Response.ok();
     }
 
     // Check if role is of the target role type, otherwise return 200 but do not handle the notification
     const isTargetRolType = this.configuration.roltypesToRegister.includes(rolType.omschrijvingGeneriek.toLocaleLowerCase());
     if (!isTargetRolType) {
-      console.debug('Role is not of the type to forward to open klant. Ignoring this notification.');
+      logger.debug('Role is not of the type to forward to open klant. Ignoring this notification.');
       return Response.ok();
     }
-    console.debug('Found a rol of the target type to forward to open klant.');
+    logger.debug('Found a rol of the target type to forward to open klant.');
 
     let partij: OpenKlantPartijWithUuid | undefined = undefined;
     if (rol.betrokkeneType == 'natuurlijk_persoon') {
@@ -71,7 +71,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     if (this.updateRolInZaakApi == true) {
       await this.updateRolWithParijUrl(partij.uuid, rol);
     } else {
-      console.debug('Skipping update of role in zaken api as updateRolInZaakApi is false');
+      logger.debug('Skipping update of role in zaken api as updateRolInZaakApi is false');
     }
 
     return Response.ok();
@@ -81,14 +81,14 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     // Create the partij
     const partijInput = OpenKlantMapper.persoonPartijFromRol(rol);
     const persoon = await this.configuration.openKlantApi.registerPartij(partijInput);
-    console.debug('Persoon partij created', persoon);
+    logger.debug('Persoon partij created', persoon);
     // Create the partij identificatie
     const identificatieInput = this.createTemporaryPartijIdentificatie(persoon.uuid);
     const identificatie = await this.configuration.openKlantApi.addPartijIdentificatie(identificatieInput);
-    console.debug('Persoon partij identificatie created', identificatie);
+    logger.debug('Persoon partij identificatie created', identificatie);
     // Add the digitale adressen (and select voorkeur)
     await this.setDigitaleAdressenForPartijFromRol(persoon, rol);
-    console.debug('Digitale addressen created');
+    logger.debug('Digitale addressen created');
     return persoon;
   }
 
@@ -100,14 +100,14 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     // Create the partij
     const partijInput = OpenKlantMapper.persoonPartijFromRol(rol);
     const persoon = await this.configuration.openKlantApi.registerPartij(partijInput);
-    console.debug('Persoon partij created (for kvk in partij per rol strategy)', persoon);
+    logger.debug('Persoon partij created (for kvk in partij per rol strategy)', persoon);
     // Create the partij identificatie
     const identificatieInput = this.createTemporaryPartijIdentificatie(persoon.uuid);
     const identificatie = await this.configuration.openKlantApi.addPartijIdentificatie(identificatieInput);
-    console.debug('Persoon partij identificatie created (for kvk in partij per rol strategy)', identificatie);
+    logger.debug('Persoon partij identificatie created (for kvk in partij per rol strategy)', identificatie);
     // Add the digitale adressen (and select voorkeur)
     await this.setDigitaleAdressenForPartijFromRol(persoon, rol);
-    console.debug('Digitale addressen created (for kvk in partij per rol strategy)');
+    logger.debug('Digitale addressen created (for kvk in partij per rol strategy)');
     return persoon;
 
   }
@@ -116,7 +116,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partijUuid}`;
     rol.betrokkene = partijUrl;
     const rolUpdate = await this.configuration.zakenApi.updateRol(rol);
-    console.debug('Rol updated with betrokkene', rolUpdate);
+    logger.debug('Rol updated with betrokkene', rolUpdate);
   }
 
   private async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, rol: Rol) {
@@ -127,7 +127,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
       promises.push(this.configuration.openKlantApi.addDigitaalAdres(digitaalAdres));
     });
     const digitaleAdressen = await Promise.all(promises);
-    digitaleAdressen.forEach(adres => console.log('Digitaal adres created', adres));
+    digitaleAdressen.forEach(adres => logger.debug('Digitaal adres created', adres));
 
     // Store the first digitaal adres as the prefered
     // TODO figure out what the primary should be of the returned adressen?
@@ -144,7 +144,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
         uuid: voorkeur,
       },
     });
-    console.debug('Partij updates with voorkeur', partijUpdate);
+    logger.debug('Partij updates with voorkeur', partijUpdate);
   }
 
   private createTemporaryPartijIdentificatie(partijUuid: string) {

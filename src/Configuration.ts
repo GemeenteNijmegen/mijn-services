@@ -345,7 +345,7 @@ const EnvironmentConfigurations: {[key:string]: Configuration} = {
     openKlantRegistrationServices: [
       {
         cdkId: 'open-klant-registration-service-woweb',
-        debug: true,
+        debug: false,
         openKlantUrl: 'https://mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://openzaak.nijmegen.cloud/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
