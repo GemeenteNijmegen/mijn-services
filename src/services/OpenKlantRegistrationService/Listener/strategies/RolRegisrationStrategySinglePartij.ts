@@ -159,8 +159,8 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
   private async updateRolWithParijUrl(partijUuid: string, rol: Rol) {
     const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partijUuid}`;
     rol.betrokkene = partijUrl;
-    const rolUpdate = await this.configuration.zakenApi.updateRol(rol);
-    logger.debug('Rol updated with betrokkene', rolUpdate);
+    const updatedRole = await this.configuration.zakenApi.updateRol(rol);
+    logger.debug('Rol updated with betrokkene', { updatedRole });
   }
 
   private async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, rol: Rol) {

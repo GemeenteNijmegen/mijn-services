@@ -1,5 +1,6 @@
 import {
   aws_rds as rds, aws_ec2 as ec2, aws_kms as kms,
+  Duration,
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -10,6 +11,7 @@ import { Statics } from '../Statics';
 export interface DatabaseProps {
   vpc: ec2.IVpc;
   databaseSecret: ISecret;
+  databaseSnapshotRetentionDays: number;
 }
 
 export class Database extends Construct {
@@ -43,6 +45,7 @@ export class Database extends Construct {
         'rds.force_ssl': '0',
       },
       deletionProtection: true,
+      backupRetention: Duration.days(props.databaseSnapshotRetentionDays),
     });
 
     new StringParameter(this, 'db-arn', {

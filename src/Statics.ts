@@ -39,7 +39,7 @@ export class Statics {
   /**
    * PRODUCTION
    * List all databases that should be
-   * present in a single array
+   * present in a single db instance
    */
   static readonly databasesProduction = [
     Statics.databaseOpenKlant,
@@ -48,7 +48,7 @@ export class Statics {
   /**
    * ACCEPTANCE
    * List all databases that should be
-   * present in a single array
+   * present in a single db instance
    */
   static readonly databasesAcceptance = [
     Statics.databaseOpenKlant,
