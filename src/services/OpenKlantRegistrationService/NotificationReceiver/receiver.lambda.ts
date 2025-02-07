@@ -1,7 +1,7 @@
-import { createHash } from 'crypto';
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
+import { createHash } from 'crypto';
 import { authenticate } from '../Shared/authenticate';
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
@@ -36,6 +36,7 @@ export async function handler(event: APIGatewayProxyEventV2) {
       MessageBody: messageJson,
       QueueUrl: process.env.QUEUE_URL,
       MessageDeduplicationId: deduplicationId,
+      MessageGroupId: process.env.REGISTRATION_SERVICE_ID,
     }));
 
     return Response.ok();
