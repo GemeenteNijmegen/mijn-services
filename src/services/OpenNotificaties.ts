@@ -91,7 +91,7 @@ export class OpenNotificatiesService extends Construct {
       ALLOWED_HOSTS: '*',
       CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
-      SUBPATH: '/'+this.props.path,
+      SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'yes',
       UWSGI_PORT: this.props.service.port.toString(),
       USE_X_FORWARDED_HOST: 'True',
@@ -221,6 +221,7 @@ export class OpenNotificatiesService extends Construct {
         streamPrefix: 'setup-service',
         logGroup: this.logs,
       }),
+
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
 
@@ -271,6 +272,7 @@ export class OpenNotificatiesService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
