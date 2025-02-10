@@ -1,7 +1,7 @@
-import { createHash } from 'crypto';
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
+import { createHash } from 'crypto';
 import { authenticate } from '../Shared/authenticate';
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
@@ -26,6 +26,11 @@ export async function handler(event: APIGatewayProxyEventV2) {
     const ignoreReasons = validateNotification(notification);
     if (ignoreReasons) {
       logger.info('Notification ignored', { ignoreReasons });
+      return Response.ok();
+    }
+
+    // If forwarding is not enabled just respond with ok
+    if (process.env.ENABLE_FORWARDING == 'false') {
       return Response.ok();
     }
 
