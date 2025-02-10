@@ -276,19 +276,19 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     databases: Statics.databasesAcceptance,
     databaseSnapshotRetentionDays: 10,
     openklant: {
-      image: 'maykinmedia/open-klant:2.3.0',
+      image: 'maykinmedia/open-klant:2.5.0',
       logLevel: 'DEBUG',
       debug: true,
     },
     openNotificaties: {
-      image: 'openzaak/open-notificaties:1.7.1',
-      rabbitMqImage: 'rabbitmq:4.0.3-alpine',
+      image: 'openzaak/open-notificaties:1.8.0',
+      rabbitMqImage: 'rabbitmq:4.0.5-alpine',
       logLevel: 'DEBUG',
       debug: true,
       persitNotifications: true,
     },
     openZaak: {
-      image: 'openzaak/open-zaak:1.15.0',
+      image: 'openzaak/open-zaak:1.17.0',
       logLevel: 'DEBUG',
       debug: true,
     },
@@ -356,7 +356,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     databases: Statics.databasesProduction,
     databaseSnapshotRetentionDays: 35,
     openklant: {
-      image: 'maykinmedia/open-klant:2.3.0',
+      image: 'maykinmedia/open-klant:2.5.0',
       logLevel: 'INFO',
     },
     openKlantRegistrationServices: [
