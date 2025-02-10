@@ -3,7 +3,6 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { ApiGatewayV2Response } from '@gemeentenijmegen/apigateway-http';
 import { NotificationSchema } from '../../Shared/model/Notification';
-import { BRPApi } from '../BRPApi';
 import { CatalogiApiMock } from '../CatalogiApi';
 import { OpenKlantApiMock } from '../OpenKlantApi';
 import { OpenKlantRegistrationHandler } from '../OpenKlantRegistrationHandler';
@@ -41,7 +40,6 @@ function createHandler(roltype?: string) {
     catalogiApi: mockCatalogiApi(roltype),
     roltypesToRegister: ['initatior'],
     openKlantApi: mockOpenKlantApi(),
-    brpApi: mockBrpApi(),
   });
 }
 
@@ -88,11 +86,4 @@ function mockOpenKlantApi() {
   jest.spyOn(openKlantApiMock, 'addPartijIdentificatie').mockImplementation(appendUuid);
   jest.spyOn(openKlantApiMock, 'addDigitaalAdres').mockImplementation(appendUuid);
   return openKlantApiMock;
-}
-
-
-function mockBrpApi() {
-  const api = new BRPApi({ apiKey: 'fakeKey', baseUrl: 'http://localhost' });
-  jest.spyOn(api, 'getName').mockImplementation((async () => 'Een naam'));
-  return api;
 }

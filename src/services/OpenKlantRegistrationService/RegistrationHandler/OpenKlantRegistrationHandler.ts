@@ -1,5 +1,4 @@
 import { ApiGatewayV2Response, Response } from '@gemeentenijmegen/apigateway-http';
-import { BRPApi } from './BRPApi';
 import { ICatalogiApi } from './CatalogiApi';
 import { IOpenKlantApi } from './OpenKlantApi';
 import { RegistrationStrategyFactory } from './strategies/RegistrationStrategyFactory';
@@ -13,7 +12,6 @@ export interface OpenKlantRegistrationServiceProps {
   readonly openKlantApi: IOpenKlantApi;
   readonly catalogiApi: ICatalogiApi;
   readonly roltypesToRegister: string[];
-  readonly brpApi: BRPApi;
 }
 
 export class OpenKlantRegistrationHandler {

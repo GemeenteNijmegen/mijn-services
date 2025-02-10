@@ -4,10 +4,10 @@ import { HttpApi, HttpMethod, MappingValue, ParameterMapping } from 'aws-cdk-lib
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { ApplicationLogLevel, Function, LoggingFormat, SystemLogLevel } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { FilterPattern, LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
-import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenKlantRegistrationServiceConfiguration } from '../../Configuration';
 import { Statics } from '../../Statics';
@@ -33,7 +33,7 @@ export class OpenKlantRegistrationService extends Construct {
     this.params = this.setupVulServiceConfiguration(id);
 
     const queue = this.setupQueue();
-    this.setupRegistrationHandler(id);
+    this.setupRegistrationHandler(id, queue);
     this.setupNotificationReceiver(id, queue);
 
   }
@@ -62,18 +62,17 @@ export class OpenKlantRegistrationService extends Construct {
     return queue;
   }
 
-  private setupRegistrationHandler(id: string) {
+  private setupRegistrationHandler(id: string, queue: Queue) {
 
-    const logs = new LogGroup(this, 'logs', {
+    const logs = new LogGroup(this, 'registration-handler-logs', {
       encryptionKey: this.props.key,
       retention: RetentionDays.SIX_MONTHS,
     });
 
-    const haalcentraalApiKey = Secret.fromSecretNameV2(this, 'haalcentraal-apikey', Statics.ssmHaalCentraalBRPApiKeySecret);
     const openKlantConfig = this.props.openKlantRegistrationServiceConfiguration;
-    const service = new RegistrationHandlerFunction(this, 'listener', {
+    const service = new RegistrationHandlerFunction(this, 'registration-handler', {
       timeout: Duration.seconds(30),
-      description: `Notification endpoint for ${id}`,
+      description: `Registration handler endpoint for ${id}`,
       environment: {
         OPEN_KLANT_API_URL: openKlantConfig.openKlantUrl,
         OPEN_KLANT_API_KEY_ARN: this.params.openklant.secretArn,
@@ -81,10 +80,7 @@ export class OpenKlantRegistrationService extends Construct {
         ZGW_TOKEN_CLIENT_SECRET_ARN: this.params.zgw.secret.secretArn,
         ZAKEN_API_URL: openKlantConfig.zakenApiUrl,
         DEBUG: openKlantConfig.debug ? 'true' : 'false',
-        API_KEY_ARN: this.params.authentication.secretArn,
         ROLTYPES_TO_REGISTER: openKlantConfig.roltypesToRegister.join(','),
-        HAALCENTRAAL_BRP_APIKEY_ARN: haalcentraalApiKey.secretArn,
-        HAALCENTRAAL_BRP_BASEURL: StringParameter.fromStringParameterName(this, 'haalcentraal-apibaseurl', Statics.ssmHaalCentraalBRPBaseUrl).stringValue,
         STRATEGY: this.props.openKlantRegistrationServiceConfiguration.strategy,
       },
       logGroup: logs,
@@ -92,17 +88,16 @@ export class OpenKlantRegistrationService extends Construct {
       systemLogLevelV2: this.props.openKlantRegistrationServiceConfiguration.debug ? SystemLogLevel.DEBUG : SystemLogLevel.INFO,
       applicationLogLevelV2: this.props.openKlantRegistrationServiceConfiguration.debug ? ApplicationLogLevel.DEBUG : ApplicationLogLevel.INFO,
     });
-
     this.props.key.grantEncrypt(service);
     this.params.openklant.grantRead(service);
     this.params.zgw.id.grantRead(service);
     this.params.zgw.secret.grantRead(service);
-    this.params.authentication.grantRead(service);
-    haalcentraalApiKey.grantRead(service);
 
     this.setupMonitoring(service);
-    this.setupRoute(service);
 
+    // Maks the lambda listen to the queue
+    const eventSource = new SqsEventSource(queue, { batchSize: 1 });
+    service.addEventSource(eventSource);
   }
 
   private setupNotificationReceiver(id: string, queue: Queue) {
@@ -139,14 +134,7 @@ export class OpenKlantRegistrationService extends Construct {
       lambda: service,
     });
 
-    // Create a new endpoint to test this lambda and queue publishing
-    this.props.api.addRoutes({
-      path: this.props.openKlantRegistrationServiceConfiguration.path + '-test',
-      methods: [HttpMethod.POST],
-      integration: new HttpLambdaIntegration('integration-notification-receiver', service, {
-        parameterMapping: new ParameterMapping().appendHeader('X-Authorization', MappingValue.requestHeader('Authorization')),
-      }),
-    });
+    this.setupRoute(service);
 
   }
 
