@@ -29,6 +29,11 @@ export async function handler(event: APIGatewayProxyEventV2) {
       return Response.ok();
     }
 
+    // If forwarding is not enabled just respond with ok
+    if (process.env.ENABLE_FORWARDING == 'false') {
+      return Response.ok();
+    }
+
     // Forward the notification to the queue
     const messageJson = JSON.stringify(notification);
     const deduplicationId = createHash('sha256').update(messageJson).digest('hex');

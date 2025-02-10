@@ -255,6 +255,10 @@ export interface OpenKlantRegistrationServiceConfiguration {
     | 'partijperrol' // Convert the rol to a partij en store the partij id in the rol. Uses a dummy partij identificatie to keep each partij unique and for easy removal later on.
     | 'partijperroldry' // Without updating the rol in the Zaken api
   );
+  /**
+   * Flag to enable processing of notifications
+   */
+  enabled: boolean;
 }
 
 const EnvironmentConfigurations: { [key: string]: Configuration } = {
@@ -324,6 +328,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         path: '/open-klant-registration-service-test/callback',
         roltypesToRegister: ['initiator'],
         strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
+        enabled: true,
       },
       {
         cdkId: 'open-klant-registration-service-woweb',
@@ -333,6 +338,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
         strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
+        enabled: true,
       },
     ],
   },
@@ -363,6 +369,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         roltypesToRegister: ['initiator'],
         strategy: 'partijperroldry', // Unique partij per rol (of zaak dus)
         // TODO change from dryrun later (but do not yet write results back to openzaak)
+        enabled: false,
       },
     ],
   },

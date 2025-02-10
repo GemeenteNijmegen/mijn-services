@@ -118,6 +118,7 @@ export class OpenKlantRegistrationService extends Construct {
         API_KEY_ARN: this.params.authentication.secretArn,
         QUEUE_URL: queue.queueUrl,
         REGISTRATION_SERVICE_ID: id,
+        ENABLE_FORWARDING: openKlantConfig.enabled ? 'true' : 'false',
       },
       logGroup: logs,
       loggingFormat: LoggingFormat.JSON,
