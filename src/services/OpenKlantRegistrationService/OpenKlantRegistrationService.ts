@@ -70,7 +70,7 @@ export class OpenKlantRegistrationService extends Construct {
     });
 
     const openKlantConfig = this.props.openKlantRegistrationServiceConfiguration;
-    const service = new RegistrationHandlerFunction(this, 'registraiont-handler', {
+    const service = new RegistrationHandlerFunction(this, 'registration-handler', {
       timeout: Duration.seconds(30),
       description: `Registration handler endpoint for ${id}`,
       environment: {
