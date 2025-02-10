@@ -1,13 +1,8 @@
-import { Stack } from 'aws-cdk-lib';
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ExecuteCommandLogging } from 'aws-cdk-lib/aws-ecs';
-import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Key } from 'aws-cdk-lib/aws-kms';
-import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
-import { Statics } from '../Statics';
 
 export interface ContainerPlatformProps {
   /**
@@ -42,65 +37,10 @@ export class ContainerPlatform extends Construct {
       securityGroups: [this.vpcLinkSecurityGroup],
     });
 
-
-    const key = new Key(this, 'cluster-exec-logs-key', {
-      description: 'Key for encrypting cluster exec commands and logs',
-      alias: `${Statics.projectName}/cluster-exec`,
-    });
-    const logs = new LogGroup(this, 'cluster-exec-logs', {
-      encryptionKey: key,
-      retention: RetentionDays.ONE_YEAR, // Also audit trail
-    });
-
-
-    const region = Stack.of(this).region;
-    const account = Stack.of(this).account;
-    key.addToResourcePolicy(new PolicyStatement({
-      effect: Effect.ALLOW,
-      principals: [new ServicePrincipal(`logs.${region}.amazonaws.com`)],
-      actions: [
-        'kms:Decrypt',
-        'kms:DescribeKey',
-        'kms:Encrypt',
-        'kms:ReEncrypt*',
-        'kms:GenerateDataKey*',
-      ],
-      resources: ['*'],
-      conditions: {
-        StringEquals: {
-          'aws:RequestedRegion': region,
-          'aws:PrincipalAccount': account,
-        },
-      },
-    }));
-    key.addToResourcePolicy(new PolicyStatement({
-      effect: Effect.ALLOW,
-      principals: [new ServicePrincipal('ecs.amazonaws.com')],
-      actions: [
-        'kms:Decrypt',
-        'kms:DescribeKey',
-        'kms:Encrypt',
-        'kms:ReEncrypt*',
-        'kms:GenerateDataKey*',
-      ],
-      resources: ['*'],
-      conditions: {
-        StringEquals: {
-          'aws:RequestedRegion': region,
-          'aws:PrincipalAccount': account,
-        },
-      },
-    }));
-
     this.cluster = new Cluster(this, 'cluster', {
       vpc: props.vpc,
       executeCommandConfiguration: {
-        kmsKey: key,
-        logConfiguration: {
-          cloudWatchLogGroup: logs,
-          cloudWatchEncryptionEnabled: true,
-        },
-        logging: ExecuteCommandLogging.OVERRIDE,
+        logging: ExecuteCommandLogging.DEFAULT,
       },
     });
 
