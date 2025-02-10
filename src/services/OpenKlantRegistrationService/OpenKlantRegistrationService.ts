@@ -64,7 +64,7 @@ export class OpenKlantRegistrationService extends Construct {
 
   private setupRegistrationHandler(id: string, queue: Queue) {
 
-    const logs = new LogGroup(this, 'registraiont-handler-logs', {
+    const logs = new LogGroup(this, 'registration-handler-logs', {
       encryptionKey: this.props.key,
       retention: RetentionDays.SIX_MONTHS,
     });
