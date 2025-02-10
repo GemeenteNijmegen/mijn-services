@@ -1,7 +1,6 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, LaunchType, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
-import { EcsTask } from 'aws-cdk-lib/aws-events-targets';
+import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -52,7 +51,6 @@ export class OpenKlantService extends Construct {
     this.setupInitalization();
     this.setupService();
     this.setupCeleryService();
-    this.setupConfigurationTask();
   }
 
   private getEnvironmentConfiguration() {
@@ -262,42 +260,6 @@ export class OpenKlantService extends Construct {
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
     this.openKlantCredentials.grantRead(role);
-  }
-
-
-  private setupConfigurationTask() {
-    const task = this.serviceFactory.createTaskDefinition('setup-configuration');
-    task.addContainer('setup-configuration-init', {
-      image: ContainerImage.fromRegistry(this.props.image),
-      healthCheck: {
-        command: ['CMD-SHELL', 'exit 0'], // Not sure what to check when executing a single script
-        startPeriod: Duration.seconds(30), // Give the script an inital 30 seconds to run before starting the health check
-      },
-      // Note: use env vars in combinations with the below command https://stackoverflow.com/questions/26963444/django-create-superuser-from-batch-file
-      // Note command can only run once: 'CommandError: Error: That gebruikersnaam is already taken.'
-      command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'],
-      portMappings: [],
-      logging: new AwsLogDriver({
-        streamPrefix: 'init',
-        logGroup: this.logs,
-      }),
-      readonlyRootFilesystem: true,
-      secrets: this.getSecretConfiguration(),
-      environment: this.getEnvironmentConfiguration(),
-    });
-
-    const standalone = new EcsTask({
-      cluster: this.props.service.cluster,
-      taskDefinition: task,
-      taskCount: 1,
-      launchType: LaunchType.FARGATE,
-    });
-
-    if (!standalone.securityGroups) {
-      throw Error('Expected security groups to be set for standalone task!');
-    }
-    this.setupConnectivity('setup-configuration-init', standalone?.securityGroups);
-    this.allowAccessToSecrets(task.executionRole!);
   }
 
 }

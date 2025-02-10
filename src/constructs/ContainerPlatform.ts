@@ -1,8 +1,11 @@
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Cluster } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ExecuteCommandLogging } from 'aws-cdk-lib/aws-ecs';
+import { Key } from 'aws-cdk-lib/aws-kms';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
+import { Statics } from '../Statics';
 
 export interface ContainerPlatformProps {
   /**
@@ -37,8 +40,26 @@ export class ContainerPlatform extends Construct {
       securityGroups: [this.vpcLinkSecurityGroup],
     });
 
+
+    const key = new Key(this, 'cluster-exec-logs-key', {
+      description: 'Key for encrypting cluster exec commands and logs',
+      alias: `${Statics.projectName}/cluster-exec`,
+    });
+    const logs = new LogGroup(this, 'cluster-exec-logs', {
+      encryptionKey: key,
+      retention: RetentionDays.ONE_YEAR, // Also audit trail
+    });
+
     this.cluster = new Cluster(this, 'cluster', {
       vpc: props.vpc,
+      executeCommandConfiguration: {
+        kmsKey: key,
+        logConfiguration: {
+          cloudWatchLogGroup: logs,
+          cloudWatchEncryptionEnabled: true,
+        },
+        logging: ExecuteCommandLogging.OVERRIDE,
+      },
     });
 
   }
