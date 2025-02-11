@@ -224,7 +224,7 @@ export class OpenZaakService extends Construct {
     const service = this.serviceFactory.createService({
       id: 'setup-configuration',
       task: task,
-      path: this.props.path,
+      path: undefined, // Do not connect this service to the internet
       options: {
         desiredCount: 0, // DISABLE BY DEFAULT AND RUN MANUALLY
       },
