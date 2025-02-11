@@ -140,7 +140,7 @@ export class OpenZaakService extends Construct {
 
   /**
    * Setup the main service (e.g. open-zaak container)
-   * @returns 
+   * @returns
    */
   private setupService() {
     const VOLUME_NAME = 'tmp';
@@ -191,7 +191,7 @@ export class OpenZaakService extends Construct {
   /**
    * This service is disabled by default an can be ran manually to
    * setup the configuration when deploying a new open-zaak.
-   * @returns 
+   * @returns
    */
   private setupConfigurationService() {
     const VOLUME_NAME = 'tmp';
@@ -208,7 +208,7 @@ export class OpenZaakService extends Construct {
       }),
       command: undefined, // Do not set a command as the entrypoint will handle this for us (see Dockerfile)
       readonlyRootFilesystem: true,
-      essential: false, // exit after running
+      essential: true,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -229,7 +229,7 @@ export class OpenZaakService extends Construct {
         desiredCount: 0, // DISABLE BY DEFAULT AND RUN MANUALLY
       },
     });
-    this.setupConnectivity('main', service.connections.securityGroups);
+    this.setupConnectivity('setup-configuration', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
   }
