@@ -73,7 +73,7 @@ export class OpenZaakService extends Construct {
       ALLOWED_HOSTS: '*',
       CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
-      SUBPATH: '/'+this.props.path,
+      SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'True',
       UWSGI_PORT: this.props.service.port.toString(),
 
@@ -234,6 +234,7 @@ export class OpenZaakService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
