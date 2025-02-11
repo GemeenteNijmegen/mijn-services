@@ -2,12 +2,14 @@
 # Documentation on how this file works can be found here:
 # https://zgw-consumers.readthedocs.io/en/latest/setup_config.html
 
-sites_config_enable: false # I dont think we need this
-# sites_config:
-#   items:
-#   - domain: ${}
-#     name: 
 
+# No default config for the following:
+sites_config_enable: false # I dont think we need this
+notifications_config_enable: false # Configure notification retry (defaults are ok)
+openzaak_selectielijst_config_enable: false # Geen idee of we dit willen beperken?
+oidc_db_config_enable: false # This is done in the UI
+
+# Define how to connect to other servies from open-zaak
 zgw_consumers_config_enable: true
 zgw_consumers:
   services:
@@ -21,52 +23,33 @@ zgw_consumers:
     # Reference our notifications API
     - identifier: notifications-api
       label: Notificaties API
-      api_root: ${OPEN_NOTIFICATIES_API_URL}
+      api_root: ${NOTIF_API_ROOT}
       api_connection_check_path: notificaties
       api_type: nrc
-      auth_type: api_key
-      header_key: Authorization
-      header_value: Token ${OPEN_NOTIFICATIES_API_KEY}
+      auth_type: zgw
+      client_id: ${OPENZAAK_NOTIF_CLIENT_ID}
+      secret: ${OPENZAAK_NOTIF_SECRET}
+      user_id: ${OPENZAAK_NOTIF_CLIENT_ID}
+      user_representation: ${OPENZAAK_NOTIF_CLIENT_ID}
 
-notifications_config_enable: false # Configure notification retry (defaults are ok)
-# notifications_config:
-#   notifications_api_service_identifier: notifications-api
-#   notification_delivery_max_retries: 1
-#   notification_delivery_retry_backoff: 2
-#   notification_delivery_retry_backoff_max: 3
 
-openzaak_selectielijst_config_enable: false # Geen idee of we dit willen beperken?
-# openzaak_selectielijst_config:
-#   selectielijst_api_service_identifier: selectielijst-api
-#   allowed_years:
-#     - 2025
-#     - 2026
-#     - 2027
-#     - 2028
-#   default_year: 2025
-
-vng_api_common_credentials_config_enable: true # Super user setup?
+# Defines how others authenticate at this open-zaak
+vng_api_common_credentials_config_enable: true
 vng_api_common_credentials:
   items:
-  - identifier: user-id
-    secret: super-secret
+  - identifier: ${NOTIF_OPENZAAK_CLIENT_ID}
+    secret: ${NOTIF_OPENZAAK_SECRET}
 
-vng_api_common_applicaties_config_enable: false # Geen idee wat dit doet
-# vng_api_common_applicaties:
-#   items:
-#   - uuid: 78591bab-9a00-4887-849c-53b21a67782f
-#     client_ids:
-#     - user-id
-#     label: applicatie
-#     heeft_alle_autorisaties: true
 
-oidc_db_config_enable: false # This is done in the UI
-# oidc_db_config_admin_auth:
-#   items:
-#     - identifier: admin-oidc
-#       oidc_rp_client_id: client-id
-#       oidc_rp_client_secret: secret
-#       endpoint_config:
-#         oidc_op_authorization_endpoint: https://example.com/realms/test/protocol/openid-connect/auth
-#         oidc_op_token_endpoint: https://example.com/realms/test/protocol/openid-connect/token
-#         oidc_op_user_endpoint: https://example.com/realms/test/protocol/openid-connect/userinfo
+# Defines default authorizations (based on client id)
+vng_api_common_applicaties_config_enable: true
+vng_api_common_applicaties:
+  items:
+  - uuid: 78591bab-9a00-4887-849c-53b21a67782f # Give permissions to default credential pairs for connections between open-zaak <-> open-notifications
+    client_ids:
+    - ${NOTIF_OPENZAAK_CLIENT_ID}
+    - ${OPENZAAK_NOTIF_CLIENT_ID}
+    label: applicatie
+    heeft_alle_autorisaties: true
+
+

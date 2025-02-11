@@ -1,6 +1,6 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -61,6 +61,8 @@ export class OpenNotificatiesService extends Construct {
       },
     });
 
+    this.setupConfigurationService();
+
     const rabbitMqService = this.setupRabbitMqService();
     const mainService = this.setupService();
     const celeryService = this.setupCeleryService();
@@ -114,11 +116,16 @@ export class OpenNotificatiesService extends Construct {
       OPENNOTIFICATIES_DOMAIN: trustedDomains[0],
       AUTORISATIES_API_ROOT: `https://${trustedDomains[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path 'open-zaak'
 
+
+      // Used by setup_configuration file and separate service
+      OPEN_ZAAK_BASE_URL: `https://${trustedDomains[0]}/open-zaak`,
+
+      // 11 Feb 2025 - This is replaced by the setup_configuration file and separate service
       // What configuration steps to run while setup_configuration is called
-      SITES_CONFIG_ENABLE: 'True',
-      AUTHORIZATION_CONFIG_ENABLE: 'True',
-      OPENZAAK_NOTIF_CONFIG_ENABLE: 'True',
-      NOTIFICATION_RETRY_CONFIG_ENABLE: 'False',
+      // SITES_CONFIG_ENABLE: 'True',
+      // AUTHORIZATION_CONFIG_ENABLE: 'True',
+      // OPENZAAK_NOTIF_CONFIG_ENABLE: 'True',
+      // NOTIFICATION_RETRY_CONFIG_ENABLE: 'False',
 
 
       LOG_NOTIFICATIONS_IN_DB: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.persitNotifications, false),
@@ -189,13 +196,55 @@ export class OpenNotificatiesService extends Construct {
     return service;
   }
 
+  private setupConfigurationService() {
+    const VOLUME_NAME = 'tmp';
+    const task = this.serviceFactory.createTaskDefinition('setup-configuration', {
+      volumes: [{ name: VOLUME_NAME }],
+    });
+
+    // Configuration container
+    const initContainer = task.addContainer('init-config', {
+      // image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      image: ContainerImage.fromAsset('./src/containers/open-notificaties/', {
+        buildArgs: {
+          OPEN_NOTIFICATIES_IMAGE: this.props.openNotificationsConfiguration.image
+        }
+      }),
+      command: ['/setup_configuration.sh'],
+      readonlyRootFilesystem: true,
+      essential: true,
+      logging: new AwsLogDriver({
+        streamPrefix: 'setup-configuration',
+        logGroup: this.logs,
+      }),
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
+    });
+    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/log', '/app/setup_configuration');
+
+    // Filesystem write access - initialization container
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/log', '/app/setup_configuration');
+
+    const service = this.serviceFactory.createService({
+      id: 'setup-configuration',
+      task: task,
+      path: undefined, // Do not connect container to internet
+      options: {
+        desiredCount: 0, // Do not run container by default (manual action)
+      },
+    });
+    this.setupConnectivity('setup-configuration', service.connections.securityGroups);
+    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    return service;
+  }
+
   private setupService() {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
       volumes: [{ name: VOLUME_NAME }],
     });
 
-    // 3th Main service container
+    // Main service container
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       healthCheck: {
@@ -221,46 +270,8 @@ export class OpenNotificatiesService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
 
-    // 2nd (A) Configuration - initialization container
-    const initContainer = task.addContainer('init-config', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
-      command: ['/setup_configuration.sh'],
-      readonlyRootFilesystem: true,
-      essential: false, // exit after running
-      logging: new AwsLogDriver({
-        streamPrefix: 'setup-service',
-        logGroup: this.logs,
-      }),
-      secrets: this.getSecretConfiguration(),
-      environment: this.getEnvironmentConfiguration(),
-    });
-    container.addContainerDependencies({
-      container: initContainer,
-      condition: ContainerDependencyCondition.SUCCESS,
-    });
-    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/log');
-
-    // 2nd (B) Configuration - initialization container
-    const initBContainer = task.addContainer('init-kanalen', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
-      command: ['python', 'src/manage.py', 'register_kanalen'],
-      readonlyRootFilesystem: true,
-      essential: false, // exit after running
-      logging: new AwsLogDriver({
-        streamPrefix: 'setup-service',
-        logGroup: this.logs,
-      }),
-      secrets: this.getSecretConfiguration(),
-      environment: this.getEnvironmentConfiguration(),
-    });
-    container.addContainerDependencies({
-      container: initContainer,
-      condition: ContainerDependencyCondition.SUCCESS,
-    });
-    this.serviceFactory.attachEphemeralStorage(initBContainer, VOLUME_NAME, '/tmp', '/app/log');
-
     // 1st Filesystem write access - initialization container
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initBContainer, '/tmp', '/app/log');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
       id: 'main',
