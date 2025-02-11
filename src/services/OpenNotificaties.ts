@@ -207,8 +207,8 @@ export class OpenNotificatiesService extends Construct {
       // image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       image: ContainerImage.fromAsset('./src/containers/open-notificaties/', {
         buildArgs: {
-          OPEN_NOTIFICATIES_IMAGE: this.props.openNotificationsConfiguration.image
-        }
+          OPEN_NOTIFICATIES_IMAGE: this.props.openNotificationsConfiguration.image,
+        },
       }),
       command: ['/setup_configuration.sh'],
       readonlyRootFilesystem: true,
