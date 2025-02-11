@@ -21,12 +21,12 @@ zgw_consumers:
     # Reference our notifications API
     - identifier: notifications-api
       label: Notificaties API
-      api_root: http://notificaties.local/api/v1/
+      api_root: ${OPEN_NOTIFICATIES_API_URL}
       api_connection_check_path: notificaties
       api_type: nrc
       auth_type: api_key
       header_key: Authorization
-      header_value: Token ba9d233e95e04c4a8a661a27daffe7c9bd019067
+      header_value: Token ${OPEN_NOTIFICATIES_API_KEY}
 
 notifications_config_enable: false # Configure notification retry (defaults are ok)
 # notifications_config:
