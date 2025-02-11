@@ -1,12 +1,13 @@
 import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
-import { Stack, StackProps, Tags, pipelines, CfnParameter, Aspects } from 'aws-cdk-lib';
+import { Aspects, CfnParameter, Stack, StackProps, Tags, pipelines } from 'aws-cdk-lib';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { MijnServicesStage } from './MijnServicesStage';
 import { ParameterStage } from './ParameterStage';
 import { Statics } from './Statics';
 
-export interface PipelineStackProps extends StackProps, Configurable {}
+export interface PipelineStackProps extends StackProps, Configurable { }
 
 /**
  * The pipeline runs in a build environment, and is responsible for deploying
@@ -51,6 +52,10 @@ export class PipelineStack extends Stack {
   }
 
   pipeline(source: pipelines.CodePipelineSource, props: PipelineStackProps): pipelines.CodePipeline {
+    const dockerHub = new Secret(this, 'docker-credentials', {
+      description: `Docker credentials for ${Statics.projectName} (${props.configuration.branch})`,
+    });
+
     const synthStep = new pipelines.ShellStep('Synth', {
       input: source,
       env: {
@@ -67,6 +72,7 @@ export class PipelineStack extends Stack {
       pipelineName: pipelineName,
       crossAccountKeys: true,
       synth: synthStep,
+      dockerCredentials: [pipelines.DockerCredential.dockerHub(dockerHub)],
     });
     return pipeline;
   }
