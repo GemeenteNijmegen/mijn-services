@@ -234,7 +234,6 @@ export class OpenZaakService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
       },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);

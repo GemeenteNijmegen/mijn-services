@@ -1,6 +1,6 @@
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ExecuteCommandLogging } from 'aws-cdk-lib/aws-ecs';
+import { Cluster } from 'aws-cdk-lib/aws-ecs';
 import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
@@ -39,9 +39,6 @@ export class ContainerPlatform extends Construct {
 
     this.cluster = new Cluster(this, 'cluster', {
       vpc: props.vpc,
-      executeCommandConfiguration: {
-        logging: ExecuteCommandLogging.DEFAULT,
-      },
     });
 
   }

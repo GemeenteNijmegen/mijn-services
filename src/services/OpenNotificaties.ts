@@ -73,10 +73,6 @@ export class OpenNotificatiesService extends Construct {
   private getEnvironmentConfiguration() {
 
     const cacheHost = this.props.cache.db.attrRedisEndpointAddress + ':' + this.props.cache.db.attrRedisEndpointPort + '/';
-
-    // const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
-    // trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
-
     const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
@@ -272,7 +268,6 @@ export class OpenNotificatiesService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
       },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
