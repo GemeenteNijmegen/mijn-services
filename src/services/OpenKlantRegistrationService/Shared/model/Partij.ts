@@ -76,7 +76,7 @@ export const OpenKlantDigitaalAdresSchema = z.object({
   verstrektDoorBetrokkene: z.union([z.null(), uuidSchema]),
   verstrektDoorPartij: z.union([z.null(), uuidSchema]),
   adres: z.string(),
-  soortDigitaalAdres: z.string(),
+  soortDigitaalAdres: z.enum(['email', 'telefoonnummer', 'overig']),
   omschrijving: z.string(),
 });
 
