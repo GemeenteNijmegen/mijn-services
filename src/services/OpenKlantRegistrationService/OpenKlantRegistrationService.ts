@@ -45,12 +45,12 @@ export class OpenKlantRegistrationService extends Construct {
       kmsKey: this.props.key,
       alarmCriticality: this.props.criticality.increase(),
       queueOptions: {
-        fifo: true,
+        fifo: false,
       },
     });
 
     const queue = new Queue(this, 'queue', {
-      fifo: true,
+      fifo: false,
       deadLetterQueue: {
         maxReceiveCount: 5,
         queue: dlq.dlq,
