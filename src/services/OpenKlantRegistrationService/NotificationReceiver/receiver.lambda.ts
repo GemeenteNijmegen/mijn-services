@@ -38,7 +38,6 @@ export async function handler(event: APIGatewayProxyEventV2) {
     await sqs.send(new SendMessageCommand({
       MessageBody: messageJson,
       QueueUrl: process.env.QUEUE_URL,
-      MessageGroupId: process.env.REGISTRATION_SERVICE_ID,
     }));
 
     return Response.ok();
