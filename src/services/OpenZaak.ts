@@ -211,7 +211,10 @@ export class OpenZaakService extends Construct {
       readonlyRootFilesystem: true,
       essential: true,
       secrets: this.getSecretConfiguration(),
-      environment: this.getEnvironmentConfiguration(),
+      environment: {
+        ...this.getEnvironmentConfiguration(),
+        RUN_SETUP_CONFIG: 'true', // Make sure the setup script can run?
+      },
       logging: new AwsLogDriver({
         streamPrefix: 'logs',
         logGroup: this.logs,
