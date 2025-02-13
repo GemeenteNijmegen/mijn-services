@@ -163,7 +163,7 @@ export class OpenZaakService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Must be enable as SQLite generates files on for now unknown locations...
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
