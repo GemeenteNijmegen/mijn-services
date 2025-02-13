@@ -211,7 +211,7 @@ export class OpenZaakService extends Construct {
       // }),
 
       command: undefined, // Do not set a command as the entrypoint will handle this for us (see Dockerfile)
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // The HTTP Cache using SQLite prevents us from running without write to root...
       essential: true,
       secrets: this.getSecretConfiguration(),
       environment: {
