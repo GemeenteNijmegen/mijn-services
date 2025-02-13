@@ -202,11 +202,15 @@ export class OpenZaakService extends Construct {
 
     // Configuration - initialization container
     const initContainer = task.addContainer('init-config', {
-      image: ContainerImage.fromAsset('./src/containers/open-zaak/', {
-        buildArgs: {
-          OPEN_ZAAK_IMAGE: this.props.openZaakConfiguration.image,
-        },
-      }),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
+
+      // TODO enable this later, current release is does not yet use the yaml configuration (open-notifictions does) (13 Feb 2025)
+      // image: ContainerImage.fromAsset('./src/containers/open-zaak/', {
+      //   buildArgs: {
+      //     OPEN_ZAAK_IMAGE: this.props.openZaakConfiguration.image,
+      //   },
+      // }),
+
       command: undefined, // Do not set a command as the entrypoint will handle this for us (see Dockerfile)
       readonlyRootFilesystem: true,
       essential: true,

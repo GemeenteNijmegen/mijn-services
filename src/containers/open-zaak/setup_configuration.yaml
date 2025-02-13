@@ -4,13 +4,13 @@
 
 
 # No default config for the following:
-sites_config_enable: false # I dont think we need this
-notifications_config_enable: false # Configure notification retry (defaults are ok)
-openzaak_selectielijst_config_enable: false # Geen idee of we dit willen beperken?
-oidc_db_config_enable: false # This is done in the UI
+# sites_config_enable: false # I dont think we need this
+# notifications_config_enable: false # Configure notification retry (defaults are ok)
+# openzaak_selectielijst_config_enable: false # Geen idee of we dit willen beperken?
+# oidc_db_config_enable: false # This is done in the UI
 
 # Define how to connect to other servies from open-zaak
-zgw_consumers_config_enable: True
+zgw_consumers_config_enable: true
 zgw_consumers:
   services:
     # Default connection to selectielijst (no auth)
@@ -34,7 +34,7 @@ zgw_consumers:
 
 
 # Defines how others authenticate at this open-zaak
-vng_api_common_credentials_config_enable: True
+vng_api_common_credentials_config_enable: true
 vng_api_common_credentials:
   items:
   - identifier: ${NOTIF_OPENZAAK_CLIENT_ID}
@@ -42,7 +42,7 @@ vng_api_common_credentials:
 
 
 # Defines default authorizations (based on client id)
-vng_api_common_applicaties_config_enable: True
+vng_api_common_applicaties_config_enable: true
 vng_api_common_applicaties:
   items:
   - uuid: 78591bab-9a00-4887-849c-53b21a67782f # Give permissions to default credential pairs for connections between open-zaak <-> open-notifications
