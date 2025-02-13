@@ -210,7 +210,7 @@ export class OpenNotificatiesService extends Construct {
           OPEN_NOTIFICATIES_IMAGE: this.props.openNotificationsConfiguration.image,
         },
       }),
-      command: ['/setup_configuration.sh'],
+      command: undefined, // Command is defined in Dockerfile
       readonlyRootFilesystem: true,
       essential: true,
       logging: new AwsLogDriver({
