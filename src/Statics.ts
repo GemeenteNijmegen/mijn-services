@@ -43,6 +43,8 @@ export class Statics {
    */
   static readonly databasesProduction = [
     Statics.databaseOpenKlant,
+    Statics.databaseOpenNotificaties,
+    Statics.databaseOpenZaak,
   ];
 
   /**
