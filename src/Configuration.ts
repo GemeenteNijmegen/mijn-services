@@ -346,6 +346,18 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         enabled: false,
       },
     ],
+    openNotificaties: {
+      image: 'openzaak/open-notificaties:1.8.0',
+      rabbitMqImage: 'rabbitmq:4.0.5-alpine',
+      logLevel: 'INFO',
+      debug: false,
+      persitNotifications: true,
+    },
+    openZaak: {
+      image: 'openzaak/open-zaak:1.17.0',
+      logLevel: 'INFO',
+      debug: false,
+    },
   },
 };
 
