@@ -1,6 +1,6 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -54,6 +54,7 @@ export class OpenZaakService extends Construct {
       },
     });
 
+    this.setupConfigurationService();
     this.setupService();
     this.setupCeleryService();
   }
@@ -73,7 +74,7 @@ export class OpenZaakService extends Construct {
       ALLOWED_HOSTS: '*',
       CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
-      SUBPATH: '/'+this.props.path,
+      SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'True',
       UWSGI_PORT: this.props.service.port.toString(),
 
@@ -137,6 +138,10 @@ export class OpenZaakService extends Construct {
     return secrets;
   }
 
+  /**
+   * Setup the main service (e.g. open-zaak container)
+   * @returns
+   */
   private setupService() {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
@@ -168,26 +173,7 @@ export class OpenZaakService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
 
-    // 2nd Configuration - initialization container
-    const initContainer = task.addContainer('init-config', {
-      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
-      command: ['/setup_configuration.sh'],
-      readonlyRootFilesystem: true,
-      essential: false, // exit after running
-      secrets: this.getSecretConfiguration(),
-      environment: this.getEnvironmentConfiguration(),
-      logging: new AwsLogDriver({
-        streamPrefix: 'logs',
-        logGroup: this.logs,
-      }),
-    });
-    container.addContainerDependencies({
-      container: initContainer,
-      condition: ContainerDependencyCondition.SUCCESS,
-    });
-    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
-
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp');
 
     const service = this.serviceFactory.createService({
       id: 'main',
@@ -198,6 +184,59 @@ export class OpenZaakService extends Construct {
       },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
+    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    return service;
+  }
+
+  /**
+   * This service is disabled by default an can be ran manually to
+   * setup the configuration when deploying a new open-zaak.
+   * @returns
+   */
+  private setupConfigurationService() {
+    const VOLUME_NAME = 'tmp';
+    const task = this.serviceFactory.createTaskDefinition('setup-configuration', {
+      volumes: [{ name: VOLUME_NAME }],
+    });
+
+    // Configuration - initialization container
+    const initContainer = task.addContainer('init-config', {
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
+
+      // TODO enable this later, current release is does not yet use the yaml configuration (open-notifictions does) (13 Feb 2025)
+      // image: ContainerImage.fromAsset('./src/containers/open-zaak/', {
+      //   buildArgs: {
+      //     OPEN_ZAAK_IMAGE: this.props.openZaakConfiguration.image,
+      //   },
+      // }),
+
+      command: undefined, // Do not set a command as the entrypoint will handle this for us (see Dockerfile)
+      readonlyRootFilesystem: true,
+      essential: true,
+      secrets: this.getSecretConfiguration(),
+      environment: {
+        ...this.getEnvironmentConfiguration(),
+        RUN_SETUP_CONFIG: 'true', // Make sure the setup script can run?
+      },
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: this.logs,
+      }),
+    });
+    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/setup_configuration');
+
+    // Make sure we have a writable volume
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/setup_configuration');
+
+    const service = this.serviceFactory.createService({
+      id: 'setup-configuration',
+      task: task,
+      path: undefined, // Do not connect this service to the internet
+      options: {
+        desiredCount: 0, // DISABLE BY DEFAULT AND RUN MANUALLY
+      },
+    });
+    this.setupConnectivity('setup-configuration', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
   }

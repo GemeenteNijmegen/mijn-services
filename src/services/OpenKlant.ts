@@ -1,6 +1,6 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -68,7 +68,7 @@ export class OpenKlantService extends Construct {
       ALLOWED_HOSTS: '*',
       CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
-      SUBPATH: '/'+this.props.path,
+      SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'True',
       UWSGI_PORT: this.props.service.port.toString(),
 
@@ -201,22 +201,7 @@ export class OpenKlantService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
 
-    // Set the correct rights for the /tmp dir using a init container
-    const initContainer = task.addContainer('init-storage', {
-      image: ContainerImage.fromRegistry('alpine:latest'),
-      entryPoint: ['sh', '-c'],
-      command: ['chmod 0777 /tmp'],
-      readonlyRootFilesystem: true,
-      essential: false, // exit after running
-      logging: new AwsLogDriver({
-        streamPrefix: 'init-storage',
-      }),
-    });
-    container.addContainerDependencies({
-      container: initContainer,
-      condition: ContainerDependencyCondition.SUCCESS,
-    });
-    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp');
 
     // Construct the service and setup conectivity and secrets access
     const service = this.serviceFactory.createService({
@@ -261,6 +246,5 @@ export class OpenKlantService extends Construct {
     this.databaseCredentials.grantRead(role);
     this.openKlantCredentials.grantRead(role);
   }
-
 
 }

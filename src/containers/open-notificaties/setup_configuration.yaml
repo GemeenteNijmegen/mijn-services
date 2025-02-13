@@ -1,0 +1,98 @@
+# For these things we do not have a default configuration
+oidc_db_config_enable: false # Configured using UI
+sites_config_enable: false # Not configured
+notifications_config_enable: false # Default values are ok
+notifications_abonnementen_config_enable: false # No default subscriptions
+
+
+# Setup how open-notificaties connects to other services
+zgw_consumers_config_enable: True 
+zgw_consumers:
+  services:
+    - identifier: autorisaties-api
+      label: Autorisaties API
+      api_root: ${OPEN_ZAAK_BASE_URL}/autorisaties/api/v1/
+      api_type: ac
+      auth_type: zgw
+      client_id: ${NOTIF_OPENZAAK_CLIENT_ID}
+      secret: ${NOTIF_OPENZAAK_SECRET}
+      user_id: ${NOTIF_OPENZAAK_CLIENT_ID}
+      user_representation: ${NOTIF_OPENZAAK_CLIENT_ID}
+    - identifier: notificaties-api
+      label: Notificaties API
+      api_root: https://${OPENNOTIFICATIES_DOMAIN}/api/v1/
+      api_type: nrc
+      auth_type: zgw
+      client_id: ${OPENZAAK_NOTIF_CLIENT_ID}
+      secret: ${OPENZAAK_NOTIF_SECRET}
+      user_id: ${OPENZAAK_NOTIF_CLIENT_ID}
+      user_representation: ${OPENZAAK_NOTIF_CLIENT_ID}
+
+
+# Setup how other services authenticate at open-notificaties
+vng_api_common_credentials_config_enable: True 
+vng_api_common_credentials:
+  items:
+    # Credentials for Open Zaak to be able to make requests to Open Notificaties
+    - identifier: ${OPENZAAK_NOTIF_CLIENT_ID}
+      secret: ${OPENZAAK_NOTIF_SECRET}
+    # Credentials for Open Notificaties, required for autorisaties subscription
+    - identifier: ${NOTIF_OPENZAAK_CLIENT_ID}
+      secret: ${NOTIF_OPENZAAK_SECRET}
+
+
+# Configure Open Notificaties to make use of Open Zaak's Autorisaties API
+autorisaties_api_config_enable: True
+autorisaties_api:
+  authorizations_api_service_identifier: autorisaties-api
+
+
+# Setup the channels required for basic events
+notifications_kanalen_config_enable: true 
+notifications_kanalen_config:
+  items:
+    - naam: autorisaties
+      documentatie_link: ${OPEN_ZAAK_BASE_URL}/ref/kanalen/#/autorisaties
+      filters: []
+    - naam: besluittypen
+      documentatie_link: ${OPEN_ZAAK_BASE_URL}/ref/kanalen/#/besluittypen
+      filters:
+        - catalogus
+    - naam: informatieobjecttypen
+      documentatie_link: ${OPEN_ZAAK_BASE_URL}/ref/kanalen/#/informatieobjecttypen
+      filters:
+        - catalogus
+    - naam: zaaktypen
+      documentatie_link: ${OPEN_ZAAK_BASE_URL}/ref/kanalen/#/zaaktypen
+      filters:
+        - catalogus
+    - naam: zaken
+      documentatie_link: ${OPEN_ZAAK_BASE_URL}/ref/kanalen/#/zaken
+      filters:
+        - bronorganisatie
+        - zaaktype
+        - vertrouwelijkheidaanduiding
+    - naam: documenten
+      documentatie_link: ${OPEN_ZAAK_BASE_URL}/ref/kanalen/#/documenten
+      filters:
+        - bronorganisatie
+        - informatieobjecttype
+        - vertrouwelijkheidaanduiding
+    - naam: besluiten
+      documentatie_link: ${OPEN_ZAAK_BASE_URL}/ref/kanalen/#/besluiten
+      filters:
+        - verantwoordelijke_organisatie
+        - besluittype
+
+
+# Setup default subscriptions
+notifications_subscriptions_config_enable: true
+notifications_subscriptions_config:
+  items:
+    - identifier: autorisaties-subscription
+      callback_url: https://${OPENNOTIFICATIES_DOMAIN}/api/v1/callbacks
+      client_id: ${OPENZAAK_NOTIF_CLIENT_ID}
+      secret: ${OPENZAAK_NOTIF_SECRET}
+      uuid: 0f616bfd-aacc-4d85-a140-2af17a56217b
+      channels:
+        - autorisaties

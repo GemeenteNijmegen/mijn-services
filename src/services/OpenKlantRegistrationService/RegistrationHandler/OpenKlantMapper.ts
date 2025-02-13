@@ -10,8 +10,8 @@ import { Rol } from '../Shared/model/Rol';
  */
 export class OpenKlantMapper {
 
-  static readonly TELEFOONNUMMER = 'Telefoon'; // Expected by OMC
-  static readonly EMAIL = 'Email'; // Expected by OMC
+  static readonly TELEFOONNUMMER = 'telefoonnummer'; // Expected by OMC
+  static readonly EMAIL = 'email'; // Expected by OMC
 
   /**
    * Map a rol to a open-klant persoon (subtype of partij)

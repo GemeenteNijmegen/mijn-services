@@ -276,49 +276,23 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     databases: Statics.databasesAcceptance,
     databaseSnapshotRetentionDays: 10,
     openklant: {
-      image: 'maykinmedia/open-klant:2.3.0',
+      image: 'maykinmedia/open-klant:2.5.0',
       logLevel: 'DEBUG',
       debug: true,
     },
     openNotificaties: {
-      image: 'openzaak/open-notificaties:1.7.1',
-      rabbitMqImage: 'rabbitmq:4.0.3-alpine',
+      image: 'openzaak/open-notificaties:1.8.0',
+      rabbitMqImage: 'rabbitmq:4.0.5-alpine',
       logLevel: 'DEBUG',
       debug: true,
       persitNotifications: true,
     },
     openZaak: {
-      image: 'openzaak/open-zaak:1.15.0',
+      image: 'openzaak/open-zaak:1.17.0',
       logLevel: 'DEBUG',
       debug: true,
     },
-    outputManagementComponents: [
-      {
-        cdkId: 'test-omc',
-        path: 'test-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.11.3',
-        logLevel: 'DEBUG',
-        debug: true,
-        mode: 'Development',
-        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
-        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
-        zgwTokenInformation: {
-          audience: '', // This must be empty for the token to start working... no clue as to why.
-          issuer: 'OMC',
-          userId: 'OMC',
-          username: 'OMC',
-        },
-        templates: {
-          zaakCreateEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
-          zaakUpdateEmail: 'e868044f-4a30-42c9-b1bf-8ad95ec2a6b8',
-          zaakCloseEmail: '14cebdee-a179-4e0e-b7de-c660fdd47c57',
-          zaakCreateSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
-          zaakUpdateSms: '0ff5f21a-2af1-4fd4-8080-45cff34e0df7',
-          zaakCloseSms: 'ac885f24-09d8-4702-845f-2f53cd045790',
-        },
-      },
-    ],
+    outputManagementComponents: undefined,
     openKlantRegistrationServices: [
       {
         cdkId: 'open-klant-registration-service-test',
@@ -356,7 +330,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     databases: Statics.databasesProduction,
     databaseSnapshotRetentionDays: 35,
     openklant: {
-      image: 'maykinmedia/open-klant:2.3.0',
+      image: 'maykinmedia/open-klant:2.5.0',
       logLevel: 'INFO',
     },
     openKlantRegistrationServices: [
