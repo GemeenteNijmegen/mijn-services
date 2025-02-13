@@ -1,4 +1,4 @@
-import { Utils } from '../src/Utils'; // adjust the import path according to your project structure
+import { Utils } from '../src/Utils';
 
 describe('Utils', () => {
   describe('toPythonBooleanString', () => {
