@@ -38,6 +38,7 @@ export class ParameterStack extends Stack {
     this.addOpenZaakParameters();
     this.addHaalCentraalBrpParameters();
     this.addObjecttypesParameters();
+    this.addObjectsParameters();
 
   }
 
@@ -162,6 +163,21 @@ export class ParameterStack extends Stack {
         generateStringKey: 'password',
       },
       secretName: Statics._ssmObjecttypesCredentials,
+    });
+  }
+
+  private addObjectsParameters() {
+    new Secret(this, 'objects-credentials', {
+      description: 'Credentials for the objects superuser',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'objects',
+          email: 'devops@nijmegen.nl',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmObjectsCredentials,
     });
   }
 
