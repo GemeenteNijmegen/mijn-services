@@ -10,6 +10,7 @@ import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
+import { ObjecttypesService } from './services/Objecttypes';
 import { OpenKlantService } from './services/OpenKlant';
 import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationService/OpenKlantRegistrationService';
 import { OpenNotificatiesService } from './services/OpenNotificaties';
@@ -57,6 +58,7 @@ export class MainStack extends Stack {
     this.openZaakServices(api, platform);
     this.outputManagementComponent(api, platform);
     this.openKlantRegistrationServices(api);
+    this.objecttypesService(api, platform);
   }
 
 
@@ -155,6 +157,31 @@ export class MainStack extends Stack {
         },
       });
     }
+  }
+
+  private objecttypesService(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.objecttypesService) {
+      console.warn('No objecttypes configuration provided. Skipping creation of objecttypes service!');
+      return;
+    }
+    new ObjecttypesService(this, 'objecttypes', {
+      hostedzone: this.hostedzone,
+      key: this.key,
+      cache: this.cache,
+      cacheDatabaseIndex: 7,
+      cacheDatabaseIndexCelery: 8,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'objecttypes',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      serviceConfiguration: this.configuration.objecttypesService,
+    });
   }
 
   private openKlantRegistrationServices(api: ApiGateway) {
