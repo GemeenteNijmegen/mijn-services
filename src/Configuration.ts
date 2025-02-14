@@ -340,7 +340,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       debug: true,
     },
     objectsService: {
-      image: 'maykinmedia/objects-apiapi:3.0.0',
+      image: 'maykinmedia/objects-api:3.0.0',
       logLevel: 'DEBUG',
       debug: true,
     },
