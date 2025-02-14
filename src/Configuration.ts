@@ -410,6 +410,16 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'INFO',
       debug: false,
     },
+    objecttypesService: {
+      image: 'maykinmedia/objecttypes-api:3.0.0',
+      logLevel: 'INFO',
+      debug: false,
+    },
+    objectsService: {
+      image: 'maykinmedia/objects-api:3.0.0',
+      logLevel: 'INFO',
+      debug: false,
+    },
   },
 };
 
