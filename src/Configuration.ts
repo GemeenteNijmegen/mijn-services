@@ -96,6 +96,11 @@ export interface Configuration {
    */
   objecttypesService?: ObjecttypesConfiguration;
 
+  /**
+   * Configuration for objects service
+   */
+  objectsService?: ObjectsConfiguration;
+
 }
 
 export interface OpenKlantConfiguration {
@@ -155,6 +160,22 @@ export interface OpenZaakConfiguration {
 }
 
 export interface ObjecttypesConfiguration {
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
+  image: string;
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+}
+
+export interface ObjectsConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -315,6 +336,11 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     },
     objecttypesService: {
       image: 'maykinmedia/objecttypes-api:3.0.0',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
+    objectsService: {
+      image: 'maykinmedia/objects-apiapi:3.0.0',
       logLevel: 'DEBUG',
       debug: true,
     },

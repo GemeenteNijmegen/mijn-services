@@ -10,6 +10,7 @@ import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
+import { ObjectsService } from './services/Objects';
 import { ObjecttypesService } from './services/Objecttypes';
 import { OpenKlantService } from './services/OpenKlant';
 import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationService/OpenKlantRegistrationService';
@@ -59,6 +60,7 @@ export class MainStack extends Stack {
     this.outputManagementComponent(api, platform);
     this.openKlantRegistrationServices(api);
     this.objecttypesService(api, platform);
+    this.objectsService(api, platform);
   }
 
 
@@ -181,6 +183,31 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.objecttypesService,
+    });
+  }
+
+  private objectsService(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.objectsService) {
+      console.warn('No objects configuration provided. Skipping creation of objects service!');
+      return;
+    }
+    new ObjectsService(this, 'objects', {
+      hostedzone: this.hostedzone,
+      key: this.key,
+      cache: this.cache,
+      cacheDatabaseIndex: 9,
+      cacheDatabaseIndexCelery: 10,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'objects',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      serviceConfiguration: this.configuration.objectsService,
     });
   }
 

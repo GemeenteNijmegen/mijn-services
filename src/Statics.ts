@@ -22,6 +22,7 @@ export class Statics {
   static readonly _ssmClientCredentialsNotificationsZaak = `/${Statics.projectName}/internal/open-notificaties/client/credentials/notifications-zaak`;
   static readonly _ssmOpenZaakCredentials = `/${Statics.projectName}/internal/open-zaak/credentials`;
   static readonly _ssmObjecttypesCredentials = `/${Statics.projectName}/internal/objecttypes/credentials`;
+  static readonly _ssmObjectsCredentials = `/${Statics.projectName}/internal/objects/credentials`;
   static readonly _ssmDatabaseArn = `/${Statics.projectName}/internal/database/arn`;
   static readonly _ssmDatabaseHostname = `/${Statics.projectName}/internal/database/hostname`;
   static readonly _ssmDatabasePort = `/${Statics.projectName}/internal/database/post`;
