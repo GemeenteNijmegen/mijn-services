@@ -61,6 +61,8 @@ export class Statics {
     Statics.databaseOpenKlant,
     Statics.databaseOpenNotificaties,
     Statics.databaseOpenZaak,
+    Statics.databaseObjecttypes,
+    Statics.databaseObjects,
   ];
 
   // MARK: Environments
