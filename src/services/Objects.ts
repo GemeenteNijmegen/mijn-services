@@ -1,6 +1,8 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { EcsTask } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -53,7 +55,7 @@ export class ObjectsService extends Construct {
       },
     });
 
-    // this.setupConfigurationService();
+    this.setupConfigurationService();
     this.setupService();
   }
 
@@ -158,6 +160,48 @@ export class ObjectsService extends Construct {
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
+  }
+
+  private setupConfigurationService() {
+    const VOLUME_NAME = 'tmp';
+    const task = this.serviceFactory.createTaskDefinition('setup', {
+      volumes: [{ name: VOLUME_NAME }],
+    });
+
+    // Configuration container
+    const initContainer = task.addContainer('setup', {
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'], // See django docs
+      readonlyRootFilesystem: true,
+      essential: true,
+      logging: new AwsLogDriver({
+        streamPrefix: 'setup',
+        logGroup: this.logs,
+      }),
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
+    });
+    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/log', '/app/setup_configuration');
+
+    // Filesystem write access - initialization container
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/log', '/app/setup_configuration');
+
+    // Scheduel a task in the past (so we can run it manually)
+    const rule = new Rule(this, 'scheudle-setup', {
+      schedule: Schedule.cron({
+        year: '2020',
+      }),
+      description: 'Rule to run setup configuration task just once (manually)'
+    });
+    const ecsTask = new EcsTask({
+      cluster: this.props.service.cluster,
+      taskDefinition: task,
+    });
+    rule.addTarget(ecsTask);
+
+    // Setup connectivity
+    this.setupConnectivity('setup', ecsTask.securityGroups ?? []);
+    this.allowAccessToSecrets(task.executionRole!);
   }
 
 
