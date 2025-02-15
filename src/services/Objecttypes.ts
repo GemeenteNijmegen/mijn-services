@@ -141,7 +141,7 @@ export class ObjecttypesService extends Construct {
     const rule = new Rule(this, 'scheudle-setup', {
       schedule: Schedule.cron({
         year: '2020',
-      })
+      }),
     });
     const ecsTask = new EcsTask({
       cluster: this.props.service.cluster,
