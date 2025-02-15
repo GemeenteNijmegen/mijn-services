@@ -142,6 +142,7 @@ export class ObjecttypesService extends Construct {
       schedule: Schedule.cron({
         year: '2020',
       }),
+      description: 'Rule to run setup configuration task just once (manually)'
     });
     const ecsTask = new EcsTask({
       cluster: this.props.service.cluster,
@@ -179,7 +180,7 @@ export class ObjecttypesService extends Construct {
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
-        streamPrefix: 'setup-service',
+        streamPrefix: 'main',
         logGroup: this.logs,
       }),
 
