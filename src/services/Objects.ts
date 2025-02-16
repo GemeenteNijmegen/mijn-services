@@ -57,6 +57,7 @@ export class ObjectsService extends Construct {
 
     this.setupConfigurationService();
     this.setupService();
+    this.setupCeleryService();
   }
 
   private getEnvironmentConfiguration() {
@@ -204,8 +205,42 @@ export class ObjectsService extends Construct {
     this.allowAccessToSecrets(task.executionRole!);
   }
 
+  private setupCeleryService() {
+    const VOLUME_NAME = 'temp';
+    const task = this.serviceFactory.createTaskDefinition('celery', {
+      volumes: [{ name: VOLUME_NAME }],
+    });
 
-  // TODO setup celery service
+    const container = task.addContainer('celery', {
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      healthCheck: {
+        command: ['CMD-SHELL', 'python', '/app/bin/check_celery_worker_liveness.py'],
+        interval: Duration.seconds(10),
+      },
+      readonlyRootFilesystem: true,
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: this.logs,
+      }),
+      command: ['/celery_worker.sh'],
+    });
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/tmp');
+
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/tmp');
+
+    const service = this.serviceFactory.createService({
+      task,
+      path: undefined, // Not exposed service
+      id: 'celery',
+      options: {
+        desiredCount: 1,
+      },
+    });
+    this.setupConnectivity('celery', service.connections.securityGroups);
+    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+  }
 
   private logGroup() {
     return new LogGroup(this, 'logs', {
