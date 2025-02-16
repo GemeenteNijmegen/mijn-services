@@ -226,9 +226,9 @@ export class ObjectsService extends Construct {
       }),
       command: ['/celery_worker.sh'],
     });
-    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/tmp');
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/tmp', '/app/log');
 
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/tmp');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
       task,
