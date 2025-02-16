@@ -191,7 +191,7 @@ export class ObjectsService extends Construct {
       schedule: Schedule.cron({
         year: '2020',
       }),
-      description: 'Rule to run setup configuration task just once (manually)'
+      description: 'Rule to run setup configuration task just once (manually)',
     });
     const ecsTask = new EcsTask({
       cluster: this.props.service.cluster,
