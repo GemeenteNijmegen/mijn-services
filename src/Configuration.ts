@@ -91,6 +91,16 @@ export interface Configuration {
    */
   openKlantRegistrationServices?: OpenKlantRegistrationServiceConfiguration[];
 
+  /**
+   * Configuration for objecttypes service
+   */
+  objecttypesService?: ObjecttypesConfiguration;
+
+  /**
+   * Configuration for objects service
+   */
+  objectsService?: ObjectsConfiguration;
+
 }
 
 export interface OpenKlantConfiguration {
@@ -134,6 +144,38 @@ export interface OpenNotificatiesConfiguration {
 }
 
 export interface OpenZaakConfiguration {
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
+  image: string;
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+}
+
+export interface ObjecttypesConfiguration {
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
+  image: string;
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+}
+
+export interface ObjectsConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -292,6 +334,16 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
+    objecttypesService: {
+      image: 'maykinmedia/objecttypes-api:3.0.0',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
+    objectsService: {
+      image: 'maykinmedia/objects-api:3.0.0',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
     outputManagementComponents: undefined,
     openKlantRegistrationServices: [
       {
@@ -355,6 +407,16 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     },
     openZaak: {
       image: 'openzaak/open-zaak:1.17.0',
+      logLevel: 'INFO',
+      debug: false,
+    },
+    objecttypesService: {
+      image: 'maykinmedia/objecttypes-api:3.0.0',
+      logLevel: 'INFO',
+      debug: false,
+    },
+    objectsService: {
+      image: 'maykinmedia/objects-api:3.0.0',
       logLevel: 'INFO',
       debug: false,
     },

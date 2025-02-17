@@ -1,12 +1,12 @@
 import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
-import { Stack, Tags, Stage, StageProps, Aspects } from 'aws-cdk-lib';
+import { Aspects, Stack, Stage, StageProps, Tags } from 'aws-cdk-lib';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { Statics } from './Statics';
 
-export interface ParameterStageProps extends StageProps, Configurable {}
+export interface ParameterStageProps extends StageProps, Configurable { }
 
 /**
  * Stage for creating SSM parameters. This needs to run
@@ -37,6 +37,8 @@ export class ParameterStack extends Stack {
     this.addOpenNotificatiesParameters();
     this.addOpenZaakParameters();
     this.addHaalCentraalBrpParameters();
+    this.addObjecttypesParameters();
+    this.addObjectsParameters();
 
   }
 
@@ -146,6 +148,36 @@ export class ParameterStack extends Stack {
     new Secret(this, 'haalcentraal-brp-key', {
       description: 'API key for Haal Centraal API',
       secretName: Statics.ssmHaalCentraalBRPApiKeySecret,
+    });
+  }
+
+  private addObjecttypesParameters() {
+    new Secret(this, 'objecttypes-credentials', {
+      description: 'Credentials for the objecttypes superuser',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'objecttypes',
+          email: 'devops@nijmegen.nl',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmObjecttypesCredentials,
+    });
+  }
+
+  private addObjectsParameters() {
+    new Secret(this, 'objects-credentials', {
+      description: 'Credentials for the objects superuser',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'objects',
+          email: 'devops@nijmegen.nl',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmObjectsCredentials,
     });
   }
 
