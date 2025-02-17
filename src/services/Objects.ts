@@ -140,7 +140,7 @@ export class ObjectsService extends Construct {
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
-        streamPrefix: 'setup-service',
+        streamPrefix: 'main',
         logGroup: this.logs,
       }),
 
