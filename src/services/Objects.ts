@@ -37,7 +37,7 @@ export class ObjectsService extends Construct {
   private readonly props: ObjectsServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
-  private readonly superuserCredetials: ISecret;
+  private readonly superuserCredentials: ISecret;
   private readonly secretKey: ISecret;
 
   constructor(scope: Construct, id: string, props: ObjectsServiceProps) {
@@ -47,7 +47,7 @@ export class ObjectsService extends Construct {
     this.logs = this.logGroup();
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
-    this.superuserCredetials = SecretParameter.fromSecretNameV2(this, 'superuser-credentials', Statics._ssmObjectsCredentials);
+    this.superuserCredentials = SecretParameter.fromSecretNameV2(this, 'superuser-credentials', Statics._ssmObjectsCredentials);
     this.secretKey = new SecretParameter(this, 'secret-key', {
       description: 'Objects secret key',
       generateSecretString: {
@@ -71,7 +71,7 @@ export class ObjectsService extends Construct {
       DB_NAME: Statics.databaseObjects,
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
-      ALLOWED_HOSTS: '*',
+      ALLOWED_HOSTS: '*', // TODO make stricter at some point
       CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/' + this.props.path,
@@ -91,7 +91,7 @@ export class ObjectsService extends Construct {
       CELERY_WORKER_CONCURRENCY: '4',
 
       // Conectivity
-      CORS_ALLOW_ALL_ORIGINS: 'True',
+      CORS_ALLOW_ALL_ORIGINS: 'True', // TODO make strickter at some point
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
 
     };
@@ -106,9 +106,9 @@ export class ObjectsService extends Construct {
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
       // Generic super user creation works with running the createsuperuser command
-      DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.superuserCredetials, 'username'),
-      DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.superuserCredetials, 'password'),
-      DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.superuserCredetials, 'email'),
+      DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.superuserCredentials, 'username'),
+      DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.superuserCredentials, 'password'),
+      DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.superuserCredentials, 'email'),
 
     };
     return secrets;
@@ -188,7 +188,7 @@ export class ObjectsService extends Construct {
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/log', '/app/setup_configuration');
 
     // Scheduel a task in the past (so we can run it manually)
-    const rule = new Rule(this, 'scheudle-setup', {
+    const rule = new Rule(this, 'schedule-setup', {
       schedule: Schedule.cron({
         year: '2020',
       }),
@@ -272,7 +272,7 @@ export class ObjectsService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
-    this.superuserCredetials.grantRead(role);
+    this.superuserCredentials.grantRead(role);
     this.secretKey.grantRead(role);
   }
 
