@@ -213,7 +213,7 @@ export class ObjectsService extends Construct {
       '/app/log',
       '/app/tmp/celery_worker_heartbeat',
       '/app/tmp/celery_worker_ready',
-    ]
+    ];
     const task = this.serviceFactory.createTaskDefinition('celery', {
       volumes: [{ name: VOLUME_NAME }],
     });
