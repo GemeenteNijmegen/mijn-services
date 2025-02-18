@@ -192,7 +192,7 @@ export class ObjectsService extends Construct {
       schedule: Schedule.cron({
         year: '2020',
       }),
-      description: 'Rule to run setup configuration task just once (manually)',
+      description: 'Rule to run setup configuration for objects-api (manually)',
     });
     const ecsTask = new EcsTask({
       cluster: this.props.service.cluster,
@@ -207,6 +207,11 @@ export class ObjectsService extends Construct {
 
   private setupCeleryService() {
     const VOLUME_NAME = 'temp';
+    const WITABLE_DIRS = [
+      '/tmp',
+      '/app/tmp',
+      '/app/log',
+    ];
     const task = this.serviceFactory.createTaskDefinition('celery', {
       volumes: [{ name: VOLUME_NAME }],
     });
@@ -227,9 +232,9 @@ export class ObjectsService extends Construct {
       }),
       command: ['/celery_worker.sh'],
     });
-    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/tmp', '/app/log');
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, ...WITABLE_DIRS);
 
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/tmp', '/app/log');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, ...WITABLE_DIRS);
 
     const service = this.serviceFactory.createService({
       task,
