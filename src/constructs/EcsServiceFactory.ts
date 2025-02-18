@@ -222,12 +222,11 @@ export class EcsServiceFactory {
         'overwrite:header.X_FORWARDED_PROTO': 'https',
         ...requestParameters,
       },
-      responseParameters: [
-        {
-          Source: 'overwrite:header.API-version',
-          Destination: '$request.header.API-version',
+      responseParameters: {
+        200: {
+          'overwrite:header.API-version': '$request.header.API-version',
         },
-      ],
+      },
     });
 
     integration.node.addDependency(service);
