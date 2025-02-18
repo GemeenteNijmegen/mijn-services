@@ -215,7 +215,6 @@ export class ObjectsService extends Construct {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'],
-        // command: ['CMD-SHELL', 'python', '/app/bin/check_celery_worker_liveness.py'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
