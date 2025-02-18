@@ -1,6 +1,8 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { EcsTask } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -48,7 +50,7 @@ export class OpenKlantService extends Construct {
       },
     });
 
-    this.setupInitalization();
+    this.setupConfigurationService();
     this.setupService();
     this.setupCeleryService();
   }
@@ -104,10 +106,7 @@ export class OpenKlantService extends Construct {
     return secrets;
   }
 
-  /**
-   * Run an initalization container once 15 minutes after creating.
-   */
-  private setupInitalization() {
+  private setupConfigurationService() {
     const task = this.serviceFactory.createTaskDefinition('init');
     task.addContainer('init', {
       image: ContainerImage.fromRegistry(this.props.image),
@@ -128,16 +127,22 @@ export class OpenKlantService extends Construct {
       environment: this.getEnvironmentConfiguration(),
     });
 
-    const service = this.serviceFactory.createService({
-      id: 'init',
-      task: task,
-      path: undefined, // Service is not exposed
-      options: {
-        desiredCount: 0, // Service runs only once and is disabled by default!
-      },
+    // Scheduel a task in the past (so we can run it manually)
+    const rule = new Rule(this, 'scheudle-setup', {
+      schedule: Schedule.cron({
+        year: '2020',
+      }),
+      description: 'Rule to run setup configuration for open-klant (manually)',
     });
-    this.setupConnectivity('init', service.connections.securityGroups);
-    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    const ecsTask = new EcsTask({
+      cluster: this.props.service.cluster,
+      taskDefinition: task,
+    });
+    rule.addTarget(ecsTask);
+
+    // Setup connectivity
+    this.setupConnectivity('setup', ecsTask.securityGroups ?? []);
+    this.allowAccessToSecrets(task.executionRole!);
   }
 
   setupService() {
@@ -190,6 +195,7 @@ export class OpenKlantService extends Construct {
         command: ['CMD-SHELL', 'celery', '--app', 'openklant.celery'],
         // command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'], // Does not yet have this script
         interval: Duration.seconds(10),
+        startPeriod: Duration.seconds(60),
       },
       readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),

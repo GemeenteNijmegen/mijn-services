@@ -1,6 +1,8 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { EcsTask } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -204,7 +206,6 @@ export class OpenNotificatiesService extends Construct {
 
     // Configuration container
     const initContainer = task.addContainer('init-config', {
-      // image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       image: ContainerImage.fromAsset('./src/containers/open-notificaties/', {
         buildArgs: {
           OPEN_NOTIFICATIES_IMAGE: this.props.openNotificationsConfiguration.image,
@@ -225,17 +226,22 @@ export class OpenNotificatiesService extends Construct {
     // Filesystem write access - initialization container
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/log', '/app/setup_configuration');
 
-    const service = this.serviceFactory.createService({
-      id: 'setup-configuration',
-      task: task,
-      path: undefined, // Do not connect container to internet
-      options: {
-        desiredCount: 0, // Do not run container by default (manual action)
-      },
+    // Scheduel a task in the past (so we can run it manually)
+    const rule = new Rule(this, 'scheudle-setup', {
+      schedule: Schedule.cron({
+        year: '2020',
+      }),
+      description: 'Rule to run setup configuration for open-notificaties (manually)',
     });
-    this.setupConnectivity('setup-configuration', service.connections.securityGroups);
-    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
-    return service;
+    const ecsTask = new EcsTask({
+      cluster: this.props.service.cluster,
+      taskDefinition: task,
+    });
+    rule.addTarget(ecsTask);
+
+    // Setup connectivity
+    this.setupConnectivity('setup', ecsTask.securityGroups ?? []);
+    this.allowAccessToSecrets(task.executionRole!);
   }
 
   private setupService() {
@@ -296,6 +302,7 @@ export class OpenNotificatiesService extends Construct {
       healthCheck: {
         command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
+        startPeriod: Duration.seconds(60),
       },
       readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),

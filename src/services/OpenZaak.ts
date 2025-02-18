@@ -1,6 +1,8 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { EcsTask } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -202,14 +204,6 @@ export class OpenZaakService extends Construct {
     // Configuration - initialization container
     const initContainer = task.addContainer('init-config', {
       image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
-
-      // TODO enable this later, current release is does not yet use the yaml configuration (open-notifictions does) (13 Feb 2025)
-      // image: ContainerImage.fromAsset('./src/containers/open-zaak/', {
-      //   buildArgs: {
-      //     OPEN_ZAAK_IMAGE: this.props.openZaakConfiguration.image,
-      //   },
-      // }),
-
       command: undefined, // Do not set a command as the entrypoint will handle this for us (see Dockerfile)
       readonlyRootFilesystem: false, // The HTTP Cache using SQLite prevents us from running without write to root...
       essential: true,
@@ -228,17 +222,22 @@ export class OpenZaakService extends Construct {
     // Make sure we have a writable volume
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/setup_configuration');
 
-    const service = this.serviceFactory.createService({
-      id: 'setup-configuration',
-      task: task,
-      path: undefined, // Do not connect this service to the internet
-      options: {
-        desiredCount: 0, // DISABLE BY DEFAULT AND RUN MANUALLY
-      },
+    // Scheduel a task in the past (so we can run it manually)
+    const rule = new Rule(this, 'scheudle-setup', {
+      schedule: Schedule.cron({
+        year: '2020',
+      }),
+      description: 'Rule to run setup configuration for open-zaak (manually)',
     });
-    this.setupConnectivity('setup-configuration', service.connections.securityGroups);
-    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
-    return service;
+    const ecsTask = new EcsTask({
+      cluster: this.props.service.cluster,
+      taskDefinition: task,
+    });
+    rule.addTarget(ecsTask);
+
+    // Setup connectivity
+    this.setupConnectivity('setup', ecsTask.securityGroups ?? []);
+    this.allowAccessToSecrets(task.executionRole!);
   }
 
   private setupCeleryService() {
@@ -252,6 +251,7 @@ export class OpenZaakService extends Construct {
       healthCheck: {
         command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
+        startPeriod: Duration.seconds(60),
       },
       readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),
