@@ -211,8 +211,8 @@ export class ObjectsService extends Construct {
       '/tmp',
       '/app/tmp',
       '/app/log',
-      'app/tmp/celery_worker_heartbeat',
-      'app/tmp/celery_worker_ready',
+      '/app/tmp/celery_worker_heartbeat',
+      '/app/tmp/celery_worker_ready',
     ]
     const task = this.serviceFactory.createTaskDefinition('celery', {
       volumes: [{ name: VOLUME_NAME }],
