@@ -80,7 +80,7 @@ export class EcsServiceFactory {
 
   createService(options: CreateEcsServiceOptions) {
 
-    let cloudmap : CloudMapOptions | undefined = undefined;
+    let cloudmap: CloudMapOptions | undefined = undefined;
     if (options.path) {
       cloudmap = {
         cloudMapNamespace: this.props.namespace,
@@ -221,6 +221,9 @@ export class EcsServiceFactory {
       requestParameters: {
         'overwrite:header.X_FORWARDED_PROTO': 'https',
         ...requestParameters,
+      },
+      responseParameters: {
+        'overwrite:header.API-version': "$request.header.API-version",
       },
     });
 
