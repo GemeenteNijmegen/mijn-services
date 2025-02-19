@@ -211,31 +211,20 @@ export class EcsServiceFactory {
       throw Error('Cannot add route if ther\'s no cloudmap service configured');
     }
 
-    const Http2xxStatusCodes = [
-      200, //	OK
-      201, //	Created
-      202, //	Accepted
-      203, //	Non - Authoritative Information
-      204, //	No Content
-      205, //	Reset Content
-      206, //	Partial Content
-      207, //	Multi - Status
-      208, //	Already Reported
-      226, //	IM Used
-    ]
+    // Tja... Ik hoop dit later beter op te lossen (19 feb 2025).
+    const responseParameters = {
+      200: this.getApiVersionHeaderResponseModification(), //	OK
+      201: this.getApiVersionHeaderResponseModification(), //	Created
+      202: this.getApiVersionHeaderResponseModification(), //	Accepted
+      203: this.getApiVersionHeaderResponseModification(), //	Non - Authoritative Information
+      204: this.getApiVersionHeaderResponseModification(), //	No Content
+      205: this.getApiVersionHeaderResponseModification(), //	Reset Content
+      206: this.getApiVersionHeaderResponseModification(), //	Partial Content
+      207: this.getApiVersionHeaderResponseModification(), //	Multi - Status
+      208: this.getApiVersionHeaderResponseModification(), //	Already Reported
+      226: this.getApiVersionHeaderResponseModification(), //	IM Used
+    };
 
-    const responseParameters = Http2xxStatusCodes.map((value) => {
-      return {
-        [value]: {
-          "ResponseParameters": [
-            {
-              "Destination": "overwrite:header.API-version",
-              "Source": '1.5.1'
-            }
-          ]
-        }
-      }
-    });
 
     const integration = new CfnIntegration(this.scope, `${id}-integration`, {
       apiId: this.props.api.apiId,
@@ -262,6 +251,17 @@ export class EcsServiceFactory {
     });
     route.addDependency(integration);
 
+  }
+
+  private getApiVersionHeaderResponseModification() {
+    return {
+      "ResponseParameters": [
+        {
+          "Destination": "overwrite:header.API-version",
+          "Source": '1.5.1'
+        }
+      ]
+    }
   }
 
 }
