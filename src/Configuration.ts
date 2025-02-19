@@ -157,6 +157,13 @@ export interface OpenZaakConfiguration {
    * Enable debug mode and logging
    */
   debug?: boolean;
+  /**
+   * API-version header value. Should coinside with the version
+   * implemented in the container image.
+   * Note: this is a workaround as this should be set by the service
+   * itself but that does not seem to happen.
+   */
+  apiVersion: string;
 }
 
 export interface ObjecttypesConfiguration {
@@ -333,6 +340,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       image: 'openzaak/open-zaak:1.17.0',
       logLevel: 'DEBUG',
       debug: true,
+      apiVersion: '1.3.1',
     },
     objecttypesService: {
       image: 'maykinmedia/objecttypes-api:3.0.0',
@@ -409,6 +417,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       image: 'openzaak/open-zaak:1.17.0',
       logLevel: 'INFO',
       debug: false,
+      apiVersion: '1.3.1',
     },
     objecttypesService: {
       image: 'maykinmedia/objecttypes-api:3.0.0',

@@ -56,6 +56,11 @@ export interface CreateEcsServiceOptions {
    * Use a custom cloudmap configuration
    */
   customCloudMap?: CloudMapOptions;
+  /**
+   * Add a API-verison header with this value to the responses
+   * @default - no api version header is set in the response
+   */
+  apiVersionHeaderValue?: string;
 }
 
 export class EcsServiceFactory {
@@ -102,7 +107,7 @@ export class EcsServiceFactory {
 
     if (options.path) {
       service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
-      this.addRoute(service, options.path, options.id, options.requestParameters);
+      this.addRoute(service, options.path, options.id, options.requestParameters, options.apiVersionHeaderValue);
     }
     if (options.filesystem) {
       this.createFileSytem(service, options);
@@ -206,25 +211,27 @@ export class EcsServiceFactory {
     });
   }
 
-  private addRoute(service: FargateService, path: string, id: string, requestParameters?: Record<string, string>) {
+  private addRoute(service: FargateService, path: string, id: string, requestParameters?: Record<string, string>, apiVersionHeaderValue?: string) {
     if (!service.cloudMapService) {
       throw Error('Cannot add route if ther\'s no cloudmap service configured');
     }
 
     // Tja... Ik hoop dit later beter op te lossen (19 feb 2025).
-    const responseParameters = {
-      200: this.getApiVersionHeaderResponseModification(), //	OK
-      201: this.getApiVersionHeaderResponseModification(), //	Created
-      202: this.getApiVersionHeaderResponseModification(), //	Accepted
-      203: this.getApiVersionHeaderResponseModification(), //	Non - Authoritative Information
-      204: this.getApiVersionHeaderResponseModification(), //	No Content
-      205: this.getApiVersionHeaderResponseModification(), //	Reset Content
-      206: this.getApiVersionHeaderResponseModification(), //	Partial Content
-      207: this.getApiVersionHeaderResponseModification(), //	Multi - Status
-      208: this.getApiVersionHeaderResponseModification(), //	Already Reported
-      226: this.getApiVersionHeaderResponseModification(), //	IM Used
-    };
-
+    let responseParameters: any = undefined;
+    if (apiVersionHeaderValue) {
+      responseParameters = {
+        200: this.apiVersionHeader(apiVersionHeaderValue), //	OK
+        201: this.apiVersionHeader(apiVersionHeaderValue), //	Created
+        202: this.apiVersionHeader(apiVersionHeaderValue), //	Accepted
+        203: this.apiVersionHeader(apiVersionHeaderValue), //	Non - Authoritative Information
+        204: this.apiVersionHeader(apiVersionHeaderValue), //	No Content
+        205: this.apiVersionHeader(apiVersionHeaderValue), //	Reset Content
+        206: this.apiVersionHeader(apiVersionHeaderValue), //	Partial Content
+        207: this.apiVersionHeader(apiVersionHeaderValue), //	Multi - Status
+        208: this.apiVersionHeader(apiVersionHeaderValue), //	Already Reported
+        226: this.apiVersionHeader(apiVersionHeaderValue), //	IM Used
+      };
+    }
 
     const integration = new CfnIntegration(this.scope, `${id}-integration`, {
       apiId: this.props.api.apiId,
@@ -253,15 +260,15 @@ export class EcsServiceFactory {
 
   }
 
-  private getApiVersionHeaderResponseModification() {
+  private apiVersionHeader(apiVersionHeaderValue: string) {
     return {
-      "ResponseParameters": [
+      ResponseParameters: [
         {
-          "Destination": "overwrite:header.API-version",
-          "Source": '1.5.1'
-        }
-      ]
-    }
+          Destination: 'overwrite:header.API-version',
+          Source: apiVersionHeaderValue,
+        },
+      ],
+    };
   }
 
 }
