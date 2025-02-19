@@ -224,9 +224,12 @@ export class EcsServiceFactory {
       },
       responseParameters: {
         200: {
-          "ResponseParameters": {
-            "overwrite:header.API-version": "1.5.1",
-          }
+          "ResponseParameters": [
+            {
+              "Destination": "overwrite:header.API-version",
+              "Source": '1.5.1'
+            }
+          ]
         },
       },
     });
