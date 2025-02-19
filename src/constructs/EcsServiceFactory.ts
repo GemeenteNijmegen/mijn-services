@@ -210,6 +210,33 @@ export class EcsServiceFactory {
     if (!service.cloudMapService) {
       throw Error('Cannot add route if ther\'s no cloudmap service configured');
     }
+
+    const Http2xxStatusCodes = [
+      200, //	OK
+      201, //	Created
+      202, //	Accepted
+      203, //	Non - Authoritative Information
+      204, //	No Content
+      205, //	Reset Content
+      206, //	Partial Content
+      207, //	Multi - Status
+      208, //	Already Reported
+      226, //	IM Used
+    ]
+
+    const responseParameters = Http2xxStatusCodes.map((value) => {
+      return {
+        [value]: {
+          "ResponseParameters": [
+            {
+              "Destination": "overwrite:header.API-version",
+              "Source": '1.5.1'
+            }
+          ]
+        }
+      }
+    });
+
     const integration = new CfnIntegration(this.scope, `${id}-integration`, {
       apiId: this.props.api.apiId,
       connectionId: this.props.link.vpcLinkId,
@@ -222,16 +249,7 @@ export class EcsServiceFactory {
         'overwrite:header.X_FORWARDED_PROTO': 'https',
         ...requestParameters,
       },
-      responseParameters: {
-        200: {
-          "ResponseParameters": [
-            {
-              "Destination": "overwrite:header.API-version",
-              "Source": '1.5.1'
-            }
-          ]
-        },
-      },
+      responseParameters: responseParameters,
     });
 
     integration.node.addDependency(service);
