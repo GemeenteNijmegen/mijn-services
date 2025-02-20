@@ -184,6 +184,7 @@ export class OpenZaakService extends Construct {
       options: {
         desiredCount: 1,
       },
+      apiVersionHeaderValue: this.props.openZaakConfiguration.apiVersion,
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
