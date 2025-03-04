@@ -214,6 +214,8 @@ export class ObjectsService extends Construct {
     ];
     const task = this.serviceFactory.createTaskDefinition('celery', {
       volumes: [{ name: VOLUME_NAME }],
+      cpu: '512',
+      memoryMiB: '1024',
     });
 
     const container = task.addContainer('celery', {

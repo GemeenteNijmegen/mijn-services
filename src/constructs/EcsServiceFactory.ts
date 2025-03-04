@@ -75,8 +75,8 @@ export class EcsServiceFactory {
 
   createTaskDefinition(id: string, options?: Partial<TaskDefinitionProps>) {
     const task = new TaskDefinition(this.scope, `${id}-task`, {
-      cpu: '256',
-      memoryMiB: '512',
+      cpu: options?.cpu ?? '256',
+      memoryMiB: options?.memoryMiB ?? '512',
       compatibility: Compatibility.FARGATE,
       ...options,
     });
