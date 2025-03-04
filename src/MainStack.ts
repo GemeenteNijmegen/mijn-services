@@ -5,7 +5,7 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { Configurable } from './Configuration';
+import { Configurable, Configuration } from './Configuration';
 import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
@@ -22,7 +22,7 @@ import { Statics } from './Statics';
 interface MainStackProps extends StackProps, Configurable { }
 
 export class MainStack extends Stack {
-  private readonly configuration;
+  private readonly configuration: Configuration;
   private readonly hostedzone: IHostedZone;
   private readonly vpc: GemeenteNijmegenVpc;
   private readonly cache: CacheDatabase;
