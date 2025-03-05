@@ -154,7 +154,7 @@ export class MainStack extends Stack {
           cluster: platform.cluster,
           link: platform.vpcLink,
           namespace: platform.namespace,
-          port: 80,
+          port: 8080,
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
       });
