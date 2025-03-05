@@ -360,7 +360,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         mode: 'Development',
         notificatiesApiUrl: 'open-notificaties.accp.nijmegen.nl/api/v1', //Not known?
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        path: '/omc-local',
+        path: 'omc-local',
         templates: {},
         zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
         zgwTokenInformation: {
