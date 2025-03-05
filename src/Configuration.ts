@@ -352,6 +352,25 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
+    outputManagementComponents: [ // WIP
+      {
+        cdkId: 'omc-local',
+        image: 'worthnl/notifynl-omc:1.14.5',
+        logLevel: 'DEBUG',
+        mode: 'Development',
+        notificatiesApiUrl: 'open-notificaties.accp.nijmegen.nl/api/v1', //Not known?
+        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        path: '/omc-local',
+        templates: {},
+        zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
+        zgwTokenInformation: {
+          issuer: 'iets',
+          audience: 'iemand',
+          userId: '123',
+          username: 'devops',
+        },
+      },
+    ],
     openKlantRegistrationServices: [
       {
         cdkId: 'open-klant-registration-service-test',
