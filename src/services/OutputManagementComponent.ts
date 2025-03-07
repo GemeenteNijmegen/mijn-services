@@ -181,7 +181,7 @@ export class OMCService extends Construct {
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/root/.aspnet');
 
     const service = this.serviceFactory.createService({
-      id: 'main',
+      id: 'omc',
       task: task,
       path: this.props.omcConfiguration.path,
       requestParameters: {

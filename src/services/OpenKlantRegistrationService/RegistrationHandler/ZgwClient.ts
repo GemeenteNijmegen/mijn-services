@@ -168,7 +168,8 @@ export class ZgwClient {
     const json = await response.json() as any;
     logger.debug('Response', { json });
     if (response.status < 200 || response.status > 300) {
-      throw Error('Not a 2xx response');
+      console.debug(json);
+      throw Error(`Not a 2xx response: ${response.status} ${response.statusText}`);
     }
     return json;
   }
