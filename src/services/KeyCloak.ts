@@ -102,7 +102,7 @@ export class KeyCloakService extends Construct {
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
-      command: [ 'start-dev'],
+      command: ['start-dev'],
       portMappings: [
         {
           containerPort: this.props.service.port,

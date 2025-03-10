@@ -66,6 +66,8 @@ export class Statics {
     Statics.databaseOpenZaak,
     Statics.databaseObjecttypes,
     Statics.databaseObjects,
+    Statics.databaseKeyCloak,
+    Statics.databaseGZAC,
   ];
 
   // MARK: Environments
