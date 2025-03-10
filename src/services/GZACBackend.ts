@@ -99,7 +99,7 @@ export class GZACBackendService extends Construct {
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'echo'],
+        command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },

@@ -70,7 +70,7 @@ export class GZACFrontendService extends Construct {
     task.addContainer('gzac-frontend', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'echo'],
+        command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
