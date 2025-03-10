@@ -82,7 +82,7 @@ export class GZACFrontendService extends Construct {
         },
       ],
       readonlyRootFilesystem: true,
-      secrets: this.getSecretConfiguration(),
+      // secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
         streamPrefix: 'main',
@@ -95,7 +95,7 @@ export class GZACFrontendService extends Construct {
     // this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
-      id: 'main',
+      id: 'gzac-frontend',
       task: task,
       path: this.props.path,
       options: {
