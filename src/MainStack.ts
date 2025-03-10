@@ -237,7 +237,7 @@ export class MainStack extends Stack {
   }
 
   private gzacBackendService(api: ApiGateway, platform: ContainerPlatform) {
-    if (!this.configuration.keyCloackService) {
+    if (!this.configuration.gzacBackendService) {
       console.warn('no gzac provided. Skipping creation of objects service!');
       return;
     }
@@ -254,7 +254,7 @@ export class MainStack extends Stack {
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
-      serviceConfiguration: this.configuration.keyCloackService,
+      serviceConfiguration: this.configuration.gzacBackendService,
     });
   }
   private openKlantRegistrationServices(api: ApiGateway) {

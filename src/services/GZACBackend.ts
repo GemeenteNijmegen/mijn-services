@@ -8,7 +8,7 @@ import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { KeyCloakConfiguration } from '../Configuration';
+import { GZACBackendConfiguration } from '../Configuration';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
@@ -21,7 +21,7 @@ interface GZACServiceProps {
   /**
    * The configuration for the open configuration installation
    */
-  readonly serviceConfiguration: KeyCloakConfiguration;
+  readonly serviceConfiguration: GZACBackendConfiguration;
   readonly key: Key;
 }
 
@@ -51,22 +51,17 @@ export class GZACBackendService extends Construct {
     const databaseHostname = StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname);
     const databasePort = StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort);
     return {
-      ALLOWED_HOSTS: '*', // TODO make stricter at some point
-      SUBPATH: '/' + this.props.path,
-      IS_HTTPS: 'yes',
-      USE_X_FORWARDED_HOST: 'True',
-
       SPRING_PROFILES_ACTIVE: 'docker',
       SPRING_DATASOURCE_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseGZAC}`,
       SPRING_DATASOURCE_NAME: 'gzac',
 
-      // VALTIMO_APP_HOSTNAME: "http://localhost:4200",
-      // VALTIMO_CONNECTORENCRYPTION_SECRET: 579156b12b9a457a579156b12b9a457a,
+      VALTIMO_APP_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl/gzac-ui',
+      VALTIMO_CONNECTORENCRYPTION_SECRET: '579156b12b9a457a579156b12b9a457a',
 
-      // VALTIMO_OAUTH_PUBLIC_KEY: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB",
+      VALTIMO_OAUTH_PUBLIC_KEY: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB',
 
       KEYCLOAK_REALM: 'valtimo',
-      KEYCLOAK_AUTH_SERVER_URL: 'http://gzac-keycloak:8080/auth',
+      KEYCLOAK_AUTH_SERVER_URL: 'https://mijn-services.accp.nijmegen.nl/keycloak/',
       KEYCLOAK_RESOURCE: 'valtimo-user-m2m-client',
       KEYCLOAK_CREDENTIALS_SECRET: '6ef6ca16-6b86-482a-a3d9-0561704c1db9',
 
