@@ -59,7 +59,7 @@ export class KeyCloakService extends Construct {
       KEYCLOAK_ADMIN: 'admin',
       KEYCLOAK_ADMIN_PASSWORD: 'admin',
       KC_DB: 'postgres',
-      KC_DB_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseGZAC}`,
+      KC_DB_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseKeyCloak}`,
       KC_FEATURES: 'token-exchange,admin-fine-grained-authz',
       KC_HTTP_RELATIVE_PATH: '/auth',
 
