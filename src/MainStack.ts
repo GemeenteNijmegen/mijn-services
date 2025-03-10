@@ -20,6 +20,7 @@ import { OpenNotificatiesService } from './services/OpenNotificaties';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
+import { GZACFrontendService } from './services/GZACFrontend';
 
 interface MainStackProps extends StackProps, Configurable { }
 
@@ -65,6 +66,7 @@ export class MainStack extends Stack {
     this.objectsService(api, platform);
     this.keyCloakService(api, platform);
     this.gzacBackendService(api, platform);
+    this.gzacFrontendService(api, platform);
   }
 
 
@@ -245,7 +247,7 @@ export class MainStack extends Stack {
       hostedzone: this.hostedzone,
       key: this.key,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
-      path: 'gzac',
+      path: 'gzac-backend',
       service: {
         api: api.api,
         cluster: platform.cluster,
@@ -255,6 +257,27 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.gzacBackendService,
+    });
+  }
+  private gzacFrontendService(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.gzacFrontendService) {
+      console.warn('no gzac provided. Skipping creation of objects service!');
+      return;
+    }
+    new  GZACFrontendService(this, 'gzac-frontend', {
+      hostedzone: this.hostedzone,
+      key: this.key,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'gzac-ui',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      serviceConfiguration: this.configuration.gzacFrontendService,
     });
   }
   private openKlantRegistrationServices(api: ApiGateway) {
