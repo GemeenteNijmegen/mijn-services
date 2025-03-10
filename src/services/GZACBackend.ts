@@ -13,7 +13,7 @@ import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServ
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
 
-interface KeyCloakServiceProps {
+interface GZACServiceProps {
   readonly service: EcsServiceFactoryProps;
   readonly path: string;
   readonly hostedzone: IHostedZone;
@@ -25,15 +25,15 @@ interface KeyCloakServiceProps {
   readonly key: Key;
 }
 
-export class KeyCloakService extends Construct {
+export class GZACBackendService extends Construct {
 
   private readonly logs: LogGroup;
-  private readonly props: KeyCloakServiceProps;
+  private readonly props: GZACServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
 
 
-  constructor(scope: Construct, id: string, props: KeyCloakServiceProps) {
+  constructor(scope: Construct, id: string, props: GZACServiceProps) {
     super(scope, id);
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
@@ -56,29 +56,35 @@ export class KeyCloakService extends Construct {
       IS_HTTPS: 'yes',
       USE_X_FORWARDED_HOST: 'True',
 
-      KEYCLOAK_ADMIN: 'admin',
-      KEYCLOAK_ADMIN_PASSWORD: 'admin',
-      KC_DB: 'postgres',
-      KC_DB_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseGZAC}`,
-      KC_FEATURES: 'token-exchange,admin-fine-grained-authz',
-      KC_HTTP_RELATIVE_PATH: '/auth',
+      SPRING_PROFILES_ACTIVE: 'docker',
+      SPRING_DATASOURCE_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseGZAC}`,
+      SPRING_DATASOURCE_NAME: 'gzac',
+
+      // VALTIMO_APP_HOSTNAME: "http://localhost:4200",
+      // VALTIMO_CONNECTORENCRYPTION_SECRET: 579156b12b9a457a579156b12b9a457a,
+
+      // VALTIMO_OAUTH_PUBLIC_KEY: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB",
+
+      KEYCLOAK_REALM: 'valtimo',
+      KEYCLOAK_AUTH_SERVER_URL: 'http://gzac-keycloak:8080/auth',
+      KEYCLOAK_RESOURCE: 'valtimo-user-m2m-client',
+      KEYCLOAK_CREDENTIALS_SECRET: '6ef6ca16-6b86-482a-a3d9-0561704c1db9',
+
+      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
+      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS: '*',
+      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDHEADERS: '*',
+      VALTIMO_WEB_CORS_PATHS: '/**',
 
       LOG_LEVEL: this.props.serviceConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.serviceConfiguration.debug, false),
       DEBUG: Utils.toPythonBooleanString(this.props.serviceConfiguration.debug, false),
-
-
-      // Conectivity
-      CORS_ALLOW_ALL_ORIGINS: 'True', // TODO make strickter at some point
-      CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
-
     };
   }
 
   private getSecretConfiguration() {
     const secrets = {
-      KC_DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
-      KC_DB_USERNAME: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+      SPRING_DATASOURCE_USERNAME: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+      SPRING_DATASOURCE_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
 
     };
     return secrets;

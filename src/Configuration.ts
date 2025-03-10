@@ -106,6 +106,8 @@ export interface Configuration {
    */
   keyCloackService?: KeyCloakConfiguration;
 
+  gzacBackendService?: GZACBackendConfiguration;
+
 }
 
 export interface OpenKlantConfiguration {
@@ -331,6 +333,22 @@ export interface KeyCloakConfiguration {
   debug?: boolean;
 }
 
+export interface GZACBackendConfiguration {
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
+  image: string;
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+}
+
 
 const EnvironmentConfigurations: { [key: string]: Configuration } = {
   acceptance: {
@@ -376,6 +394,11 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     },
     keyCloackService: {
       image: 'quay.io/keycloak/keycloak:24.0.1',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
+    gzacBackendService: {
+      image: 'ritense/gzac-backend:12.6.0',
       logLevel: 'DEBUG',
       debug: true,
     },
