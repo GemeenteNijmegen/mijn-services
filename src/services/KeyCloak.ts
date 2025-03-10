@@ -59,9 +59,9 @@ export class KeyCloakService extends Construct {
       KC_DB_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseKeyCloak}`,
       KC_FEATURES: 'token-exchange,admin-fine-grained-authz',
       KC_HTTP_RELATIVE_PATH: '/' + this.props.path,
-      KC_PROXY_HEADERS: 'xforwarded',
+      KC_PROXY_HEADERS: 'forwarded',
       KC_HTTP_ENABLED: 'true',
-      KC_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl',
+      KC_HOSTNAME: 'mijn-services.accp.nijmegen.nl',
 
       LOG_LEVEL: this.props.serviceConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.serviceConfiguration.debug, false),
