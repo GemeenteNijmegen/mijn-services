@@ -79,7 +79,7 @@ export class KeyCloakService extends Construct {
     const secrets = {
       KC_DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       KC_DB_USERNAME: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-      KEYCLOAK_ADMIN_PASSWORD: Secret.fromSecretsManager(this.keyCloakAdminCredentials, 'password'),
+      KEYCLOAK_ADMIN_PASSWORD: Secret.fromSecretsManager(this.keyCloakAdminCredentials, 'secret'),
       KEYCLOAK_ADMIN: Secret.fromSecretsManager(this.keyCloakAdminCredentials, 'username'),
     };
     return secrets;

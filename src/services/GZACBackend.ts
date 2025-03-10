@@ -83,7 +83,7 @@ export class GZACBackendService extends Construct {
       SPRING_DATASOURCE_USERNAME: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       SPRING_DATASOURCE_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
       KEYCLOAK_RESOURCE: Secret.fromSecretsManager(this.m2mCredentials , 'username'),
-      KEYCLOAK_CREDENTIALS_SECRET:  Secret.fromSecretsManager(this.m2mCredentials, 'password'),
+      KEYCLOAK_CREDENTIALS_SECRET:  Secret.fromSecretsManager(this.m2mCredentials, 'secret'),
 
     };
     return secrets;
