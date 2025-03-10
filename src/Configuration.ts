@@ -406,7 +406,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'local-omc',
         path: 'local-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.14.5',
+        image: 'worthnl/notifynl-omc:1.14.6',
         logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
