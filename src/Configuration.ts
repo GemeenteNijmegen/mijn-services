@@ -420,16 +420,16 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
-    gzacBackendService: {
-      image: 'ritense/gzac-backend:12.6.0',
-      logLevel: 'DEBUG',
-      debug: true,
-    },
-    gzacFrontendService: {
-      image: 'ritense/gzac-frontend:12.6.0',
-      logLevel: 'DEBUG',
-      debug: true,
-    },
+    // gzacBackendService: {
+    //   image: 'ritense/gzac-backend:12.6.0',
+    //   logLevel: 'DEBUG',
+    //   debug: true,
+    // },
+    // gzacFrontendService: {
+    //   image: 'ritense/gzac-frontend:12.6.0',
+    //   logLevel: 'DEBUG',
+    //   debug: true,
+    // },
     outputManagementComponents: [
       {
         cdkId: 'local-omc',
