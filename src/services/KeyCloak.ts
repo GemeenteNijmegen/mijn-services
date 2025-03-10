@@ -102,6 +102,7 @@ export class KeyCloakService extends Construct {
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
+      command: [ 'start-dev'],
       portMappings: [
         {
           containerPort: this.props.service.port,
@@ -109,7 +110,7 @@ export class KeyCloakService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // moet uiteindelijk op true, maar voor nu niet
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
