@@ -91,5 +91,6 @@ export class Statics {
    * Placed separately to make (re)moving easier
    */
   static readonly _ssmGZACKeyCloakAdminCredentials = `/${Statics.projectName}/internal/gzac/keycloak/admin/credentials`;
+  static readonly _ssmGZACBackendM2MCredentials = `/${Statics.projectName}/internal/gzac/backend/m2m/credentials`;
 
 }

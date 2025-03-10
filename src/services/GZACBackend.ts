@@ -31,6 +31,7 @@ export class GZACBackendService extends Construct {
   private readonly props: GZACServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
+  private readonly m2mCredentials : ISecret;
 
 
   constructor(scope: Construct, id: string, props: GZACServiceProps) {
@@ -40,6 +41,8 @@ export class GZACBackendService extends Construct {
     this.logs = this.logGroup();
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
+    this.m2mCredentials = SecretParameter.fromSecretNameV2(this, 'm2m-credentials', Statics._ssmGZACBackendM2MCredentials);
+
 
     // this.setupConfigurationService();
     this.setupService();
@@ -62,8 +65,7 @@ export class GZACBackendService extends Construct {
 
       KEYCLOAK_REALM: 'valtimo',
       KEYCLOAK_AUTH_SERVER_URL: 'https://mijn-services.accp.nijmegen.nl/keycloak/',
-      KEYCLOAK_RESOURCE: 'valtimo-user-m2m-client',
-      KEYCLOAK_CREDENTIALS_SECRET: '6ef6ca16-6b86-482a-a3d9-0561704c1db9',
+
 
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS: '*',
@@ -80,6 +82,8 @@ export class GZACBackendService extends Construct {
     const secrets = {
       SPRING_DATASOURCE_USERNAME: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       SPRING_DATASOURCE_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+      KEYCLOAK_RESOURCE: Secret.fromSecretsManager(this.m2mCredentials , 'username'),
+      KEYCLOAK_CREDENTIALS_SECRET:  Secret.fromSecretsManager(this.m2mCredentials, 'password'),
 
     };
     return secrets;
@@ -200,6 +204,7 @@ export class GZACBackendService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
+    this.m2mCredentials.grantRead(role);
 
   }
 

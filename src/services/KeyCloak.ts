@@ -61,6 +61,7 @@ export class KeyCloakService extends Construct {
       KC_PROXY_HEADERS: 'forwarded',
       KC_HTTP_ENABLED: 'true',
       KC_HOSTNAME: 'mijn-services.accp.nijmegen.nl',
+      KC_HEALTH_ENABLED: 'true',
 
       LOG_LEVEL: this.props.serviceConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.serviceConfiguration.debug, false),
@@ -98,7 +99,7 @@ export class KeyCloakService extends Construct {
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'echo'],
+        command: ['CMD-SHELL', 'curl --head -fsS http://localhost:9000/health/ready || exit 1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
