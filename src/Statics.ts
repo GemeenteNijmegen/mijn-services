@@ -35,6 +35,7 @@ export class Statics {
   static readonly databaseOpenZaak = 'open-zaak';
   static readonly databaseObjecttypes = 'objecttypes';
   static readonly databaseObjects = 'objects';
+  static readonly databaseKeyCloak = 'keycloak'; // GZAC Static
 
   // MARK: Vulservice
   static readonly ssmHaalCentraalBRPBaseUrl = `/${Statics.projectName}/api/haalcentraalbrp/baseurl`;

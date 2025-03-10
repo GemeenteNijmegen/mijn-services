@@ -100,6 +100,11 @@ export interface Configuration {
    * Configuration for objects service
    */
   objectsService?: ObjectsConfiguration;
+  /**
+   * Configuration for Keycloack service
+   * GZAC Keycloak
+   */
+  keyCloackService?: KeyCloakConfiguration;
 
 }
 
@@ -310,6 +315,23 @@ export interface OpenKlantRegistrationServiceConfiguration {
   enabled: boolean;
 }
 
+export interface KeyCloakConfiguration {
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
+  image: string;
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+}
+
+
 const EnvironmentConfigurations: { [key: string]: Configuration } = {
   acceptance: {
     branch: 'acceptance',
@@ -349,6 +371,11 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     },
     objectsService: {
       image: 'maykinmedia/objects-api:3.0.0',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
+    keyCloackService: {
+      image: 'quay.io/keycloak/keycloak:24.0.1',
       logLevel: 'DEBUG',
       debug: true,
     },

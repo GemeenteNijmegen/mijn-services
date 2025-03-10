@@ -10,6 +10,7 @@ import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
+import { KeyCloakService } from './services/KeyCloak';
 import { ObjectsService } from './services/Objects';
 import { ObjecttypesService } from './services/Objecttypes';
 import { OpenKlantService } from './services/OpenKlant';
@@ -61,6 +62,7 @@ export class MainStack extends Stack {
     this.openKlantRegistrationServices(api);
     this.objecttypesService(api, platform);
     this.objectsService(api, platform);
+    this.keyCloakService(api, platform);
   }
 
 
@@ -208,6 +210,27 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.objectsService,
+    });
+  }
+  private keyCloakService(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.keyCloackService) {
+      console.warn('No objects configuration provided. Skipping creation of objects service!');
+      return;
+    }
+    new KeyCloakService(this, 'keycloak', {
+      hostedzone: this.hostedzone,
+      key: this.key,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'keycloak',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      serviceConfiguration: this.configuration.keyCloackService,
     });
   }
 
