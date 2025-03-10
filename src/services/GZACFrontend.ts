@@ -52,10 +52,10 @@ export class GZACFrontendService extends Construct {
     };
   }
 
-  private getSecretConfiguration() {
-    const secrets = {};
-    return secrets;
-  }
+  // private getSecretConfiguration() {
+  //   const secrets = {};
+  //   return secrets;
+  // }
 
   private setupService() {
     const VOLUME_NAME = 'tmp';

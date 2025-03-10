@@ -11,6 +11,7 @@ import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
 import { GZACBackendService } from './services/GZACBackend';
+import { GZACFrontendService } from './services/GZACFrontend';
 import { KeyCloakService } from './services/KeyCloak';
 import { ObjectsService } from './services/Objects';
 import { ObjecttypesService } from './services/Objecttypes';
@@ -20,7 +21,6 @@ import { OpenNotificatiesService } from './services/OpenNotificaties';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
-import { GZACFrontendService } from './services/GZACFrontend';
 
 interface MainStackProps extends StackProps, Configurable { }
 
@@ -264,7 +264,7 @@ export class MainStack extends Stack {
       console.warn('no gzac provided. Skipping creation of objects service!');
       return;
     }
-    new  GZACFrontendService(this, 'gzac-frontend', {
+    new GZACFrontendService(this, 'gzac-frontend', {
       hostedzone: this.hostedzone,
       key: this.key,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
