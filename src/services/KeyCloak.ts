@@ -31,6 +31,7 @@ export class KeyCloakService extends Construct {
   private readonly props: KeyCloakServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
+  private readonly keyCloakAdminCredentials: ISecret;
 
 
   constructor(scope: Construct, id: string, props: KeyCloakServiceProps) {
@@ -40,6 +41,7 @@ export class KeyCloakService extends Construct {
     this.logs = this.logGroup();
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
+    this.keyCloakAdminCredentials = SecretParameter.fromSecretNameV2(this, 'keycloak-admin-credentials', Statics._ssmGZACKeyCloakAdminCredentials);
 
     // this.setupConfigurationService();
     this.setupService();
@@ -52,9 +54,6 @@ export class KeyCloakService extends Construct {
     const databasePort = StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort);
     return {
       ALLOWED_HOSTS: '*', // TODO make stricter at some point
-
-      KEYCLOAK_ADMIN: 'admin',
-      KEYCLOAK_ADMIN_PASSWORD: 'admin',
       KC_DB: 'postgres',
       KC_DB_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseKeyCloak}`,
       KC_FEATURES: 'token-exchange,admin-fine-grained-authz',
@@ -79,7 +78,8 @@ export class KeyCloakService extends Construct {
     const secrets = {
       KC_DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       KC_DB_USERNAME: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-
+      KEYCLOAK_ADMIN_PASSWORD: Secret.fromSecretsManager(this.keyCloakAdminCredentials, 'password'),
+      KEYCLOAK_ADMIN: Secret.fromSecretsManager(this.keyCloakAdminCredentials, 'username'),
     };
     return secrets;
   }

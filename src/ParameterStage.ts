@@ -39,6 +39,10 @@ export class ParameterStack extends Stack {
     this.addHaalCentraalBrpParameters();
     this.addObjecttypesParameters();
     this.addObjectsParameters();
+    // GZAC
+    this.addKeyCloakParameters();
+    // this.addGZACBackendParameters();
+    // this.addGZACFrontendParameters();
 
   }
 
@@ -182,4 +186,24 @@ export class ParameterStack extends Stack {
   }
 
 
+  /**
+   * GZAC Params
+   */
+
+  private addKeyCloakParameters() {
+
+    new Secret(this, 'gzac-keycloak-admin-credentials', {
+      description: 'Credentials for GZAC KeyCloak Admin user',
+      secretName: Statics._ssmGZACKeyCloakAdminCredentials,
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'keycloakAdmin',
+        }),
+        generateStringKey: 'secret',
+      },
+    });
+  }
+  // private addGZACBackendParameters(){};
+  // private addGZACFrontendParameters(){};
 }

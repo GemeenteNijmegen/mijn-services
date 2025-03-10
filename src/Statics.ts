@@ -66,8 +66,8 @@ export class Statics {
     Statics.databaseOpenZaak,
     Statics.databaseObjecttypes,
     Statics.databaseObjects,
-    Statics.databaseKeyCloak,
-    Statics.databaseGZAC,
+    Statics.databaseKeyCloak, // GZAC
+    Statics.databaseGZAC, // GZAC
   ];
 
   // MARK: Environments
@@ -85,5 +85,11 @@ export class Statics {
     account: '692859927138',
     region: 'eu-central-1',
   };
+
+  /**
+   * GZAC Statics
+   * Placed separately to make (re)moving easier
+   */
+  static readonly _ssmGZACKeyCloakAdminCredentials = `/${Statics.projectName}/internal/gzac/keycloak/admin/credentials`;
 
 }
