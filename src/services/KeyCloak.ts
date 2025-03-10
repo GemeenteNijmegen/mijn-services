@@ -200,6 +200,7 @@ export class KeyCloakService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
+    this.keyCloakAdminCredentials.grantRead(role);
 
   }
 
