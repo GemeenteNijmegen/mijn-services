@@ -247,7 +247,7 @@ export class MainStack extends Stack {
       hostedzone: this.hostedzone,
       key: this.key,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
-      path: 'gzac-backend',
+      path: 'gzac',
       service: {
         api: api.api,
         cluster: platform.cluster,
@@ -268,7 +268,7 @@ export class MainStack extends Stack {
       hostedzone: this.hostedzone,
       key: this.key,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
-      path: 'gzac-ui',
+      path: 'gzac',
       service: {
         api: api.api,
         cluster: platform.cluster,

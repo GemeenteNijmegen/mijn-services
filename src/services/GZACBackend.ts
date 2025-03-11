@@ -58,7 +58,7 @@ export class GZACBackendService extends Construct {
       SPRING_DATASOURCE_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseGZAC}`,
       SPRING_DATASOURCE_NAME: 'gzac',
 
-      VALTIMO_APP_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl/gzac-ui',
+      VALTIMO_APP_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl/gzac/',
       VALTIMO_CONNECTORENCRYPTION_SECRET: '579156b12b9a457a579156b12b9a457a',
 
       VALTIMO_OAUTH_PUBLIC_KEY: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB',
