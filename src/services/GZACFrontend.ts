@@ -49,6 +49,9 @@ export class GZACFrontendService extends Construct {
       KEYCLOAK_CLIENT_ID: 'valtimo-console',
       KEYCLOAK_REDIRECT_URI: 'https://mijn-services.accp.nijmegen.nl/keycloak',
       KEYCLOAK_LOGOUT_REDIRECT_URI: 'https://mijn-services.accp.nijmegen.nl',
+      WHITELISTED_DOMAIN: 'https://mijn-services.accp.nijmegen.nl',
+      ENABLE_CASE_WIDGETS: 'true',
+      ENABLE_TASK_PANEL: 'true',
     };
   }
 

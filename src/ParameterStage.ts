@@ -204,7 +204,7 @@ export class ParameterStack extends Stack {
       },
     });
   }
-  private addGZACBackendParameters(){
+  private addGZACBackendParameters() {
     new Secret(this, 'gzac-backend-m2m-credentials', {
       description: 'Credentials for GZAC Backend M-2-M',
       secretName: Statics._ssmGZACBackendM2MCredentials,
