@@ -10,8 +10,7 @@ import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
-import { GZACBackendService } from './services/GZACBackend';
-import { GZACFrontendService } from './services/GZACFrontend';
+// import { GZACService } from './services/GZAC';
 import { KeyCloakService } from './services/KeyCloak';
 import { ObjectsService } from './services/Objects';
 import { ObjecttypesService } from './services/Objecttypes';
@@ -65,8 +64,7 @@ export class MainStack extends Stack {
     this.objecttypesService(api, platform);
     this.objectsService(api, platform);
     this.keyCloakService(api, platform);
-    this.gzacBackendService(api, platform);
-    this.gzacFrontendService(api, platform);
+    // this.gzacService(api, platform);
   }
 
 
@@ -238,48 +236,27 @@ export class MainStack extends Stack {
     });
   }
 
-  private gzacBackendService(api: ApiGateway, platform: ContainerPlatform) {
-    if (!this.configuration.gzacBackendService) {
-      console.warn('no gzac provided. Skipping creation of objects service!');
-      return;
-    }
-    new GZACBackendService(this, 'gzac-backend', {
-      hostedzone: this.hostedzone,
-      key: this.key,
-      alternativeDomainNames: this.configuration.alternativeDomainNames,
-      path: 'gzac',
-      service: {
-        api: api.api,
-        cluster: platform.cluster,
-        link: platform.vpcLink,
-        namespace: platform.namespace,
-        port: 8080,
-        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
-      },
-      serviceConfiguration: this.configuration.gzacBackendService,
-    });
-  }
-  private gzacFrontendService(api: ApiGateway, platform: ContainerPlatform) {
-    if (!this.configuration.gzacFrontendService) {
-      console.warn('no gzac provided. Skipping creation of objects service!');
-      return;
-    }
-    new GZACFrontendService(this, 'gzac-frontend', {
-      hostedzone: this.hostedzone,
-      key: this.key,
-      alternativeDomainNames: this.configuration.alternativeDomainNames,
-      path: 'gzac',
-      service: {
-        api: api.api,
-        cluster: platform.cluster,
-        link: platform.vpcLink,
-        namespace: platform.namespace,
-        port: 8080,
-        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
-      },
-      serviceConfiguration: this.configuration.gzacFrontendService,
-    });
-  }
+  // private gzacService(api: ApiGateway, platform: ContainerPlatform) {
+  //   if (!this.configuration.gzacService) {
+  //     console.warn('no gzac provided. Skipping creation of objects service!');
+  //     return;
+  //   }
+  //   new GZACService(this, 'gzac', {
+  //     hostedzone: this.hostedzone,
+  //     key: this.key,
+  //     alternativeDomainNames: this.configuration.alternativeDomainNames,
+  //     path: 'gzac',
+  //     service: {
+  //       api: api.api,
+  //       cluster: platform.cluster,
+  //       link: platform.vpcLink,
+  //       namespace: platform.namespace,
+  //       port: 8080,
+  //       vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+  //     },
+  //     serviceConfiguration: this.configuration.gzacService,
+  //   });
+  // }
   private openKlantRegistrationServices(api: ApiGateway) {
     if (!this.configuration.openKlantRegistrationServices) {
       console.warn('No openKlantRegistrationServices configuration provided. Skipping creation!');
