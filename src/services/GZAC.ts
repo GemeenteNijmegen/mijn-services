@@ -44,9 +44,7 @@ export class GZACService extends Construct {
     this.m2mCredentials = SecretParameter.fromSecretNameV2(this, 'm2m-credentials', Statics._ssmGZACBackendM2MCredentials);
 
 
-    // this.setupConfigurationService();
-    this.setupBackendService();
-    this.setupFrontEndService();
+    this.setupService();
   }
 
   private getEnvironmentConfiguration() {
@@ -91,16 +89,13 @@ export class GZACService extends Construct {
   }
 
 
-  private setupBackendService() {
+  private setupService() {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('gzac-backend', {
       volumes: [{ name: VOLUME_NAME }],
       cpu: '512',
       memoryMiB: '1024',
     });
-
-    // Main service container
-    // const container =
     task.addContainer('gzac-backend', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.backendImage),
       healthCheck: {
@@ -124,13 +119,37 @@ export class GZACService extends Construct {
       }),
 
     });
+    task.addContainer('gzac-frontend', {
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.frontendImage),
+      healthCheck: {
+        command: ['CMD-SHELL', 'exit 0'],
+        interval: Duration.seconds(10),
+        startPeriod: Duration.seconds(30),
+      },
+      portMappings: [
+        {
+          containerPort: this.props.service.port,
+          hostPort: this.props.service.port,
+          protocol: Protocol.TCP,
+        },
+      ],
+      readonlyRootFilesystem: false,
+      // secrets: this.getSecretConfiguration(),
+      environment: this.getFrontEndEnvironmentConfiguration(),
+      logging: new AwsLogDriver({
+        streamPrefix: 'gzac-frontend',
+        logGroup: this.logs,
+      }),
+
+
+    });
     // this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
 
     // 1st Filesystem write access - initialization container
     // this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
-      id: 'gzac-backend',
+      id: 'gzac',
       task: task,
       path: this.props.path,
       options: {
@@ -157,96 +176,6 @@ export class GZACService extends Construct {
       ENABLE_TASK_PANEL: 'true',
     };
   }
-
-  private setupFrontEndService() {
-    const VOLUME_NAME = 'tmp';
-    const task = this.serviceFactory.createTaskDefinition('gzac-frontend', {
-      volumes: [{ name: VOLUME_NAME }],
-      cpu: '512',
-      memoryMiB: '1024',
-    });
-
-    // Main service container
-    // const container =
-    task.addContainer('gzac-frontend', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.frontendImage),
-      healthCheck: {
-        command: ['CMD-SHELL', 'exit 0'],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(30),
-      },
-      portMappings: [
-        {
-          containerPort: this.props.service.port,
-          hostPort: this.props.service.port,
-          protocol: Protocol.TCP,
-        },
-      ],
-      readonlyRootFilesystem: false,
-      // secrets: this.getSecretConfiguration(),
-      environment: this.getFrontEndEnvironmentConfiguration(),
-      logging: new AwsLogDriver({
-        streamPrefix: 'gzac-frontend',
-        logGroup: this.logs,
-      }),
-    });
-    // this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
-
-    // 1st Filesystem write access - initialization container
-    // this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
-
-    const service = this.serviceFactory.createService({
-      id: 'gzac-frontend',
-      task: task,
-      path: this.props.path,
-      options: {
-        desiredCount: 1,
-      },
-    });
-    return service;
-  }
-
-  //   private setupConfigurationService() {
-  //     const VOLUME_NAME = 'tmp';
-  //     const task = this.serviceFactory.createTaskDefinition('setup', {
-  //       volumes: [{ name: VOLUME_NAME }],
-  //     });
-
-  //     // Configuration container
-  //     const initContainer = task.addContainer('setup', {
-  //       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
-  //       command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'], // See django docs
-  //       readonlyRootFilesystem: true,
-  //       essential: true,
-  //       logging: new AwsLogDriver({
-  //         streamPrefix: 'setup',
-  //         logGroup: this.logs,
-  //       }),
-  //       secrets: this.getSecretConfiguration(),
-  //       environment: this.getEnvironmentConfiguration(),
-  //     });
-  //     this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/log', '/app/setup_configuration');
-
-  //     // Filesystem write access - initialization container
-  //     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/log', '/app/setup_configuration');
-
-  //     // Scheduel a task in the past (so we can run it manually)
-  //     const rule = new Rule(this, 'schedule-setup', {
-  //       schedule: Schedule.cron({
-  //         year: '2020',
-  //       }),
-  //       description: 'Rule to run setup configuration for KeyCloak-api (manually)',
-  //     });
-  //     const ecsTask = new EcsTask({
-  //       cluster: this.props.service.cluster,
-  //       taskDefinition: task,
-  //     });
-  //     rule.addTarget(ecsTask);
-
-  //     // Setup connectivity
-  //     this.setupConnectivity('setup', ecsTask.securityGroups ?? []);
-  //     this.allowAccessToSecrets(task.executionRole!);
-  //   }
 
 
   private logGroup() {
