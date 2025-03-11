@@ -1,17 +1,28 @@
-import { Duration, Token } from 'aws-cdk-lib';
-import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
-import { IRole } from 'aws-cdk-lib/aws-iam';
-import { Key } from 'aws-cdk-lib/aws-kms';
-import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { IHostedZone } from 'aws-cdk-lib/aws-route53';
-import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
-import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { Construct } from 'constructs';
-import { GZACBackendConfiguration } from '../Configuration';
-import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
-import { Statics } from '../Statics';
-import { Utils } from '../Utils';
+import { Duration, RemovalPolicy, Token } from "aws-cdk-lib";
+import { ISecurityGroup, Port, SecurityGroup } from "aws-cdk-lib/aws-ec2";
+import {
+  AwsLogDriver,
+  ContainerImage,
+  Protocol,
+  Secret,
+} from "aws-cdk-lib/aws-ecs";
+import { IRole } from "aws-cdk-lib/aws-iam";
+import { Key } from "aws-cdk-lib/aws-kms";
+import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
+import { IHostedZone } from "aws-cdk-lib/aws-route53";
+import {
+  ISecret,
+  Secret as SecretParameter,
+} from "aws-cdk-lib/aws-secretsmanager";
+import { StringParameter } from "aws-cdk-lib/aws-ssm";
+import { Construct } from "constructs";
+import { GZACBackendConfiguration } from "../Configuration";
+import {
+  EcsServiceFactory,
+  EcsServiceFactoryProps,
+} from "../constructs/EcsServiceFactory";
+import { Statics } from "../Statics";
+import { Utils } from "../Utils";
 
 //GZAC
 interface GZACServiceProps {
@@ -27,13 +38,11 @@ interface GZACServiceProps {
 }
 
 export class GZACBackendService extends Construct {
-
   private readonly logs: LogGroup;
   private readonly props: GZACServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
-  private readonly m2mCredentials : ISecret;
-
+  private readonly m2mCredentials: ISecret;
 
   constructor(scope: Construct, id: string, props: GZACServiceProps) {
     super(scope, id);
@@ -41,70 +50,104 @@ export class GZACBackendService extends Construct {
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
-    this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
-    this.m2mCredentials = SecretParameter.fromSecretNameV2(this, 'm2m-credentials', Statics._ssmGZACBackendM2MCredentials);
-
+    this.databaseCredentials = SecretParameter.fromSecretNameV2(
+      this,
+      "database-credentials",
+      Statics._ssmDatabaseCredentials
+    );
+    this.m2mCredentials = SecretParameter.fromSecretNameV2(
+      this,
+      "m2m-credentials",
+      Statics._ssmGZACBackendM2MCredentials
+    );
 
     // this.setupConfigurationService();
-    this.setupService();
+    const service = this.setupService();
+    service.applyRemovalPolicy(RemovalPolicy.DESTROY);
   }
 
   private getEnvironmentConfiguration() {
-    const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
+    const trustedDomains =
+      this.props.alternativeDomainNames?.map((a) => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
-    const databaseHostname = StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname);
-    const databasePort = StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort);
+    const databaseHostname = StringParameter.valueForStringParameter(
+      this,
+      Statics._ssmDatabaseHostname
+    );
+    const databasePort = StringParameter.valueForStringParameter(
+      this,
+      Statics._ssmDatabasePort
+    );
     return {
-      SPRING_PROFILES_ACTIVE: 'docker',
+      SPRING_PROFILES_ACTIVE: "docker",
       SPRING_DATASOURCE_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseGZAC}`,
-      SPRING_DATASOURCE_NAME: 'gzac',
+      SPRING_DATASOURCE_NAME: "gzac",
 
-      VALTIMO_APP_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl/gzac-ui',
-      VALTIMO_CONNECTORENCRYPTION_SECRET: '579156b12b9a457a579156b12b9a457a',
+      VALTIMO_APP_HOSTNAME: "https://mijn-services.accp.nijmegen.nl/gzac-ui",
+      VALTIMO_CONNECTORENCRYPTION_SECRET: "579156b12b9a457a579156b12b9a457a",
 
-      VALTIMO_OAUTH_PUBLIC_KEY: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB',
+      VALTIMO_OAUTH_PUBLIC_KEY:
+        "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB",
 
-      KEYCLOAK_REALM: 'valtimo',
-      KEYCLOAK_AUTH_SERVER_URL: 'https://mijn-services.accp.nijmegen.nl/keycloak/',
+      KEYCLOAK_REALM: "valtimo",
+      KEYCLOAK_AUTH_SERVER_URL:
+        "https://mijn-services.accp.nijmegen.nl/keycloak/",
 
-
-      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
-      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS: '*',
-      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDHEADERS: '*',
-      VALTIMO_WEB_CORS_PATHS: '/**',
+      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: trustedDomains
+        .map((domain) => `https://${domain}`)
+        .join(","),
+      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS: "*",
+      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDHEADERS: "*",
+      VALTIMO_WEB_CORS_PATHS: "/**",
 
       LOG_LEVEL: this.props.serviceConfiguration.logLevel,
-      LOG_REQUESTS: Utils.toPythonBooleanString(this.props.serviceConfiguration.debug, false),
-      DEBUG: Utils.toPythonBooleanString(this.props.serviceConfiguration.debug, false),
+      LOG_REQUESTS: Utils.toPythonBooleanString(
+        this.props.serviceConfiguration.debug,
+        false
+      ),
+      DEBUG: Utils.toPythonBooleanString(
+        this.props.serviceConfiguration.debug,
+        false
+      ),
     };
   }
 
   private getSecretConfiguration() {
     const secrets = {
-      SPRING_DATASOURCE_USERNAME: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-      SPRING_DATASOURCE_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
-      KEYCLOAK_RESOURCE: Secret.fromSecretsManager(this.m2mCredentials, 'username'),
-      KEYCLOAK_CREDENTIALS_SECRET: Secret.fromSecretsManager(this.m2mCredentials, 'secret'),
-
+      SPRING_DATASOURCE_USERNAME: Secret.fromSecretsManager(
+        this.databaseCredentials,
+        "username"
+      ),
+      SPRING_DATASOURCE_PASSWORD: Secret.fromSecretsManager(
+        this.databaseCredentials,
+        "password"
+      ),
+      KEYCLOAK_RESOURCE: Secret.fromSecretsManager(
+        this.m2mCredentials,
+        "username"
+      ),
+      KEYCLOAK_CREDENTIALS_SECRET: Secret.fromSecretsManager(
+        this.m2mCredentials,
+        "secret"
+      ),
     };
     return secrets;
   }
 
-
   private setupService() {
-    const VOLUME_NAME = 'tmp';
-    const task = this.serviceFactory.createTaskDefinition('main', {
+    const VOLUME_NAME = "tmp";
+    const task = this.serviceFactory.createTaskDefinition("main", {
       volumes: [{ name: VOLUME_NAME }],
-      cpu: '512',
-      memoryMiB: '1024',
+      cpu: "512",
+      memoryMiB: "1024",
     });
 
     // Main service container
     // const container =
-    task.addContainer('main', {
+    task.addContainer("main", {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'exit 0'],
+        command: ["CMD-SHELL", "exit 0"],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
@@ -119,10 +162,9 @@ export class GZACBackendService extends Construct {
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
-        streamPrefix: 'main',
+        streamPrefix: "main",
         logGroup: this.logs,
       }),
-
     });
     // this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
 
@@ -130,14 +172,14 @@ export class GZACBackendService extends Construct {
     // this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
-      id: 'main',
+      id: "main",
       task: task,
       path: this.props.path,
       options: {
         desiredCount: 1,
       },
     });
-    this.setupConnectivity('main', service.connections.securityGroups);
+    this.setupConnectivity("main", service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
   }
@@ -184,30 +226,40 @@ export class GZACBackendService extends Construct {
   //     this.allowAccessToSecrets(task.executionRole!);
   //   }
 
-
   private logGroup() {
-    return new LogGroup(this, 'logs', {
+    return new LogGroup(this, "logs", {
       retention: RetentionDays.ONE_MONTH,
       encryptionKey: this.props.key,
     });
   }
 
-  private setupConnectivity(id: string, serviceSecurityGroups: ISecurityGroup[]) {
-
-    const dbSecurityGroupId = StringParameter.valueForStringParameter(this, Statics._ssmDatabaseSecurityGroup);
-    const dbSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `db-security-group-${id}`, dbSecurityGroupId);
-    const dbPort = StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort);
-    serviceSecurityGroups.forEach(serviceSecurityGroup => {
-      dbSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(dbPort)));
+  private setupConnectivity(
+    id: string,
+    serviceSecurityGroups: ISecurityGroup[]
+  ) {
+    const dbSecurityGroupId = StringParameter.valueForStringParameter(
+      this,
+      Statics._ssmDatabaseSecurityGroup
+    );
+    const dbSecurityGroup = SecurityGroup.fromSecurityGroupId(
+      this,
+      `db-security-group-${id}`,
+      dbSecurityGroupId
+    );
+    const dbPort = StringParameter.valueForStringParameter(
+      this,
+      Statics._ssmDatabasePort
+    );
+    serviceSecurityGroups.forEach((serviceSecurityGroup) => {
+      dbSecurityGroup.connections.allowFrom(
+        serviceSecurityGroup,
+        Port.tcp(Token.asNumber(dbPort))
+      );
     });
-
   }
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
     this.m2mCredentials.grantRead(role);
-
   }
-
-
 }
