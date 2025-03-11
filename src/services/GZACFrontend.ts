@@ -1,4 +1,4 @@
-import { Duration } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { AwsLogDriver, ContainerImage, Protocol } from 'aws-cdk-lib/aws-ecs';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -35,7 +35,8 @@ export class GZACFrontendService extends Construct {
     this.logs = this.logGroup();
 
     // this.setupConfigurationService();
-    this.setupService();
+    const service = this.setupService();
+    service.applyRemovalPolicy(RemovalPolicy.DESTROY);
   }
 
   private getEnvironmentConfiguration() {
@@ -102,7 +103,7 @@ export class GZACFrontendService extends Construct {
       task: task,
       path: this.props.path,
       options: {
-        desiredCount: 1,
+        desiredCount: 0,
       },
     });
     return service;

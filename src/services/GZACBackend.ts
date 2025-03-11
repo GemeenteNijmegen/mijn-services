@@ -1,4 +1,4 @@
-import { Duration, Token } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
@@ -46,7 +46,8 @@ export class GZACBackendService extends Construct {
 
 
     // this.setupConfigurationService();
-    this.setupService();
+    const service = this.setupService();
+    service.applyRemovalPolicy(RemovalPolicy.DESTROY);
   }
 
   private getEnvironmentConfiguration() {
