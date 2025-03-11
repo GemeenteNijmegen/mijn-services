@@ -8,7 +8,7 @@ import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { GZACBackendConfiguration } from '../Configuration';
+import { GZACConfiguration } from '../Configuration';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
@@ -22,11 +22,11 @@ interface GZACServiceProps {
   /**
    * The configuration for the open configuration installation
    */
-  readonly serviceConfiguration: GZACBackendConfiguration;
+  readonly serviceConfiguration: GZACConfiguration;
   readonly key: Key;
 }
 
-export class GZACBackendService extends Construct {
+export class GZACService extends Construct {
 
   private readonly logs: LogGroup;
   private readonly props: GZACServiceProps;
@@ -46,7 +46,8 @@ export class GZACBackendService extends Construct {
 
 
     // this.setupConfigurationService();
-    this.setupService();
+    this.setupBackendService();
+    this.setupFrontEndService();
   }
 
   private getEnvironmentConfiguration() {
@@ -59,7 +60,7 @@ export class GZACBackendService extends Construct {
       SPRING_DATASOURCE_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseGZAC}`,
       SPRING_DATASOURCE_NAME: 'gzac',
 
-      VALTIMO_APP_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl/gzac-ui',
+      VALTIMO_APP_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl/gzac/',
       VALTIMO_CONNECTORENCRYPTION_SECRET: '579156b12b9a457a579156b12b9a457a',
 
       VALTIMO_OAUTH_PUBLIC_KEY: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB',
@@ -91,9 +92,9 @@ export class GZACBackendService extends Construct {
   }
 
 
-  private setupService() {
+  private setupBackendService() {
     const VOLUME_NAME = 'tmp';
-    const task = this.serviceFactory.createTaskDefinition('main', {
+    const task = this.serviceFactory.createTaskDefinition('gzac-backend', {
       volumes: [{ name: VOLUME_NAME }],
       cpu: '512',
       memoryMiB: '1024',
@@ -101,8 +102,8 @@ export class GZACBackendService extends Construct {
 
     // Main service container
     // const container =
-    task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+    task.addContainer('gzac-backend', {
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.backendImage),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
@@ -119,7 +120,7 @@ export class GZACBackendService extends Construct {
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
-        streamPrefix: 'main',
+        streamPrefix: 'gzac-backend',
         logGroup: this.logs,
       }),
 
@@ -130,15 +131,79 @@ export class GZACBackendService extends Construct {
     // this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
-      id: 'main',
+      id: 'gzac-backend',
       task: task,
       path: this.props.path,
       options: {
         desiredCount: 1,
       },
     });
-    this.setupConnectivity('main', service.connections.securityGroups);
+    this.setupConnectivity('gzac-backend', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    return service;
+  }
+  private getFrontEndEnvironmentConfiguration() {
+    const trustedDomains =
+      this.props.alternativeDomainNames?.map((a) => a) ?? [];
+    trustedDomains.push(this.props.hostedzone.zoneName);
+    return {
+      API_URI: 'https://mijn-services.accp.nijmegen.nl/gzac/api',
+      KEYCLOAK_URL: 'https://mijn-services.accp.nijmegen.nl/keycloak',
+      KEYCLOAK_REALM: 'valtimo',
+      KEYCLOAK_CLIENT_ID: 'valtimo-console',
+      KEYCLOAK_REDIRECT_URI: 'https://mijn-services.accp.nijmegen.nl/keycloak',
+      KEYCLOAK_LOGOUT_REDIRECT_URI: 'https://mijn-services.accp.nijmegen.nl',
+      WHITELISTED_DOMAIN: 'https://mijn-services.accp.nijmegen.nl',
+      ENABLE_CASE_WIDGETS: 'true',
+      ENABLE_TASK_PANEL: 'true',
+    };
+  }
+
+  private setupFrontEndService() {
+    const VOLUME_NAME = 'tmp';
+    const task = this.serviceFactory.createTaskDefinition('gzac-frontend', {
+      volumes: [{ name: VOLUME_NAME }],
+      cpu: '512',
+      memoryMiB: '1024',
+    });
+
+    // Main service container
+    // const container =
+    task.addContainer('gzac-frontend', {
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.frontendImage),
+      healthCheck: {
+        command: ['CMD-SHELL', 'exit 0'],
+        interval: Duration.seconds(10),
+        startPeriod: Duration.seconds(30),
+      },
+      portMappings: [
+        {
+          containerPort: this.props.service.port,
+          hostPort: this.props.service.port,
+          protocol: Protocol.TCP,
+        },
+      ],
+      readonlyRootFilesystem: false,
+      // secrets: this.getSecretConfiguration(),
+      environment: this.getFrontEndEnvironmentConfiguration(),
+      logging: new AwsLogDriver({
+        streamPrefix: 'gzac-frontend',
+        logGroup: this.logs,
+      }),
+    });
+    // this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
+
+    // 1st Filesystem write access - initialization container
+    // this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
+
+    const service = this.serviceFactory.createService({
+      id: 'gzac-frontend',
+      task: task,
+      path: this.props.path,
+      options: {
+        desiredCount: 1,
+      },
+    });
     return service;
   }
 
