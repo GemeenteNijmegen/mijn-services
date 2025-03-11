@@ -106,9 +106,8 @@ export interface Configuration {
    */
   keyCloackService?: KeyCloakConfiguration;
 
-  gzacBackendService?: GZACBackendConfiguration;
 
-  gzacFrontendService?: GZACFrontendConfiguration;
+  gzacService?: GZACConfiguration;
 }
 
 export interface OpenKlantConfiguration {
@@ -342,28 +341,17 @@ export interface KeyCloakConfiguration {
   debug?: boolean;
 }
 
-export interface GZACFrontendConfiguration {
+export interface GZACConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
    */
-  image: string;
-  /**
-   * Log level for the container
-   */
-  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
-  /*
-   * Enable debug mode and logging
-   */
-  debug?: boolean;
-}
-
-export interface GZACBackendConfiguration {
+  backendImage: string;
   /**
    * Docker image to use.
    * Usually includes the version number.
    */
-  image: string;
+  frontendImage: string;
   /**
    * Log level for the container
    */
@@ -420,17 +408,12 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
-    gzacBackendService: {
-      image: 'ritense/gzac-backend:12.6.0',
+    gzacService: {
+      backendImage: 'ritense/gzac-backend:12.6.0',
+      frontendImage: 'ritense/gzac-frontend:12.6.0',
       logLevel: 'DEBUG',
       debug: true,
     },
-    gzacFrontendService: {
-      image: 'ritense/gzac-frontend:12.6.0',
-      logLevel: 'DEBUG',
-      debug: true,
-    },
-
     outputManagementComponents: [
       {
         cdkId: 'local-omc',
