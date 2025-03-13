@@ -22,7 +22,6 @@ import {
   EcsServiceFactoryProps,
 } from '../constructs/EcsServiceFactory';
 import { Statics } from '../Statics';
-import { Utils } from '../Utils';
 
 interface GZACServiceProps {
   readonly service: EcsServiceFactoryProps;
