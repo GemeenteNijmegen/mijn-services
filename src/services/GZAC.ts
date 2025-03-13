@@ -1,4 +1,4 @@
-import { Duration, Token } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import {
   AwsLogDriver,
@@ -60,7 +60,8 @@ export class GZACService extends Construct {
       Statics._ssmGZACBackendM2MCredentials,
     );
 
-    this.setupService();
+    const service = this.setupService();
+    service.applyRemovalPolicy(RemovalPolicy.DESTROY);
   }
 
   private getEnvironmentConfiguration() {
@@ -162,30 +163,6 @@ export class GZACService extends Construct {
         logGroup: this.logs,
       }),
     });
-    task.addContainer('gzac-frontend', {
-      image: ContainerImage.fromRegistry(
-        this.props.serviceConfiguration.frontendImage,
-      ),
-      healthCheck: {
-        command: ['CMD-SHELL', 'exit 0'],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(30),
-      },
-      portMappings: [
-        {
-          containerPort: this.props.service.port,
-          hostPort: this.props.service.port,
-          protocol: Protocol.TCP,
-        },
-      ],
-      readonlyRootFilesystem: false,
-      // secrets: this.getSecretConfiguration(),
-      environment: this.getFrontEndEnvironmentConfiguration(),
-      logging: new AwsLogDriver({
-        streamPrefix: 'gzac-frontend',
-        logGroup: this.logs,
-      }),
-    });
     // this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
 
     // 1st Filesystem write access - initialization container
@@ -202,22 +179,6 @@ export class GZACService extends Construct {
     this.setupConnectivity('gzac-backend', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
-  }
-  private getFrontEndEnvironmentConfiguration() {
-    const trustedDomains =
-      this.props.alternativeDomainNames?.map((a) => a) ?? [];
-    trustedDomains.push(this.props.hostedzone.zoneName);
-    return {
-      API_URI: 'https://mijn-services.accp.nijmegen.nl/gzac/api',
-      KEYCLOAK_URL: 'https://mijn-services.accp.nijmegen.nl/keycloak',
-      KEYCLOAK_REALM: 'valtimo',
-      KEYCLOAK_CLIENT_ID: 'valtimo-console',
-      KEYCLOAK_REDIRECT_URI: 'https://mijn-services.accp.nijmegen.nl/keycloak',
-      KEYCLOAK_LOGOUT_REDIRECT_URI: 'https://mijn-services.accp.nijmegen.nl',
-      WHITELISTED_DOMAIN: 'https://mijn-services.accp.nijmegen.nl',
-      ENABLE_CASE_WIDGETS: 'true',
-      ENABLE_TASK_PANEL: 'true',
-    };
   }
 
   private logGroup() {

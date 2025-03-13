@@ -108,6 +108,8 @@ export interface Configuration {
 
 
   gzacService?: GZACConfiguration;
+
+  gzacFrontendService?: GZACFrontendConfiguration;
 }
 
 export interface OpenKlantConfiguration {
@@ -341,6 +343,22 @@ export interface KeyCloakConfiguration {
   debug?: boolean;
 }
 
+export interface GZACFrontendConfiguration {
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
+  image: string;
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /*
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+}
+
 export interface GZACConfiguration {
   /**
    * Docker image to use.
@@ -411,6 +429,11 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     gzacService: {
       backendImage: 'ritense/gzac-backend:12.6.0',
       frontendImage: 'ritense/gzac-frontend:12.6.0',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
+    gzacFrontendService: {
+      image: 'ritense/gzac-frontend:12.6.0',
       logLevel: 'DEBUG',
       debug: true,
     },

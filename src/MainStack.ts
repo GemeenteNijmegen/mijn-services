@@ -11,6 +11,7 @@ import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
 import { GZACService } from './services/GZAC';
+import { GZACFrontendService } from './services/GZACFrontend';
 import { KeyCloakService } from './services/KeyCloak';
 import { ObjectsService } from './services/Objects';
 import { ObjecttypesService } from './services/Objecttypes';
@@ -65,6 +66,7 @@ export class MainStack extends Stack {
     this.objectsService(api, platform);
     this.keyCloakService(api, platform);
     this.gzacService(api, platform);
+    this.gzacFrontendService(api, platform);
   }
 
   private openKlantService(api: ApiGateway, platform: ContainerPlatform) {
@@ -250,6 +252,28 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.keyCloackService,
+    });
+  }
+
+  private gzacFrontendService(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.gzacFrontendService) {
+      console.warn('no gzac provided. Skipping creation of objects service!');
+      return;
+    }
+    new GZACFrontendService(this, 'gzac-frontend', {
+      hostedzone: this.hostedzone,
+      key: this.key,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'gzac-ui',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      serviceConfiguration: this.configuration.gzacFrontendService,
     });
   }
 
