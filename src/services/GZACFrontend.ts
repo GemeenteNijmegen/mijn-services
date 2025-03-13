@@ -71,7 +71,7 @@ export class GZACFrontendService extends Construct {
 
     // Main service container
     // const container =
-    const container = task.addContainer('gzac-frontend', {
+    task.addContainer('gzac-frontend', {
       image: ContainerImage.fromAsset('./src/containers/gzac-frontend'),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'],
@@ -92,12 +92,6 @@ export class GZACFrontendService extends Construct {
         streamPrefix: 'main',
         logGroup: this.logs,
       }),
-    });
-
-    container.addMountPoints({
-      containerPath: '/etc/nginx/conf.d/default.conf',
-      sourceVolume: VOLUME_NAME,
-      readOnly: false,
     });
 
     // this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
