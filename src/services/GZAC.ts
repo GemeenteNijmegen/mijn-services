@@ -81,7 +81,7 @@ export class GZACService extends Construct {
       SPRING_DATASOURCE_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${Statics.databaseGZAC}`,
       SPRING_DATASOURCE_NAME: 'gzac',
 
-      VALTIMO_APP_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl/gzac/',
+      VALTIMO_APP_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl/gzac',
       VALTIMO_CONNECTORENCRYPTION_SECRET: '579156b12b9a457a579156b12b9a457a',
 
       VALTIMO_OAUTH_PUBLIC_KEY:
@@ -89,7 +89,7 @@ export class GZACService extends Construct {
 
       KEYCLOAK_REALM: 'valtimo',
       KEYCLOAK_AUTH_SERVER_URL:
-        'https://mijn-services.accp.nijmegen.nl/keycloak/',
+        'https://mijn-services.accp.nijmegen.nl/keycloak/auth',
 
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: trustedDomains
         .map((domain) => `https://${domain}`)
@@ -97,16 +97,6 @@ export class GZACService extends Construct {
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS: '*',
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDHEADERS: '*',
       VALTIMO_WEB_CORS_PATHS: '/**',
-
-      LOG_LEVEL: this.props.serviceConfiguration.logLevel,
-      LOG_REQUESTS: Utils.toPythonBooleanString(
-        this.props.serviceConfiguration.debug,
-        false,
-      ),
-      DEBUG: Utils.toPythonBooleanString(
-        this.props.serviceConfiguration.debug,
-        false,
-      ),
     };
   }
 
