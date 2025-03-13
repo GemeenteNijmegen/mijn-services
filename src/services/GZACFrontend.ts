@@ -102,7 +102,7 @@ export class GZACFrontendService extends Construct {
     const service = this.serviceFactory.createService({
       id: 'gzac-frontend',
       task: task,
-      path: this.props.path,
+      isRootPath: true,
       options: {
         desiredCount: 0,
       },
