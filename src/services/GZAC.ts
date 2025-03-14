@@ -88,7 +88,7 @@ export class GZACService extends Construct {
 
       KEYCLOAK_REALM: 'valtimo',
       KEYCLOAK_AUTH_SERVER_URL:
-        'https://mijn-services.accp.nijmegen.nl/keycloak/auth',
+        'https://mijn-services.accp.nijmegen.nl/keycloak',
 
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: trustedDomains
         .map((domain) => `https://${domain}`)

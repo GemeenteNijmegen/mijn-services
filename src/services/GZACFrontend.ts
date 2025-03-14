@@ -44,7 +44,7 @@ export class GZACFrontendService extends Construct {
       this.props.alternativeDomainNames?.map((a) => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
     return {
-      API_URI: 'https://mijn-services.accp.nijmegen.nl/gzac/api',
+      API_URI: 'https://mijn-services.accp.nijmegen.nl/api',
       KEYCLOAK_URL: 'https://mijn-services.accp.nijmegen.nl/keycloak',
       KEYCLOAK_REALM: 'valtimo',
       KEYCLOAK_CLIENT_ID: 'valtimo-console',
