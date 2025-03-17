@@ -14,6 +14,7 @@ import {
   ISecret,
   Secret as SecretParameter,
 } from 'aws-cdk-lib/aws-secretsmanager';
+import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { GZACConfiguration } from '../Configuration';
@@ -58,9 +59,11 @@ export class GZACService extends Construct {
       'm2m-credentials',
       Statics._ssmGZACBackendM2MCredentials,
     );
-
+    const gzacRabbitMQService = this.setupRabbitMqService();
     const service = this.setupService();
+    gzacRabbitMQService.applyRemovalPolicy(RemovalPolicy.DESTROY);
     service.applyRemovalPolicy(RemovalPolicy.DESTROY);
+    gzacRabbitMQService.connections.allowFrom(service.connections, Port.tcp(5672));
   }
 
   private getEnvironmentConfiguration() {
@@ -167,6 +170,41 @@ export class GZACService extends Construct {
     });
     this.setupConnectivity('gzac-backend', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    return service;
+  }
+  private setupRabbitMqService() {
+    const task = this.serviceFactory.createTaskDefinition('gzac-rabbit-mq');
+    task.addContainer('gzac-rabbit-mq', {
+      image: ContainerImage.fromAsset('./src/containers/gzac-rabbitmq'),
+      logging: new AwsLogDriver({
+        streamPrefix: 'gzac-rabbit-mq',
+        logGroup: this.logs,
+      }),
+      readonlyRootFilesystem: true,
+      portMappings: [{
+        containerPort: 5672,
+      },
+      {
+        containerPort: 15672,
+      }],
+      secrets: {},
+      environment: {},
+    });
+    const service = this.serviceFactory.createService({
+      task,
+      path: undefined, // No path needed
+      id: 'gzac-rabbit-mq',
+      options: {
+        desiredCount: 1,
+      },
+      customCloudMap: {
+        cloudMapNamespace: this.props.service.namespace,
+        containerPort: 5672,
+        name: 'gzac-rabbit-mq',
+        dnsRecordType: DnsRecordType.A,
+        dnsTtl: Duration.seconds(60),
+      },
+    });
     return service;
   }
 
