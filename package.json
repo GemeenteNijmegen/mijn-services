@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^2.16.0",
-    "@aws-sdk/client-sqs": "^3.758.0",
+    "@aws-sdk/client-sqs": "^3.772.0",
     "@gemeentenijmegen/apigateway-http": "^0.0.23",
     "@gemeentenijmegen/aws-constructs": "^0.0.31",
     "@gemeentenijmegen/utils": "^0.0.26",
