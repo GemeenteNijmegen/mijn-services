@@ -474,7 +474,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'openzaak.woweb.app/api/v1',
-        notificatiesApiUrl: 'opennotificaties.woweb.app/api/v1/api/v1',
+        notificatiesApiUrl: 'opennotificaties.woweb.app/api/v1',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'nijmegen_devops',
