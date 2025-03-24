@@ -35,6 +35,8 @@ export class Statics {
   static readonly databaseOpenZaak = 'open-zaak';
   static readonly databaseObjecttypes = 'objecttypes';
   static readonly databaseObjects = 'objects';
+  static readonly databaseKeyCloak = 'keycloak'; // GZAC Static
+  static readonly databaseGZAC = 'gzac'; // GZAC Static
 
   // MARK: Vulservice
   static readonly ssmHaalCentraalBRPBaseUrl = `/${Statics.projectName}/api/haalcentraalbrp/baseurl`;
@@ -64,6 +66,8 @@ export class Statics {
     Statics.databaseOpenZaak,
     Statics.databaseObjecttypes,
     Statics.databaseObjects,
+    Statics.databaseKeyCloak, // GZAC
+    Statics.databaseGZAC, // GZAC
   ];
 
   // MARK: Environments
@@ -81,5 +85,12 @@ export class Statics {
     account: '692859927138',
     region: 'eu-central-1',
   };
+
+  /**
+   * GZAC Statics
+   * Placed separately to make (re)moving easier
+   */
+  static readonly _ssmGZACKeyCloakAdminCredentials = `/${Statics.projectName}/internal/gzac/keycloak/admin/credentials`;
+  static readonly _ssmGZACBackendM2MCredentials = `/${Statics.projectName}/internal/gzac/backend/m2m/credentials`;
 
 }

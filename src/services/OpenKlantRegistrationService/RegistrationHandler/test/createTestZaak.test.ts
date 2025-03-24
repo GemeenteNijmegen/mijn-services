@@ -18,6 +18,9 @@ const runTest = process.env.CREATE_TEST_ZAAK_LIVE === 'true' ? describe : descri
  * CREATE_TEST_ZAAK_CONTACTPERSOON_NAAM=H. de Jong
  * CREATE_TEST_ZAAK_CONTACTPERSOON_EMAIL=...@nijmegen.nl
  * CREATE_TEST_ZAAK_CONTACTPERSOON_TELEFOON=0612345656
+ *
+ * ZAKEN_API_CLIENT_ID=...
+ * ZAKEN_API_CLIENT_SECRET=...
  * ```
  */
 runTest('Create zaak run live tests', () => {

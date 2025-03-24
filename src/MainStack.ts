@@ -5,11 +5,14 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { Configurable } from './Configuration';
+import { Configurable, Configuration } from './Configuration';
 import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
+import { GZACService } from './services/GZAC';
+import { GZACFrontendService } from './services/GZACFrontend';
+import { KeyCloakService } from './services/KeyCloak';
 import { ObjectsService } from './services/Objects';
 import { ObjecttypesService } from './services/Objecttypes';
 import { OpenKlantService } from './services/OpenKlant';
@@ -19,10 +22,10 @@ import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
 
-interface MainStackProps extends StackProps, Configurable { }
+interface MainStackProps extends StackProps, Configurable {}
 
 export class MainStack extends Stack {
-  private readonly configuration;
+  private readonly configuration: Configuration;
   private readonly hostedzone: IHostedZone;
   private readonly vpc: GemeenteNijmegenVpc;
   private readonly cache: CacheDatabase;
@@ -61,12 +64,16 @@ export class MainStack extends Stack {
     this.openKlantRegistrationServices(api);
     this.objecttypesService(api, platform);
     this.objectsService(api, platform);
+    this.keyCloakService(api, platform);
+    this.gzacService(api, platform);
+    this.gzacFrontendService(api, platform);
   }
-
 
   private openKlantService(api: ApiGateway, platform: ContainerPlatform) {
     if (!this.configuration.openklant) {
-      console.warn('No open-klant configuration provided. Skipping creation of open klant service!');
+      console.warn(
+        'No open-klant configuration provided. Skipping creation of open klant service!',
+      );
       return;
     }
     new OpenKlantService(this, 'open-klant', {
@@ -90,9 +97,14 @@ export class MainStack extends Stack {
     });
   }
 
-  private openNotificatiesServices(api: ApiGateway, platform: ContainerPlatform) {
+  private openNotificatiesServices(
+    api: ApiGateway,
+    platform: ContainerPlatform,
+  ) {
     if (!this.configuration.openNotificaties) {
-      console.warn('No open-notificaties configuration provided. Skipping creation of open notification service!');
+      console.warn(
+        'No open-notificaties configuration provided. Skipping creation of open notification service!',
+      );
       return;
     }
     new OpenNotificatiesService(this, 'open-notificaties', {
@@ -117,7 +129,9 @@ export class MainStack extends Stack {
 
   private openZaakServices(api: ApiGateway, platform: ContainerPlatform) {
     if (!this.configuration.openZaak) {
-      console.warn('No open-zaak configuration provided. Skipping creation of open zaak service!');
+      console.warn(
+        'No open-zaak configuration provided. Skipping creation of open zaak service!',
+      );
       return;
     }
     new OpenZaakService(this, 'open-zaak', {
@@ -140,7 +154,10 @@ export class MainStack extends Stack {
     });
   }
 
-  private outputManagementComponent(api: ApiGateway, platform: ContainerPlatform) {
+  private outputManagementComponent(
+    api: ApiGateway,
+    platform: ContainerPlatform,
+  ) {
     if (!this.configuration.outputManagementComponents) {
       console.warn('No OMC configuration provided. Skipping creation of OMC!');
       return;
@@ -154,7 +171,7 @@ export class MainStack extends Stack {
           cluster: platform.cluster,
           link: platform.vpcLink,
           namespace: platform.namespace,
-          port: 80,
+          port: 8080,
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
       });
@@ -163,7 +180,9 @@ export class MainStack extends Stack {
 
   private objecttypesService(api: ApiGateway, platform: ContainerPlatform) {
     if (!this.configuration.objecttypesService) {
-      console.warn('No objecttypes configuration provided. Skipping creation of objecttypes service!');
+      console.warn(
+        'No objecttypes configuration provided. Skipping creation of objecttypes service!',
+      );
       return;
     }
     new ObjecttypesService(this, 'objecttypes', {
@@ -188,7 +207,9 @@ export class MainStack extends Stack {
 
   private objectsService(api: ApiGateway, platform: ContainerPlatform) {
     if (!this.configuration.objectsService) {
-      console.warn('No objects configuration provided. Skipping creation of objects service!');
+      console.warn(
+        'No objects configuration provided. Skipping creation of objects service!',
+      );
       return;
     }
     new ObjectsService(this, 'objects', {
@@ -210,27 +231,109 @@ export class MainStack extends Stack {
       serviceConfiguration: this.configuration.objectsService,
     });
   }
+  private keyCloakService(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.keyCloackService) {
+      console.warn(
+        'No keycloak configuration provided. Skipping creation of keycloak service!',
+      );
+      return;
+    }
+    new KeyCloakService(this, 'keycloak', {
+      hostedzone: this.hostedzone,
+      key: this.key,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'keycloak',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      serviceConfiguration: this.configuration.keyCloackService,
+    });
+  }
+
+  private gzacFrontendService(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.gzacFrontendService) {
+      console.warn('no gzac provided. Skipping creation of objects service!');
+      return;
+    }
+    new GZACFrontendService(this, 'gzac-frontend', {
+      hostedzone: this.hostedzone,
+      key: this.key,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'gzac-ui',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      serviceConfiguration: this.configuration.gzacFrontendService,
+    });
+  }
+
+  private gzacService(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.gzacService) {
+      console.warn('no gzac provided. Skipping creation of objects service!');
+
+      return;
+    }
+
+    new GZACService(this, 'gzac', {
+      hostedzone: this.hostedzone,
+      key: this.key,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'api',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      serviceConfiguration: this.configuration.gzacService,
+    });
+  }
 
   private openKlantRegistrationServices(api: ApiGateway) {
     if (!this.configuration.openKlantRegistrationServices) {
-      console.warn('No openKlantRegistrationServices configuration provided. Skipping creation!');
+      console.warn(
+        'No openKlantRegistrationServices configuration provided. Skipping creation!',
+      );
       return;
     }
-    for (const openKlantRegistrationService of this.configuration.openKlantRegistrationServices) {
-      new OpenKlantRegistrationService(this, openKlantRegistrationService.cdkId, {
-        api: api.api,
-        openKlantRegistrationServiceConfiguration: openKlantRegistrationService,
-        criticality: this.configuration.criticality,
-        key: this.key,
-      });
+    for (const openKlantRegistrationService of this.configuration
+      .openKlantRegistrationServices) {
+      new OpenKlantRegistrationService(
+        this,
+        openKlantRegistrationService.cdkId,
+        {
+          api: api.api,
+          openKlantRegistrationServiceConfiguration:
+            openKlantRegistrationService,
+          criticality: this.configuration.criticality,
+          key: this.key,
+        },
+      );
     }
-
   }
 
   private importHostedzone() {
     return HostedZone.fromHostedZoneAttributes(this, 'hostedzone', {
-      hostedZoneId: StringParameter.valueForStringParameter(this, Statics.ssmAccountRootHostedZoneId),
-      zoneName: StringParameter.valueForStringParameter(this, Statics.ssmAccountRootHostedZoneName),
+      hostedZoneId: StringParameter.valueForStringParameter(
+        this,
+        Statics.ssmAccountRootHostedZoneId,
+      ),
+      zoneName: StringParameter.valueForStringParameter(
+        this,
+        Statics.ssmAccountRootHostedZoneName,
+      ),
     });
   }
 
@@ -242,29 +345,29 @@ export class MainStack extends Stack {
     key.addAlias('mijn-services-general-encryption');
 
     const stack = Stack.of(this);
-    key.addToResourcePolicy(new PolicyStatement({
-      effect: Effect.ALLOW,
-      sid: 'Allow KMS key usage by CloudWatch in this account',
-      principals: [
-        new ServicePrincipal(`logs.${stack.region}.amazonaws.com`),
-      ],
-      actions: [
-        'kms:Encrypt*',
-        'kms:Decrypt*',
-        'kms:ReEncrypt*',
-        'kms:GenerateDataKey*',
-        'kms:Describe*',
-      ],
-      resources: ['*'],
-      conditions: {
-        ArnLike: {
-          'kms:EncryptionContext:aws:logs:arn': `arn:aws:logs:${stack.region}:${stack.account}:*`,
+    key.addToResourcePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        sid: 'Allow KMS key usage by CloudWatch in this account',
+        principals: [
+          new ServicePrincipal(`logs.${stack.region}.amazonaws.com`),
+        ],
+        actions: [
+          'kms:Encrypt*',
+          'kms:Decrypt*',
+          'kms:ReEncrypt*',
+          'kms:GenerateDataKey*',
+          'kms:Describe*',
+        ],
+        resources: ['*'],
+        conditions: {
+          ArnLike: {
+            'kms:EncryptionContext:aws:logs:arn': `arn:aws:logs:${stack.region}:${stack.account}:*`,
+          },
         },
-      },
-    }));
+      }),
+    );
 
     return key;
   }
-
-
 }

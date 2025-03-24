@@ -39,6 +39,14 @@ export interface CreateEcsServiceOptions {
    * @default - No integration, route and servicediscovery are created
    */
   path?: string;
+
+
+  /**
+   * Provide the root path bool to expose the service on the main domain
+   * (bla.com/)
+   */
+  isRootPath?: boolean;
+
   /**
    * Configuration for mount paths in the filesystem.
    * Provide a name and the container mounth path.
@@ -75,8 +83,8 @@ export class EcsServiceFactory {
 
   createTaskDefinition(id: string, options?: Partial<TaskDefinitionProps>) {
     const task = new TaskDefinition(this.scope, `${id}-task`, {
-      cpu: '256',
-      memoryMiB: '512',
+      cpu: options?.cpu ?? '256',
+      memoryMiB: options?.memoryMiB ?? '512',
       compatibility: Compatibility.FARGATE,
       ...options,
     });
@@ -86,7 +94,7 @@ export class EcsServiceFactory {
   createService(options: CreateEcsServiceOptions) {
 
     let cloudmap: CloudMapOptions | undefined = undefined;
-    if (options.path) {
+    if (options.path || options.isRootPath) { //TODO allow root path
       cloudmap = {
         cloudMapNamespace: this.props.namespace,
         containerPort: this.props.port,
@@ -105,9 +113,9 @@ export class EcsServiceFactory {
       ...options.options,
     });
 
-    if (options.path) {
+    if (options.path || options.isRootPath) {
       service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
-      this.addRoute(service, options.path, options.id, options.requestParameters, options.apiVersionHeaderValue);
+      this.addRoute(service, options.path ?? '', options.id, options.requestParameters, options.apiVersionHeaderValue, options.isRootPath);
     }
     if (options.filesystem) {
       this.createFileSytem(service, options);
@@ -211,7 +219,14 @@ export class EcsServiceFactory {
     });
   }
 
-  private addRoute(service: FargateService, path: string, id: string, requestParameters?: Record<string, string>, apiVersionHeaderValue?: string) {
+  private addRoute(service: FargateService,
+    path: string,
+    id: string,
+    requestParameters?: Record<string,
+      string>,
+    apiVersionHeaderValue?: string,
+    isRootPath?: boolean,
+  ) {
     if (!service.cloudMapService) {
       throw Error('Cannot add route if ther\'s no cloudmap service configured');
     }
@@ -251,13 +266,21 @@ export class EcsServiceFactory {
     integration.node.addDependency(service);
     integration.node.addDependency(this.props.link);
 
-    const route = new CfnRoute(this.scope, `${id}-route`, {
-      apiId: this.props.api.apiId,
-      routeKey: `ANY /${path}/{proxy+}`,
-      target: `integrations/${integration.ref}`,
-    });
+    let route;
+    if (isRootPath) {
+      route = new CfnRoute(this.scope, `${id}-route`, {
+        apiId: this.props.api.apiId,
+        routeKey: 'ANY /{proxy+}', // TODO: enable root path
+        target: `integrations/${integration.ref}`,
+      });
+    } else {
+      route = new CfnRoute(this.scope, `${id}-route`, {
+        apiId: this.props.api.apiId,
+        routeKey: `ANY /${path}/{proxy+}`, // TODO: enable root path
+        target: `integrations/${integration.ref}`,
+      });
+    }
     route.addDependency(integration);
-
   }
 
   private apiVersionHeader(apiVersionHeaderValue: string) {
