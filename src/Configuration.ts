@@ -477,9 +477,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         notificatiesApiUrl: 'opennotificaties.woweb.app/api/v1/api/v1',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
-          issuer: 'OMC',
-          userId: 'OMC',
-          username: 'OMC',
+          issuer: 'nijmegen_devops',
+          userId: 'nijmegen_devops',
+          username: 'nijmegen_devops',
         },
         templates: {
           zaakCreateEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
