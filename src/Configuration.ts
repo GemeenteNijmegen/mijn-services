@@ -544,7 +544,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         roltypesToRegister: ['initiator'],
         strategy: 'partijperroldry', // Unique partij per rol (of zaak dus)
         // TODO change from dryrun later (but do not yet write results back to openzaak)
-        enabled: true,
+        enabled: false,
       },
     ],
     openNotificaties: {
