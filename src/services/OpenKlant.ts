@@ -192,8 +192,7 @@ export class OpenKlantService extends Construct {
     const container = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'celery', '--app', 'openklant.celery'],
-        // command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'], // Does not yet have this script
+        command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
