@@ -250,7 +250,7 @@ export class OpenZaakService extends Construct {
     const container = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'celery inspect ping --app openzaak >> /proc/1/fd/1 2>&1'],
+        command: ['CMD-SHELL', 'celery --app openzaak inspect >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },

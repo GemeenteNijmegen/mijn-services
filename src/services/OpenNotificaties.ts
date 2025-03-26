@@ -305,7 +305,7 @@ export class OpenNotificatiesService extends Construct {
     const celeryContainer = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'celery inspect ping --app nrc >> /proc/1/fd/1 2>&1'],
+        command: ['CMD-SHELL', 'celery --app nrc inspect >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
