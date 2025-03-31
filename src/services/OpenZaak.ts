@@ -85,6 +85,7 @@ export class OpenZaakService extends Construct {
       LOG_OUTGOING_REQUESTS_DB_SAVE: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
       LOG_QUERIES: 'False',
       DEBUG: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
+      SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // TODO not used as we do not store documents nor import them... yet
       // IMPORT_DOCUMENTEN_BASE_DIR=${IMPORT_DOCUMENTEN_BASE_DIR:-/app/import-data}

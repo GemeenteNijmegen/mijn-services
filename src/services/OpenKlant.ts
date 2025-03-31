@@ -78,6 +78,7 @@ export class OpenKlantService extends Construct {
       LOG_REQUESTS: 'True',
       LOG_QUERIES: 'False',
       DEBUG: 'True',
+      SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // Celery
       CELERY_BROKER_URL: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,

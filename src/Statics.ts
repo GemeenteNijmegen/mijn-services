@@ -93,4 +93,7 @@ export class Statics {
   static readonly _ssmGZACKeyCloakAdminCredentials = `/${Statics.projectName}/internal/gzac/keycloak/admin/credentials`;
   static readonly _ssmGZACBackendM2MCredentials = `/${Statics.projectName}/internal/gzac/backend/m2m/credentials`;
 
+
+  static readonly sessionTimeoutDefaultSeconds = 12 * 3600;
+
 }

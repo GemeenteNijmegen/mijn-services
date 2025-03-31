@@ -101,6 +101,7 @@ export class OpenNotificatiesService extends Construct {
       LOG_OUTGOING_REQUESTS_DB_SAVE: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
       LOG_QUERIES: 'False',
       DEBUG: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
+      SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // Celery
       CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
