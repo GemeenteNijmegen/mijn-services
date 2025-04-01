@@ -101,6 +101,7 @@ export class OpenNotificatiesService extends Construct {
       LOG_OUTGOING_REQUESTS_DB_SAVE: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
       LOG_QUERIES: 'False',
       DEBUG: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
+      SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // Celery
       CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
@@ -305,7 +306,7 @@ export class OpenNotificatiesService extends Construct {
     const celeryContainer = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'],
+        command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },

@@ -263,6 +263,10 @@ export interface OutputManagementComponentConfiguration {
     username: string;
   };
   /**
+   * Taak objecttype uuid
+   */
+  taakObjecttypeUuid?: string;
+  /**
    * Template UUIDs defined in NotifyNL to use for notifications.
    */
   templates: {
@@ -463,6 +467,8 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           zaakCreateSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
           zaakUpdateSms: '0ff5f21a-2af1-4fd4-8080-45cff34e0df7',
           zaakCloseSms: 'ac885f24-09d8-4702-845f-2f53cd045790',
+          taskAssignedEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
+          taskAssignedSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
         },
       },
       {
@@ -473,14 +479,15 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'openzaak.woweb.app/api/v1',
-        notificatiesApiUrl: 'opennotificaties.woweb.app/api/v1/api/v1',
+        zakenApiUrl: 'openzaak.woweb.app/zaken/api/v1',
+        notificatiesApiUrl: 'opennotificaties.woweb.app/api/v1',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
-          issuer: 'OMC',
-          userId: 'OMC',
-          username: 'OMC',
+          issuer: 'nijmegen_devops',
+          userId: 'nijmegen_devops',
+          username: 'nijmegen_devops',
         },
+        taakObjecttypeUuid: 'd5c77844-7e00-4908-9839-f18a8ac6a045',
         templates: {
           zaakCreateEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
           zaakUpdateEmail: 'e868044f-4a30-42c9-b1bf-8ad95ec2a6b8',
@@ -488,6 +495,8 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           zaakCreateSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
           zaakUpdateSms: '0ff5f21a-2af1-4fd4-8080-45cff34e0df7',
           zaakCloseSms: 'ac885f24-09d8-4702-845f-2f53cd045790',
+          taskAssignedEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
+          taskAssignedSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
         },
       },
     ],

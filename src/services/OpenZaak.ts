@@ -85,6 +85,7 @@ export class OpenZaakService extends Construct {
       LOG_OUTGOING_REQUESTS_DB_SAVE: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
       LOG_QUERIES: 'False',
       DEBUG: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
+      SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // TODO not used as we do not store documents nor import them... yet
       // IMPORT_DOCUMENTEN_BASE_DIR=${IMPORT_DOCUMENTEN_BASE_DIR:-/app/import-data}
@@ -250,7 +251,7 @@ export class OpenZaakService extends Construct {
     const container = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'],
+        command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
