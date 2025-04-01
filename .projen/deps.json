@@ -26,6 +26,10 @@
       "type": "build"
     },
     {
+      "name": "@types/pg-format",
+      "type": "build"
+    },
+    {
       "name": "@typescript-eslint/eslint-plugin",
       "version": "^8",
       "type": "build"
@@ -135,6 +139,10 @@
     },
     {
       "name": "pg",
+      "type": "runtime"
+    },
+    {
+      "name": "pg-format",
       "type": "runtime"
     },
     {

@@ -1,6 +1,7 @@
 import {
-  aws_rds as rds, aws_ec2 as ec2, aws_kms as kms,
   Duration,
+  aws_ec2 as ec2, aws_kms as kms,
+  aws_rds as rds,
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -14,7 +15,7 @@ export interface DatabaseProps {
   databaseSnapshotRetentionDays: number;
 }
 
-export class Database extends Construct {
+export class DatabaseInstance extends Construct {
 
   readonly db: rds.DatabaseInstance;
 

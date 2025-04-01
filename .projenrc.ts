@@ -7,6 +7,7 @@ const project = new GemeenteNijmegenCdkApp({
   devDeps: [
     '@gemeentenijmegen/projen-project-type',
     '@types/pg',
+    '@types/pg-format',
     '@types/jsonwebtoken',
   ],
   deps: [
@@ -17,6 +18,7 @@ const project = new GemeenteNijmegenCdkApp({
     '@gemeentenijmegen/apigateway-http',
     'cdk-remote-stack',
     'pg', // Postgres client 🐘
+    'pg-format', // Postgres formatter (for db name)
     'zod',
     'jsonwebtoken',
     'dotenv',

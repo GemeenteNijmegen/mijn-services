@@ -1,12 +1,12 @@
 import { AWS } from '@gemeentenijmegen/utils';
 import { CdkCustomResourceEvent } from 'aws-lambda';
-import * as postgres from 'pg';
+import { DatabaseInstance } from './DatabaseInstance';
 
 export async function handler(event: CdkCustomResourceEvent) {
   console.log(JSON.stringify(event));
 
   if (event.RequestType == 'Delete') {
-    console.error('Delete events are not implemented for this custom resources! You\'ll have to manually delete the databases');
+    console.error('Delete events are not implemented for this custom resource! You\'ll have to manually delete the databases');
     return;
   }
 
@@ -14,42 +14,30 @@ export async function handler(event: CdkCustomResourceEvent) {
   const credentialsObj = await AWS.getSecret(process.env.DB_CREDENTIALS_ARN!);
   const credentials = JSON.parse(credentialsObj);
 
-  const client = new postgres.Client({
+  const instance = new DatabaseInstance({
     user: credentials.username,
     password: credentials.password,
     host: process.env.DB_HOST!,
     port: parseInt(process.env.DB_PORT!),
-    database: process.env.DB_NAME,
-  });
-  await client.connect();
-
+    database: process.env.DB_NAME!,
+  })
+  
   // Check if databases exist otherwise create them
   const listOfDatabases = event.ResourceProperties.listOfDatabases;
   console.log('Found list of databases', listOfDatabases);
   const databases = listOfDatabases.split(',');
   for (const database of databases) {
-    const exists = await existsDatabase(client, database);
+    const exists = await instance.databaseExists(database);
     if (!exists) {
       console.info('Creating database', database);
-      await createDatabase(client, database);
+      await instance.createDatabase(database);
     } else {
       console.info('Database', database, 'already exists... skipping creation.');
     }
-  }
 
-}
-
-
-async function existsDatabase(client: postgres.Client, name: string) {
-  const resp = await client.query(`SELECT datname FROM pg_catalog.pg_database WHERE datname = '${name}';`);
-  return resp.rowCount !== 0;
-}
-
-async function createDatabase(client: postgres.Client, name: string) {
-  try {
-    await client.query(`CREATE DATABASE "${name}";`);
-  } catch ( err ) {
-    console.error(err);
-    throw Error(`Could not create database ${name}`);
+    // TODO: Add user for this db if it hasn't been created yet
+    if(!instance.userExists(database)) {
+      console.info('No user exists for database', database);
+    }
   }
 }

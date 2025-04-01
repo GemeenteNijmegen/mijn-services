@@ -5,7 +5,7 @@ import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
-import { Database } from './constructs/Database';
+import { DatabaseInstance } from './constructs/Database';
 import { CreateDatabasesFunction } from './custom-resources/create-databases/create-databases-function';
 import { Statics } from './Statics';
 
@@ -23,7 +23,7 @@ export class DatabaseStack extends Stack {
     this.credentials = Secret.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.vpc = new GemeenteNijmegenVpc(this, 'vpc');
 
-    this.database = new Database(this, 'database', {
+    this.database = new DatabaseInstance(this, 'database', {
       databaseSecret: this.credentials,
       vpc: this.vpc.vpc,
       databaseSnapshotRetentionDays: props.configuration.databaseSnapshotRetentionDays ?? 35,
