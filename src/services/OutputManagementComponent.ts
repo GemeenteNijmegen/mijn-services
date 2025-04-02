@@ -157,8 +157,8 @@ export class OMCService extends Construct {
       NOTIFY_API_KEY: EcsSecret.fromSecretsManager(this.configurationParameters.notify),
 
       // API keys for ZGW(ish) components
-      ZGW_AUTH_KEY_OBJECTEN: EcsSecret.fromSecretsManager(this.configurationParameters.objectenApiSecret),
-      ZGW_AUTH_KEY_OBJECTTYPEN: EcsSecret.fromSecretsManager(this.configurationParameters.objecttypenenApiSecret),
+      ZGW_AUTH_KEY_OBJECTEN: EcsSecret.fromSecretsManager(this.configurationParameters.objectenApiKey),
+      ZGW_AUTH_KEY_OBJECTTYPEN: EcsSecret.fromSecretsManager(this.configurationParameters.objecttypenApiKey),
 
     };
     return secrets;
