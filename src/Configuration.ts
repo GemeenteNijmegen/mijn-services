@@ -222,10 +222,6 @@ export interface OutputManagementComponentConfiguration {
    */
   image: string;
   /**
-   * Log level for the container
-   */
-  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
-  /**
    * Enable debug mode and logging
    */
   debug?: boolean;
@@ -252,6 +248,21 @@ export interface OutputManagementComponentConfiguration {
    * configured using the console.
    */
   notificatiesApiUrl: string;
+  /**
+   * API URL (net als zaken api url) voor objecten API
+   * @default none
+   */
+  objectenApiUrl?: string;
+  /**
+   * API URL (net als zaken api url) voor objecttypen API
+   * @default none
+   */
+  objecttypenApiUrl?: string;
+  /**
+   * API URL (net als zaken api url) voor besluiten API
+   * @default none
+   */
+  besluitenApiUrl?: string;
   /**
    * Information to include in the ZGW token
    * build for authenticating at other ZGW APIs.
@@ -446,7 +457,6 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         cdkId: 'local-omc',
         path: 'local-omc', // Without /
         image: 'worthnl/notifynl-omc:1.14.6',
-        logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
         openKlantUrl:
@@ -475,12 +485,13 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         cdkId: 'woweb-omc',
         path: 'woweb-omc', // Without /
         image: 'worthnl/notifynl-omc:1.14.6',
-        logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'openzaak.woweb.app/zaken/api/v1',
         notificatiesApiUrl: 'opennotificaties.woweb.app/api/v1',
+        objectenApiUrl: 'objects-api.woweb.app/api/v2',
+        objecttypenApiUrl: 'objecttypes-api.woweb.app/api/v2',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'nijmegen_devops',
