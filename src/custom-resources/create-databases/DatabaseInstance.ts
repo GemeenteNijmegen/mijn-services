@@ -2,10 +2,8 @@ import * as postgres from 'pg';
 import format from 'pg-format';
 
 export class DatabaseInstance {
-  private pool: postgres.Pool;
+  public pool: postgres.Pool;
   private config: postgres.PoolConfig;
-  private client?: postgres.PoolClient; // Used for transactions;
-  private inTransaction: boolean = false;
   constructor(config: {
     user: string;
     password: string;
@@ -17,37 +15,22 @@ export class DatabaseInstance {
     this.pool = new postgres.Pool(config);
   }
 
-  // Return the client if a transaction is open
-  // Otherwise return the pool
-  currentClient() {
-    return this.inTransaction && this.client ? this.client : this.pool;
+  async startTransaction(client: postgres.Client) {
+    await client.query('BEGIN');
   }
 
-  async close() {
-    this.pool.end();
-  }
-
-  async startTransaction() {
-    this.client = await this.pool.connect();
-    await this.client.query('BEGIN');
-    this.inTransaction = true;
-  }
-
-  async endTransaction(commit: boolean) {
+  async endTransaction(client: postgres.Client, commit: boolean) {
     if(commit) {
-      await this.client?.query('COMMIT');
+      await client?.query('COMMIT');
     } else {
-      await this.client?.query('ROLLBACK');
+      await client?.query('ROLLBACK');
     }
-    this.client?.release();
-    this.client = undefined;
-    this.inTransaction = false;
   }
 
 
   async connected() {
     const connectedString = 'Connection to postgres successful!';
-    const res = await this.currentClient().query('SELECT $1::text as connected', ['']);
+    const res = await this.pool.query('SELECT $1::text as connected', ['']);
     console.debug(res);
     if((res.rows[0].connected) == connectedString) {
       return true;
@@ -56,53 +39,61 @@ export class DatabaseInstance {
   }
 
   async userExists(name: string) {
-    const resp = await this.currentClient().query(`SELECT FROM pg_catalog.pg_roles WHERE rolname = $1;`, [name]);
+    const resp = await this.pool.query(`SELECT FROM pg_catalog.pg_roles WHERE rolname = $1;`, [name]);
+    console.debug(`role ${name} exists? `, resp);
     return resp.rowCount !== 0;
   }
 
   // Create a user, and grant full access to the database of the same name
-  async createUserWithAccessToDb(name: string) {
-      // FIRST CONNECT TO THE DB USER should have ACCESS to
-      if(!this.databaseExists(name)) {
+  async createUserWithAccessToDb(name: string, password: string) {
+      if(!await this.databaseExists(name)) {
         throw Error('Cant create user for nonexistent database');
       }
+      // FIRST CONNECT TO THE DB USER should have ACCESS to
       const newDBConf = this.config;
       newDBConf.database = name;
-      const newDBPool = new postgres.Pool(newDBConf);
+      const newDbClient = new postgres.Client(newDBConf);
+      await newDbClient.connect();
       try {
-        this.startTransaction();
-        const dbResult = await newDBPool.query('SELECT current_database();');
+        await this.startTransaction(newDbClient);
+        const dbResult = await newDbClient.query('SELECT current_database();');
         const current = dbResult.rows[0].current_database;
         if(dbResult.rows[0].current_database !== name) {
           throw Error(`Connected to incorrect db (current: ${current}), aborting`);
         }
+        console.debug('Connected to DB ', dbResult.rows[0].current_database);
 
-        newDBPool.query(format('CREATE ROLE %I WITH LOGIN', name));
-        newDBPool.query(format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I;', name, name));
+        await newDbClient.query(format('CREATE ROLE %I WITH LOGIN PASSWORD %L', name, password));
+        await newDbClient.query(format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I;', name, name));
         //bestaande tabellen
-        newDBPool.query(format('GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO %I;', name)); 
+        await newDbClient.query(format('GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO %I;', name)); 
         //bestaande sequences
-        newDBPool.query(format('GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO %I;', name, name)); 
+        await newDbClient.query(format('GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO %I;', name, name)); 
         //nieuwe tabellen
-        newDBPool.query(format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public GRANT ALL ON TABLES TO %I;', name, name)); 
+        await newDbClient.query(format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public GRANT ALL ON TABLES TO %I;', name, name)); 
         //nieuwe sequences
-        newDBPool.query(format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public GRANT ALL ON SEQUENCES TO %I;', name, name)); 
+        await newDbClient.query(format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public GRANT ALL ON SEQUENCES TO %I;', name, name));
+        await this.endTransaction(newDbClient, true); 
+        await newDbClient.end();
       } catch (error) {
-        this.endTransaction(false);
+        await this.endTransaction(newDbClient, false);
         console.log('Unexpected error: rolled back transaction in createUserWithAccessToDb');
         throw(error);
       }
   }
 
   async databaseExists(name: string) {
-    const resp = await this.currentClient().query(`SELECT datname FROM pg_catalog.pg_database WHERE datname = $1;`, [name]);
+    console.debug('check existence');
+    const resp = await this.pool.query(`SELECT datname FROM pg_catalog.pg_database WHERE datname = $1;`, [name]);
+    console.debug('completed query');
     return resp.rowCount !== 0;
   }
 
   async createDatabase(name: string) {
     try {
+      console.debug('Creating database', name);
       const query = format('CREATE DATABASE %I', name);
-      await this.currentClient().query(query);
+      await this.pool.query(query);
     } catch (err) {
       console.error(err);
       throw Error(`Could not create database ${name}`);
