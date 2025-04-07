@@ -9,7 +9,7 @@ import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServ
 import { Statics } from '../Statics';
 
 const DEFAULT_UUID = '00000000-0000-0000-0000-000000000000';
-
+const DEFAULT_DOMAIN = 'example.com/not-in-use';
 export interface OMCServiceProps {
   service: EcsServiceFactoryProps;
   omcConfiguration: OutputManagementComponentConfiguration;
@@ -63,11 +63,26 @@ export class OMCService extends Construct {
       secretName: ssmNotifyNlApiKey,
     });
 
+    // Objecten API key
+    const ssmObjectenApiKey = `/${Statics.projectName}/omc/${id}/objecten/api-key`;
+    const objectenApiKey = new Secret(this, 'objecten-api-key', {
+      description: `API key for OMC (${id}) to authenticate at Objecten API (tasks)`,
+      secretName: ssmObjectenApiKey,
+    });
+    // Objecttypen API key
+    const ssmObjecttypenApiKey = `/${Statics.projectName}/omc/${id}/objecttypen/api-key`;
+    const objecttypenApiKey = new Secret(this, 'objecttypen-api-key', {
+      description: `API key for OMC (${id}) to authenticate at objecttypen API (tasks)`,
+      secretName: ssmObjecttypenApiKey,
+    });
+
     return {
       openklant: openKlantApiKey,
       notify: notifyNlApiKey,
       omcJwt: omcJwtSecret,
       zgwJwt: zgwJwtSecret,
+      objectenApiKey,
+      objecttypenApiKey,
     };
   }
 
@@ -93,31 +108,26 @@ export class OMCService extends Construct {
       ZGW_AUTH_JWT_USERID: this.props.omcConfiguration.zgwTokenInformation.userId, //  This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
       ZGW_AUTH_JWT_USERNAME: this.props.omcConfiguration.zgwTokenInformation.username, // This JWT token will be generated from secret, and other JWT claims, configured from UI of OpenZaak Web API service. Identical details (secret, iss, aud, exp, etc) as in Open services needs to be used here
 
-      // API keys for ZGW(ish) components
-      ZGW_AUTH_KEY_OBJECTEN: 'NOT IN USE', // Cannot be missing and have null or empty value 	It needs to be generated from "Objecten" Web API service UI
-      ZGW_AUTH_KEY_OBJECTTYPEN: 'NOT IN USE', // Cannot be missing and have null or empty value 	It needs to be generated from "ObjectTypen" Web API service UI
-
       // Domains for ZGW(ish) components
       ZGW_ENDPOINT_OPENNOTIFICATIES: this.props.omcConfiguration.notificatiesApiUrl, // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
       ZGW_ENDPOINT_OPENZAAK: this.props.omcConfiguration.zakenApiUrl, // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
       ZGW_ENDPOINT_OPENKLANT: this.props.omcConfiguration.openKlantUrl, // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
-      ZGW_ENDPOINT_OBJECTEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
-      ZGW_ENDPOINT_OBJECTTYPEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
-      ZGW_ENDPOINT_BESLUITEN: 'mijn-services.accp.nijmegen.nl/not-in-use', // NOT USED NOW
+      ZGW_ENDPOINT_OBJECTEN: this.props.omcConfiguration.objectenApiUrl ?? DEFAULT_DOMAIN, // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
+      ZGW_ENDPOINT_OBJECTTYPEN: this.props.omcConfiguration.objecttypenApiUrl ?? DEFAULT_DOMAIN, // You have to use ONLY the domain part from URLs where you are hosting the dedicated Open services
+      ZGW_ENDPOINT_BESLUITEN: this.props.omcConfiguration.besluitenApiUrl ?? DEFAULT_DOMAIN,
       ZGW_ENDPOINT_CONTACTMOMENTEN: this.props.omcConfiguration.openKlantUrl,
 
       // Template references in Notify
       NOTIFY_TEMPLATEID_EMAIL_ZAAKCREATE: this.props.omcConfiguration.templates.zaakCreateEmail ?? DEFAULT_UUID,
       NOTIFY_TEMPLATEID_EMAIL_ZAAKUPDATE: this.props.omcConfiguration.templates.zaakUpdateEmail ?? DEFAULT_UUID,
       NOTIFY_TEMPLATEID_EMAIL_ZAAKCLOSE: this.props.omcConfiguration.templates.zaakCloseEmail ?? DEFAULT_UUID,
-      NOTIFY_TEMPLATEID_EMAIL_TASKASSIGNED: DEFAULT_UUID,
+      NOTIFY_TEMPLATEID_EMAIL_TASKASSIGNED: this.props.omcConfiguration.templates.taskAssignedEmail ?? DEFAULT_UUID,
       NOTIFY_TEMPLATEID_EMAIL_MESSAGERECEIVED: DEFAULT_UUID,
       NOTIFY_TEMPLATEID_SMS_ZAAKCREATE: this.props.omcConfiguration.templates.zaakCreateSms ?? DEFAULT_UUID,
       NOTIFY_TEMPLATEID_SMS_ZAAKUPDATE: this.props.omcConfiguration.templates.zaakUpdateSms ?? DEFAULT_UUID,
       NOTIFY_TEMPLATEID_SMS_ZAAKCLOSE: this.props.omcConfiguration.templates.zaakCloseSms ?? DEFAULT_UUID,
-      NOTIFY_TEMPLATEID_SMS_TASKASSIGNED: DEFAULT_UUID,
+      NOTIFY_TEMPLATEID_SMS_TASKASSIGNED: this.props.omcConfiguration.templates.taskAssignedSms ?? DEFAULT_UUID,
       NOTIFY_TEMPLATEID_SMS_MESSAGE: DEFAULT_UUID,
-
 
       // Whitelisted IDs used by OMC web API?
       // Let op: Dit zijn de UUIDs van de zaaktypes etc. De URL wordt zelf opgebouwd.
@@ -145,6 +155,11 @@ export class OMCService extends Construct {
       ZGW_AUTH_KEY_OPENKLANT: EcsSecret.fromSecretsManager(this.configurationParameters.openklant),
       USER_API_KEY_OPENKLANT_2: EcsSecret.fromSecretsManager(this.configurationParameters.openklant), //TODO does this exist?
       NOTIFY_API_KEY: EcsSecret.fromSecretsManager(this.configurationParameters.notify),
+
+      // API keys for ZGW(ish) components
+      ZGW_AUTH_KEY_OBJECTEN: EcsSecret.fromSecretsManager(this.configurationParameters.objectenApiKey),
+      ZGW_AUTH_KEY_OBJECTTYPEN: EcsSecret.fromSecretsManager(this.configurationParameters.objecttypenApiKey),
+
     };
     return secrets;
   }

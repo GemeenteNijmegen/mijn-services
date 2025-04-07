@@ -222,10 +222,6 @@ export interface OutputManagementComponentConfiguration {
    */
   image: string;
   /**
-   * Log level for the container
-   */
-  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
-  /**
    * Enable debug mode and logging
    */
   debug?: boolean;
@@ -252,6 +248,21 @@ export interface OutputManagementComponentConfiguration {
    * configured using the console.
    */
   notificatiesApiUrl: string;
+  /**
+   * API URL (net als zaken api url) voor objecten API
+   * @default none
+   */
+  objectenApiUrl?: string;
+  /**
+   * API URL (net als zaken api url) voor objecttypen API
+   * @default none
+   */
+  objecttypenApiUrl?: string;
+  /**
+   * API URL (net als zaken api url) voor besluiten API
+   * @default none
+   */
+  besluitenApiUrl?: string;
   /**
    * Information to include in the ZGW token
    * build for authenticating at other ZGW APIs.
@@ -446,7 +457,6 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         cdkId: 'local-omc',
         path: 'local-omc', // Without /
         image: 'worthnl/notifynl-omc:1.14.6',
-        logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
         openKlantUrl:
@@ -475,12 +485,13 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         cdkId: 'woweb-omc',
         path: 'woweb-omc', // Without /
         image: 'worthnl/notifynl-omc:1.14.6',
-        logLevel: 'DEBUG',
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'openzaak.woweb.app/zaken/api/v1',
         notificatiesApiUrl: 'opennotificaties.woweb.app/api/v1',
+        objectenApiUrl: 'objects-api.woweb.app/api/v2',
+        objecttypenApiUrl: 'objecttypes-api.woweb.app/api/v2',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'nijmegen_devops',
@@ -492,11 +503,11 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           zaakCreateEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
           zaakUpdateEmail: 'e868044f-4a30-42c9-b1bf-8ad95ec2a6b8',
           zaakCloseEmail: '14cebdee-a179-4e0e-b7de-c660fdd47c57',
+          taskAssignedEmail: 'ec835216-4629-4bba-ac3a-6bc4770062e8',
           zaakCreateSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
           zaakUpdateSms: '0ff5f21a-2af1-4fd4-8080-45cff34e0df7',
           zaakCloseSms: 'ac885f24-09d8-4702-845f-2f53cd045790',
-          taskAssignedEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
-          taskAssignedSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
+          taskAssignedSms: '2ab3d68e-0a8a-4a9a-b091-0e934ed1c64b',
         },
       },
     ],
@@ -553,7 +564,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         roltypesToRegister: ['initiator'],
         strategy: 'partijperroldry', // Unique partij per rol (of zaak dus)
         // TODO change from dryrun later (but do not yet write results back to openzaak)
-        enabled: false,
+        enabled: true,
       },
     ],
     openNotificaties: {
