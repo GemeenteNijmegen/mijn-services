@@ -69,7 +69,7 @@ export class OMCService extends Construct {
       description: `API key for OMC (${id}) to authenticate at Objecten API (tasks)`,
       secretName: ssmObjectenApiKey,
     });
-    // Objecten API key
+    // Objecttypen API key
     const ssmObjecttypenApiKey = `/${Statics.projectName}/omc/${id}/objecttypen/api-key`;
     const objecttypenApiKey = new Secret(this, 'objecttypen-api-key', {
       description: `API key for OMC (${id}) to authenticate at objecttypen API (tasks)`,
