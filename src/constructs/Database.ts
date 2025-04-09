@@ -1,5 +1,5 @@
 import {
-  aws_rds as rds, aws_ec2 as ec2, aws_kms as kms,
+  aws_rds as rds, aws_ec2 as ec2, aws_kms as kms, aws_backup as backup,
   Duration,
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
@@ -46,6 +46,14 @@ export class Database extends Construct {
       },
       deletionProtection: true,
       backupRetention: Duration.days(props.databaseSnapshotRetentionDays),
+    });
+
+    // Create a backup plan for the database instance
+    const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, 'rds-backup-plan');
+    backupPlan.addSelection('rds-backup-selection', {
+      resources: [
+        backup.BackupResource.fromRdsDatabaseInstance(this.db),
+      ],
     });
 
     new StringParameter(this, 'db-arn', {
