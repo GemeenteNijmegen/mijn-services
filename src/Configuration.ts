@@ -340,6 +340,12 @@ export interface OpenKlantRegistrationServiceConfiguration {
    * Flag to enable processing of notifications
    */
   enabled: boolean;
+  /**
+   * Whitelist of catalogi to respond to based on roltype catalogus field
+   * Provide a whitelist list of uuid's of catalogi.
+   * @default - all catalogi
+   */
+  catalogiWhitelist?: string[];
 }
 
 export interface KeyCloakConfiguration {
@@ -534,6 +540,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         roltypesToRegister: ['initiator'],
         strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
         enabled: true,
+        catalogiWhitelist: [
+          '84f9e30d-8a3e-4ca0-8011-556ae3cbdd41', // VIP catalogus on acceptance
+        ],
       },
     ],
   },
@@ -565,6 +574,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         strategy: 'partijperroldry', // Unique partij per rol (of zaak dus)
         // TODO change from dryrun later (but do not yet write results back to openzaak)
         enabled: true,
+        catalogiWhitelist: [
+          '84f9e30d-8a3e-4ca0-8011-556ae3cbdd41', // VIP catalogus op productie
+        ],
       },
     ],
     openNotificaties: {

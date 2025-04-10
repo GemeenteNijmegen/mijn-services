@@ -22,7 +22,7 @@ import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
 
-interface MainStackProps extends StackProps, Configurable {}
+interface MainStackProps extends StackProps, Configurable { }
 
 export class MainStack extends Stack {
   private readonly configuration: Configuration;
@@ -308,19 +308,13 @@ export class MainStack extends Stack {
       );
       return;
     }
-    for (const openKlantRegistrationService of this.configuration
-      .openKlantRegistrationServices) {
-      new OpenKlantRegistrationService(
-        this,
-        openKlantRegistrationService.cdkId,
-        {
-          api: api.api,
-          openKlantRegistrationServiceConfiguration:
-            openKlantRegistrationService,
-          criticality: this.configuration.criticality,
-          key: this.key,
-        },
-      );
+    for (const openKlantRegistrationService of this.configuration.openKlantRegistrationServices) {
+      new OpenKlantRegistrationService(this, openKlantRegistrationService.cdkId, {
+        api: api.api,
+        openKlantRegistrationServiceConfiguration: openKlantRegistrationService,
+        criticality: this.configuration.criticality,
+        key: this.key,
+      });
     }
   }
 

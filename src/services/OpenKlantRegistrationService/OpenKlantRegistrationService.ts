@@ -69,6 +69,11 @@ export class OpenKlantRegistrationService extends Construct {
       retention: RetentionDays.SIX_MONTHS,
     });
 
+    let environment: Record<string, string> = {};
+    if (this.props.openKlantRegistrationServiceConfiguration.catalogiWhitelist) {
+      environment.CATALOGI_WHITELIST = this.props.openKlantRegistrationServiceConfiguration.catalogiWhitelist.join(',');
+    }
+
     const openKlantConfig = this.props.openKlantRegistrationServiceConfiguration;
     const service = new RegistrationHandlerFunction(this, 'registration-handler', {
       timeout: Duration.seconds(30),
@@ -82,6 +87,7 @@ export class OpenKlantRegistrationService extends Construct {
         DEBUG: openKlantConfig.debug ? 'true' : 'false',
         ROLTYPES_TO_REGISTER: openKlantConfig.roltypesToRegister.join(','),
         STRATEGY: this.props.openKlantRegistrationServiceConfiguration.strategy,
+        ...environment,
       },
       logGroup: logs,
       loggingFormat: LoggingFormat.JSON,

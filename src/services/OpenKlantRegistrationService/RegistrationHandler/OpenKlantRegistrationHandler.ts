@@ -12,6 +12,12 @@ export interface OpenKlantRegistrationServiceProps {
   readonly openKlantApi: IOpenKlantApi;
   readonly catalogiApi: ICatalogiApi;
   readonly roltypesToRegister: string[];
+  /**
+   * Limit from what catalogi the registration
+   * service responds.
+   * @default - all catalogi
+   */
+  readonly catalogusUuids?: string[];
 }
 
 export class OpenKlantRegistrationHandler {
