@@ -41,6 +41,7 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
       clientSecret: zgwClientSecret,
     }),
     roltypesToRegister: env.ROLTYPES_TO_REGISTER.split(','),
+    catalogusUuids: process.env.CATALOGI_WHITELIST ? process.env.CATALOGI_WHITELIST.split(',') : undefined,
   };
 
 }

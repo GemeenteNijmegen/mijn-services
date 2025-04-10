@@ -42,6 +42,14 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     const rol = await this.configuration.zakenApi.getRol(rolUrl);
     const rolType = await this.configuration.catalogiApi.getRolType(rol.roltype);
 
+    if (this.configuration.catalogusUuids) {
+      const inWhitelist = this.configuration.catalogusUuids.find(catalogusUuid => rolType.catalogus && rolType.catalogus.includes(catalogusUuid));
+      if (!inWhitelist) {
+        logger.debug('Catalogus of roltype is not in the configured whitelist of catalogi, ignoring notification');
+        return Response.ok();
+      }
+    }
+
     if (rol.betrokkene) {
       logger.debug('Rol alreay had betrokkene url set. Skipping update...');
       return Response.ok();
