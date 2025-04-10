@@ -48,8 +48,11 @@ export class Database extends Construct {
       backupRetention: Duration.days(props.databaseSnapshotRetentionDays),
     });
 
+    // Use the default backup vault for the backup plan
+    const defaultBackupVault = backup.BackupVault.fromBackupVaultName(this, 'default-backup-vault', 'Default');
+
     // Create a backup plan for the database instance
-    const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, 'rds-backup-plan');
+    const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, 'rds-backup-plan', defaultBackupVault);
     backupPlan.addSelection('rds-backup-selection', {
       resources: [
         backup.BackupResource.fromRdsDatabaseInstance(this.db),
