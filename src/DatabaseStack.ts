@@ -11,6 +11,11 @@ import { Statics } from './Statics';
 
 interface DatabaseStackProps extends StackProps, Configurable {}
 
+
+/**
+ * Creates the database instance (only one currenlty)
+ * and create the databases.
+ */
 export class DatabaseStack extends Stack {
 
   public readonly database;

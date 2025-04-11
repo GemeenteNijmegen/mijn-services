@@ -4,6 +4,7 @@ import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { DatabaseStack } from './DatabaseStack';
 import { MainStack } from './MainStack';
+import { StorageStack } from './StorageStack';
 
 interface MijnServicesStageProps extends StageProps, Configurable {}
 
@@ -13,24 +14,19 @@ export class MijnServicesStage extends Stage {
     super(scope, id, props);
     Aspects.of(this).add(new PermissionsBoundaryAspect());
 
-    /**
-     * Creates the database instance (only one currenlty)
-     * and create the databases.
-     */
-    const databasestack = new DatabaseStack(this, 'database-stack', {
+    const databaseStack = new DatabaseStack(this, 'database-stack', {
       env: props.configuration.deploymentEnvironment,
       configuration: props.configuration,
     });
 
-    /**
-     * Main stack of this project
-     * Constains resources such as loadbalancer, cloudfront, apigateway, fargate cluster
-     */
-    const mainstack = new MainStack(this, 'stack', { // Translates to mijn-services-stack
-      env: props.configuration.deploymentEnvironment,
+    const storageStack = new StorageStack(this, 'storage-stack');
+
+    const mainStack = new MainStack(this, 'stack', {
+      env: props.configuration.deploymentEnvironment, // Translates to mijn-services-stack
       configuration: props.configuration,
     });
-    mainstack.addDependency(databasestack, 'Services in main stack need the DB to be created');
+    mainStack.addDependency(databaseStack, 'Services in main stack need the DB to be created');
+    mainStack.addDependency(storageStack, 'Services in main stack need the storage (filesystem) to be created');
 
   }
 

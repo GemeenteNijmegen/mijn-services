@@ -186,6 +186,10 @@ export class OpenZaakService extends Construct {
         desiredCount: 1,
       },
       apiVersionHeaderValue: this.props.openZaakConfiguration.apiVersion,
+      volumeMounts: {
+        'media': 'app/media',
+        'private-media': 'app/private-media',
+      },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);

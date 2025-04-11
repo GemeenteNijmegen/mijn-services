@@ -5,7 +5,9 @@ import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinit
 import { AccessPoint, FileSystem } from 'aws-cdk-lib/aws-efs';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { Statics } from '../Statics';
 
 
 export interface EcsServiceFactoryProps {
@@ -53,7 +55,7 @@ export interface CreateEcsServiceOptions {
    * A filesystem is automatically created.
    * @default - no filesystem is created
    */
-  filesystem?: Record<string, string>;
+  volumeMounts?: Record<string, string>;
   /**
    * Pass request rewrite paraemters to the API gateway integration.
    * @see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigatewayv2-integration.html#cfn-apigatewayv2-integration-requestparameters
@@ -117,8 +119,8 @@ export class EcsServiceFactory {
       service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
       this.addRoute(service, options.path ?? '', options.id, options.requestParameters, options.apiVersionHeaderValue, options.isRootPath);
     }
-    if (options.filesystem) {
-      this.createFileSytem(service, options);
+    if (options.volumeMounts) {
+      this.createVolumes(service, options);
     }
 
     return service;
@@ -164,15 +166,16 @@ export class EcsServiceFactory {
     });
   }
 
-  private createFileSytem(service: FargateService, options: CreateEcsServiceOptions) {
-    const privateFileSystemSecurityGroup = new SecurityGroup(this.scope, 'efs-security-group', {
-      vpc: this.props.cluster.vpc,
-    });
+  private createVolumes(service: FargateService, options: CreateEcsServiceOptions) {
 
-    const fileSystem = new FileSystem(this.scope, 'esf-filesystem', {
-      encrypted: true,
-      vpc: this.props.cluster.vpc,
-      securityGroup: privateFileSystemSecurityGroup,
+    const securityGroupId = StringParameter.valueForStringParameter(this.scope, Statics._ssmFilesystemSecurityGroupId);
+    const securityGroup = SecurityGroup.fromSecurityGroupId(this.scope, 'sg', securityGroupId);
+    //import the storage stack filesystem and security group here
+
+    const fileSystemArn = StringParameter.valueForStringParameter(this.scope, Statics._ssmFilesystemArn);
+    const fileSystem = FileSystem.fromFileSystemAttributes(this.scope, 'ImportedFileSystem', {
+      fileSystemArn: fileSystemArn,
+      securityGroup: securityGroup,
     });
 
     const fileSystemAccessPoint = new AccessPoint(this.scope, 'esf-access-point', {
@@ -199,7 +202,7 @@ export class EcsServiceFactory {
       transitEncryption: 'ENABLED',
     };
 
-    const volumes = Object.entries(options.filesystem ?? {});
+    const volumes = Object.entries(options.volumeMounts ?? {});
     for (const volume of volumes) {
       const name = volume[0];
       const containerPath = volume[1];
@@ -215,7 +218,7 @@ export class EcsServiceFactory {
     }
 
     service.connections.securityGroups.forEach(sg => {
-      privateFileSystemSecurityGroup.addIngressRule(sg, Port.NFS);
+      securityGroup.addIngressRule(sg, Port.NFS);
     });
   }
 
