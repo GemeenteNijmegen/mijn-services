@@ -1,8 +1,8 @@
 import { Duration } from 'aws-cdk-lib';
 import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
-import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
-import { AccessPoint, FileSystem } from 'aws-cdk-lib/aws-efs';
+import { AccessPoint, FileSystem, IFileSystem } from 'aws-cdk-lib/aws-efs';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -20,8 +20,8 @@ export interface EcsServiceFactoryProps {
 }
 
 interface volumeMounts {
-  fileSystemRoot: string,
-  volumes: Record<string, string>
+  fileSystemRoot: string;
+  volumes: Record<string, string>;
 }
 
 export interface CreateEcsServiceOptions {
@@ -83,6 +83,9 @@ export class EcsServiceFactory {
   private readonly props: EcsServiceFactoryProps;
   private readonly scope: Construct;
 
+  private filesystem?: IFileSystem;
+  private securitygroup?: ISecurityGroup;
+
   constructor(scope: Construct, props: EcsServiceFactoryProps) {
     this.scope = scope;
     this.props = props;
@@ -125,7 +128,7 @@ export class EcsServiceFactory {
       this.addRoute(service, options.path ?? '', options.id, options.requestParameters, options.apiVersionHeaderValue, options.isRootPath);
     }
     if (options.volumeMounts) {
-      this.createVolumes(service, options.volumeMounts);
+      this.createVolumes(service, options.id, options.volumeMounts);
     }
 
     return service;
@@ -170,25 +173,18 @@ export class EcsServiceFactory {
     });
   }
 
-  private createVolumes(service: FargateService, volumeMounts: volumeMounts) {
+  private createVolumes(service: FargateService, id: string, volumeMounts: volumeMounts) {
 
-    const securityGroupId = StringParameter.valueForStringParameter(this.scope, Statics._ssmFilesystemSecurityGroupId);
-    const securityGroup = SecurityGroup.fromSecurityGroupId(this.scope, 'sg', securityGroupId);
-    //import the storage stack filesystem and security group here
+    const fileSystem = this.getImportedFileSystem();
+    const securityGroup = this.getImportedFileSystemSecurityGroup();
 
-    const fileSystemArn = StringParameter.valueForStringParameter(this.scope, Statics._ssmFilesystemArn);
-    const fileSystem = FileSystem.fromFileSystemAttributes(this.scope, 'ImportedFileSystem', {
-      fileSystemArn: fileSystemArn,
-      securityGroup: securityGroup,
-    });
-
-    const fileSystemAccessPoint = new AccessPoint(this.scope, 'esf-access-point', {
+    const fileSystemAccessPoint = new AccessPoint(this.scope, `${id}-esf-access-point`, {
       fileSystem: fileSystem,
       /**
        * Dit moet configureerbaar zijn vrees ik: Soms wil je dat twee containers bij dezelfde
        * data kunnen, soms juist niet. Als je dan het path aanpast hebben ze hun eigen 'root'.
        */
-      path: volumeMounts.fileSystemRoot, 
+      path: volumeMounts.fileSystemRoot,
       createAcl: {
         ownerGid: '1000',
         ownerUid: '1000',
@@ -227,6 +223,29 @@ export class EcsServiceFactory {
     service.connections.securityGroups.forEach(sg => {
       securityGroup.addIngressRule(sg, Port.NFS);
     });
+  }
+
+  private getImportedFileSystem() {
+    const securityGroup = this.getImportedFileSystemSecurityGroup();
+    if (!this.filesystem) {
+      const fileSystemArn = StringParameter.valueForStringParameter(this.scope, Statics._ssmFilesystemArn);
+      const fileSystem = FileSystem.fromFileSystemAttributes(this.scope, 'ImportedFileSystem', {
+        fileSystemArn: fileSystemArn,
+        securityGroup,
+      });
+      this.filesystem = fileSystem;
+    }
+    return this.filesystem;
+  }
+
+  private getImportedFileSystemSecurityGroup() {
+    if (!this.securitygroup) {
+      const securityGroupId = StringParameter.valueForStringParameter(this.scope, Statics._ssmFilesystemSecurityGroupId);
+      const securityGroup = SecurityGroup.fromSecurityGroupId(this.scope, 'sg', securityGroupId);
+      //import the storage stack filesystem and security group here
+      this.securitygroup = securityGroup;
+    }
+    return this.securitygroup;
   }
 
   private addRoute(service: FargateService,

@@ -190,7 +190,7 @@ export class OpenZaakService extends Construct {
         volumes: {
           'media': 'app/media',
           'private-media': 'app/private-media',
-        }
+        },
       },
     });
 
@@ -288,7 +288,7 @@ export class OpenZaakService extends Construct {
         volumes: {
           'media': 'app/media',
           'private-media': 'app/private-media',
-        }
+        },
       },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
