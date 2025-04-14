@@ -19,6 +19,11 @@ export interface EcsServiceFactoryProps {
   port: number;
 }
 
+interface volumeMounts {
+  fileSystemRoot: string,
+  volumes: Record<string, string>
+}
+
 export interface CreateEcsServiceOptions {
   /**
    * Provide an cdk id for the service as the resources are created
@@ -55,7 +60,7 @@ export interface CreateEcsServiceOptions {
    * A filesystem is automatically created.
    * @default - no filesystem is created
    */
-  volumeMounts?: Record<string, string>;
+  volumeMounts?: volumeMounts;
   /**
    * Pass request rewrite paraemters to the API gateway integration.
    * @see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigatewayv2-integration.html#cfn-apigatewayv2-integration-requestparameters
@@ -120,7 +125,7 @@ export class EcsServiceFactory {
       this.addRoute(service, options.path ?? '', options.id, options.requestParameters, options.apiVersionHeaderValue, options.isRootPath);
     }
     if (options.volumeMounts) {
-      this.createVolumes(service, options);
+      this.createVolumes(service, options.volumeMounts);
     }
 
     return service;
@@ -134,7 +139,6 @@ export class EcsServiceFactory {
         sourceVolume: name,
       });
     });
-
   }
 
   /**
@@ -166,7 +170,7 @@ export class EcsServiceFactory {
     });
   }
 
-  private createVolumes(service: FargateService, options: CreateEcsServiceOptions) {
+  private createVolumes(service: FargateService, volumeMounts: volumeMounts) {
 
     const securityGroupId = StringParameter.valueForStringParameter(this.scope, Statics._ssmFilesystemSecurityGroupId);
     const securityGroup = SecurityGroup.fromSecurityGroupId(this.scope, 'sg', securityGroupId);
@@ -180,8 +184,11 @@ export class EcsServiceFactory {
 
     const fileSystemAccessPoint = new AccessPoint(this.scope, 'esf-access-point', {
       fileSystem: fileSystem,
-
-      path: '/data',
+      /**
+       * Dit moet configureerbaar zijn vrees ik: Soms wil je dat twee containers bij dezelfde
+       * data kunnen, soms juist niet. Als je dan het path aanpast hebben ze hun eigen 'root'.
+       */
+      path: volumeMounts.fileSystemRoot, 
       createAcl: {
         ownerGid: '1000',
         ownerUid: '1000',
@@ -202,7 +209,7 @@ export class EcsServiceFactory {
       transitEncryption: 'ENABLED',
     };
 
-    const volumes = Object.entries(options.volumeMounts ?? {});
+    const volumes = Object.entries(volumeMounts.volumes ?? {});
     for (const volume of volumes) {
       const name = volume[0];
       const containerPath = volume[1];

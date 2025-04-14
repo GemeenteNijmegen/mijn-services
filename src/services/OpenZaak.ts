@@ -112,7 +112,6 @@ export class OpenZaakService extends Construct {
       DEMO_CONFIG_ENABLE: 'False',
       DEMO_CLIENT_ID: 'demo-client',
       DEMO_SECRET: 'demo-secret',
-
     };
   }
 
@@ -187,10 +186,14 @@ export class OpenZaakService extends Construct {
       },
       apiVersionHeaderValue: this.props.openZaakConfiguration.apiVersion,
       volumeMounts: {
-        'media': 'app/media',
-        'private-media': 'app/private-media',
+        fileSystemRoot: '/openzaak',
+        volumes: {
+          'media': 'app/media',
+          'private-media': 'app/private-media',
+        }
       },
     });
+
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
@@ -279,6 +282,13 @@ export class OpenZaakService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
+      },
+      volumeMounts: {
+        fileSystemRoot: '/openzaak',
+        volumes: {
+          'media': 'app/media',
+          'private-media': 'app/private-media',
+        }
       },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
