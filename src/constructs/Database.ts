@@ -1,5 +1,5 @@
 import {
-  aws_rds as rds, aws_ec2 as ec2, aws_kms as kms, aws_backup as backup,
+  aws_rds as rds, aws_ec2 as ec2, aws_kms as kms,
   Duration,
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
@@ -46,17 +46,6 @@ export class Database extends Construct {
       },
       deletionProtection: true,
       backupRetention: Duration.days(props.databaseSnapshotRetentionDays),
-    });
-
-    // Use the default backup vault for the backup plan
-    const defaultBackupVault = backup.BackupVault.fromBackupVaultName(this, 'default-backup-vault', 'Default');
-
-    // Create a backup plan for the database instance
-    const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, 'rds-backup-plan', defaultBackupVault);
-    backupPlan.addSelection('rds-backup-selection', {
-      resources: [
-        backup.BackupResource.fromRdsDatabaseInstance(this.db),
-      ],
     });
 
     new StringParameter(this, 'db-arn', {
