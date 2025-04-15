@@ -24,6 +24,10 @@ import { Statics } from './Statics';
 
 interface MainStackProps extends StackProps, Configurable { }
 
+/**
+ * Main stack of this project
+ * Constains resources such as loadbalancer, cloudfront, apigateway, fargate cluster
+ */
 export class MainStack extends Stack {
   private readonly configuration: Configuration;
   private readonly hostedzone: IHostedZone;

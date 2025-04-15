@@ -1,11 +1,13 @@
 import { Duration } from 'aws-cdk-lib';
 import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
-import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
-import { AccessPoint, FileSystem } from 'aws-cdk-lib/aws-efs';
+import { AccessPoint, FileSystem, IFileSystem } from 'aws-cdk-lib/aws-efs';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { Statics } from '../Statics';
 
 
 export interface EcsServiceFactoryProps {
@@ -15,6 +17,11 @@ export interface EcsServiceFactoryProps {
   namespace: PrivateDnsNamespace;
   vpcLinkSecurityGroup: SecurityGroup;
   port: number;
+}
+
+interface volumeMounts {
+  fileSystemRoot: string;
+  volumes: Record<string, string>;
 }
 
 export interface CreateEcsServiceOptions {
@@ -53,7 +60,7 @@ export interface CreateEcsServiceOptions {
    * A filesystem is automatically created.
    * @default - no filesystem is created
    */
-  filesystem?: Record<string, string>;
+  volumeMounts?: volumeMounts;
   /**
    * Pass request rewrite paraemters to the API gateway integration.
    * @see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigatewayv2-integration.html#cfn-apigatewayv2-integration-requestparameters
@@ -75,6 +82,9 @@ export class EcsServiceFactory {
 
   private readonly props: EcsServiceFactoryProps;
   private readonly scope: Construct;
+
+  private filesystem?: IFileSystem;
+  private securitygroup?: ISecurityGroup;
 
   constructor(scope: Construct, props: EcsServiceFactoryProps) {
     this.scope = scope;
@@ -117,8 +127,8 @@ export class EcsServiceFactory {
       service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
       this.addRoute(service, options.path ?? '', options.id, options.requestParameters, options.apiVersionHeaderValue, options.isRootPath);
     }
-    if (options.filesystem) {
-      this.createFileSytem(service, options);
+    if (options.volumeMounts) {
+      this.createVolumes(service, options.id, options.volumeMounts);
     }
 
     return service;
@@ -132,7 +142,6 @@ export class EcsServiceFactory {
         sourceVolume: name,
       });
     });
-
   }
 
   /**
@@ -164,21 +173,18 @@ export class EcsServiceFactory {
     });
   }
 
-  private createFileSytem(service: FargateService, options: CreateEcsServiceOptions) {
-    const privateFileSystemSecurityGroup = new SecurityGroup(this.scope, 'efs-security-group', {
-      vpc: this.props.cluster.vpc,
-    });
+  private createVolumes(service: FargateService, id: string, volumeMounts: volumeMounts) {
 
-    const fileSystem = new FileSystem(this.scope, 'esf-filesystem', {
-      encrypted: true,
-      vpc: this.props.cluster.vpc,
-      securityGroup: privateFileSystemSecurityGroup,
-    });
+    const fileSystem = this.getImportedFileSystem();
+    const securityGroup = this.getImportedFileSystemSecurityGroup();
 
-    const fileSystemAccessPoint = new AccessPoint(this.scope, 'esf-access-point', {
+    const fileSystemAccessPoint = new AccessPoint(this.scope, `${id}-esf-access-point`, {
       fileSystem: fileSystem,
-
-      path: '/data',
+      /**
+       * Dit moet configureerbaar zijn vrees ik: Soms wil je dat twee containers bij dezelfde
+       * data kunnen, soms juist niet. Als je dan het path aanpast hebben ze hun eigen 'root'.
+       */
+      path: volumeMounts.fileSystemRoot,
       createAcl: {
         ownerGid: '1000',
         ownerUid: '1000',
@@ -199,7 +205,7 @@ export class EcsServiceFactory {
       transitEncryption: 'ENABLED',
     };
 
-    const volumes = Object.entries(options.filesystem ?? {});
+    const volumes = Object.entries(volumeMounts.volumes ?? {});
     for (const volume of volumes) {
       const name = volume[0];
       const containerPath = volume[1];
@@ -215,8 +221,31 @@ export class EcsServiceFactory {
     }
 
     service.connections.securityGroups.forEach(sg => {
-      privateFileSystemSecurityGroup.addIngressRule(sg, Port.NFS);
+      securityGroup.addIngressRule(sg, Port.NFS);
     });
+  }
+
+  private getImportedFileSystem() {
+    const securityGroup = this.getImportedFileSystemSecurityGroup();
+    if (!this.filesystem) {
+      const fileSystemArn = StringParameter.valueForStringParameter(this.scope, Statics._ssmFilesystemArn);
+      const fileSystem = FileSystem.fromFileSystemAttributes(this.scope, 'ImportedFileSystem', {
+        fileSystemArn: fileSystemArn,
+        securityGroup,
+      });
+      this.filesystem = fileSystem;
+    }
+    return this.filesystem;
+  }
+
+  private getImportedFileSystemSecurityGroup() {
+    if (!this.securitygroup) {
+      const securityGroupId = StringParameter.valueForStringParameter(this.scope, Statics._ssmFilesystemSecurityGroupId);
+      const securityGroup = SecurityGroup.fromSecurityGroupId(this.scope, 'sg', securityGroupId);
+      //import the storage stack filesystem and security group here
+      this.securitygroup = securityGroup;
+    }
+    return this.securitygroup;
   }
 
   private addRoute(service: FargateService,
