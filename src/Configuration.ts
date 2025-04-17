@@ -579,6 +579,37 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         ],
       },
     ],
+    outputManagementComponents: [
+      {
+        cdkId: 'woweb-omc',
+        path: 'woweb-omc', // Without /
+        image: 'worthnl/notifynl-omc:1.14.6',
+        debug: true,
+        mode: 'Production',
+        openKlantUrl: 'mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        zakenApiUrl: 'openzaak.nijmegen.cloud/zaken/api/v1',
+        notificatiesApiUrl: 'opennotificaties.nijmegen.cloud/api/v1',
+        objectenApiUrl: 'objects-api.nijmegen.cloud/api/v2',
+        objecttypenApiUrl: 'objecttypes-api.nijmegen.cloud/api/v2',
+        zgwTokenInformation: {
+          audience: '', // This must be empty for the token to start working... no clue as to why.
+          issuer: 'nijmegen_devops',
+          userId: 'nijmegen_devops',
+          username: 'nijmegen_devops',
+        },
+        taakObjecttypeUuid: '00000000-00000000-00000000-00000000', // TODO unknown as we do not yet have an objects api in prod
+        templates: { // IDs refer to templates in NotifyNL service: APV - Gemeente Nijmegen
+          zaakCreateEmail: '06ff0f61-a0a3-4ea5-a583-4106dac20c33',
+          zaakUpdateEmail: 'ff09a540-3a88-4f70-9717-11a6c0fac356',
+          zaakCloseEmail: '9582f057-acf4-4fe1-b856-0bfdb6e7e956',
+          taskAssignedEmail: 'b9624682-0ecd-48bc-b5f8-884bcc0ac469',
+          zaakCreateSms: 'b789f105-f49b-4a4c-b54d-804db68c3760',
+          zaakUpdateSms: 'ceaa93e9-8ebd-474b-8617-ea41239f1ccb',
+          zaakCloseSms: 'd7ab0077-44f0-4756-ba99-edf5f2ac3ed7',
+          taskAssignedSms: '1ef3a3b6-d525-4e57-a212-81448b91ada9',
+        },
+      },
+    ],
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.8.0',
       rabbitMqImage: 'rabbitmq:4.0.5-alpine',
