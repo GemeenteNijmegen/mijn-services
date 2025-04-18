@@ -60,7 +60,7 @@
     "@aws-sdk/client-sqs": "^3.787.0",
     "@gemeentenijmegen/apigateway-http": "^0.0.24",
     "@gemeentenijmegen/aws-constructs": "^0.0.33",
-    "@gemeentenijmegen/utils": "^0.0.28",
+    "@gemeentenijmegen/utils": "^0.0.30",
     "@types/aws-lambda": "^8.10.149",
     "aws-cdk-lib": "^2.1.0",
     "cdk-remote-stack": "^2.1.0",
