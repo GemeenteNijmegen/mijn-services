@@ -1,16 +1,25 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
-import { Stack } from 'aws-cdk-lib';
+import { Stack, StackProps } from 'aws-cdk-lib';
 import { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { FileSystem } from 'aws-cdk-lib/aws-efs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { Configurable } from './Configuration';
 import { Statics } from './Statics';
+import { TransferServer } from './TransferServer';
+import { TransferUser } from './TransferUser';
+
+interface StorageStackProps extends StackProps, Configurable {}
 
 export class StorageStack extends Stack {
-  constructor(scope: Construct, id: string) {
-    super(scope, id);
+  private filesystem: FileSystem;
+  constructor(scope: Construct, id: string, props: StorageStackProps) {
+    super(scope, id, props);
 
-    this.createFileSytem();
+    this.filesystem = this.createFileSytem();
+    if(props.configuration.createTransferServer) {
+      this.createSftpConnector(this.filesystem);
+    }
   }
 
   private createFileSytem() {
@@ -37,5 +46,17 @@ export class StorageStack extends Stack {
 
     return fs;
 
+  }
+
+  createSftpConnector(filesystem: FileSystem) {
+    const transferServer = new TransferServer(this, 'tfserver', {
+      name: 'mijnservices-transfer-server',
+      domain: 'EFS',
+    });
+
+    new TransferUser(this, 'tfuser', {
+      filesystem,
+      server: transferServer,
+    })
   }
 }

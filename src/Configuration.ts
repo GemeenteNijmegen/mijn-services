@@ -66,6 +66,12 @@ export interface Configuration {
   databaseSnapshotRetentionDays?: number;
 
   /**
+   * Create a transfer server & user for allowing 
+   * access to the filesystem via SFTP
+   */
+  createTransferServer?: boolean;
+
+  /**
    * Configuration for open klant
    */
   openklant?: OpenKlantConfiguration;
@@ -412,6 +418,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       _b528d6157c2d9a369bf7d7812881d466:
         '_189b6977b0d0141d6cbb01e0ba1386e6.djqtsrsxkq.acm-validations.aws.',
     },
+    createTransferServer: true,
     databases: Statics.databasesAcceptance,
     databaseSnapshotRetentionDays: 10,
     openklant: {
