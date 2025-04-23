@@ -19,7 +19,7 @@ export class MijnServicesStage extends Stage {
       configuration: props.configuration,
     });
 
-    const storageStack = new StorageStack(this, 'storage-stack');
+    const storageStack = new StorageStack(this, 'storage-stack', { configuration: props.configuration });
 
     const mainStack = new MainStack(this, 'stack', {
       env: props.configuration.deploymentEnvironment, // Translates to mijn-services-stack

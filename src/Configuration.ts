@@ -66,7 +66,7 @@ export interface Configuration {
   databaseSnapshotRetentionDays?: number;
 
   /**
-   * Create a transfer server & user for allowing 
+   * Create a transfer server & user for allowing
    * access to the filesystem via SFTP
    */
   createTransferServer?: boolean;

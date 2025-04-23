@@ -17,7 +17,7 @@ export class RegistrationHandlerFunction extends lambda.Function {
     super(scope, id, {
       description: 'src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts',
       ...props,
-      runtime: new lambda.Runtime('nodejs22.x', lambda.RuntimeFamily.NODEJS),
+      runtime: new lambda.Runtime('nodejs20.x', lambda.RuntimeFamily.NODEJS),
       handler: 'index.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../../../../assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda')),
     });

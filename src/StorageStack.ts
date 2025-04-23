@@ -17,7 +17,7 @@ export class StorageStack extends Stack {
     super(scope, id, props);
 
     this.filesystem = this.createFileSytem();
-    if(props.configuration.createTransferServer) {
+    if (props.configuration.createTransferServer) {
       this.createSftpConnector(this.filesystem);
     }
   }
@@ -57,6 +57,6 @@ export class StorageStack extends Stack {
     new TransferUser(this, 'tfuser', {
       filesystem,
       server: transferServer,
-    })
+    });
   }
 }
