@@ -27,7 +27,5 @@ export class MijnServicesStage extends Stage {
     });
     mainStack.addDependency(databaseStack, 'Services in main stack need the DB to be created');
     mainStack.addDependency(storageStack, 'Services in main stack need the storage (filesystem) to be created');
-
   }
-
 }
