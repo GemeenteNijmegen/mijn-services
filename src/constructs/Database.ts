@@ -27,6 +27,11 @@ export class Database extends Construct {
       alias: 'mijn-services-db-key',
     });
 
+    const bvKmsKey = new kms.Key(this, 'bv-kms-key', {
+      description: 'Mijn Services Backup Vault encryption key',
+      alias: 'mijn-services-bv-key',
+    });
+
     this.db = new rds.DatabaseInstance(this, 'db-instance', {
       engine: rds.DatabaseInstanceEngine.postgres({
         version: rds.PostgresEngineVersion.VER_16_4,
@@ -51,6 +56,7 @@ export class Database extends Construct {
 
     const backupVault = new backup.BackupVault(this, 'rds-backup-vault', {
       removalPolicy: RemovalPolicy.RETAIN,
+      encryptionKey: bvKmsKey,
     });
 
     const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, 'rds-backup-plan', backupVault);
