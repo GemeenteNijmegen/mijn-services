@@ -62,7 +62,7 @@
       "description": "Create a JavaScript bundle from src/custom-resources/create-databases/create-databases.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -71,7 +71,7 @@
       "description": "Continuously update the JavaScript bundle from src/custom-resources/create-databases/create-databases.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -80,7 +80,7 @@
       "description": "Create a JavaScript bundle from src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -89,7 +89,7 @@
       "description": "Continuously update the JavaScript bundle from src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -98,7 +98,7 @@
       "description": "Create a JavaScript bundle from src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -107,7 +107,7 @@
       "description": "Continuously update the JavaScript bundle from src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node20\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
