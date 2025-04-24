@@ -49,11 +49,12 @@ export class Database extends Construct {
       backupRetention: Duration.days(props.databaseSnapshotRetentionDays),
     });
 
-
-    const backupVault = new backup.BackupVault(this, 'rds-backup-vault', {
-      removalPolicy: RemovalPolicy.RETAIN,
-    });
-
+    // Create a backup plan for the database
+    const backupVaultArn = StringParameter.valueForStringParameter(
+      this,
+      Statics._ssmBackupVaultArn,
+    );
+    const backupVault = backup.BackupVault.fromBackupVaultArn(this, 'backup-vault', backupVaultArn);
     const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, 'rds-backup-plan', backupVault);
     backupPlan.addSelection('rds-backup-selection', {
       resources: [
