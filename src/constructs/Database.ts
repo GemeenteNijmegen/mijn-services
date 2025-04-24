@@ -26,6 +26,11 @@ export class Database extends Construct {
       alias: 'mijn-services-db-key',
     });
 
+    new kms.Key(this, 'bv-kms-key', {
+      description: 'Mijn Services Backup Vault encryption key',
+      alias: 'mijn-services-bv-key',
+    });
+
     this.db = new rds.DatabaseInstance(this, 'db-instance', {
       engine: rds.DatabaseInstanceEngine.postgres({
         version: rds.PostgresEngineVersion.VER_16_4,
@@ -47,6 +52,30 @@ export class Database extends Construct {
       deletionProtection: true,
       backupRetention: Duration.days(props.databaseSnapshotRetentionDays),
     });
+
+    // const backupVault = new backup.BackupVault(this, 'rds-backup-vault', {
+    //   removalPolicy: RemovalPolicy.RETAIN,
+    //   encryptionKey: bvKmsKey,
+    // });
+
+    // backupVault.addToAccessPolicy(
+    //   new iam.PolicyStatement({
+    //     actions: ['kms:Decrypt'],
+    //     resources: [dbKmsKey.keyArn],
+    //     principals: [new iam.ServicePrincipal('backup.amazonaws.com')],
+    //     effect: iam.Effect.ALLOW,
+    //     conditions: {
+    //       'aws:SourceArn': backupVault.backupVaultArn
+    //     },
+    //   }),
+    // );
+
+    // const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, 'rds-backup-plan', backupVault);
+    // backupPlan.addSelection('rds-backup-selection', {
+    //   resources: [
+    //     backup.BackupResource.fromRdsDatabaseInstance(this.db),
+    //   ],
+    // });
 
     new StringParameter(this, 'db-arn', {
       stringValue: this.db.instanceArn,
