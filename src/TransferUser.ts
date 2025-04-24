@@ -1,8 +1,8 @@
+import path from 'path';
 import { FileSystem } from 'aws-cdk-lib/aws-efs';
 import { Effect, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { CfnUser } from 'aws-cdk-lib/aws-transfer';
 import { Construct } from 'constructs';
-import path from 'path';
 import { TransferServer } from './TransferServer';
 
 interface TransferUserProps {
@@ -11,8 +11,8 @@ interface TransferUserProps {
 
   /** Home directory for the user
    *  For EFS: Prepended with /<filesystemid>
-   * 
-   * Default: EFS filesystem root 
+   *
+   * Default: EFS filesystem root
    */
   homeDirectory?: string;
 }
@@ -26,7 +26,7 @@ export class TransferUser extends Construct {
       role: this.role(props.filesystem).roleArn,
       serverId: props.server.serverId(),
       userName: 'sftpuser',
-      homeDirectory
+      homeDirectory,
     });
   }
 
