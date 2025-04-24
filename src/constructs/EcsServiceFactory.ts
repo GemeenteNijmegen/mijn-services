@@ -1,11 +1,13 @@
-import { Duration } from 'aws-cdk-lib';
+import { Duration, aws_backup as backup } from 'aws-cdk-lib';
 import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem } from 'aws-cdk-lib/aws-efs';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { Statics } from '../Statics';
 
 
 export interface EcsServiceFactoryProps {
@@ -118,7 +120,8 @@ export class EcsServiceFactory {
       this.addRoute(service, options.path ?? '', options.id, options.requestParameters, options.apiVersionHeaderValue, options.isRootPath);
     }
     if (options.filesystem) {
-      this.createFileSytem(service, options);
+      const fileSystem = this.createFileSytem(service, options);
+      this.createBackupPlan(fileSystem);
     }
 
     return service;
@@ -217,6 +220,8 @@ export class EcsServiceFactory {
     service.connections.securityGroups.forEach(sg => {
       privateFileSystemSecurityGroup.addIngressRule(sg, Port.NFS);
     });
+
+    return fileSystem;
   }
 
   private addRoute(service: FargateService,
@@ -292,6 +297,25 @@ export class EcsServiceFactory {
         },
       ],
     };
+  }
+
+  /**
+   * Creates a backup plan for the EFS file system.
+   */
+  private createBackupPlan(fileSystem: FileSystem) {
+    const backupVaultArn = StringParameter.valueForStringParameter(
+      this.scope,
+      Statics._ssmBackupVaultArn,
+    );
+
+    const backupVault = backup.BackupVault.fromBackupVaultArn(this.scope, 'backup-vault', backupVaultArn);
+
+    const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this.scope, 'efs-backup-plan', backupVault);
+    backupPlan.addSelection('backup-selection', {
+      resources: [
+        backup.BackupResource.fromEfsFileSystem(fileSystem),
+      ],
+    });
   }
 
 }

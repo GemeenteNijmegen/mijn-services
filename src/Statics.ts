@@ -27,6 +27,7 @@ export class Statics {
   static readonly _ssmDatabaseHostname = `/${Statics.projectName}/internal/database/hostname`;
   static readonly _ssmDatabasePort = `/${Statics.projectName}/internal/database/post`;
   static readonly _ssmDatabaseSecurityGroup = `/${Statics.projectName}/internal/database/security-group`;
+  static readonly _ssmBackupVaultArn = `/${Statics.projectName}/internal/backup/vault-arn`;
 
   // MARK: Databases
   static readonly defaultDatabaseName = 'postgres';

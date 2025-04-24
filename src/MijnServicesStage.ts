@@ -1,6 +1,7 @@
 import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
 import { Aspects, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { BackupStack } from './BackupStack';
 import { Configurable } from './Configuration';
 import { DatabaseStack } from './DatabaseStack';
 import { MainStack } from './MainStack';
@@ -14,6 +15,15 @@ export class MijnServicesStage extends Stage {
     Aspects.of(this).add(new PermissionsBoundaryAspect());
 
     /**
+     * This stack creates the backup vault
+     * and stores the ARN in SSM
+     */
+    const backupstack = new BackupStack(this, 'backup-stack', {
+      env: props.configuration.deploymentEnvironment,
+      configuration: props.configuration,
+    });
+
+    /**
      * Creates the database instance (only one currenlty)
      * and create the databases.
      */
@@ -21,6 +31,7 @@ export class MijnServicesStage extends Stage {
       env: props.configuration.deploymentEnvironment,
       configuration: props.configuration,
     });
+    databasestack.addDependency(backupstack, 'Backup stack needs to be created first');
 
     /**
      * Main stack of this project
