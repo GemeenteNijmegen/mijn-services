@@ -27,6 +27,7 @@ export class MijnServicesStage extends Stage {
     databaseStack.addDependency(backupStack, 'Backup stack needs to be created first');
 
     const storageStack = new StorageStack(this, 'storage-stack', { configuration: props.configuration });
+    storageStack.addDependency(backupStack, 'Backup stack needs to be created first');
 
     const mainStack = new MainStack(this, 'stack', {
       env: props.configuration.deploymentEnvironment, // Translates to mijn-services-stack
