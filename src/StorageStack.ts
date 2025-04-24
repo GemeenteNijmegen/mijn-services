@@ -1,5 +1,5 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Stack, StackProps, aws_backup as backup } from 'aws-cdk-lib';
 import { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { FileSystem } from 'aws-cdk-lib/aws-efs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -9,7 +9,7 @@ import { Statics } from './Statics';
 import { TransferServer } from './TransferServer';
 import { TransferUser } from './TransferUser';
 
-interface StorageStackProps extends StackProps, Configurable {}
+interface StorageStackProps extends StackProps, Configurable { }
 
 export class StorageStack extends Stack {
   private filesystem: FileSystem;
@@ -17,6 +17,7 @@ export class StorageStack extends Stack {
     super(scope, id, props);
 
     this.filesystem = this.createFileSytem();
+    this.createBackupPlan(this.filesystem);
     if (props.configuration.createTransferServer) {
       this.createSftpConnector(this.filesystem);
     }
@@ -57,6 +58,25 @@ export class StorageStack extends Stack {
     new TransferUser(this, 'tfuser', {
       filesystem,
       server: transferServer,
+    });
+  }
+
+  /**
+   * Creates a backup plan for the EFS file system.
+   */
+  private createBackupPlan(fileSystem: FileSystem) {
+    const backupVaultArn = StringParameter.valueForStringParameter(
+      this,
+      Statics._ssmBackupVaultArn,
+    );
+
+    const backupVault = backup.BackupVault.fromBackupVaultArn(this, 'backup-vault', backupVaultArn);
+
+    const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, 'efs-backup-plan', backupVault);
+    backupPlan.addSelection('backup-selection', {
+      resources: [
+        backup.BackupResource.fromEfsFileSystem(fileSystem),
+      ],
     });
   }
 }
