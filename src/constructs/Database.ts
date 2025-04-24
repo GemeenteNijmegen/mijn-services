@@ -1,7 +1,6 @@
 import {
   aws_rds as rds, aws_ec2 as ec2, aws_kms as kms, aws_backup as backup,
   Duration,
-  RemovalPolicy,
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -49,11 +48,12 @@ export class Database extends Construct {
       backupRetention: Duration.days(props.databaseSnapshotRetentionDays),
     });
 
-
-    const backupVault = new backup.BackupVault(this, 'rds-backup-vault', {
-      removalPolicy: RemovalPolicy.RETAIN,
-    });
-
+    // Create a backup plan for the database
+    const backupVaultArn = StringParameter.valueForStringParameter(
+      this,
+      Statics._ssmBackupVaultArn,
+    );
+    const backupVault = backup.BackupVault.fromBackupVaultArn(this, 'backup-vault', backupVaultArn);
     const backupPlan = backup.BackupPlan.dailyMonthly1YearRetention(this, 'rds-backup-plan', backupVault);
     backupPlan.addSelection('rds-backup-selection', {
       resources: [

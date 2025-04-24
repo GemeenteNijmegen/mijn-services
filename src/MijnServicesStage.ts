@@ -1,6 +1,7 @@
 import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
 import { Aspects, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { BackupStack } from './BackupStack';
 import { Configurable } from './Configuration';
 import { DatabaseStack } from './DatabaseStack';
 import { MainStack } from './MainStack';
@@ -14,10 +15,16 @@ export class MijnServicesStage extends Stage {
     super(scope, id, props);
     Aspects.of(this).add(new PermissionsBoundaryAspect());
 
+    const backupStack = new BackupStack(this, 'backup-stack', {
+      env: props.configuration.deploymentEnvironment,
+      configuration: props.configuration,
+    });
+
     const databaseStack = new DatabaseStack(this, 'database-stack', {
       env: props.configuration.deploymentEnvironment,
       configuration: props.configuration,
     });
+    databaseStack.addDependency(backupStack, 'Backup stack needs to be created first');
 
     const storageStack = new StorageStack(this, 'storage-stack', { configuration: props.configuration });
 

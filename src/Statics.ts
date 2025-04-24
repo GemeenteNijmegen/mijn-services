@@ -29,6 +29,7 @@ export class Statics {
   static readonly _ssmDatabaseSecurityGroup = `/${Statics.projectName}/internal/database/security-group`;
   static readonly _ssmFilesystemSecurityGroupId = `/${Statics.projectName}/internal/filesystem-security-group-id`;
   static readonly _ssmFilesystemArn = `/${Statics.projectName}/internal/filesystem-arn`;
+  static readonly _ssmBackupVaultArn = `/${Statics.projectName}/internal/backup/vault-arn`;
 
   // MARK: Databases
   static readonly defaultDatabaseName = 'postgres';
