@@ -49,6 +49,7 @@ export class Database extends Construct {
       backupRetention: Duration.days(props.databaseSnapshotRetentionDays),
     });
 
+    
     const backupVault = new backup.BackupVault(this, 'rds-backup-vault', {
       removalPolicy: RemovalPolicy.RETAIN,
     });
