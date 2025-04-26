@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^2.19.0",
-    "@aws-sdk/client-sqs": "^3.796.0",
+    "@aws-sdk/client-sqs": "^3.797.0",
     "@gemeentenijmegen/apigateway-http": "^0.0.24",
     "@gemeentenijmegen/aws-constructs": "^0.0.34",
     "@gemeentenijmegen/utils": "^0.0.30",
@@ -67,7 +67,7 @@
     "constructs": "^10.0.5",
     "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.15.5",
+    "pg": "^8.15.6",
     "zod": "^3.24.3"
   },
   "license": "EUPL-1.2",
