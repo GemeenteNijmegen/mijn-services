@@ -12,6 +12,7 @@ export interface DatabaseProps {
   vpc: ec2.IVpc;
   databaseSecret: ISecret;
   databaseSnapshotRetentionDays: number;
+  kmsKey: kms.IKey;
 }
 
 export class Database extends Construct {
@@ -20,11 +21,6 @@ export class Database extends Construct {
 
   constructor(scope: Construct, id: string, props: DatabaseProps) {
     super(scope, id);
-
-    const dbKmsKey = new kms.Key(this, 'db-kms-key', {
-      description: 'Mijn Services DB encryption key',
-      alias: 'mijn-services-db-key',
-    });
 
     this.db = new rds.DatabaseInstance(this, 'db-instance', {
       engine: rds.DatabaseInstanceEngine.postgres({
@@ -37,7 +33,7 @@ export class Database extends Construct {
       },
       vpc: props.vpc,
       databaseName: Statics.defaultDatabaseName, // Note: the default database is not used. We have a lambda to create the DBs
-      storageEncryptionKey: dbKmsKey,
+      storageEncryptionKey: props.kmsKey,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_ISOLATED,
       },

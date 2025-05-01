@@ -3,7 +3,6 @@ import { Aspects, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { BackupStack } from './BackupStack';
 import { Configurable } from './Configuration';
-import { DatabaseStack } from './DatabaseStack';
 import { MainStack } from './MainStack';
 import { StorageStack } from './StorageStack';
 
@@ -20,12 +19,6 @@ export class MijnServicesStage extends Stage {
       configuration: props.configuration,
     });
 
-    const databaseStack = new DatabaseStack(this, 'database-stack', {
-      env: props.configuration.deploymentEnvironment,
-      configuration: props.configuration,
-    });
-    databaseStack.addDependency(backupStack, 'Backup stack needs to be created first');
-
     const storageStack = new StorageStack(this, 'storage-stack', { configuration: props.configuration });
     storageStack.addDependency(backupStack, 'Backup stack needs to be created first');
 
@@ -33,7 +26,6 @@ export class MijnServicesStage extends Stage {
       env: props.configuration.deploymentEnvironment, // Translates to mijn-services-stack
       configuration: props.configuration,
     });
-    mainStack.addDependency(databaseStack, 'Services in main stack need the DB to be created');
     mainStack.addDependency(storageStack, 'Services in main stack need the storage (filesystem) to be created');
   }
 }
