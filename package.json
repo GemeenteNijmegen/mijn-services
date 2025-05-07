@@ -56,6 +56,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@aws-lambda-powertools/idempotency": "^2.19.1",
     "@aws-lambda-powertools/logger": "^2.19.1",
     "@aws-sdk/client-sqs": "^3.804.0",
     "@gemeentenijmegen/apigateway-http": "^0.0.25",

@@ -1,3 +1,5 @@
+import { makeIdempotent } from '@aws-lambda-powertools/idempotency';
+import { DynamoDBPersistenceLayer } from '@aws-lambda-powertools/idempotency/dynamodb';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { SQSEvent } from 'aws-lambda';
 import { CatalogiApi } from './CatalogiApi';
@@ -7,6 +9,10 @@ import { ZakenApi } from './ZakenApi';
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
 import { Notification, NotificationSchema } from '../Shared/model/Notification';
+
+const persistenceStore = new DynamoDBPersistenceLayer({
+  tableName: process.env.IDEMPOTENCY_TABLE_NAME ?? '',
+});
 
 
 async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
@@ -47,7 +53,13 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
 }
 
 let configuration: undefined | OpenKlantRegistrationServiceProps = undefined;
-export async function handler(event: SQSEvent) {
+
+export const handler = makeIdempotent(
+  async (event: SQSEvent) => { return handle(event); },
+  { persistenceStore },
+);
+
+async function handle(event: SQSEvent) {
 
   logger.debug('Incomming event', JSON.stringify(event));
 

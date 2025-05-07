@@ -2,6 +2,7 @@ import { Criticality, DeadLetterQueue, ErrorMonitoringAlarm } from '@gemeentenij
 import { Duration } from 'aws-cdk-lib';
 import { HttpApi, HttpMethod, MappingValue, ParameterMapping } from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
+import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { ApplicationLogLevel, Function, LoggingFormat, SystemLogLevel } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
@@ -31,9 +32,10 @@ export class OpenKlantRegistrationService extends Construct {
 
     this.props = props;
     this.params = this.setupVulServiceConfiguration(id);
+    const idempotency = this.setupIdempotencyTable();
 
     const queue = this.setupQueue();
-    this.setupRegistrationHandler(id, queue);
+    this.setupRegistrationHandler(id, queue, idempotency);
     this.setupNotificationReceiver(id, queue);
 
   }
@@ -62,7 +64,7 @@ export class OpenKlantRegistrationService extends Construct {
     return queue;
   }
 
-  private setupRegistrationHandler(id: string, queue: Queue) {
+  private setupRegistrationHandler(id: string, queue: Queue, idempotency: Table) {
 
     const logs = new LogGroup(this, 'registration-handler-logs', {
       encryptionKey: this.props.key,
@@ -87,6 +89,7 @@ export class OpenKlantRegistrationService extends Construct {
         DEBUG: openKlantConfig.debug ? 'true' : 'false',
         ROLTYPES_TO_REGISTER: openKlantConfig.roltypesToRegister.join(','),
         STRATEGY: this.props.openKlantRegistrationServiceConfiguration.strategy,
+        IDEMPOTENCY_TABLE_NAME: idempotency.tableName,
         ...environment,
       },
       logGroup: logs,
@@ -94,6 +97,7 @@ export class OpenKlantRegistrationService extends Construct {
       systemLogLevelV2: this.props.openKlantRegistrationServiceConfiguration.debug ? SystemLogLevel.DEBUG : SystemLogLevel.INFO,
       applicationLogLevelV2: this.props.openKlantRegistrationServiceConfiguration.debug ? ApplicationLogLevel.DEBUG : ApplicationLogLevel.INFO,
     });
+    idempotency.grantReadWriteData(service);
     this.props.key.grantEncrypt(service);
     this.params.openklant.grantRead(service);
     this.params.zgw.id.grantRead(service);
@@ -214,5 +218,19 @@ export class OpenKlantRegistrationService extends Construct {
       },
     });
   }
+
+
+  private setupIdempotencyTable() {
+    const table = new Table(this, 'idempotency-table', {
+      partitionKey: {
+        name: 'id',
+        type: AttributeType.STRING,
+      },
+      timeToLiveAttribute: 'expiration',
+      billingMode: BillingMode.PAY_PER_REQUEST,
+    });
+    return table;
+  }
+
 
 }

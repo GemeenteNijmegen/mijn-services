@@ -107,10 +107,25 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
-"@aws-lambda-powertools/commons@^2.19.1":
+"@aws-lambda-powertools/commons@2.19.1", "@aws-lambda-powertools/commons@^2.19.1":
   version "2.19.1"
   resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-2.19.1.tgz#81dded11424d3ea9c081a8da6672de2f8bb2f04b"
   integrity sha512-fSoyiCRigGbIgk2XJlWPOgnIiRM1nxHhwxAHtGp7AgnLK/EAoh8G2kpImmlt1AcfEZNkI0HO/EsbaITYwpRzHw==
+
+"@aws-lambda-powertools/idempotency@^2.19.1":
+  version "2.19.1"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/idempotency/-/idempotency-2.19.1.tgz#996bb792d3b9d732910e5cbc351c59c43e82a442"
+  integrity sha512-EtWA1sHxefVWpk6DduSlJSSnz9DS9oBDlsA3N09bzNUD9cflNVwHt9kktceMz52AgFKnUymVJJoLY4Ko4P9wcg==
+  dependencies:
+    "@aws-lambda-powertools/commons" "^2.19.1"
+    "@aws-lambda-powertools/jmespath" "^2.19.1"
+
+"@aws-lambda-powertools/jmespath@^2.19.1":
+  version "2.19.1"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/jmespath/-/jmespath-2.19.1.tgz#90bb11d6fa11f05f02a8c8f92a992704019db931"
+  integrity sha512-Su54LgjoatshhuqiQyGmqtfjGk1xXL3PFTKN5x1g1aXh2j2dR2IcJcb3wQuyEGYicAGpkREj8cei8/w9fJdu3g==
+  dependencies:
+    "@aws-lambda-powertools/commons" "2.19.1"
 
 "@aws-lambda-powertools/logger@^2.19.1":
   version "2.19.1"
