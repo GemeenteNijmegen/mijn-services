@@ -16,7 +16,7 @@ export class IdempotencyChecker {
       },
       TableName: this.tableName,
     }));
-    if (!response.Item) {
+    if (response.Item) {
       return true;
     }
     return false;

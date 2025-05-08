@@ -1,8 +1,6 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { SQSEvent } from 'aws-lambda';
 import { CatalogiApi } from './CatalogiApi';
-import { IdempotencyChecker } from './IdempotencyChecker';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
@@ -47,7 +45,7 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
 
 }
 
-const idempotency = new IdempotencyChecker(process.env.IDEMPOTENCY_TABLE_NAME!, new DynamoDBClient());
+// const idempotency = new IdempotencyChecker(process.env.IDEMPOTENCY_TABLE_NAME!, new DynamoDBClient());
 let configuration: undefined | OpenKlantRegistrationServiceProps = undefined;
 
 export async function handler(event: SQSEvent) {
@@ -65,13 +63,13 @@ export async function handler(event: SQSEvent) {
     // Handle the notification event
     const notifications = parseNotificationFromBody(event);
     for (const notification of notifications) {
-      const hashKey = idempotency.calculateHashKey(notifications);
-      if (await idempotency.checkAlreadyHandled(hashKey)) {
-        logger.info('Already handled event', { hashKey });
-        continue;
-      }
+      // const hashKey = idempotency.calculateHashKey(notifications);
+      // if (await idempotency.checkAlreadyHandled(hashKey)) {
+      //   logger.info('Already handled event', { hashKey });
+      //   continue;
+      // }
       await registrationHandler.handleNotification(notification);
-      await idempotency.registerIdempotencyCheck(hashKey);
+      // await idempotency.registerIdempotencyCheck(hashKey);
     }
 
   } catch (error) {

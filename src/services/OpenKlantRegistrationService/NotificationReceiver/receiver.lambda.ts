@@ -1,3 +1,4 @@
+import { createHash, randomUUID } from 'crypto';
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
@@ -35,9 +36,12 @@ export async function handler(event: APIGatewayProxyEventV2) {
 
     // Forward the notification to the queue
     const messageJson = JSON.stringify(notification);
+    const groupid = createHash('sha256').update(notification.hoofdObject).digest('hex').substring(0, 120);
     await sqs.send(new SendMessageCommand({
       MessageBody: messageJson,
       QueueUrl: process.env.QUEUE_URL,
+      MessageGroupId: groupid,
+      MessageDeduplicationId: randomUUID(),
     }));
 
     return Response.ok();
