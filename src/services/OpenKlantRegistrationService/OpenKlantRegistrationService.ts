@@ -221,12 +221,12 @@ export class OpenKlantRegistrationService extends Construct {
 
 
   private setupIdempotencyTable() {
-    const table = new Table(this, 'idempotency-table', {
+    const table = new Table(this, 'idempotency-hash-table', {
       partitionKey: {
-        name: 'id',
+        name: 'hash',
         type: AttributeType.STRING,
       },
-      timeToLiveAttribute: 'expiration',
+      timeToLiveAttribute: 'ttl',
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
     return table;
