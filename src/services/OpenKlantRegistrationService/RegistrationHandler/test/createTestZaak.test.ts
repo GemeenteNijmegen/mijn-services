@@ -38,6 +38,7 @@ runTest('Create zaak run live tests', () => {
     });
 
     const zaak = await client.createZaak(`TEST-VUL-SERVICE-ZAAK-${Date.now()}`, 'TestVulService');
+    console.log('Zaak url', zaak.url);
 
     await sleep(3000);
 
@@ -73,6 +74,8 @@ runTest('Create zaak run live tests', () => {
     });
 
     const zaak = await client.createZaak(`TEST-VUL-SERVICE-ZAAK-${Date.now()}`, 'TestVulService');
+
+    console.log('Zaak url', zaak.url);
 
     await client.addKvkRoleToZaak(zaak.url, '69599084', 'ExampleCompanyName', {
       naam: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_NAAM!,

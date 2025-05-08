@@ -1,19 +1,14 @@
-import { makeIdempotent } from '@aws-lambda-powertools/idempotency';
-import { DynamoDBPersistenceLayer } from '@aws-lambda-powertools/idempotency/dynamodb';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { SQSEvent } from 'aws-lambda';
 import { CatalogiApi } from './CatalogiApi';
+import { IdempotencyChecker } from './IdempotencyChecker';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
 import { Notification, NotificationSchema } from '../Shared/model/Notification';
-
-const persistenceStore = new DynamoDBPersistenceLayer({
-  tableName: process.env.IDEMPOTENCY_TABLE_NAME ?? '',
-});
-
 
 async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
   const env = environmentVariables([
@@ -52,14 +47,10 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
 
 }
 
+const idempotency = new IdempotencyChecker(process.env.IDEMPOTENCY_TABLE_NAME!, new DynamoDBClient());
 let configuration: undefined | OpenKlantRegistrationServiceProps = undefined;
 
-export const handler = makeIdempotent(
-  async (event: SQSEvent) => { return handle(event); },
-  { persistenceStore },
-);
-
-async function handle(event: SQSEvent) {
+export async function handler(event: SQSEvent) {
 
   logger.debug('Incomming event', JSON.stringify(event));
 
@@ -74,7 +65,13 @@ async function handle(event: SQSEvent) {
     // Handle the notification event
     const notifications = parseNotificationFromBody(event);
     for (const notification of notifications) {
+      const hashKey = idempotency.calculateHashKey(notifications);
+      if (await idempotency.checkAlreadyHandled(hashKey)) {
+        logger.info('Already handled event', { hashKey });
+        continue;
+      }
       await registrationHandler.handleNotification(notification);
+      await idempotency.registerIdempotencyCheck(hashKey);
     }
 
   } catch (error) {
@@ -108,3 +105,5 @@ function parseNotificationFromBody(event: SQSEvent): Notification[] {
     throw new ErrorResponse(400, 'Error parsing body');
   }
 }
+
+
