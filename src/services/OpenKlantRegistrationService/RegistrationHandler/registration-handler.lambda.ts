@@ -5,12 +5,12 @@ import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import middy from '@middy/core';
 import { SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
 import type { Subsegment } from 'aws-xray-sdk-core';
-import { logger } from '../Shared/Logger';
-import { NotificationSchema } from '../Shared/model/Notification';
 import { CatalogiApi } from './CatalogiApi';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
+import { logger } from '../Shared/Logger';
+import { NotificationSchema } from '../Shared/model/Notification';
 
 const processor = new BatchProcessor(EventType.SQS);
 const tracer = new Tracer({
@@ -56,7 +56,6 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
 }
 
 
-
 // ENABLE X-RAY TRACING
 const segment = tracer?.getSegment(); // This is the facade segment (the one that is created by AWS Lambda)
 if (!segment) {
@@ -65,7 +64,7 @@ if (!segment) {
 let subsegment: Subsegment | undefined;
 if (tracer && segment) {
   // Create subsegment for the function & set it as active
-  subsegment = segment.addNewSubsegment(`registration-handler`);
+  subsegment = segment.addNewSubsegment('registration-handler');
   tracer.setSegment(subsegment);
 }
 tracer?.annotateColdStart();
@@ -88,8 +87,8 @@ export async function recordHandler(record: SQSRecord, configuration: OpenKlantR
 
 export const handler: SQSHandler = middy(async (event: SQSEvent) => {
   const configuration = await initalize();
-  const configuredRecordHandler = (event: SQSRecord) => recordHandler(event, configuration);
-  processPartialResponse(event, configuredRecordHandler, processor);
+  const configuredRecordHandler = (record: SQSRecord) => recordHandler(record, configuration);
+  await processPartialResponse(event, configuredRecordHandler, processor);
 }).use(captureLambdaHandler(tracer));
 
 

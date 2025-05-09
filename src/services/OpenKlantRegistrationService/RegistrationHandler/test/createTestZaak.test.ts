@@ -1,6 +1,6 @@
 
-import { Bsn } from '@gemeentenijmegen/utils';
 import { randomBytes } from 'crypto';
+import { Bsn } from '@gemeentenijmegen/utils';
 import { ZgwClient } from '../ZgwClient';
 
 const runTest = process.env.CREATE_TEST_ZAAK_LIVE === 'true' ? describe : describe.skip;
