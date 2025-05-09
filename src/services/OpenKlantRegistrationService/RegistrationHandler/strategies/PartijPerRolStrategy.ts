@@ -57,6 +57,11 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
       }
     }
 
+    // Annotate trace if we're tracing
+    if (this.configuration.tracer) {
+      this.configuration.tracer.getSegment()?.addAnnotation('BETROKKENE_ALREADY_SET', !!rol.betrokkene);
+    }
+
     if (rol.betrokkene) {
       logger.debug('Rol alreay had betrokkene url set. Skipping update...');
       return Response.ok();

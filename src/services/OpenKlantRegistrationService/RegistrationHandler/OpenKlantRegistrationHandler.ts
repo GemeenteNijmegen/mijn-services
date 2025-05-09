@@ -1,3 +1,4 @@
+import { Tracer } from '@aws-lambda-powertools/tracer';
 import { ApiGatewayV2Response, Response } from '@gemeentenijmegen/apigateway-http';
 import { ICatalogiApi } from './CatalogiApi';
 import { IOpenKlantApi } from './OpenKlantApi';
@@ -18,6 +19,11 @@ export interface OpenKlantRegistrationServiceProps {
    * @default - all catalogi
    */
   readonly catalogusUuids?: string[];
+  /**
+   * Annotate trace with usefull information if a
+   * tracer is provided
+   */
+  readonly tracer?: Tracer;
 }
 
 export class OpenKlantRegistrationHandler {

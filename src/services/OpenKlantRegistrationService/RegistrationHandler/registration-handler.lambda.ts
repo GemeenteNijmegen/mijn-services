@@ -4,12 +4,12 @@ import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import middy from '@middy/core';
 import { SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
-import { logger } from '../Shared/Logger';
-import { NotificationSchema } from '../Shared/model/Notification';
 import { CatalogiApi } from './CatalogiApi';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
+import { logger } from '../Shared/Logger';
+import { NotificationSchema } from '../Shared/model/Notification';
 
 const processor = new BatchProcessor(EventType.SQS);
 
@@ -54,6 +54,7 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
     }),
     roltypesToRegister: env.ROLTYPES_TO_REGISTER.split(','),
     catalogusUuids: process.env.CATALOGI_WHITELIST ? process.env.CATALOGI_WHITELIST.split(',') : undefined,
+    tracer: tracer,
   };
 
 }

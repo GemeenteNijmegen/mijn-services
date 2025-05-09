@@ -62,7 +62,7 @@ export class PipelineStack extends Stack {
         BRANCH_NAME: this.branchName,
       },
       installCommands: [
-        'n 22'
+        'n 22',
       ],
       commands: [
         'yarn install --frozen-lockfile',
