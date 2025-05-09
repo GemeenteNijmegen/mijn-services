@@ -1,5 +1,5 @@
-import { Response } from '@gemeentenijmegen/apigateway-http';
 import { randomUUID } from 'crypto';
+import { Response } from '@gemeentenijmegen/apigateway-http';
 import { ErrorResponse } from '../../Shared/ErrorResponse';
 import { logger } from '../../Shared/Logger';
 import { Notification } from '../../Shared/model/Notification';
@@ -111,9 +111,10 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     // Act as if the rol is actually a natuurlijk persoon for converting it to a persoon partij.
     // Note that we can do this in this particular situation as we do not use the rol.betrokkeneIdentificatie
     //  but instead use a random ID so that we can remove these partijen later.
-    rol.betrokkeneType = 'natuurlijk_persoon';
+    const localRol = { ...rol }; // Fix for below aproach that resulted in a major bug when the rol is updated later on.
+    localRol.betrokkeneType = 'natuurlijk_persoon';
     // Create the partij
-    const partijInput = OpenKlantMapper.persoonPartijFromRol(rol);
+    const partijInput = OpenKlantMapper.persoonPartijFromRol(localRol);
     const persoon = await this.configuration.openKlantApi.registerPartij(partijInput);
     logger.debug('Persoon partij created (for kvk in partij per rol strategy)', persoon);
     // Create the partij identificatie
@@ -121,7 +122,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     const identificatie = await this.configuration.openKlantApi.addPartijIdentificatie(identificatieInput);
     logger.debug('Persoon partij identificatie created (for kvk in partij per rol strategy)', identificatie);
     // Add the digitale adressen (and select voorkeur)
-    await this.setDigitaleAdressenForPartijFromRol(persoon, rol);
+    await this.setDigitaleAdressenForPartijFromRol(persoon, localRol);
     logger.debug('Digitale addressen created (for kvk in partij per rol strategy)');
     return persoon;
 

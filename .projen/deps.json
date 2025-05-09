@@ -96,6 +96,10 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-lambda-powertools/tracer",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-dynamodb",
       "type": "runtime"
     },

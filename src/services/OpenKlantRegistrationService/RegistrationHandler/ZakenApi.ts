@@ -1,6 +1,6 @@
+import { ZgwApi, ZgwApiProps } from './ZgwApi';
 import { logger } from '../Shared/Logger';
 import { Rol, RolSchema } from '../Shared/model/Rol';
-import { ZgwApi, ZgwApiProps } from './ZgwApi';
 
 export interface IZakenApi {
   getRol(url: string): Promise<Rol>;
@@ -50,6 +50,7 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
       });
 
       const json = await response.json();
+      logger.debug('Response', { json });
 
       // If not 2xx log the response and throw an error
       if (!response.ok) {

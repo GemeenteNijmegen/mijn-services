@@ -1,6 +1,6 @@
 
-import { Bsn } from '@gemeentenijmegen/utils';
 import { randomBytes } from 'crypto';
+import { Bsn } from '@gemeentenijmegen/utils';
 import { ZgwClient } from '../ZgwClient';
 
 const runTest = process.env.CREATE_TEST_ZAAK_LIVE === 'true' ? describe : describe.skip;
@@ -36,7 +36,7 @@ runTest('Create zaak run live tests', () => {
       createZaak(false, '69599084'),
       createZaak(true, '900222633'),
       createZaak(false, '68750110'),
-    ])
+    ]);
   }, 30 * 1000);
 
   test('Create test zaak live (BSN)', async () => {
@@ -79,10 +79,7 @@ runTest('Create zaak run live tests', () => {
     }
 
 
-
   }
-
-
 
 
 });

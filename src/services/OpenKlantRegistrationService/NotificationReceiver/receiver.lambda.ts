@@ -1,7 +1,9 @@
 import { createHash, randomUUID } from 'crypto';
+import { Tracer } from '@aws-lambda-powertools/tracer';
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
+import type { Subsegment } from 'aws-xray-sdk-core';
 import { authenticate } from '../Shared/authenticate';
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
@@ -9,8 +11,26 @@ import { Notification, NotificationSchema } from '../Shared/model/Notification';
 
 const sqs = new SQSClient();
 
+const tracer = new Tracer({
+  serviceName: `${process.env.SERVICE_NAME}-receiver`, captureHTTPsRequests: true,
+});
+
 export async function handler(event: APIGatewayProxyEventV2) {
   logger.debug('Incomming event', JSON.stringify(event));
+
+  // ENABLE X-RAY TRACING
+  const segment = tracer?.getSegment(); // This is the facade segment (the one that is created by AWS Lambda)
+  if (!segment) {
+    logger.debug('no xray tracing segment found', { tracer });
+  }
+  let subsegment: Subsegment | undefined;
+  if (tracer && segment) {
+    // Create subsegment for the function & set it as active
+    subsegment = segment.addNewSubsegment(`## ${process.env._HANDLER}`);
+    tracer.setSegment(subsegment);
+  }
+  tracer?.annotateColdStart();
+  tracer?.addServiceNameAnnotation();
 
   try {
 
@@ -51,7 +71,15 @@ export async function handler(event: APIGatewayProxyEventV2) {
       return Response.error(error.statusCode, error.message);
     }
     logger.error('Error during processing of event', error as Error);
+    tracer?.addErrorAsMetadata(error as Error);
     return Response.error(500);
+  } finally {
+    if (segment && subsegment) {
+      // Close subsegment (the AWS Lambda one is closed automatically)
+      subsegment.close();
+      // Set back the facade segment as active again
+      tracer?.setSegment(segment);
+    }
   }
 }
 
@@ -84,3 +112,4 @@ export function validateNotification(notification: Notification): string[] | und
 
   return errors.length == 0 ? undefined : errors;
 }
+
