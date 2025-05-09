@@ -88,6 +88,10 @@
       "type": "build"
     },
     {
+      "name": "@aws-lambda-powertools/batch",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-lambda-powertools/idempotency",
       "type": "runtime"
     },
@@ -117,6 +121,10 @@
     },
     {
       "name": "@gemeentenijmegen/utils",
+      "type": "runtime"
+    },
+    {
+      "name": "@middy/core",
       "type": "runtime"
     },
     {

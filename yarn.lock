@@ -107,6 +107,11 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
+"@aws-lambda-powertools/batch@^2.19.1":
+  version "2.19.1"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/batch/-/batch-2.19.1.tgz#db8034db46f2dd64811f36bc7817c78b2569f088"
+  integrity sha512-qKUq7w9x/2YbtCk9xwzBlZZOv3vB+C0qLdk05/gbwIBq/EYWG4dhP4i1NSQGRJQo2WszXJwWpzO+W8QtGf71+Q==
+
 "@aws-lambda-powertools/commons@2.19.1", "@aws-lambda-powertools/commons@^2.19.1":
   version "2.19.1"
   resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-2.19.1.tgz#81dded11424d3ea9c081a8da6672de2f8bb2f04b"
@@ -1706,6 +1711,11 @@
   dependencies:
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
+
+"@middy/core@^6.2.3":
+  version "6.2.3"
+  resolved "https://registry.yarnpkg.com/@middy/core/-/core-6.2.3.tgz#a741b34d0813bd7400012512e49b203b3069064b"
+  integrity sha512-ubWGbAW2wlgee7XvhRNfML/HUyKLJsUiZIYtml2R0cVtgUmx7nSsoPBa6H3FaDLhW8/XlwYrYMoa0plrdsqeTQ==
 
 "@modelcontextprotocol/sdk@^1.8.0":
   version "1.11.1"

@@ -25,6 +25,8 @@ const project = new GemeenteNijmegenCdkApp({
     '@aws-sdk/client-dynamodb',
     '@aws-lambda-powertools/idempotency',
     '@aws-lambda-powertools/tracer',
+    '@middy/core',
+    '@aws-lambda-powertools/batch',
   ],
   jestOptions: {
     jestConfig: {

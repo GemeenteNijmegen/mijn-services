@@ -1,17 +1,21 @@
+import { BatchProcessor, EventType, processPartialResponse } from '@aws-lambda-powertools/batch';
 import { Tracer } from '@aws-lambda-powertools/tracer';
+import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
-import { SQSEvent } from 'aws-lambda';
+import middy from '@middy/core';
+import { SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
 import type { Subsegment } from 'aws-xray-sdk-core';
-import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
-import { Notification, NotificationSchema } from '../Shared/model/Notification';
+import { NotificationSchema } from '../Shared/model/Notification';
 import { CatalogiApi } from './CatalogiApi';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
 
+const processor = new BatchProcessor(EventType.SQS);
 const tracer = new Tracer({
-  serviceName: `${process.env.SERVICE_NAME}-receiver`, captureHTTPsRequests: true,
+  serviceName: `${process.env.SERVICE_NAME}-receiver`,
+  captureHTTPsRequests: true,
 });
 
 async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
@@ -51,85 +55,41 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
 
 }
 
-// const idempotency = new IdempotencyChecker(process.env.IDEMPOTENCY_TABLE_NAME!, new DynamoDBClient());
-let configuration: undefined | OpenKlantRegistrationServiceProps = undefined;
-
-export async function handler(event: SQSEvent) {
-  logger.debug('Incomming event', JSON.stringify(event));
-
-  // ENABLE X-RAY TRACING
-  const segment = tracer?.getSegment(); // This is the facade segment (the one that is created by AWS Lambda)
-  if (!segment) {
-    logger.debug('no xray tracing segment found', { tracer });
-  }
-  let subsegment: Subsegment | undefined;
-  if (tracer && segment) {
-    // Create subsegment for the function & set it as active
-    subsegment = segment.addNewSubsegment(`## ${process.env._HANDLER}`);
-    tracer.setSegment(subsegment);
-  }
-  tracer?.annotateColdStart();
-  tracer?.addServiceNameAnnotation();
 
 
-  if (!configuration) {
-    configuration = await initalize();
-  }
+// ENABLE X-RAY TRACING
+const segment = tracer?.getSegment(); // This is the facade segment (the one that is created by AWS Lambda)
+if (!segment) {
+  logger.debug('no xray tracing segment found', { tracer });
+}
+let subsegment: Subsegment | undefined;
+if (tracer && segment) {
+  // Create subsegment for the function & set it as active
+  subsegment = segment.addNewSubsegment(`registration-handler`);
+  tracer.setSegment(subsegment);
+}
+tracer?.annotateColdStart();
+tracer?.addServiceNameAnnotation();
+
+export async function recordHandler(record: SQSRecord, configuration: OpenKlantRegistrationServiceProps) {
+  logger.debug('Handling record', { record });
 
   try {
-    // Create the handler
+    const notification = NotificationSchema.parse(JSON.parse(record.body));
     const registrationHandler = new OpenKlantRegistrationHandler(configuration);
-
-    // Handle the notification event
-    const notifications = parseNotificationFromBody(event);
-    for (const notification of notifications) {
-      // const hashKey = idempotency.calculateHashKey(notifications);
-      // if (await idempotency.checkAlreadyHandled(hashKey)) {
-      //   logger.info('Already handled event', { hashKey });
-      //   continue;
-      // }
-      await registrationHandler.handleNotification(notification);
-      // await idempotency.registerIdempotencyCheck(hashKey);
-    }
-
+    await registrationHandler.handleNotification(notification);
   } catch (error) {
-    logger.error('Error during processing of notification', error as Error);
+    logger.error('Error during processing of record', error as Error);
     tracer?.addErrorAsMetadata(error as Error);
     throw Error('Failed to handle SQS message');
-  } finally {
-    if (segment && subsegment) {
-      // Close subsegment (the AWS Lambda one is closed automatically)
-      subsegment.close();
-      // Set back the facade segment as active again
-      tracer?.setSegment(segment);
-    }
   }
 
 }
 
-function parseNotificationFromBody(event: SQSEvent): Notification[] {
-  try {
-
-    if (!event.Records || event.Records.length == 0) {
-      throw Error('Empty event received from queue');
-    }
-
-    const notifications: Notification[] = [];
-
-    for (const record of event.Records) {
-      if (!record.body) {
-        throw Error('Received notification without notification body!');
-      }
-      const notification = NotificationSchema.parse(JSON.parse(record.body));
-      notifications.push(notification);
-    }
-
-    return notifications;
-
-  } catch (error) {
-    logger.error('Could ont parse notification', error as Error);
-    throw new ErrorResponse(400, 'Error parsing body');
-  }
-}
+export const handler: SQSHandler = middy(async (event: SQSEvent) => {
+  const configuration = await initalize();
+  const configuredRecordHandler = (event: SQSRecord) => recordHandler(event, configuration);
+  processPartialResponse(event, configuredRecordHandler, processor);
+}).use(captureLambdaHandler(tracer));
 
 

@@ -1,19 +1,21 @@
-import { createHash, randomUUID } from 'crypto';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import type { Subsegment } from 'aws-xray-sdk-core';
+import { createHash, randomUUID } from 'crypto';
 import { authenticate } from '../Shared/authenticate';
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
 import { Notification, NotificationSchema } from '../Shared/model/Notification';
 
-const sqs = new SQSClient();
 
 const tracer = new Tracer({
-  serviceName: `${process.env.SERVICE_NAME}-receiver`, captureHTTPsRequests: true,
+  serviceName: process.env.SERVICE_NAME,
+  captureHTTPsRequests: true,
 });
+
+const sqs = tracer.captureAWSv3Client(new SQSClient());
 
 export async function handler(event: APIGatewayProxyEventV2) {
   logger.debug('Incomming event', JSON.stringify(event));
@@ -26,7 +28,7 @@ export async function handler(event: APIGatewayProxyEventV2) {
   let subsegment: Subsegment | undefined;
   if (tracer && segment) {
     // Create subsegment for the function & set it as active
-    subsegment = segment.addNewSubsegment(`## ${process.env._HANDLER}`);
+    subsegment = segment.addNewSubsegment('Notifcation receiver');
     tracer.setSegment(subsegment);
   }
   tracer?.annotateColdStart();
@@ -57,11 +59,18 @@ export async function handler(event: APIGatewayProxyEventV2) {
     // Forward the notification to the queue
     const messageJson = JSON.stringify(notification);
     const groupid = createHash('sha256').update(notification.hoofdObject).digest('hex').substring(0, 120);
+
     await sqs.send(new SendMessageCommand({
       MessageBody: messageJson,
       QueueUrl: process.env.QUEUE_URL,
       MessageGroupId: groupid,
       MessageDeduplicationId: randomUUID(),
+      MessageAttributes: {
+        'X-Amzn-Trace-Id': {
+          'StringValue': tracer.getRootXrayTraceId(),
+          'DataType': 'String'
+        }
+      },
     }));
 
     return Response.ok();
