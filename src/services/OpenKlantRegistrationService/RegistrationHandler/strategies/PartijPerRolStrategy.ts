@@ -1,5 +1,5 @@
-import { randomUUID } from 'crypto';
 import { Response } from '@gemeentenijmegen/apigateway-http';
+import { randomUUID } from 'crypto';
 import { ErrorResponse } from '../../Shared/ErrorResponse';
 import { logger } from '../../Shared/Logger';
 import { Notification } from '../../Shared/model/Notification';
@@ -39,7 +39,14 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
   async register(notification: Notification): Promise<Response> {
     // Get the involved rol details and check if the role is the 'aanvrager'
     const rolUrl = notification.resourceUrl;
-    const rol = await this.configuration.zakenApi.getRol(rolUrl);
+    let rol = undefined;
+    try {
+      rol = await this.configuration.zakenApi.getRol(rolUrl);
+    } catch (error) {
+      logger.info('Failed to get role, this is probably fine.');
+      return Response.ok();
+    }
+
     const rolType = await this.configuration.catalogiApi.getRolType(rol.roltype);
 
     if (this.configuration.catalogusUuids) {
