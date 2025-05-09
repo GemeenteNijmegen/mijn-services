@@ -4,7 +4,7 @@ import { HttpApi, HttpMethod, MappingValue, ParameterMapping } from 'aws-cdk-lib
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Key } from 'aws-cdk-lib/aws-kms';
-import { ApplicationLogLevel, Function, LoggingFormat, SystemLogLevel } from 'aws-cdk-lib/aws-lambda';
+import { ApplicationLogLevel, Function, LoggingFormat, SystemLogLevel, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { FilterPattern, LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -91,12 +91,15 @@ export class OpenKlantRegistrationService extends Construct {
         STRATEGY: this.props.openKlantRegistrationServiceConfiguration.strategy,
         IDEMPOTENCY_TABLE_NAME: idempotency.tableName,
         SERVICE_NAME: id,
+        AWS_XRAY_DEBUG_MODE: this.props.openKlantRegistrationServiceConfiguration.debug ? 'TRUE' : "FALSE",
+        AWS_XRAY_LOG_LEVEL: this.props.openKlantRegistrationServiceConfiguration.debug ? SystemLogLevel.DEBUG : SystemLogLevel.INFO,
         ...environment,
       },
       logGroup: logs,
       loggingFormat: LoggingFormat.JSON,
       systemLogLevelV2: this.props.openKlantRegistrationServiceConfiguration.debug ? SystemLogLevel.DEBUG : SystemLogLevel.INFO,
       applicationLogLevelV2: this.props.openKlantRegistrationServiceConfiguration.debug ? ApplicationLogLevel.DEBUG : ApplicationLogLevel.INFO,
+      tracing: Tracing.ACTIVE,
     });
     idempotency.grantReadWriteData(service);
     this.props.key.grantEncrypt(service);
@@ -131,11 +134,14 @@ export class OpenKlantRegistrationService extends Construct {
         REGISTRATION_SERVICE_ID: id,
         ENABLE_FORWARDING: openKlantConfig.enabled ? 'true' : 'false',
         SERVICE_NAME: id,
+        AWS_XRAY_DEBUG_MODE: this.props.openKlantRegistrationServiceConfiguration.debug ? 'TRUE' : "FALSE",
+        AWS_XRAY_LOG_LEVEL: this.props.openKlantRegistrationServiceConfiguration.debug ? SystemLogLevel.DEBUG : SystemLogLevel.INFO,
       },
       logGroup: logs,
       loggingFormat: LoggingFormat.JSON,
       systemLogLevelV2: this.props.openKlantRegistrationServiceConfiguration.debug ? SystemLogLevel.DEBUG : SystemLogLevel.INFO,
       applicationLogLevelV2: this.props.openKlantRegistrationServiceConfiguration.debug ? ApplicationLogLevel.DEBUG : ApplicationLogLevel.INFO,
+      tracing: Tracing.ACTIVE,
     });
 
     queue.grantSendMessages(service);

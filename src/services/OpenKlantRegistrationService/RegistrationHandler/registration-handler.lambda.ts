@@ -1,12 +1,18 @@
+import { Tracer } from '@aws-lambda-powertools/tracer';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import { SQSEvent } from 'aws-lambda';
+import type { Subsegment } from 'aws-xray-sdk-core';
+import { ErrorResponse } from '../Shared/ErrorResponse';
+import { logger } from '../Shared/Logger';
+import { Notification, NotificationSchema } from '../Shared/model/Notification';
 import { CatalogiApi } from './CatalogiApi';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
-import { ErrorResponse } from '../Shared/ErrorResponse';
-import { logger } from '../Shared/Logger';
-import { Notification, NotificationSchema } from '../Shared/model/Notification';
+
+const tracer = new Tracer({
+  serviceName: `${process.env.SERVICE_NAME}-receiver`, captureHTTPsRequests: true,
+});
 
 async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
   const env = environmentVariables([
@@ -49,8 +55,22 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
 let configuration: undefined | OpenKlantRegistrationServiceProps = undefined;
 
 export async function handler(event: SQSEvent) {
-
   logger.debug('Incomming event', JSON.stringify(event));
+
+  // ENABLE X-RAY TRACING
+  const segment = tracer?.getSegment(); // This is the facade segment (the one that is created by AWS Lambda)
+  if (!segment) {
+    logger.debug('no xray tracing segment found', { tracer });
+  }
+  let subsegment: Subsegment | undefined;
+  if (tracer && segment) {
+    // Create subsegment for the function & set it as active
+    subsegment = segment.addNewSubsegment(`## ${process.env._HANDLER}`);
+    tracer.setSegment(subsegment);
+  }
+  tracer?.annotateColdStart();
+  tracer?.addServiceNameAnnotation();
+
 
   if (!configuration) {
     configuration = await initalize();
@@ -74,7 +94,15 @@ export async function handler(event: SQSEvent) {
 
   } catch (error) {
     logger.error('Error during processing of notification', error as Error);
+    tracer?.addErrorAsMetadata(error as Error);
     throw Error('Failed to handle SQS message');
+  } finally {
+    if (segment && subsegment) {
+      // Close subsegment (the AWS Lambda one is closed automatically)
+      subsegment.close();
+      // Set back the facade segment as active again
+      tracer?.setSegment(segment);
+    }
   }
 
 }
