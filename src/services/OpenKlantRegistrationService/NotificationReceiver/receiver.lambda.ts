@@ -2,7 +2,6 @@ import { Tracer } from '@aws-lambda-powertools/tracer';
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { Response } from '@gemeentenijmegen/apigateway-http';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
-import type { Subsegment } from 'aws-xray-sdk-core';
 import { createHash, randomUUID } from 'crypto';
 import { authenticate } from '../Shared/authenticate';
 import { ErrorResponse } from '../Shared/ErrorResponse';
@@ -10,31 +9,20 @@ import { logger } from '../Shared/Logger';
 import { Notification, NotificationSchema } from '../Shared/model/Notification';
 
 
+// ENABLE X-RAY TRACING
 const tracer = new Tracer({
-  serviceName: process.env.SERVICE_NAME,
+  serviceName: 'Receiver-service',
   captureHTTPsRequests: true,
 });
+tracer.annotateColdStart();
+tracer.addServiceNameAnnotation();
 
+// Setup SQS client
 const sqs = tracer.captureAWSv3Client(new SQSClient());
+
 
 export async function handler(event: APIGatewayProxyEventV2) {
   logger.debug('Incomming event', JSON.stringify(event));
-
-  // ENABLE X-RAY TRACING
-  const segment = tracer?.getSegment(); // This is the facade segment (the one that is created by AWS Lambda)
-  if (!segment) {
-    logger.debug('no xray tracing segment found', { tracer });
-  }
-  let subsegment: Subsegment | undefined;
-  if (tracer && segment) {
-    // Create subsegment for the function & set it as active
-    subsegment = segment.addNewSubsegment('Notifcation receiver');
-    tracer.setSegment(subsegment);
-  }
-  tracer?.annotateColdStart();
-  tracer?.addServiceNameAnnotation();
-
-
 
   try {
 
@@ -81,13 +69,6 @@ export async function handler(event: APIGatewayProxyEventV2) {
     logger.error('Error during processing of event', error as Error);
     tracer?.addErrorAsMetadata(error as Error);
     return Response.error(500);
-  } finally {
-    if (segment && subsegment) {
-      // Close subsegment (the AWS Lambda one is closed automatically)
-      subsegment.close();
-      // Set back the facade segment as active again
-      tracer?.setSegment(segment);
-    }
   }
 }
 

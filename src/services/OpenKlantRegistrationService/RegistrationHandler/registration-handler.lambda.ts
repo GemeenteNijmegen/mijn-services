@@ -4,19 +4,22 @@ import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
 import middy from '@middy/core';
 import { SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
-import type { Subsegment } from 'aws-xray-sdk-core';
+import { logger } from '../Shared/Logger';
+import { NotificationSchema } from '../Shared/model/Notification';
 import { CatalogiApi } from './CatalogiApi';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
-import { logger } from '../Shared/Logger';
-import { NotificationSchema } from '../Shared/model/Notification';
 
 const processor = new BatchProcessor(EventType.SQS);
+
+// ENABLE X-RAY TRACING
 const tracer = new Tracer({
   serviceName: `${process.env.SERVICE_NAME}-receiver`,
   captureHTTPsRequests: true,
 });
+tracer.annotateColdStart();
+tracer.addServiceNameAnnotation();
 
 async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
   const env = environmentVariables([
@@ -54,21 +57,6 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
   };
 
 }
-
-
-// ENABLE X-RAY TRACING
-const segment = tracer?.getSegment(); // This is the facade segment (the one that is created by AWS Lambda)
-if (!segment) {
-  logger.debug('no xray tracing segment found', { tracer });
-}
-let subsegment: Subsegment | undefined;
-if (tracer && segment) {
-  // Create subsegment for the function & set it as active
-  subsegment = segment.addNewSubsegment('registration-handler');
-  tracer.setSegment(subsegment);
-}
-tracer?.annotateColdStart();
-tracer?.addServiceNameAnnotation();
 
 export async function recordHandler(record: SQSRecord, configuration: OpenKlantRegistrationServiceProps) {
   logger.debug('Handling record', { record });
