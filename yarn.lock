@@ -1712,10 +1712,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@middy/core@^6.2.3":
-  version "6.2.3"
-  resolved "https://registry.yarnpkg.com/@middy/core/-/core-6.2.3.tgz#a741b34d0813bd7400012512e49b203b3069064b"
-  integrity sha512-ubWGbAW2wlgee7XvhRNfML/HUyKLJsUiZIYtml2R0cVtgUmx7nSsoPBa6H3FaDLhW8/XlwYrYMoa0plrdsqeTQ==
+"@middy/core@^6.2.4":
+  version "6.2.4"
+  resolved "https://registry.yarnpkg.com/@middy/core/-/core-6.2.4.tgz#c4f3ca0cb5c473f4ece99ffd57e3295827a76beb"
+  integrity sha512-PQRkW3xnaI1Trh9Vkffn2U/KTKL5lI3Cm/YHuGNqr8TR0R2SlazFV7X+k4KbmD2sAgESd1YGPOCDOTLWhuNuIw==
 
 "@modelcontextprotocol/sdk@^1.8.0":
   version "1.11.1"
