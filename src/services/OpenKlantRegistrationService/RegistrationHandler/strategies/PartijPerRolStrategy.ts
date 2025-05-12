@@ -52,7 +52,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     if (this.configuration.catalogusUuids) {
       const inWhitelist = this.configuration.catalogusUuids.find(catalogusUuid => rolType.catalogus && rolType.catalogus.includes(catalogusUuid));
       if (!inWhitelist) {
-        logger.debug('Catalogus of roltype is not in the configured whitelist of catalogi, ignoring notification');
+        logger.info('Catalogus of roltype is not in the configured whitelist of catalogi, ignoring notification');
         return Response.ok();
       }
     }
@@ -63,25 +63,27 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     }
 
     if (rol.betrokkene) {
-      logger.debug('Rol alreay had betrokkene url set. Skipping update...');
+      logger.info('Rol alreay had betrokkene url set. Skipping update...');
       return Response.ok();
     }
 
     // Check if role is of the target role type, otherwise return 200 but do not handle the notification
     const isTargetRolType = this.configuration.roltypesToRegister.includes(rolType.omschrijvingGeneriek.toLocaleLowerCase());
     if (!isTargetRolType) {
-      logger.debug('Role is not of the type to forward to open klant. Ignoring this notification.');
+      logger.info('Role is not of the type to forward to open klant. Ignoring this notification.');
       return Response.ok();
     }
-    logger.debug('Found a rol of the target type to forward to open klant.');
+    logger.info('Found a rol of the target type to forward to open klant.');
 
     let partij: OpenKlantPartijWithUuid | undefined = undefined;
     if (rol.betrokkeneType == 'natuurlijk_persoon') {
       partij = await this.handleNatuurlijkPersoon(rol);
+      logger.info('Registratie van partij als natuurlijk_persoon is afgerond.');
     }
 
     if (rol.betrokkeneType == 'niet_natuurlijk_persoon') {
       partij = await this.handleNietNatuurlijkPersoon(rol);
+      logger.info('Registratie van partij als niet_natuurlijk_persoon is afgerond.');
     }
 
     if (!partij) {
@@ -90,8 +92,9 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
 
     if (this.updateRolInZaakApi == true) {
       await this.updateRolWithParijUrl(partij.uuid, rol);
+      logger.info('Update van de rol met partij url is uitgevoerd.');
     } else {
-      logger.debug('Skipping update of role in zaken api as updateRolInZaakApi is false');
+      logger.info('Skipping update of role in zaken api as updateRolInZaakApi is false');
     }
 
     return Response.ok();

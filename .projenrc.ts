@@ -8,6 +8,7 @@ const project = new GemeenteNijmegenCdkApp({
     '@gemeentenijmegen/projen-project-type',
     '@types/pg',
     '@types/jsonwebtoken',
+    'aws-sdk-client-mock',
   ],
   deps: [
     'dotenv',
