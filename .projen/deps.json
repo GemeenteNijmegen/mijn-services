@@ -88,7 +88,23 @@
       "type": "build"
     },
     {
+      "name": "@aws-lambda-powertools/batch",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-lambda-powertools/idempotency",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-lambda-powertools/logger",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-lambda-powertools/tracer",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-dynamodb",
       "type": "runtime"
     },
     {
@@ -105,6 +121,10 @@
     },
     {
       "name": "@gemeentenijmegen/utils",
+      "type": "runtime"
+    },
+    {
+      "name": "@middy/core",
       "type": "runtime"
     },
     {

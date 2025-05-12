@@ -1,13 +1,25 @@
+import { BatchProcessor, EventType, processPartialResponse } from '@aws-lambda-powertools/batch';
+import { Tracer } from '@aws-lambda-powertools/tracer';
+import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware';
 import { AWS, environmentVariables } from '@gemeentenijmegen/utils';
-import { SQSEvent } from 'aws-lambda';
+import middy from '@middy/core';
+import { SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
 import { CatalogiApi } from './CatalogiApi';
 import { OpenKlantApi } from './OpenKlantApi';
 import { OpenKlantRegistrationHandler, OpenKlantRegistrationServiceProps } from './OpenKlantRegistrationHandler';
 import { ZakenApi } from './ZakenApi';
-import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
-import { Notification, NotificationSchema } from '../Shared/model/Notification';
+import { NotificationSchema } from '../Shared/model/Notification';
 
+const processor = new BatchProcessor(EventType.SQS);
+
+// ENABLE X-RAY TRACING
+const tracer = new Tracer({
+  serviceName: `${process.env.SERVICE_NAME}-receiver`,
+  captureHTTPsRequests: true,
+});
+tracer.annotateColdStart();
+tracer.addServiceNameAnnotation();
 
 async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
   const env = environmentVariables([
@@ -42,57 +54,30 @@ async function initalize(): Promise<OpenKlantRegistrationServiceProps> {
     }),
     roltypesToRegister: env.ROLTYPES_TO_REGISTER.split(','),
     catalogusUuids: process.env.CATALOGI_WHITELIST ? process.env.CATALOGI_WHITELIST.split(',') : undefined,
+    tracer: tracer,
   };
 
 }
 
-let configuration: undefined | OpenKlantRegistrationServiceProps = undefined;
-export async function handler(event: SQSEvent) {
-
-  logger.debug('Incomming event', JSON.stringify(event));
-
-  if (!configuration) {
-    configuration = await initalize();
-  }
+export async function recordHandler(record: SQSRecord, configuration: OpenKlantRegistrationServiceProps) {
+  logger.debug('Handling record', { record });
 
   try {
-    // Create the handler
+    const notification = NotificationSchema.parse(JSON.parse(record.body));
     const registrationHandler = new OpenKlantRegistrationHandler(configuration);
-
-    // Handle the notification event
-    const notifications = parseNotificationFromBody(event);
-    for (const notification of notifications) {
-      await registrationHandler.handleNotification(notification);
-    }
-
+    await registrationHandler.handleNotification(notification);
   } catch (error) {
-    logger.error('Error during processing of notification', error as Error);
+    logger.error('Error during processing of record', error as Error);
+    tracer?.addErrorAsMetadata(error as Error);
     throw Error('Failed to handle SQS message');
   }
 
 }
 
-function parseNotificationFromBody(event: SQSEvent): Notification[] {
-  try {
+export const handler: SQSHandler = middy(async (event: SQSEvent) => {
+  const configuration = await initalize();
+  const configuredRecordHandler = (record: SQSRecord) => recordHandler(record, configuration);
+  await processPartialResponse(event, configuredRecordHandler, processor);
+}).use(captureLambdaHandler(tracer));
 
-    if (!event.Records || event.Records.length == 0) {
-      throw Error('Empty event received from queue');
-    }
 
-    const notifications: Notification[] = [];
-
-    for (const record of event.Records) {
-      if (!record.body) {
-        throw Error('Received notification without notification body!');
-      }
-      const notification = NotificationSchema.parse(JSON.parse(record.body));
-      notifications.push(notification);
-    }
-
-    return notifications;
-
-  } catch (error) {
-    logger.error('Could ont parse notification', error as Error);
-    throw new ErrorResponse(400, 'Error parsing body');
-  }
-}

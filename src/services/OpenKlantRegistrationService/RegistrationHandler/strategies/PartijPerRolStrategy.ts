@@ -39,7 +39,14 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
   async register(notification: Notification): Promise<Response> {
     // Get the involved rol details and check if the role is the 'aanvrager'
     const rolUrl = notification.resourceUrl;
-    const rol = await this.configuration.zakenApi.getRol(rolUrl);
+    let rol = undefined;
+    try {
+      rol = await this.configuration.zakenApi.getRol(rolUrl);
+    } catch (error) {
+      logger.info('Failed to get role, this is probably fine.');
+      return Response.ok();
+    }
+
     const rolType = await this.configuration.catalogiApi.getRolType(rol.roltype);
 
     if (this.configuration.catalogusUuids) {
@@ -48,6 +55,11 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
         logger.debug('Catalogus of roltype is not in the configured whitelist of catalogi, ignoring notification');
         return Response.ok();
       }
+    }
+
+    // Annotate trace if we're tracing
+    if (this.configuration.tracer) {
+      this.configuration.tracer.getSegment()?.addAnnotation('BETROKKENE_ALREADY_SET', !!rol.betrokkene);
     }
 
     if (rol.betrokkene) {
@@ -104,9 +116,10 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     // Act as if the rol is actually a natuurlijk persoon for converting it to a persoon partij.
     // Note that we can do this in this particular situation as we do not use the rol.betrokkeneIdentificatie
     //  but instead use a random ID so that we can remove these partijen later.
-    rol.betrokkeneType = 'natuurlijk_persoon';
+    const localRol = { ...rol }; // Fix for below aproach that resulted in a major bug when the rol is updated later on.
+    localRol.betrokkeneType = 'natuurlijk_persoon';
     // Create the partij
-    const partijInput = OpenKlantMapper.persoonPartijFromRol(rol);
+    const partijInput = OpenKlantMapper.persoonPartijFromRol(localRol);
     const persoon = await this.configuration.openKlantApi.registerPartij(partijInput);
     logger.debug('Persoon partij created (for kvk in partij per rol strategy)', persoon);
     // Create the partij identificatie
@@ -114,7 +127,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     const identificatie = await this.configuration.openKlantApi.addPartijIdentificatie(identificatieInput);
     logger.debug('Persoon partij identificatie created (for kvk in partij per rol strategy)', identificatie);
     // Add the digitale adressen (and select voorkeur)
-    await this.setDigitaleAdressenForPartijFromRol(persoon, rol);
+    await this.setDigitaleAdressenForPartijFromRol(persoon, localRol);
     logger.debug('Digitale addressen created (for kvk in partij per rol strategy)');
     return persoon;
 

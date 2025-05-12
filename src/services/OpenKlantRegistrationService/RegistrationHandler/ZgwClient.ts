@@ -150,28 +150,44 @@ export class ZgwClient {
     return token;
   }
 
-  private async callZaakApi(method: string, path: string, data?: any) {
+  private async callZaakApi(method: string, path: string, data?: any): Promise<any> {
     this.checkConfiguration();
     const token = this.createToken(this.clientId!, this.options.name, this.clientSecret!);
 
     const url = this.joinUrl(this.options.zakenApiUrl, path);
-    const response = await fetch(url, {
-      method: method,
-      body: JSON.stringify(data),
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-type': 'application/json',
-        'Content-Crs': 'EPSG:4326',
-        'Accept-Crs': 'EPSG:4326',
-      },
-    });
-    const json = await response.json() as any;
-    logger.debug('Response', { json });
-    if (response.status < 200 || response.status > 300) {
-      console.debug(json);
-      throw Error(`Not a 2xx response: ${response.status} ${response.statusText}`);
+    try {
+      const response = await fetch(url, {
+        method: method,
+        body: JSON.stringify(data),
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-type': 'application/json',
+          'Content-Crs': 'EPSG:4326',
+          'Accept-Crs': 'EPSG:4326',
+        },
+      });
+
+      // Try to parse JSON otherwise log text and throw parse error
+      let json = undefined;
+      try {
+        json = await response.json();
+        logger.debug('Response', { json });
+      } catch (error) {
+        logger.error(await response.text());
+        throw error;
+      }
+
+      // If not 2xx log the response and throw an error
+      if (response.status < 200 || response.status > 300) {
+        logger.error('Not a 2xx response:', { json });
+        throw Error(`Not a 2xx response: ${response.status} ${response.statusText}`);
+      }
+
+      return json;
+    } catch (error) {
+      logger.error('[ZGW] Failed to call API', { error });
+      throw error;
     }
-    return json;
   }
 
   private checkConfiguration() {

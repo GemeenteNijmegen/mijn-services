@@ -502,9 +502,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'openzaak.woweb.app/zaken/api/v1',
-        notificatiesApiUrl: 'opennotificaties.woweb.app/api/v1',
-        objectenApiUrl: 'objects-api.woweb.app/api/v2',
-        objecttypenApiUrl: 'objecttypes-api.woweb.app/api/v2',
+        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
+        objectenApiUrl: 'mijn-services.accp.nijmegen.nl/objects/api/v2',
+        objecttypenApiUrl: 'mijn-services.accp.nijmegen.nl/objecttypes/api/v2',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'nijmegen_devops',
@@ -604,7 +604,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           userId: 'nijmegen_devops',
           username: 'nijmegen_devops',
         },
-        taakObjecttypeUuid: '00000000-00000000-00000000-00000000', // TODO unknown as we do not yet have an objects api in prod
+        taakObjecttypeUuid: 'bf3dbb29-5391-40e3-94a8-c662bedcd0f7',
         templates: { // IDs refer to templates in NotifyNL service: APV - Gemeente Nijmegen
           zaakCreateEmail: '06ff0f61-a0a3-4ea5-a583-4106dac20c33',
           zaakUpdateEmail: 'ff09a540-3a88-4f70-9717-11a6c0fac356',

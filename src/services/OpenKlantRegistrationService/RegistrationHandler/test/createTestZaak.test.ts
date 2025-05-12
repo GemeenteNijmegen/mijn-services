@@ -1,4 +1,5 @@
 
+import { randomBytes } from 'crypto';
 import { Bsn } from '@gemeentenijmegen/utils';
 import { ZgwClient } from '../ZgwClient';
 
@@ -25,43 +26,28 @@ const runTest = process.env.CREATE_TEST_ZAAK_LIVE === 'true' ? describe : descri
  */
 runTest('Create zaak run live tests', () => {
 
-  test('Create test zaak live (BSN)', async () => {
+  // Random ID that is logged for correlating in the zaken api
+  const runid = randomBytes(20).toString('hex').substring(0, 10);
+  console.log('Using ID', runid);
 
-    const client = new ZgwClient({
-      name: process.env.ZAKEN_API_CLIENT_ID!,
-      roltype: process.env.CREATE_TEST_ZAAK_ROLTYPE!,
-      zaakstatus: process.env.CREATE_TEST_ZAAK_STATUSTYPE!,
-      zaaktype: process.env.CREATE_TEST_ZAAK_ZAAKTYPE!,
-      zakenApiUrl: process.env.CREATE_TEST_ZAAK_API!,
-      clientId: process.env.ZAKEN_API_CLIENT_ID,
-      clientSecret: process.env.ZAKEN_API_CLIENT_SECRET,
-    });
-
-    const zaak = await client.createZaak(`TEST-VUL-SERVICE-ZAAK-${Date.now()}`, 'TestVulService');
-
-    await sleep(3000);
-
-    await client.addBsnRoleToZaak(zaak.url, new Bsn('999999333'), {
-      naam: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_NAAM!,
-      telefoonnummer: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_TELEFOON,
-      emailadres: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_EMAIL,
-    });
-
-    await sleep(3000);
-
-    await client.addStatusToZaak(zaak.url, 'Trigger vul service vanaf lokaal (bsn)');
-
+  test('Do multiple creates', async () => {
+    await Promise.all([
+      createZaak(true, '999999333'),
+      createZaak(false, '69599084'),
+      createZaak(true, '900222633'),
+      createZaak(false, '68750110'),
+    ]);
   }, 30 * 1000);
 
-  async function sleep(ms: number) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  }
-
+  test('Create test zaak live (BSN)', async () => {
+    await createZaak(true, '999999333');
+  }, 30 * 1000);
 
   test('Create test zaak live (kvk)', async () => {
+    await createZaak(false, '68750110');
+  }, 30 * 1000);
 
+  async function createZaak(useBsn: boolean, identifier: string) {
     const client = new ZgwClient({
       name: process.env.ZAKEN_API_CLIENT_ID!,
       roltype: process.env.CREATE_TEST_ZAAK_ROLTYPE!,
@@ -72,18 +58,29 @@ runTest('Create zaak run live tests', () => {
       clientSecret: process.env.ZAKEN_API_CLIENT_SECRET,
     });
 
-    const zaak = await client.createZaak(`TEST-VUL-SERVICE-ZAAK-${Date.now()}`, 'TestVulService');
+    const zaakid = randomBytes(20).toString('hex').substring(0, 10);
+    const zaak = await client.createZaak(`ZAAK-${runid}-${zaakid}`, 'TestVulService');
+    console.log('Zaak url', zaak.url);
 
-    await client.addKvkRoleToZaak(zaak.url, '69599084', 'ExampleCompanyName', {
-      naam: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_NAAM!,
-      telefoonnummer: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_TELEFOON,
-      emailadres: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_EMAIL,
-    });
+    if (useBsn) {
+      await client.addBsnRoleToZaak(zaak.url, new Bsn(identifier), {
+        naam: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_NAAM!,
+        telefoonnummer: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_TELEFOON,
+        emailadres: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_EMAIL,
+      });
+      await client.addStatusToZaak(zaak.url, 'Trigger vul service vanaf lokaal (bsn)');
+    } else {
+      await client.addKvkRoleToZaak(zaak.url, identifier, 'ExampleCompanyName', {
+        naam: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_NAAM!,
+        telefoonnummer: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_TELEFOON,
+        emailadres: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_EMAIL,
+      });
+      await client.addStatusToZaak(zaak.url, 'Trigger vul service vanaf lokaal (kvk)');
+    }
 
-    await client.addStatusToZaak(zaak.url, 'Trigger vul service vanaf lokaal (kvk)');
 
+  }
 
-  });
 
 });
 
