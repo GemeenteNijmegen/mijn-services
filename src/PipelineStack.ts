@@ -62,6 +62,7 @@ export class PipelineStack extends Stack {
         BRANCH_NAME: this.branchName,
       },
       installCommands: [
+        // We set the node version to the latest 22.x.x release as the middy package used in lambdas requires >=20.
         'n 22',
       ],
       commands: [

@@ -35,32 +35,7 @@ export async function handler(event: APIGatewayProxyEventV2) {
 
     // Check if we need to handle this notification event
     const notification = parseNotificationFromBody(event);
-    const ignoreReasons = validateNotification(notification);
-    if (ignoreReasons) {
-      logger.info('Notification ignored', { ignoreReasons });
-      return Response.ok();
-    }
-
-    // If forwarding is not enabled just respond with ok
-    if (process.env.ENABLE_FORWARDING == 'false') {
-      return Response.ok();
-    }
-
-    // Forward the notification to the queue
-    const messageJson = JSON.stringify(notification);
-    const groupid = createHash('sha256').update(notification.hoofdObject).digest('hex').substring(0, 120);
-
-    await sqs.send(new SendMessageCommand({
-      MessageBody: messageJson,
-      QueueUrl: process.env.QUEUE_URL,
-      MessageGroupId: groupid,
-      MessageDeduplicationId: randomUUID(),
-    }));
-
-    return Response.json({
-      message: 'ok',
-      trace: tracer.getRootXrayTraceId(), // Send this as a response to be stored for easier correlation
-    });
+    return await handleAuthenticatedRequest(notification);
 
   } catch (error) {
     if (error instanceof ErrorResponse) {
@@ -70,6 +45,38 @@ export async function handler(event: APIGatewayProxyEventV2) {
     tracer?.addErrorAsMetadata(error as Error);
     return Response.error(500);
   }
+}
+
+export async function handleAuthenticatedRequest(notification: Notification) {
+
+  // Check if we need to handle this (e.g. is a notification of the right type)
+  const ignoreReasons = validateNotification(notification);
+  if (ignoreReasons) {
+    logger.info('Notification ignored', { ignoreReasons });
+    return Response.ok();
+  }
+
+  // If forwarding is not enabled just respond with ok
+  if (process.env.ENABLE_FORWARDING == 'false') {
+    logger.info('Forwarding is disabled, returning');
+    return Response.ok();
+  }
+
+  // Forward the notification to the queue
+  const messageJson = JSON.stringify(notification);
+  const groupid = createHash('sha256').update(notification.hoofdObject).digest('hex').substring(0, 120);
+  await sqs.send(new SendMessageCommand({
+    MessageBody: messageJson,
+    QueueUrl: process.env.QUEUE_URL,
+    MessageGroupId: groupid,
+    MessageDeduplicationId: randomUUID(),
+  }));
+
+  logger.info('Notification is forwarded to queue');
+  return Response.json({
+    message: 'ok',
+    trace: tracer.getRootXrayTraceId(), // Send this as a response to be stored for easier correlation
+  });
 }
 
 function parseNotificationFromBody(event: APIGatewayProxyEventV2): Notification {
