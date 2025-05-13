@@ -7,8 +7,8 @@ import { Rol } from '../../Shared/model/Rol';
 import { RolType } from '../../Shared/model/RolType';
 import { OpenKlantMapper } from '../OpenKlantMapper';
 import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
-import { SubmissionScanner } from '../SubmissionScanner';
 import { SubmissionStorage } from '../SubmissionStorage';
+import { SubmissionUtils } from '../SubmissionUtils';
 import { NotFoundError } from '../ZgwApi';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
 
@@ -181,9 +181,9 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     // Check if a phone number is valid using the following expression (used in open-klant)
     const phonenumberRegex = /^(0[8-9]00[0-9]{4,7})|(0[1-9][0-9]{8})|(\+[0-9]{9,20}|1400|140[0-9]{2,3})$/;
 
-    const phone = SubmissionScanner.findPhone(form);
-    const email = SubmissionScanner.findEmail(form);
-    const preference = SubmissionScanner.findPreference(form) as 'email' | 'telefoon';
+    const phone = SubmissionUtils.findTelefoon(form);
+    const email = SubmissionUtils.findEmail(form);
+    const preference = SubmissionUtils.findKanaalvoorkeur(form);
 
     // Register phone number if provied and correct format
     let registeredPhone = undefined;
@@ -222,7 +222,8 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     // 1. Has only email -> Use that (disregard preference)
     // 2. Has only phone -> Use that (disregard preference)
     // 3. Has email & phone -> Find preference in form
-    // 4. No email & phone -> Throw error
+    // 4. Has email & phone & no preference -> phone
+    // 5. No email & phone -> Throw error
 
     if (registeredEmail && !registeredPhone) {
       // (1) Register email as preference
@@ -233,11 +234,14 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     } else if (registeredEmail && registeredPhone && preference == 'email') {
       // (3) Register email as preference
       await this.setVoorkeurDigitiaalAdres(partij, registeredEmail.uuid);
-    } else if (registeredEmail && registeredPhone && preference == 'telefoon') {
+    } else if (registeredEmail && registeredPhone && preference == 'sms') {
       // (3) Register phone as preference
       await this.setVoorkeurDigitiaalAdres(partij, registeredPhone.uuid);
+    } else if (registeredEmail && registeredPhone && !preference) {
+      // (4) Register phone as preference
+      await this.setVoorkeurDigitiaalAdres(partij, registeredPhone.uuid);
     } else if (!registeredEmail && !registeredPhone) {
-      // Well now we only can throw an error
+      // (5) Well now we only can throw an error
       throw new Error('Failed to set a preference as we do not have any registered digitaal adres');
     } else {
       logger.error('Not registering any preference, how did this happen?');
