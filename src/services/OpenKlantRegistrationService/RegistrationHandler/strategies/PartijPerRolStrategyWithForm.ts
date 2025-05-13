@@ -1,5 +1,5 @@
-import { randomUUID } from 'crypto';
 import { Response } from '@gemeentenijmegen/apigateway-http';
+import { randomUUID } from 'crypto';
 import { logger } from '../../Shared/Logger';
 import { Notification } from '../../Shared/model/Notification';
 import { OpenKlantPartijWithUuid } from '../../Shared/model/Partij';
@@ -12,7 +12,7 @@ import { SubmissionUtils } from '../SubmissionUtils';
 import { NotFoundError } from '../ZgwApi';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
 
-export class PartijPerRolStrategy implements IRegistrationStrategy {
+export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
 
   private readonly configuration: OpenKlantRegistrationServiceProps;
   private readonly updateRolInZaakApi: boolean;

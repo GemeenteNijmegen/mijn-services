@@ -2,6 +2,7 @@ import { logger } from '../../Shared/Logger';
 import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
 import { PartijPerRolStrategy } from './PartijPerRolStrategy';
+import { PartijPerRolStrategyWithForm } from './PartijPerRolStrategyWithForm';
 import { RolRegisrationStrategySinglePartij } from './RolRegisrationStrategySinglePartij';
 
 
@@ -23,9 +24,9 @@ export class RegistrationStrategyFactory {
     } else if (strategy == 'partijperroldry') {
       return new PartijPerRolStrategy(this.configuration, false);
     } else if (strategy == 'partijperrol-with-form') {
-      return new PartijPerRolStrategy(this.configuration);
+      return new PartijPerRolStrategyWithForm(this.configuration);
     } else if (strategy == 'partijperrol-with-form-dry') {
-      return new PartijPerRolStrategy(this.configuration, false);
+      return new PartijPerRolStrategyWithForm(this.configuration, false);
     }
 
     logger.warn('Defaulting to PartijPerRolStrategy.');
