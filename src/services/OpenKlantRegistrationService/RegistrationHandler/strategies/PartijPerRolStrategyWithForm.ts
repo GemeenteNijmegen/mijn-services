@@ -1,5 +1,5 @@
-import { Response } from '@gemeentenijmegen/apigateway-http';
 import { randomUUID } from 'crypto';
+import { Response } from '@gemeentenijmegen/apigateway-http';
 import { logger } from '../../Shared/Logger';
 import { Notification } from '../../Shared/model/Notification';
 import { OpenKlantPartijWithUuid } from '../../Shared/model/Partij';
@@ -106,7 +106,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
 
       // If did not find rol
       if (error instanceof NotFoundError && error.message.includes('rol')) {
-        logger.info('Did not find role, this is probably fine.')
+        logger.info('Did not find role, this is probably fine.');
         return Response.ok();
       }
 
@@ -195,8 +195,8 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
         soortDigitaalAdres: OpenKlantMapper.TELEFOONNUMMER,
         verstrektDoorBetrokkene: null,
         verstrektDoorPartij: {
-          uuid: partij.uuid
-        }
+          uuid: partij.uuid,
+        },
       });
     }
 
@@ -213,8 +213,8 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
         soortDigitaalAdres: OpenKlantMapper.EMAIL,
         verstrektDoorBetrokkene: null,
         verstrektDoorPartij: {
-          uuid: partij.uuid
-        }
+          uuid: partij.uuid,
+        },
       });
     }
 

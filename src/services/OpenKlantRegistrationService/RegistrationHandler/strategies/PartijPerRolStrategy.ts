@@ -1,5 +1,5 @@
-import { Response } from '@gemeentenijmegen/apigateway-http';
 import { randomUUID } from 'crypto';
+import { Response } from '@gemeentenijmegen/apigateway-http';
 import { ErrorResponse } from '../../Shared/ErrorResponse';
 import { logger } from '../../Shared/Logger';
 import { Notification } from '../../Shared/model/Notification';

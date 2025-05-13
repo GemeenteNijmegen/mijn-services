@@ -56,4 +56,4 @@ test('Sends message to queue', async () => {
   const executed = sqsMock.commandCalls(SendMessageCommand);
   expect(executed.length).toBe(1);
   expect(response.statusCode).toBe(200);
-})
+});

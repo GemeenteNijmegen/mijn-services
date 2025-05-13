@@ -7,12 +7,12 @@ export const ZaakSchema = z.object({
   _expand: z.object({
     eigenschappen: z.array(
       z.object({
-        "url": z.string(),
-        "uuid": z.string(),
-        "eigenschap": z.string(),
-        "naam": z.string(),
-        "waarde": z.string(),
-      })
+        url: z.string(),
+        uuid: z.string(),
+        eigenschap: z.string(),
+        naam: z.string(),
+        waarde: z.string(),
+      }),
     ).optional().nullable(),
   }).optional().nullable(),
 

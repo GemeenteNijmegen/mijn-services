@@ -1,31 +1,31 @@
-import { AWS } from "@gemeentenijmegen/utils";
-import { logger } from "../Shared/Logger";
-import { Submission, SubmissionSchema } from "../Shared/model/Submisison";
+import { AWS } from '@gemeentenijmegen/utils';
+import { logger } from '../Shared/Logger';
+import { Submission, SubmissionSchema } from '../Shared/model/Submisison';
 
 export class SubmissionStorage {
-  constructor(
-    private readonly endpointSsm?: string,
-    private readonly apiKeySecretArn?: string
-  ) { }
-
   private endpoint?: string;
   private apiKey?: string;
+  constructor(
+    private readonly endpointSsm?: string,
+    private readonly apiKeySecretArn?: string,
+  ) { }
+
 
   private async getConfig() {
     if (!this.endpoint || !this.apiKey) {
-      this.endpoint = await AWS.getParameter(this.endpointSsm ?? process.env.FORM_SUBMISSIONS_API_ENDPOINT_SSM!)
-      this.apiKey = await AWS.getSecret(this.apiKeySecretArn ?? process.env.FORM_SUBMISSIONS_API_KEY_ARN!)
+      this.endpoint = await AWS.getParameter(this.endpointSsm ?? process.env.FORM_SUBMISSIONS_API_ENDPOINT_SSM!);
+      this.apiKey = await AWS.getSecret(this.apiKeySecretArn ?? process.env.FORM_SUBMISSIONS_API_KEY_ARN!);
     }
     return {
       endpoint: this.endpoint,
       apiKey: this.apiKey,
-    }
+    };
   }
 
   /**
    * Retreives a submission from the submission storage
    * @param reference The form reference to retreive the submission
-   * @returns 
+   * @returns
    */
   async getFormJson(reference: string, userId: string, userType: 'person' | 'organization'): Promise<Submission> {
     const config = await this.getConfig();
