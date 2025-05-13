@@ -22,6 +22,10 @@ export class RegistrationStrategyFactory {
       return new PartijPerRolStrategy(this.configuration);
     } else if (strategy == 'partijperroldry') {
       return new PartijPerRolStrategy(this.configuration, false);
+    } else if (strategy == 'partijperrol-with-form') {
+      return new PartijPerRolStrategy(this.configuration);
+    } else if (strategy == 'partijperrol-with-form-dry') {
+      return new PartijPerRolStrategy(this.configuration, false);
     }
 
     logger.warn('Defaulting to PartijPerRolStrategy.');

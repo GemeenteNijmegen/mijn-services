@@ -341,7 +341,9 @@ export interface OpenKlantRegistrationServiceConfiguration {
   strategy:
   | 'rolregistrationsinglepartij' // Convert the rol to a partij and store the partij id in the rol. Check if the partij exists and update digitale addressen (cannot be used in production)
   | 'partijperrol' // Convert the rol to a partij en store the partij id in the rol. Uses a dummy partij identificatie to keep each partij unique and for easy removal later on.
-  | 'partijperroldry'; // Without updating the rol in the Zaken api
+  | 'partijperroldry' // Without updating the rol in the Zaken api
+  | 'partijperrol-with-form' // Get contactgegevens and preference from form instead of rol
+  | 'partijperrol-with-form-dry'; // Same as above but does not update the rol
   /**
    * Flag to enable processing of notifications
    */

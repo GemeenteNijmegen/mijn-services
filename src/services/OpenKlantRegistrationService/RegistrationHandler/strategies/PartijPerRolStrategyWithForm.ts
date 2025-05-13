@@ -222,7 +222,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     // 1. Has only email -> Use that (disregard preference)
     // 2. Has only phone -> Use that (disregard preference)
     // 3. Has email & phone -> Find preference in form
-    // 4. No email & phone -> 
+    // 4. No email & phone -> Throw error
 
     if (registeredEmail && !registeredPhone) {
       // (1) Register email as preference
@@ -240,7 +240,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
       // Well now we only can throw an error
       throw new Error('Failed to set a preference as we do not have any registered digitaal adres');
     } else {
-      logger.error('How did this happen?');
+      logger.error('Not registering any preference, how did this happen?');
     }
 
   }
