@@ -1,7 +1,7 @@
+import { NotFoundError, ZgwApi, ZgwApiProps } from './ZgwApi';
 import { logger } from '../Shared/Logger';
 import { Rol, RolSchema } from '../Shared/model/Rol';
 import { Zaak, ZaakSchema } from '../Shared/model/Zaak';
-import { NotFoundError, ZgwApi, ZgwApiProps } from './ZgwApi';
 
 export interface IZakenApi {
   getRol(url: string): Promise<Rol>;

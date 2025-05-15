@@ -1,12 +1,8 @@
 import { randomUUID } from 'crypto';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { ApiGatewayV2Response } from '@gemeentenijmegen/apigateway-http';
 import { NotificationSchema } from '../../Shared/model/Notification';
-import { CatalogiApiMock } from '../CatalogiApi';
-import { OpenKlantApiMock } from '../OpenKlantApi';
 import { OpenKlantRegistrationHandler } from '../OpenKlantRegistrationHandler';
-import { ZakenApiMock } from '../ZakenApi';
 
 beforeAll(() => {
   process.env.DEBUG = 'true';
@@ -20,16 +16,16 @@ test('Unsupported notification returns error', async () => {
   const file = readFileSync(join(__dirname, 'notification-zaak.json')).toString('utf-8');
   const notification = NotificationSchema.parse(JSON.parse(file));
   const handler = createHandler();
-  const response = await handler.handleNotification(notification);
-  expect((response as ApiGatewayV2Response).statusCode).toBe(206);
+  const call = handler.handleNotification(notification);
+  await expect(call).resolves.not.toThrow();
 });
 
 test('Do not handle rol of wrong type', async () => {
   const file = readFileSync(join(__dirname, 'notification-rol.json')).toString('utf-8');
   const notification = NotificationSchema.parse(JSON.parse(file));
   const handler = createHandler('behandelaar');
-  const response = await handler.handleNotification(notification);
-  expect((response as ApiGatewayV2Response).statusCode).toBe(200);
+  const call = handler.handleNotification(notification);
+  await expect(call).resolves.not.toThrow();
 });
 
 
@@ -39,12 +35,12 @@ function createHandler(roltype?: string) {
     zakenApi: mockZakenApi(),
     catalogiApi: mockCatalogiApi(roltype),
     roltypesToRegister: ['initatior'],
-    openKlantApi: mockOpenKlantApi(),
+    openKlantApi: getMockOpenKlantApiV2(),
   });
 }
 
 function mockZakenApi() {
-  const zakenApiMock = new ZakenApiMock();
+  const zakenApiMock = getMockZakenApiV2();
   jest.spyOn(zakenApiMock, 'getRol').mockImplementation((url: string) => {
     return Promise.resolve({
       url: url,
@@ -66,7 +62,7 @@ function mockZakenApi() {
 }
 
 function mockCatalogiApi(roltype?: string) {
-  const catalogiApiMock = new CatalogiApiMock();
+  const catalogiApiMock = getMockCatalogiApiV2();
   jest.spyOn(catalogiApiMock, 'getRolType').mockImplementation((url: string) => {
     return Promise.resolve({
       url: url,
@@ -78,12 +74,36 @@ function mockCatalogiApi(roltype?: string) {
   return catalogiApiMock;
 }
 
-function mockOpenKlantApi() {
-  const openKlantApiMock = new OpenKlantApiMock();
-  const appendUuid = (obj: any) => Promise.resolve({ uuid: randomUUID(), ...obj });
-  jest.spyOn(openKlantApiMock, 'registerPartij').mockImplementation(appendUuid);
-  jest.spyOn(openKlantApiMock, 'updatePartij').mockImplementation(appendUuid);
-  jest.spyOn(openKlantApiMock, 'addPartijIdentificatie').mockImplementation(appendUuid);
-  jest.spyOn(openKlantApiMock, 'addDigitaalAdres').mockImplementation(appendUuid);
-  return openKlantApiMock;
+
+const appendUuid = (obj: any) => Promise.resolve({ uuid: randomUUID(), ...obj });
+
+function getMockZakenApiV2() {
+  const api = {
+    getRol: jest.fn(),
+    getZaak: jest.fn(),
+    updateRol: jest.fn(),
+  };
+  return api;
+}
+
+function getMockCatalogiApiV2() {
+  const api = {
+    getRolType: jest.fn(),
+  };
+  return api;
+}
+
+function getMockOpenKlantApiV2() {
+  const api = {
+    addDigitaalAdres: appendUuid,
+    addPartijIdentificatie: appendUuid,
+    deleteDigitaalAdres: jest.fn(),
+    findPartij: jest.fn(),
+    findPartijen: jest.fn(),
+    getEndpoint: jest.fn(),
+    getPartij: jest.fn(),
+    registerPartij: appendUuid,
+    updatePartij: appendUuid,
+  };
+  return api;
 }

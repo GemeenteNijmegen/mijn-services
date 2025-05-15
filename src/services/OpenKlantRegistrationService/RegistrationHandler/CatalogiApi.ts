@@ -1,5 +1,5 @@
-import { RolType, RolTypeWithUrl, RolTypeWithUrlSchema } from '../Shared/model/RolType';
 import { ZgwApi, ZgwApiProps } from './ZgwApi';
+import { RolType, RolTypeWithUrl, RolTypeWithUrlSchema } from '../Shared/model/RolType';
 
 export interface ICatalogiApi {
   getRolType(url: string): Promise<RolType>;

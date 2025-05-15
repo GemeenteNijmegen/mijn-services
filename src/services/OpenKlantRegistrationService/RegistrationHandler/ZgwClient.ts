@@ -114,7 +114,7 @@ export class ZgwClient {
     const eigenschapRequest = {
       zaak,
       eigenschap,
-      waarde
+      waarde,
     };
     const status = await this.callZaakApi('POST', `zaken/${zaakUuid}/zaakeigenschappen`, eigenschapRequest);
     return status;
