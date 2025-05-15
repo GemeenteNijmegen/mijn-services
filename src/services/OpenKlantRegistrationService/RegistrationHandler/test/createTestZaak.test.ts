@@ -1,6 +1,6 @@
 
-import { randomBytes } from 'crypto';
 import { Bsn } from '@gemeentenijmegen/utils';
+import { randomBytes } from 'crypto';
 import { ZgwClient } from '../ZgwClient';
 
 const runTest = process.env.CREATE_TEST_ZAAK_LIVE === 'true' ? describe : describe.skip;
@@ -61,6 +61,10 @@ runTest('Create zaak run live tests', () => {
     const zaakid = randomBytes(20).toString('hex').substring(0, 10);
     const zaak = await client.createZaak(`ZAAK-${runid}-${zaakid}`, 'TestVulService');
     console.log('Zaak url', zaak.url);
+
+    console.log('Setting zaakeigenschap...');
+    client.setZaakEigenschap(process.env.CREATE_TEST_ZAAK_EIGENSCHAP!, zaak.url, zaak.uuid, 'APV33.445');
+    console.log('Done setting zaakeigenschap...');
 
     if (useBsn) {
       await client.addBsnRoleToZaak(zaak.url, new Bsn(identifier), {

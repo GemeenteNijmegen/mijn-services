@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto';
-import { Response } from '@gemeentenijmegen/apigateway-http';
 import { ErrorResponse } from '../../Shared/ErrorResponse';
 import { logger } from '../../Shared/Logger';
 import { Notification } from '../../Shared/model/Notification';
@@ -36,7 +35,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
   }
 
 
-  async register(notification: Notification): Promise<Response> {
+  async register(notification: Notification): Promise<void> {
     // Get the involved rol details and check if the role is the 'aanvrager'
     const rolUrl = notification.resourceUrl;
     let rol = undefined;
@@ -44,7 +43,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
       rol = await this.configuration.zakenApi.getRol(rolUrl);
     } catch (error) {
       logger.info('Failed to get role, this is probably fine.');
-      return Response.ok();
+      return;
     }
 
     const rolType = await this.configuration.catalogiApi.getRolType(rol.roltype);
@@ -54,7 +53,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
       const inWhitelist = this.configuration.catalogusUuids.find(catalogusUuid => rolType.catalogus && rolType.catalogus.includes(catalogusUuid));
       if (!inWhitelist) {
         logger.info('Catalogus of roltype is not in the configured whitelist of catalogi, ignoring notification');
-        return Response.ok();
+        return;
       }
     }
 
@@ -65,14 +64,14 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
 
     if (rol.betrokkene) {
       logger.info('Rol alreay had betrokkene url set. Skipping update...');
-      return Response.ok();
+      return;
     }
 
     // Check if role is of the target role type, otherwise return 200 but do not handle the notification
     const isTargetRolType = this.configuration.roltypesToRegister.includes(rolType.omschrijvingGeneriek.toLocaleLowerCase());
     if (!isTargetRolType) {
       logger.info('Role is not of the type to forward to open klant. Ignoring this notification.');
-      return Response.ok();
+      return;
     }
     logger.info('Found a rol of the target type to forward to open klant.');
 
@@ -98,7 +97,7 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
       logger.info('Skipping update of role in zaken api as updateRolInZaakApi is false');
     }
 
-    return Response.ok();
+    return;
   }
 
   private async handleNatuurlijkPersoon(rol: Rol) {

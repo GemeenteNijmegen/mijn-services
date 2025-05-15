@@ -2,7 +2,11 @@ import { AWS } from '@gemeentenijmegen/utils';
 import { logger } from '../Shared/Logger';
 import { Submission, SubmissionSchema } from '../Shared/model/Submisison';
 
-export class SubmissionStorage {
+export interface ISubmissionStorage {
+  getFormJson(reference: string, userId: string, userType: 'person' | 'organization'): Promise<Submission>;
+}
+
+export class SubmissionStorage implements ISubmissionStorage {
   private endpoint?: string;
   private apiKey?: string;
   constructor(

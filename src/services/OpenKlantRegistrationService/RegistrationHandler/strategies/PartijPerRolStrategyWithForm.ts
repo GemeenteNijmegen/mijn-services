@@ -1,4 +1,3 @@
-import { Response } from '@gemeentenijmegen/apigateway-http';
 import { randomUUID } from 'crypto';
 import { logger } from '../../Shared/Logger';
 import { Notification } from '../../Shared/model/Notification';
@@ -7,7 +6,7 @@ import { Rol } from '../../Shared/model/Rol';
 import { RolType } from '../../Shared/model/RolType';
 import { OpenKlantMapper } from '../OpenKlantMapper';
 import { OpenKlantRegistrationServiceProps } from '../OpenKlantRegistrationHandler';
-import { SubmissionStorage } from '../SubmissionStorage';
+import { ISubmissionStorage, SubmissionStorage } from '../SubmissionStorage';
 import { SubmissionUtils } from '../SubmissionUtils';
 import { NotFoundError } from '../ZgwApi';
 import { IRegistrationStrategy } from './IRegistrationStrategy';
@@ -16,11 +15,15 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
 
   private readonly configuration: OpenKlantRegistrationServiceProps;
   private readonly updateRolInZaakApi: boolean;
-  private readonly submissisonStorage: SubmissionStorage;
-  constructor(configuration: OpenKlantRegistrationServiceProps, updateRolInZaakApi?: boolean) {
+  private readonly submissisonStorage: ISubmissionStorage;
+  constructor(configuration: OpenKlantRegistrationServiceProps, updateRolInZaakApi?: boolean, submissionStorage?: ISubmissionStorage) {
     this.configuration = configuration;
     this.updateRolInZaakApi = updateRolInZaakApi ?? true;
-    this.submissisonStorage = new SubmissionStorage();
+    if (!submissionStorage) {
+      this.submissisonStorage = new SubmissionStorage();
+    } else {
+      this.submissisonStorage = submissionStorage;
+    }
   }
 
   validateNotification(notification: Notification): string[] | undefined {
@@ -40,7 +43,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     return errors.length == 0 ? undefined : errors;
   }
 
-  async register(notification: Notification): Promise<Response> {
+  async register(notification: Notification): Promise<void> {
 
     try {
 
@@ -50,7 +53,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
 
       // Is the rol of the correct type and catalog?
       if (!this.shouldHandleRolOfThisType(rolType)) {
-        return Response.ok();
+        return;
       }
       logger.info('Received a role to forward to open-klant.');
 
@@ -107,7 +110,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
       // If did not find rol
       if (error instanceof NotFoundError && error.message.includes('rol')) {
         logger.info('Did not find role, this is probably fine.');
-        return Response.ok();
+        return;
       }
 
       // Log and rethrow
@@ -115,11 +118,11 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
       throw error;
     }
 
-    return Response.ok();
+    return;
   }
 
 
-  private shouldHandleRolOfThisType(roltype: RolType) {
+  shouldHandleRolOfThisType(roltype: RolType) {
 
     // Filter if role is from right catalogus
     if (this.configuration.catalogusUuids) {
@@ -140,7 +143,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     return true;
   }
 
-  private async handleNatuurlijkPersoonNew(rol: Rol) {
+  async handleNatuurlijkPersoonNew(rol: Rol) {
     // Create the partij
     const partijInput = OpenKlantMapper.persoonPartijFromRol(rol);
     const persoon = await this.configuration.openKlantApi.registerPartij(partijInput);
@@ -152,7 +155,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     return persoon;
   }
 
-  private async handleNietNatuurlijkPersoonNew(rol: Rol) {
+  async handleNietNatuurlijkPersoonNew(rol: Rol) {
     // Act as if the rol is actually a natuurlijk persoon for converting it to a persoon partij.
     // Note that we can do this in this particular situation as we do not use the rol.betrokkeneIdentificatie
     //  but instead use a random ID so that we can remove these partijen later.
@@ -169,14 +172,14 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     return persoon;
   }
 
-  private async updateRolWithParijUrl(partijUuid: string, rol: Rol) {
+  async updateRolWithParijUrl(partijUuid: string, rol: Rol) {
     const partijUrl = this.configuration.openKlantApi.getEndpoint() + `/partijen/${partijUuid}`;
     rol.betrokkene = partijUrl;
     const updatedRole = await this.configuration.zakenApi.updateRol(rol);
     logger.debug('Rol updated with betrokkene', { updatedRole });
   }
 
-  private async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, form: any) {
+  async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, form: any) {
 
     // Check if a phone number is valid using the following expression (used in open-klant)
     const phonenumberRegex = /^(0[8-9]00[0-9]{4,7})|(0[1-9][0-9]{8})|(\+[0-9]{9,20}|1400|140[0-9]{2,3})$/;

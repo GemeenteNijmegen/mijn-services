@@ -1,7 +1,7 @@
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
-import { StrategyStatics } from './strategies/StrategyStatics';
 import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijenWithUuid, OpenKlantPartijenWithUuidSchema, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from '../Shared/model/Partij';
+import { StrategyStatics } from './strategies/StrategyStatics';
 
 interface OpenKlantApiProps {
   url: string;
@@ -146,35 +146,4 @@ export class OpenKlantApi implements IOpenKlantApi {
 
   }
 
-}
-
-
-export class OpenKlantApiMock implements IOpenKlantApi {
-  deleteDigitaalAdres(_uuid: string): Promise<boolean> {
-    throw new Error('Method should be mocked.');
-  }
-  findPartijen(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijenWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
-  findPartij(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid | undefined> {
-    throw new Error('Method should be mocked.');
-  }
-  getPartij(_url: string): Promise<OpenKlantPartijWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
-  getEndpoint(): string {
-    throw new Error('Method should be mocked.');
-  }
-  registerPartij(_partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
-  updatePartij(_partij: Partial<OpenKlantPartijWithUuid>): Promise<OpenKlantPartijWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
-  addPartijIdentificatie(_identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
-  addDigitaalAdres(_address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
 }

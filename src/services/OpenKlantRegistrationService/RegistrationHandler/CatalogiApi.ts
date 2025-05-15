@@ -1,5 +1,5 @@
-import { ZgwApi, ZgwApiProps } from './ZgwApi';
 import { RolType, RolTypeWithUrl, RolTypeWithUrlSchema } from '../Shared/model/RolType';
+import { ZgwApi, ZgwApiProps } from './ZgwApi';
 
 export interface ICatalogiApi {
   getRolType(url: string): Promise<RolType>;
@@ -17,10 +17,4 @@ export class CatalogiApi extends ZgwApi implements ICatalogiApi {
     return RolTypeWithUrlSchema.parse(result);
   }
 
-}
-
-export class CatalogiApiMock implements ICatalogiApi {
-  async getRolType(_url: string): Promise<RolType> {
-    throw new Error('This method should be mocked.');
-  }
 }

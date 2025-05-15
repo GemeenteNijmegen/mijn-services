@@ -58,7 +58,7 @@ export class SubmissionUtils {
     ]);
     if (!kanaalvoorkeur) {
       return undefined;
-    } else if (['SMS', 'sms'].includes(kanaalvoorkeur)) {
+    } else if (['SMS', 'sms', 'Sms'].includes(kanaalvoorkeur)) {
       return 'sms';
     } else if (['E-mail', 'e-mail', 'email', 'EMAIL'].includes(kanaalvoorkeur)) {
       return 'email';

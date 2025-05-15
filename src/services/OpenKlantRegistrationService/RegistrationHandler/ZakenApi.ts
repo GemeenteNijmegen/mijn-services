@@ -1,7 +1,7 @@
-import { NotFoundError, ZgwApi, ZgwApiProps } from './ZgwApi';
 import { logger } from '../Shared/Logger';
 import { Rol, RolSchema } from '../Shared/model/Rol';
 import { Zaak, ZaakSchema } from '../Shared/model/Zaak';
+import { NotFoundError, ZgwApi, ZgwApiProps } from './ZgwApi';
 
 export interface IZakenApi {
   getRol(url: string): Promise<Rol>;
@@ -92,16 +92,4 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
     }
   }
 
-}
-
-export class ZakenApiMock implements IZakenApi {
-  async getRol(_url: string): Promise<Rol> {
-    throw Error('This method should be mocked!');
-  }
-  async getZaak(_url: string): Promise<Zaak> {
-    throw Error('This method should be mocked!');
-  }
-  async updateRol(_rol: Rol): Promise<Rol> {
-    throw Error('This method should be mocked!');
-  }
 }

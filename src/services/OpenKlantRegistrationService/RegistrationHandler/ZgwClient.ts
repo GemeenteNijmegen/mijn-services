@@ -109,6 +109,17 @@ export class ZgwClient {
     return status;
   }
 
+
+  async setZaakEigenschap(eigenschap: string, zaak: string, zaakUuid: string, waarde: string) {
+    const eigenschapRequest = {
+      zaak,
+      eigenschap,
+      waarde
+    };
+    const status = await this.callZaakApi('POST', `zaken/${zaakUuid}/zaakeigenschappen`, eigenschapRequest);
+    return status;
+  }
+
   async addBsnRoleToZaak(zaak: string, bsn: Bsn, contactpersoon: Contactpersoon) {
     const roleRequest = {
       zaak,
