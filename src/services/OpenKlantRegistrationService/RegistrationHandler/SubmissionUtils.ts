@@ -53,8 +53,22 @@ export class SubmissionUtils {
 
 
   static findKanaalvoorkeur(submission: any) {
+
+    // APV blok 2
+    const gebruikEmail = SubmissionUtils.findField(submission, [
+      'deGemeenteMagDitEMailadresGebruikenOmTeReagerenOpMijnAanvraag'
+    ]);
+    if (gebruikEmail === 'ja') {
+      return 'email';
+    } else if (gebruikEmail === 'nee') {
+      return 'sms';
+    }
+
+    // APV blok 1 (en overig)
     const kanaalvoorkeur = SubmissionUtils.findField(submission, [
       'hoeWiltUOpDeHoogteGehoudenWorden',
+      'hoeWiltUDatDeGemeenteContactMetUOpneemtOverAanvraagAlsDatNodigIs',
+
     ]);
     if (!kanaalvoorkeur) {
       return undefined;
