@@ -56,7 +56,7 @@ export class SubmissionUtils {
 
     // APV blok 2
     const gebruikEmail = SubmissionUtils.findField(submission, [
-      'deGemeenteMagDitEMailadresGebruikenOmTeReagerenOpMijnAanvraag'
+      'deGemeenteMagDitEMailadresGebruikenOmTeReagerenOpMijnAanvraag',
     ]);
     if (gebruikEmail === 'ja') {
       return 'email';
