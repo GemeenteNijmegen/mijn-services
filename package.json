@@ -34,7 +34,7 @@
     "projen": "npx projen"
   },
   "devDependencies": {
-    "@gemeentenijmegen/projen-project-type": "^1.10.4",
+    "@gemeentenijmegen/projen-project-type": "^1.10.5",
     "@stylistic/eslint-plugin": "^2",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.9",
@@ -57,15 +57,15 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@aws-lambda-powertools/batch": "^2.19.1",
-    "@aws-lambda-powertools/idempotency": "^2.19.1",
-    "@aws-lambda-powertools/logger": "^2.19.1",
-    "@aws-lambda-powertools/tracer": "^2.19.1",
+    "@aws-lambda-powertools/batch": "^2.20.0",
+    "@aws-lambda-powertools/idempotency": "^2.20.0",
+    "@aws-lambda-powertools/logger": "^2.20.0",
+    "@aws-lambda-powertools/tracer": "^2.20.0",
     "@aws-sdk/client-dynamodb": "^3.812.0",
     "@aws-sdk/client-sqs": "^3.812.0",
-    "@gemeentenijmegen/apigateway-http": "^0.0.25",
-    "@gemeentenijmegen/aws-constructs": "^0.0.35",
-    "@gemeentenijmegen/utils": "^0.0.31",
+    "@gemeentenijmegen/apigateway-http": "^0.0.26",
+    "@gemeentenijmegen/aws-constructs": "^0.0.36",
+    "@gemeentenijmegen/utils": "^0.0.32",
     "@middy/core": "^6.3.0",
     "@types/aws-lambda": "^8.10.149",
     "aws-cdk-lib": "^2.1.0",
@@ -74,7 +74,7 @@
     "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.0",
-    "zod": "^3.25.7"
+    "zod": "^3.25.9"
   },
   "license": "EUPL-1.2",
   "publishConfig": {
