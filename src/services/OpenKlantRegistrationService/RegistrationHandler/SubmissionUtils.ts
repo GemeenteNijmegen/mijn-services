@@ -18,11 +18,11 @@ export class SubmissionUtils {
     return this.findField(submission, options);
   }
 
-  static findField(submission: any, fields: string[]) {
+  static findField<T>(submission: any, fields: string[]) {
     for (const field of fields) {
       const email = SubmissionUtils.findValueByKey(submission, field);
       if (email) {
-        return email;
+        return email as T;
       }
     }
     return undefined;
@@ -55,26 +55,31 @@ export class SubmissionUtils {
   static findKanaalvoorkeur(submission: any) {
 
     // APV blok 2
-    const gebruikEmail = SubmissionUtils.findField(submission, [
+    const gebruikEmail = SubmissionUtils.findField<string>(submission, [
       'deGemeenteMagDitEMailadresGebruikenOmTeReagerenOpMijnAanvraag',
     ]);
-    if (gebruikEmail === 'ja') {
+    if (gebruikEmail?.toLocaleLowerCase() === 'ja') {
       return 'email';
-    } else if (gebruikEmail === 'nee') {
+    } else if (gebruikEmail?.toLocaleLowerCase() === 'nee') {
       return 'sms';
     }
 
     // APV blok 1 (en overig)
-    const kanaalvoorkeur = SubmissionUtils.findField(submission, [
+    const kanaalvoorkeur = SubmissionUtils.findField<string>(submission, [
       'hoeWiltUOpDeHoogteGehoudenWorden',
       'hoeWiltUDatDeGemeenteContactMetUOpneemtOverAanvraagAlsDatNodigIs',
-
+      'hoeWiltUDatDeGemeenteContactMetUOpneemtOverUwAanvraagAlsDatNodigIs',
     ]);
+
     if (!kanaalvoorkeur) {
       return undefined;
-    } else if (['SMS', 'sms', 'Sms'].includes(kanaalvoorkeur)) {
+    }
+
+    const lowercaseVoorkeur = kanaalvoorkeur.toLocaleLowerCase();
+
+    if (['sms', 'viasms'].includes(lowercaseVoorkeur)) {
       return 'sms';
-    } else if (['E-mail', 'e-mail', 'email', 'EMAIL'].includes(kanaalvoorkeur)) {
+    } else if (['e-mail', 'email', 'viaemail'].includes(lowercaseVoorkeur)) {
       return 'email';
     }
     return undefined;
