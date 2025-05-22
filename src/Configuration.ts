@@ -536,7 +536,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           'https://mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
         path: '/open-klant-registration-service-test/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
+        strategy: 'partijperrol-with-form', // Unique partij per rol (of zaak dus)
         enabled: true,
       },
       {
@@ -547,7 +547,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         zakenApiUrl: 'https://openzaak.woweb.app/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
+        strategy: 'partijperrol-with-form', // Unique partij per rol (of zaak dus)
         enabled: true,
         catalogiWhitelist: [
           '84f9e30d-8a3e-4ca0-8011-556ae3cbdd41', // VIP catalogus on acceptance
