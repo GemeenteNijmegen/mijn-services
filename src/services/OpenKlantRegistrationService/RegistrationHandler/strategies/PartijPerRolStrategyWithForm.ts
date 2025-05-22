@@ -79,8 +79,9 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
         // TODO when this fails also remove the partij
         if (this.updateRolInZaakApi == true) {
           // Note this should happen only once as when we already have a partij, we do not delete and recreate a rol.
-          await this.updateRolWithParijUrl(partij.uuid, rol);
+          const newRol = await this.updateRolWithParijUrl(partij.uuid, rol);
           logger.info('Update van de rol met partij url is uitgevoerd.');
+          logger.info('Nieuwe rol', { newRolUrl: newRol.url });
         } else {
           logger.info('Skipping update of role in zaken api as updateRolInZaakApi is false');
         }
@@ -177,6 +178,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     rol.betrokkene = partijUrl;
     const updatedRole = await this.configuration.zakenApi.updateRol(rol);
     logger.debug('Rol updated with betrokkene', { updatedRole });
+    return updatedRole;
   }
 
   async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, form: any) {
