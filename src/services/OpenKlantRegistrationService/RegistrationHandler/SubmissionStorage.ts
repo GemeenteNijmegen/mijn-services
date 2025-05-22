@@ -45,7 +45,7 @@ export class SubmissionStorage implements ISubmissionStorage {
       const response = await fetch(url, {
         method: method,
         headers: {
-          'Authorization': `${config.apiKey}`,
+          'x-api-key': `${config.apiKey}`,
           'Content-Type': 'application/json',
         },
         ...options,

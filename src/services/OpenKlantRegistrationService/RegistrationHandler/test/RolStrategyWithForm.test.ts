@@ -131,9 +131,14 @@ describe('RolStrategyWithForm', () => {
   test('Use sms when setDigitaleAdressenForPartijFromRol preference', async () => {
     // Setup
     const form = {
-      eMailadres: 'abc@example.com',
-      telefoon: '+31612345678',
-      hoeWiltUOpDeHoogteGehoudenWorden: 'sms',
+      "submission": {
+        "Message": JSON.stringify(
+          {
+            eMailadres: 'abc@example.com',
+            telefoon: '+31612345678',
+            hoeWiltUOpDeHoogteGehoudenWorden: 'sms',
+          })
+      }
     };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
@@ -158,9 +163,15 @@ describe('RolStrategyWithForm', () => {
   test('Use email when setDigitaleAdressenForPartijFromRol preference', async () => {
     // Setup
     const form = {
-      eMailadres: 'abc@example.com',
-      telefoon: '+31612345678',
-      hoeWiltUOpDeHoogteGehoudenWorden: 'email',
+      "submission": {
+        "Message": JSON.stringify(
+          {
+            eMailadres: 'abc@example.com',
+            telefoon: '+31612345678',
+            hoeWiltUOpDeHoogteGehoudenWorden: 'email',
+          }
+        )
+      }
     };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
@@ -185,10 +196,15 @@ describe('RolStrategyWithForm', () => {
   test('Use sms when no preference in setDigitaleAdressenForPartijFromRol', async () => {
     // Setup
     const form = {
-      eMailadres: 'abc@example.com',
-      telefoon: '+31612345678',
-      // hoeWiltUOpDeHoogteGehoudenWorden: 'email' // Do not prived a preference for this test
-    };
+      "submission": {
+        "Message": JSON.stringify(
+          {
+            eMailadres: 'abc@example.com',
+            telefoon: '+31612345678',
+            // hoeWiltUOpDeHoogteGehoudenWorden: 'email' // Do not prived a preference for this test
+          })
+      }
+    }
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
@@ -212,9 +228,14 @@ describe('RolStrategyWithForm', () => {
   test('Use email when only option in setDigitaleAdressenForPartijFromRol when preference is SMS', async () => {
     // Setup
     const form = {
-      eMailadres: 'abc@example.com',
-      // telefoon: '+31612345678',
-      hoeWiltUOpDeHoogteGehoudenWorden: 'sms', // Do not prived a preference for this test
+      "submission": {
+        "Message": JSON.stringify(
+          {
+            eMailadres: 'abc@example.com',
+            // telefoon: '+31612345678',
+            hoeWiltUOpDeHoogteGehoudenWorden: 'sms', // Do not prived a preference for this test
+          })
+      }
     };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
@@ -237,9 +258,14 @@ describe('RolStrategyWithForm', () => {
   test('Use sms when only option in setDigitaleAdressenForPartijFromRol when preference is email', async () => {
     // Setup
     const form = {
-      // eMailadres: 'abc@example.com',
-      telefoon: '+31612345678',
-      hoeWiltUOpDeHoogteGehoudenWorden: 'e-mail', // Do not prived a preference for this test
+      "submission": {
+        "Message": JSON.stringify(
+          {
+            // eMailadres: 'abc@example.com',
+            telefoon: '+31612345678',
+            hoeWiltUOpDeHoogteGehoudenWorden: 'e-mail', // Do not prived a preference for this test
+          })
+      }
     };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
@@ -261,10 +287,15 @@ describe('RolStrategyWithForm', () => {
 
   test('Throws error setDigitaleAdressenForPartijFromRol no values', async () => {
     // Setup
-    const form = { // No values in the form
-      // eMailadres: 'abc@example.com',
-      // telefoon: '+31612345678',
-      // hoeWiltUOpDeHoogteGehoudenWorden: 'e-mail' // Do not prived a preference for this test
+    const form = {// No values in the form
+      "submission": {
+        "Message": JSON.stringify(
+          {
+            // eMailadres: 'abc@example.com',
+            // telefoon: '+31612345678',
+            // hoeWiltUOpDeHoogteGehoudenWorden: 'e-mail' // Do not prived a preference for this test
+          })
+      }
     };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
@@ -283,30 +314,38 @@ describe('RolStrategyWithForm', () => {
 
   test('Register with natuurlijk persoon', async () => {
     // Mock
-    setupMockForTestingRegister('persoon');
-
+    setupMockForTestingRegister('persoon', false);
     // Call
     await strategy.register(getTestNotification());
-
     // Test
     expect(strategy.updateRolWithParijUrl).toHaveBeenCalled(); // Test if update call is done
-    expect(submissionStorageMock.getFormJson).toHaveBeenCalledWith<[string, string, string]>('APV.123', '999999333', 'person');
+    expect(openKlantMock.getPartij).not.toHaveBeenCalled();
+    // expect(submissionStorageMock.getFormJson).toHaveBeenCalledWith<[string, string, string]>('APV.123', '999999333', 'person');
+  });
 
+  test('Register with natuurlijk persoon and existing partij', async () => {
+    // Mock
+    setupMockForTestingRegister('persoon', true);
+    // Call
+    await strategy.register(getTestNotification());
+    // Test
+    expect(strategy.updateRolWithParijUrl).not.toHaveBeenCalled(); // Test if update call is done
+    expect(openKlantMock.getPartij).toHaveBeenCalled();
+    expect(submissionStorageMock.getFormJson).toHaveBeenCalledWith<[string, string, string]>('APV.123', '999999333', 'person');
   });
 
   test('Register with niet natuurlijk persoon', async () => {
     // Mock
-    setupMockForTestingRegister('organisatie');
+    setupMockForTestingRegister('organisatie', false);
     // Call
     await strategy.register(getTestNotification());
     // Test
     expect(strategy.updateRolWithParijUrl).toHaveBeenCalled(); // Test if update call is done
-    expect(submissionStorageMock.getFormJson).toHaveBeenCalledWith<[string, string, string]>('APV.123', '123456', 'organization');
   });
 
   test('Register while failed to create partij fails throws error', async () => {
     // Mock
-    setupMockForTestingRegister('persoon');
+    setupMockForTestingRegister('persoon', false);
     strategy.handleNatuurlijkPersoonNew = jest.fn().mockRejectedValue(new Error('Some error'));
     // Call
     const call = strategy.register(getTestNotification());
@@ -316,7 +355,7 @@ describe('RolStrategyWithForm', () => {
 
   test('Register while failed to update partij throws error', async () => {
     // Mock
-    setupMockForTestingRegister('persoon');
+    setupMockForTestingRegister('persoon', false);
     strategy.updateRolWithParijUrl = jest.fn().mockRejectedValue(new Error('Some error'));
     // Call
     const call = strategy.register(getTestNotification());
@@ -326,7 +365,7 @@ describe('RolStrategyWithForm', () => {
 
   test('Register while rol not found is ok', async () => {
     // Mock
-    setupMockForTestingRegister('persoon');
+    setupMockForTestingRegister('persoon', false);
     zakenMock.getRol.mockRejectedValue(new NotFoundError('rol'));
     // Call
     const call = strategy.register(getTestNotification());
@@ -337,7 +376,7 @@ describe('RolStrategyWithForm', () => {
 
   test('Register while partij already exists reuses partij', async () => {
     // Mock
-    setupMockForTestingRegister('persoon');
+    setupMockForTestingRegister('persoon', false);
 
     // Mock rol
     zakenMock.getRol.mockResolvedValue({
@@ -383,13 +422,15 @@ describe('RolStrategyWithForm', () => {
     return notification as Notification;
   }
 
-  function setupMockForTestingRegister(soort: 'persoon' | 'organisatie') {
+  function setupMockForTestingRegister(soort: 'persoon' | 'organisatie', hasExistingPartij: boolean) {
 
+    const betrokkene = hasExistingPartij ? 'https://example.com/open-klant/partijen/abcdef-123-123' : undefined;
     // Mock rol
     if (soort == 'persoon') {
       zakenMock.getRol.mockResolvedValue({
         uuid: randomUUID(),
         omschrijvingGeneriek: 'initiator',
+        betrokkene: betrokkene,
         betrokkeneType: 'natuurlijk_persoon',
         betrokkeneIdentificatie: {
           inpBsn: '999999333', // BSN
@@ -401,6 +442,7 @@ describe('RolStrategyWithForm', () => {
         uuid: randomUUID(),
         omschrijvingGeneriek: 'initiator',
         betrokkeneType: 'niet_natuurlijk_persoon',
+        betrokkene: betrokkene,
         betrokkeneIdentificatie: {
           annIdentificatie: '123456', // KVK
           geslachtsnaam: 'H. de Jong',
@@ -414,6 +456,11 @@ describe('RolStrategyWithForm', () => {
       catalogus: `https://example.com/catalogi/api/v1/catalogussen/${CATALOGUS_UUID}`,
       omschrijvingGeneriek: 'initiator',
     } as Partial<RolType>);
+
+    // Mock roltype
+    openKlantMock.getPartij.mockResolvedValue({
+      uuid: randomUUID(),
+    } as Partial<OpenKlantPartijWithUuid>);
 
     // Mock zaak
     const zaakUuid = randomUUID();

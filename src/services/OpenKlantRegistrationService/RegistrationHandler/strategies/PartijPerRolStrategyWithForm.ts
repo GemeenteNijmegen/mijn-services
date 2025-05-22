@@ -57,54 +57,21 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
       }
       logger.info('Received a role to forward to open-klant.');
 
-
-      let partij: OpenKlantPartijWithUuid | undefined = undefined;
-
+      // Enter phase 1 or 2 depending on if partij reference exists in betrokkene field
       if (!rol.betrokkene) {
-
-        if (rol.betrokkeneType == 'natuurlijk_persoon') {
-          partij = await this.handleNatuurlijkPersoonNew(rol);
-          logger.info('Registratie van partij als natuurlijk_persoon is afgerond.');
-        }
-
-        if (rol.betrokkeneType == 'niet_natuurlijk_persoon') {
-          partij = await this.handleNietNatuurlijkPersoonNew(rol);
-          logger.info('Registratie van partij als niet_natuurlijk_persoon is afgerond.');
-        }
-
-        if (!partij) {
-          throw new Error('Failed to create a partij');
-        }
-
-        // TODO when this fails also remove the partij
-        if (this.updateRolInZaakApi == true) {
-          // Note this should happen only once as when we already have a partij, we do not delete and recreate a rol.
-          const newRol = await this.updateRolWithParijUrl(partij.uuid, rol);
-          logger.info('Update van de rol met partij url is uitgevoerd.');
-          logger.info('Nieuwe rol', { newRolUrl: newRol.url });
-        } else {
-          logger.info('Skipping update of role in zaken api as updateRolInZaakApi is false');
-        }
-
+        logger.info('PHASE 1: Create partij and update rol');
+        await this.createPartijAndUpdateRol(rol);
+        // Phase 1 is done now. After deleting and recreating the role
+        // there will be a new create rol notification arriving at this
+        // implementation that has a betrokkene url. When this is handled
+        // the form is fetched, parsed and digitale addressen are set.
+        logger.info('Done creating partij and updating rol, returning');
       } else {
-        // Get the existing coupled partij
-        partij = await this.configuration.openKlantApi.getPartij(rol.betrokkene);
+        // Phase 2 starts here
+        logger.info('PHASE 2: Add contact data to partij');
+        await this.addDataToPartij(rol, notification);
+        logger.info('Contact data added to partij');
       }
-
-      // Get the form reference
-      const zaak = await this.configuration.zakenApi.getZaak(notification.hoofdObject);
-      const reference = zaak._expand?.eigenschappen?.find(eigenschap => eigenschap.naam == 'formulier_referentie')?.waarde;
-      if (!reference) {
-        throw Error('Could not find form reference so no data can be transfered to open-klant.');
-      }
-
-      // The the form submission
-      const userType = rol.betrokkeneType == 'natuurlijk_persoon' ? 'person' : 'organization';
-      const userId = userType == 'person' ? rol.betrokkeneIdentificatie.inpBsn : rol.betrokkeneIdentificatie.annIdentificatie;
-      const form = await this.submissisonStorage.getFormJson(reference, userId!, userType!);
-
-      // Based on the form contents add digital adresses
-      await this.setDigitaleAdressenForPartijFromRol(partij, form.submission);
 
     } catch (error) {
 
@@ -120,6 +87,53 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     }
 
     return;
+  }
+
+  private async addDataToPartij(rol: Rol, notification: Notification) {
+    // Get the existing partij
+    const partij = await this.configuration.openKlantApi.getPartij(rol.betrokkene!);
+
+    // Get the form reference
+    const zaak = await this.configuration.zakenApi.getZaak(notification.hoofdObject);
+    const reference = zaak._expand?.eigenschappen?.find(eigenschap => eigenschap.naam == 'formulier_referentie')?.waarde;
+    if (!reference) {
+      throw Error('Could not find form reference so no data can be transfered to open-klant.');
+    }
+
+    // The the form submission
+    const userType = rol.betrokkeneType == 'natuurlijk_persoon' ? 'person' : 'organization';
+    const userId = userType == 'person' ? rol.betrokkeneIdentificatie.inpBsn : rol.betrokkeneIdentificatie.annIdentificatie;
+    const form = await this.submissisonStorage.getFormJson(reference, userId!, userType!);
+
+    // Based on the form contents add digital adresses
+    await this.setDigitaleAdressenForPartijFromRol(partij, form);
+  }
+
+  private async createPartijAndUpdateRol(rol: Rol) {
+    let partij: OpenKlantPartijWithUuid | undefined = undefined;
+
+    if (rol.betrokkeneType == 'natuurlijk_persoon') {
+      partij = await this.handleNatuurlijkPersoonNew(rol);
+      logger.info('Registratie van partij als natuurlijk_persoon is afgerond.');
+    }
+
+    if (rol.betrokkeneType == 'niet_natuurlijk_persoon') {
+      partij = await this.handleNietNatuurlijkPersoonNew(rol);
+      logger.info('Registratie van partij als niet_natuurlijk_persoon is afgerond.');
+    }
+
+    if (!partij) {
+      throw new Error('Failed to create a partij');
+    }
+
+    // TODO when this fails also remove the partij
+    if (this.updateRolInZaakApi == true) {
+      // Note this should happen only once as when we already have a partij, we do not delete and recreate a rol.
+      await this.updateRolWithParijUrl(partij.uuid, rol);
+      logger.info('Update van de rol met partij url is uitgevoerd.');
+    } else {
+      logger.info('Skipping update of role in zaken api as updateRolInZaakApi is false');
+    }
   }
 
 
@@ -181,7 +195,10 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     return updatedRole;
   }
 
-  async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, form: any) {
+  async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, submission: any) {
+
+    // First try to parse the form data from the submission
+    const form = JSON.parse(submission.submission.Message);
 
     // Check if a phone number is valid using the following expression (used in open-klant)
     const phonenumberRegex = /^(0[8-9]00[0-9]{4,7})|(0[1-9][0-9]{8})|(\+[0-9]{9,20}|1400|140[0-9]{2,3})$/;
@@ -205,7 +222,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
       });
     }
 
-    if (!isValidPhone) {
+    if (phone && !isValidPhone) {
       logger.info('Invalid phonenumber, not registering in open-klant');
     }
 
