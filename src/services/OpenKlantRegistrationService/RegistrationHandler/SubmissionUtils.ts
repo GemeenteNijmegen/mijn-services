@@ -76,7 +76,6 @@ export class SubmissionUtils {
     }
 
     const lowercaseVoorkeur = kanaalvoorkeur.toLocaleLowerCase();
-
     if (['sms', 'viasms', 'viatelefoon'].includes(lowercaseVoorkeur)) {
       return 'sms';
     } else if (['e-mail', 'email', 'viaemail'].includes(lowercaseVoorkeur)) {
