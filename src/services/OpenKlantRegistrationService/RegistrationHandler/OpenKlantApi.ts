@@ -1,7 +1,7 @@
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
-import { StrategyStatics } from './strategies/StrategyStatics';
 import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijenWithUuid, OpenKlantPartijenWithUuidSchema, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from '../Shared/model/Partij';
+import { StrategyStatics } from './strategies/StrategyStatics';
 
 interface OpenKlantApiProps {
   url: string;
@@ -60,8 +60,9 @@ export class OpenKlantApi implements IOpenKlantApi {
   }
 
   async getPartij(url: string): Promise<OpenKlantPartijWithUuid> {
-    const partij = await this.callApi('GET', url);
-    return OpenKlantPartijSchemaWithUuid.parse(partij);
+    const response = await this.callApi('GET', url);
+    const result = await response.json();
+    return OpenKlantPartijSchemaWithUuid.parse(result);
   }
 
   async addDigitaalAdres(address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
