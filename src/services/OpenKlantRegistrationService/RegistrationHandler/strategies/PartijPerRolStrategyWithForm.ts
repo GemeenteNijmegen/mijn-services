@@ -190,7 +190,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
 
     // Register phone number if provied and correct format
     let registeredPhone = undefined;
-    const isValidPhone = phonenumberRegex.test(phone);
+    const isValidPhone = phone ? phonenumberRegex.test(phone) : false;
     if (phone && isValidPhone) {
       registeredPhone = await this.configuration.openKlantApi.addDigitaalAdres({
         adres: phone,

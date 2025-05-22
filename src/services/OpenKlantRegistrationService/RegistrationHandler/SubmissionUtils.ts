@@ -7,7 +7,7 @@ export class SubmissionUtils {
       'eMailadres1',
       'eMailadres2',
     ];
-    return this.findField(submission, options);
+    return this.findField<string>(submission, options);
   }
 
   static findTelefoon(submission: any) {
@@ -15,7 +15,7 @@ export class SubmissionUtils {
       'telefoonnummer',
       'telefoon',
     ];
-    return this.findField(submission, options);
+    return this.findField<string>(submission, options);
   }
 
   static findField<T>(submission: any, fields: string[]) {
