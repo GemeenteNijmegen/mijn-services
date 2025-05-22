@@ -1,7 +1,7 @@
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
-import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijenWithUuid, OpenKlantPartijenWithUuidSchema, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from '../Shared/model/Partij';
 import { StrategyStatics } from './strategies/StrategyStatics';
+import { OpenKlantDigitaalAdres, OpenKlantDigitaalAdresSchemaWithUuid, OpenKlantDigitaalAdresWithUuid, OpenKlantPartij, OpenKlantPartijenWithUuid, OpenKlantPartijenWithUuidSchema, OpenKlantPartijIdentificiatie, OpenKlantPartijIdentificiatieSchemaWithUuid, OpenKlantPartijIdentificiatieWithUuid, OpenKlantPartijSchemaWithUuid, OpenKlantPartijWithUuid } from '../Shared/model/Partij';
 
 interface OpenKlantApiProps {
   url: string;

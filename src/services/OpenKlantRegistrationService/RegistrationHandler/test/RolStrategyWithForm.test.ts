@@ -131,14 +131,14 @@ describe('RolStrategyWithForm', () => {
   test('Use sms when setDigitaleAdressenForPartijFromRol preference', async () => {
     // Setup
     const form = {
-      "submission": {
-        "Message": JSON.stringify(
+      submission: {
+        Message: JSON.stringify(
           {
             eMailadres: 'abc@example.com',
             telefoon: '+31612345678',
             hoeWiltUOpDeHoogteGehoudenWorden: 'sms',
-          })
-      }
+          }),
+      },
     };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
@@ -163,15 +163,15 @@ describe('RolStrategyWithForm', () => {
   test('Use email when setDigitaleAdressenForPartijFromRol preference', async () => {
     // Setup
     const form = {
-      "submission": {
-        "Message": JSON.stringify(
+      submission: {
+        Message: JSON.stringify(
           {
             eMailadres: 'abc@example.com',
             telefoon: '+31612345678',
             hoeWiltUOpDeHoogteGehoudenWorden: 'email',
-          }
-        )
-      }
+          },
+        ),
+      },
     };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
@@ -196,15 +196,15 @@ describe('RolStrategyWithForm', () => {
   test('Use sms when no preference in setDigitaleAdressenForPartijFromRol', async () => {
     // Setup
     const form = {
-      "submission": {
-        "Message": JSON.stringify(
+      submission: {
+        Message: JSON.stringify(
           {
             eMailadres: 'abc@example.com',
             telefoon: '+31612345678',
             // hoeWiltUOpDeHoogteGehoudenWorden: 'email' // Do not prived a preference for this test
-          })
-      }
-    }
+          }),
+      },
+    };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
@@ -228,14 +228,14 @@ describe('RolStrategyWithForm', () => {
   test('Use email when only option in setDigitaleAdressenForPartijFromRol when preference is SMS', async () => {
     // Setup
     const form = {
-      "submission": {
-        "Message": JSON.stringify(
+      submission: {
+        Message: JSON.stringify(
           {
             eMailadres: 'abc@example.com',
             // telefoon: '+31612345678',
             hoeWiltUOpDeHoogteGehoudenWorden: 'sms', // Do not prived a preference for this test
-          })
-      }
+          }),
+      },
     };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
@@ -258,14 +258,14 @@ describe('RolStrategyWithForm', () => {
   test('Use sms when only option in setDigitaleAdressenForPartijFromRol when preference is email', async () => {
     // Setup
     const form = {
-      "submission": {
-        "Message": JSON.stringify(
+      submission: {
+        Message: JSON.stringify(
           {
             // eMailadres: 'abc@example.com',
             telefoon: '+31612345678',
             hoeWiltUOpDeHoogteGehoudenWorden: 'e-mail', // Do not prived a preference for this test
-          })
-      }
+          }),
+      },
     };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
@@ -287,15 +287,15 @@ describe('RolStrategyWithForm', () => {
 
   test('Throws error setDigitaleAdressenForPartijFromRol no values', async () => {
     // Setup
-    const form = {// No values in the form
-      "submission": {
-        "Message": JSON.stringify(
+    const form = { // No values in the form
+      submission: {
+        Message: JSON.stringify(
           {
             // eMailadres: 'abc@example.com',
             // telefoon: '+31612345678',
             // hoeWiltUOpDeHoogteGehoudenWorden: 'e-mail' // Do not prived a preference for this test
-          })
-      }
+          }),
+      },
     };
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
