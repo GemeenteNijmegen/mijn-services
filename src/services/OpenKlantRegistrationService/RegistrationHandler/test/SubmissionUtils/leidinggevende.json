@@ -1,0 +1,98 @@
+{
+  "adresWaaroverDeAanpassingGaat": {
+    "adresWaaroverDeAanpassingGaat-postalcode": "6511PP",
+    "adresWaaroverDeAanpassingGaat-housenr": "6",
+    "adresWaaroverDeAanpassingGaat-streetname": "Korte Nieuwstraat",
+    "adresWaaroverDeAanpassingGaat-city": "Nijmegen"
+  },
+  "kenmerk1": "APV-33.724",
+  "naamIngelogdeGebruiker1": "H. de Jong",
+  "bsn": "900026236",
+  "inlogmiddel": "digid",
+  "volledigadres": "",
+  "postbusnummer": "",
+  "totaalbedrag": "141.55",
+  "vipZaaktype": "5a7611c0-607b-4c4a-a1be-fcd9d7929be1",
+  "volgende": true,
+  "gegevensNieuweLeidinggevendeN": [
+    {
+      "container": {
+        "naam": "H. de Jong",
+        "adres": {
+          "gegevensNieuweLeidinggevendeN[0].container[0].adres-postalcode": "6511PP",
+          "gegevensNieuweLeidinggevendeN[0].container[0].adres-housenr": "6",
+          "gegevensNieuweLeidinggevendeN[0].container[0].adres-streetname": "Korte Nieuwstraat",
+          "gegevensNieuweLeidinggevendeN[0].container[0].adres-city": "Nijmegen"
+        },
+        "geboortedatum": "12-01-1990",
+        "bentUOokBestuurderVanDeOrganisatieWaarvoorUDeLeidinggevendeWiltAanpassen": "ja"
+      }
+    },
+    {
+      "container": {
+        "naam": "H. de Jong 2",
+        "adres": {
+          "gegevensNieuweLeidinggevendeN[1].container[1].adres-postalcode": "6511PP",
+          "gegevensNieuweLeidinggevendeN[1].container[1].adres-housenr": "6",
+          "gegevensNieuweLeidinggevendeN[1].container[1].adres-streetname": "Korte Nieuwstraat",
+          "gegevensNieuweLeidinggevendeN[1].container[1].adres-city": "Nijmegen"
+        },
+        "geboortedatum": "12-12-1990",
+        "bentUOokBestuurderVanDeOrganisatieWaarvoorUDeLeidinggevendeWiltAanpassen": "nee"
+      }
+    }
+  ],
+  "wiltUOokEenLeidinggevendeVerwijderen": "ja",
+  "vorige1": false,
+  "volgende1": true,
+  "toevoegen": [
+    {
+      "storage": "url",
+      "name": "1200x415-1--52a5f23d-0371-483f-877f-3be328a8fb2e.jpg",
+      "url": "https://app6-accp.nijmegen.nl/form/cloud/s3/upload/2f1a4252-4c7b-4c49-b91b-56c2b5912a4a?baseUrl=https%3A%2F%2Fapp6-accp.nijmegen.nl&project=&form=/1200x415-1--52a5f23d-0371-483f-877f-3be328a8fb2e.jpg",
+      "size": "74290",
+      "type": "image/jpeg",
+      "reference": "4361011eeafe2eb7f4aa821f3efad69e",
+      "originalName": "1200x415%281%29.jpg",
+      "location": "2f1a4252-4c7b-4c49-b91b-56c2b5912a4a/files/1200x415%281%29.jpg",
+      "bucketName": "webforms-eformgenericserv-eformattuploads951db329-lm1p2s2mgzv3"
+    }
+  ],
+  "vanElkeNieuweLeidinggevendeHebIkDeVolgendeBijlagenToegevoegd": {
+    "kopieArbeidscontract": true,
+    "verklaringLeidinggevendeHorecabedrijfOfSlijterij": true
+  },
+  "vorige3": false,
+  "volgende2": true,
+  "vorige4": false,
+  "volgende3": true,
+  "ikHebAlleVragenNaarWaarheidBeantwoord": true,
+  "vorige2": false,
+  "verzenden1": true,
+  "nonhiddenfieldsform": {
+    "data": {
+      "naamIngelogdeGebruiker": "H. de Jong",
+      "straatnaam": "Kelfkensbos",
+      "huisnummerfield": "80-A-1",
+      "postcode": "6511 RN",
+      "woonplaats": "Nijmegen"
+    },
+    "metadata": {}
+  },
+  "naamOrganisatieOfBedrijf": "Kantine",
+  "inschrijfnummerKamerVanKoophandel": "12345678",
+  "contactpersoon": "ja",
+  "gegevens": [
+    {
+      "container": {
+        "achternaam": "de Jong",
+        "geboortedatum1": "12-12-1990"
+      }
+    }
+  ],
+  "hoeWiltUDatDeGemeenteContactMetUOpneemtOverUwAanvraagAlsDatNodigIs": "viaEMail",
+  "email": {
+    "eMailadres": "h.de.jong@example.com",
+    "telefoonnummer": "+31612123456"
+  }
+}

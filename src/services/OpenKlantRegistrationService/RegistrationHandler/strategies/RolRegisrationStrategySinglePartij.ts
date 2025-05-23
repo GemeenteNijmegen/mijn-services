@@ -1,4 +1,3 @@
-import { Response } from '@gemeentenijmegen/apigateway-http';
 import { ErrorResponse } from '../../Shared/ErrorResponse';
 import { logger } from '../../Shared/Logger';
 import { Notification } from '../../Shared/model/Notification';
@@ -35,7 +34,7 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
   }
 
 
-  async register(notification: Notification): Promise<Response> {
+  async register(notification: Notification): Promise<void> {
     // Get the involved rol details and check if the role is the 'aanvrager'
     const rolUrl = notification.resourceUrl;
     const rol = await this.configuration.zakenApi.getRol(rolUrl);
@@ -43,14 +42,14 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
 
     if (rol.betrokkene) {
       logger.debug('Rol alreay had betrokkene url set. Skipping update...');
-      return Response.ok();
+      return;
     }
 
     // Check if role is of the target role type, otherwise return 200 but do not handle the notification
     const isTargetRolType = this.configuration.roltypesToRegister.includes(rolType.omschrijvingGeneriek.toLocaleLowerCase());
     if (!isTargetRolType) {
       logger.debug('Role is not of the type to forward to open klant. Ignoring this notification.');
-      return Response.ok();
+      return;
     }
     logger.debug('Found a rol of the target type to forward to open klant.');
 
@@ -68,7 +67,7 @@ export class RolRegisrationStrategySinglePartij implements IRegistrationStrategy
     }
     await this.updateRolWithParijUrl(partij.uuid, rol);
 
-    return Response.ok();
+    return;
   }
 
   private async handleNatuurlijkPersoon(rol: Rol) {

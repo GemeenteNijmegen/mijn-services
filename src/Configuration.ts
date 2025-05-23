@@ -341,7 +341,8 @@ export interface OpenKlantRegistrationServiceConfiguration {
   strategy:
   | 'rolregistrationsinglepartij' // Convert the rol to a partij and store the partij id in the rol. Check if the partij exists and update digitale addressen (cannot be used in production)
   | 'partijperrol' // Convert the rol to a partij en store the partij id in the rol. Uses a dummy partij identificatie to keep each partij unique and for easy removal later on.
-  | 'partijperroldry'; // Without updating the rol in the Zaken api
+  | 'partijperroldry' // Without updating the rol in the Zaken api
+  | 'partijperrol-with-form'; // Get contactgegevens and preference from form instead of rol
   /**
    * Flag to enable processing of notifications
    */
@@ -469,7 +470,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'local-omc',
         path: 'local-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.14.6',
+        image: 'worthnl/notifynl-omc:1.15.1',
         debug: true,
         mode: 'Development',
         openKlantUrl:
@@ -497,7 +498,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'woweb-omc',
         path: 'woweb-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.14.6',
+        image: 'worthnl/notifynl-omc:1.15.1',
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
@@ -534,7 +535,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           'https://mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
         path: '/open-klant-registration-service-test/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
+        strategy: 'partijperrol-with-form', // Unique partij per rol (of zaak dus)
         enabled: true,
       },
       {
@@ -545,7 +546,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         zakenApiUrl: 'https://openzaak.woweb.app/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol', // Unique partij per rol (of zaak dus)
+        strategy: 'partijperrol-with-form', // Unique partij per rol (of zaak dus)
         enabled: true,
         catalogiWhitelist: [
           '84f9e30d-8a3e-4ca0-8011-556ae3cbdd41', // VIP catalogus on acceptance

@@ -15,6 +15,7 @@ import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServ
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
+import { ServiceInfraUtils } from './ServiceInfraUtils';
 
 export interface OpenZaakServiceProps {
   cache: CacheDatabase;
@@ -154,7 +155,8 @@ export class OpenZaakService extends Construct {
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+        command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
+        // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },

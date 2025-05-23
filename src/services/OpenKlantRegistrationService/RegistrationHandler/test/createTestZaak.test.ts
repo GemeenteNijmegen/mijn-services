@@ -62,6 +62,10 @@ runTest('Create zaak run live tests', () => {
     const zaak = await client.createZaak(`ZAAK-${runid}-${zaakid}`, 'TestVulService');
     console.log('Zaak url', zaak.url);
 
+    console.log('Setting zaakeigenschap...');
+    await client.setZaakEigenschap(process.env.CREATE_TEST_ZAAK_EIGENSCHAP!, zaak.url, zaak.uuid, 'APV33.445');
+    console.log('Done setting zaakeigenschap...');
+
     if (useBsn) {
       await client.addBsnRoleToZaak(zaak.url, new Bsn(identifier), {
         naam: process.env.CREATE_TEST_ZAAK_CONTACTPERSOON_NAAM!,

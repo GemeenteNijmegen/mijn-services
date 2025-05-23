@@ -9,6 +9,7 @@ import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { FilterPattern, LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenKlantRegistrationServiceConfiguration } from '../../Configuration';
 import { Statics } from '../../Statics';
@@ -89,6 +90,10 @@ export class OpenKlantRegistrationService extends Construct {
         DEBUG: openKlantConfig.debug ? 'true' : 'false',
         ROLTYPES_TO_REGISTER: openKlantConfig.roltypesToRegister.join(','),
         STRATEGY: this.props.openKlantRegistrationServiceConfiguration.strategy,
+
+        FORM_SUBMISSIONS_API_ENDPOINT_SSM: this.params.submissionstorage.endpoint.parameterName,
+        FORM_SUBMISSIONS_API_KEY_ARN: this.params.submissionstorage.apiKey.secretName,
+
         IDEMPOTENCY_TABLE_NAME: idempotency.tableName,
         SERVICE_NAME: id,
         AWS_XRAY_DEBUG_MODE: this.props.openKlantRegistrationServiceConfiguration.debug ? 'TRUE' : 'FALSE',
@@ -103,6 +108,8 @@ export class OpenKlantRegistrationService extends Construct {
     });
     idempotency.grantReadWriteData(service);
     this.props.key.grantEncrypt(service);
+    this.params.submissionstorage.endpoint.grantRead(service);
+    this.params.submissionstorage.apiKey.grantRead(service);
     this.params.openklant.grantRead(service);
     this.params.zgw.id.grantRead(service);
     this.params.zgw.secret.grantRead(service);
@@ -159,6 +166,8 @@ export class OpenKlantRegistrationService extends Construct {
 
   private setupVulServiceConfiguration(id: string) {
     const ssmApiKey = `/${Statics.projectName}/open-klant-registration/${id}/api-key`;
+    const ssmSubmisisonStorageEndpoint = `/${Statics.projectName}/open-klant-registration/${id}/submission-storage-endpoint`;
+    const ssmSubmisisonStorageApiKey = `/${Statics.projectName}/open-klant-registration/${id}/submission-storage-api-key`;
     const ssmOpenKlantApiKey = `/${Statics.projectName}/open-klant-registration/${id}/open-klant-api-key`;
     const ssmZgwTokenClientId = `/${Statics.projectName}/open-klant-registration/${id}/zgw/client-id`;
     const ssmZgwTokenClientSecret = `/${Statics.projectName}/open-klant-registration/${id}/zgw/clientsecret`;
@@ -187,11 +196,26 @@ export class OpenKlantRegistrationService extends Construct {
       },
     });
 
+    const submisisonStorageEndpoint = new StringParameter(this, 'submission-storage-endpoint-url', {
+      stringValue: '-',
+      description: `Endpoint of submission storage (for ${id})`,
+      parameterName: ssmSubmisisonStorageEndpoint,
+    });
+
+    const submisisonStorageApiKey = new Secret(this, 'submission-storage-api-key', {
+      description: `Api key of submission storage (for ${id})`,
+      secretName: ssmSubmisisonStorageApiKey,
+    });
+
     return {
       openklant: openKlantApiKey,
       zgw: {
         id: zgwTokenClientId,
         secret: zgwTokenClientSecret,
+      },
+      submissionstorage: {
+        endpoint: submisisonStorageEndpoint,
+        apiKey: submisisonStorageApiKey,
       },
       authentication: serviceApiKey,
     };

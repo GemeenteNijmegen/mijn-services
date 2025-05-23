@@ -41,6 +41,9 @@ export abstract class ZgwApi {
     });
 
     if (!response.ok) {
+      if (response.status == 404) {
+        throw new NotFoundError();
+      }
       logger.error(`[ZGW] ${method} failed for ${url}`, {
         status: response.status,
         statusText: response.statusText,
@@ -65,3 +68,5 @@ export abstract class ZgwApi {
   }
 
 }
+
+export class NotFoundError extends Error { }

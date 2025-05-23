@@ -1,4 +1,3 @@
-import { Response } from '@gemeentenijmegen/apigateway-http';
 import { Notification } from '../../Shared/model/Notification';
 
 /**
@@ -18,5 +17,5 @@ export interface IRegistrationStrategy {
    * in OpenKlant.
    * @param notification
    */
-  register(notification: Notification): Promise<Response>;
+  register(notification: Notification): Promise<void>;
 }

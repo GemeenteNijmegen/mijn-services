@@ -1,10 +1,12 @@
-import { ZgwApi, ZgwApiProps } from './ZgwApi';
+import { NotFoundError, ZgwApi, ZgwApiProps } from './ZgwApi';
 import { logger } from '../Shared/Logger';
 import { Rol, RolSchema } from '../Shared/model/Rol';
+import { Zaak, ZaakSchema } from '../Shared/model/Zaak';
 
 export interface IZakenApi {
   getRol(url: string): Promise<Rol>;
   updateRol(rol: Rol): Promise<Rol>;
+  getZaak(url: string): Promise<Zaak>;
 }
 
 export interface ZakenApiProps extends ZgwApiProps {
@@ -20,9 +22,16 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
   }
 
   async getRol(url: string): Promise<Rol> {
-    const response = await this.get(url);
-    const result = await response.json();
-    return RolSchema.parse(result);
+    try {
+      const response = await this.get(url);
+      const result = await response.json();
+      return RolSchema.parse(result);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundError('rol');
+      }
+      throw error;
+    }
   }
 
   /**
@@ -68,13 +77,19 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
 
   }
 
-}
 
-export class ZakenApiMock implements IZakenApi {
-  async getRol(_url: string): Promise<Rol> {
-    throw Error('This method should be mocked!');
+  async getZaak(url: string): Promise<Zaak> {
+    try {
+      const expantedUrl = url + '?expand=eigenschappen';
+      const response = await this.get(expantedUrl);
+      const result = await response.json();
+      return ZaakSchema.parse(result);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundError('zaak');
+      }
+      throw error;
+    }
   }
-  async updateRol(_rol: Rol): Promise<Rol> {
-    throw Error('This method should be mocked!');
-  }
+
 }
