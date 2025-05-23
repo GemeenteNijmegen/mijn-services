@@ -14,11 +14,9 @@ import { IRegistrationStrategy } from './IRegistrationStrategy';
 export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
 
   private readonly configuration: OpenKlantRegistrationServiceProps;
-  private readonly updateRolInZaakApi: boolean;
   private readonly submissisonStorage: ISubmissionStorage;
-  constructor(configuration: OpenKlantRegistrationServiceProps, updateRolInZaakApi?: boolean, submissionStorage?: ISubmissionStorage) {
+  constructor(configuration: OpenKlantRegistrationServiceProps, submissionStorage?: ISubmissionStorage) {
     this.configuration = configuration;
-    this.updateRolInZaakApi = updateRolInZaakApi ?? true;
     if (!submissionStorage) {
       this.submissisonStorage = new SubmissionStorage();
     } else {
@@ -126,14 +124,8 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
       throw new Error('Failed to create a partij');
     }
 
-    // TODO when this fails also remove the partij
-    if (this.updateRolInZaakApi == true) {
-      // Note this should happen only once as when we already have a partij, we do not delete and recreate a rol.
-      await this.updateRolWithParijUrl(partij.uuid, rol);
-      logger.info('Update van de rol met partij url is uitgevoerd.');
-    } else {
-      logger.info('Skipping update of role in zaken api as updateRolInZaakApi is false');
-    }
+    await this.updateRolWithParijUrl(partij.uuid, rol);
+    logger.info('Update van de rol met partij url is uitgevoerd.');
   }
 
 

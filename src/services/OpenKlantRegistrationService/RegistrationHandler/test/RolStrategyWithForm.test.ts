@@ -25,7 +25,7 @@ describe('RolStrategyWithForm', () => {
     zakenApiUrl: 'https://example.com/zaken/api/v1/zaken',
     roltypesToRegister: ['initiator'],
     catalogusUuids: [CATALOGUS_UUID],
-  }, true, submissionStorageMock);
+  }, submissionStorageMock);
 
   beforeEach(() => {
     jest.clearAllMocks();

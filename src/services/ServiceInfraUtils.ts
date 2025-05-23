@@ -9,6 +9,6 @@ export class ServiceInfraUtils {
       `x = requests.get('http://localhost:${port}/')`,
       'sys.exit(x.status_code != 200)',
     ].join(';');
-    return `python - c "${script}" >> /proc/1/fd/1`
+    return `python - c "${script}" >> /proc/1/fd/1`;
   }
 }
