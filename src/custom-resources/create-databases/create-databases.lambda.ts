@@ -47,9 +47,17 @@ async function existsDatabase(client: postgres.Client, name: string) {
 
 async function createDatabase(client: postgres.Client, name: string) {
   try {
+    // Create the database
     await client.query(`CREATE DATABASE "${name}";`);
-  } catch ( err ) {
+
+    // Create a user for the new database
+    const username = client.user;
+    const password = client.password;
+    await client.query(`CREATE USER "${username}" WITH PASSWORD '${password}';`);
+    await client.query(`GRANT ALL PRIVILEGES ON DATABASE "${name}" TO "${username}";`);
+    console.info(`Created user "${username}" with access to database "${name}".`);
+  } catch (err) {
     console.error(err);
-    throw Error(`Could not create database ${name}`);
+    throw Error(`Could not create database or user for ${name}`);
   }
 }
