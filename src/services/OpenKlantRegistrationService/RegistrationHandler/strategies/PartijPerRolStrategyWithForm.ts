@@ -198,69 +198,89 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     const phone = SubmissionUtils.findTelefoon(form);
     const email = SubmissionUtils.findEmail(form);
     const preference = SubmissionUtils.findKanaalvoorkeur(form);
-
-    // Register phone number if provied and correct format
-    let registeredPhone = undefined;
     const isValidPhone = phone ? phonenumberRegex.test(phone) : false;
-    if (phone && isValidPhone) {
-      registeredPhone = await this.configuration.openKlantApi.addDigitaalAdres({
-        adres: phone,
-        omschrijving: 'Telefoon',
-        soortDigitaalAdres: OpenKlantMapper.TELEFOONNUMMER,
-        verstrektDoorBetrokkene: null,
-        verstrektDoorPartij: {
-          uuid: partij.uuid,
-        },
-      });
-    }
 
     if (phone && !isValidPhone) {
       logger.info('Invalid phonenumber, not registering in open-klant');
     }
 
-    // Register email if prived and correct format
-    let registeredEmail = undefined;
-    if (email) {
-      registeredEmail = await this.configuration.openKlantApi.addDigitaalAdres({
-        adres: email,
-        omschrijving: 'Email',
-        soortDigitaalAdres: OpenKlantMapper.EMAIL,
-        verstrektDoorBetrokkene: null,
-        verstrektDoorPartij: {
-          uuid: partij.uuid,
-        },
-      });
-    }
+    // // Register phone number if provied and correct format
+    // let registeredPhone = undefined;
+    // if (phone && isValidPhone) {
+    //   registeredPhone = await this.configuration.openKlantApi.addDigitaalAdres({
+    //     adres: phone,
+    //     omschrijving: 'Telefoon',
+    //     soortDigitaalAdres: OpenKlantMapper.TELEFOONNUMMER,
+    //     verstrektDoorBetrokkene: null,
+    //     verstrektDoorPartij: {
+    //       uuid: partij.uuid,
+    //     },
+    //   });
+    // }
+
+    // // Register email if prived and correct format
+    // let registeredEmail = undefined;
+    // if (email) {
+    //   registeredEmail = await this.configuration.openKlantApi.addDigitaalAdres({
+    //     adres: email,
+    //     omschrijving: 'Email',
+    //     soortDigitaalAdres: OpenKlantMapper.EMAIL,
+    //     verstrektDoorBetrokkene: null,
+    //     verstrektDoorPartij: {
+    //       uuid: partij.uuid,
+    //     },
+    //   });
+    // }
 
     // Logic reasoning
     // 1. Has only email -> Use that (disregard preference)
     // 2. Has only phone -> Use that (disregard preference)
     // 3. Has email & phone -> Find preference in form
-    // 4. Has email & phone & no preference -> phone
+    // 4. Has email & phone & no preference -> email
     // 5. No email & phone -> Throw error
 
-    if (registeredEmail && !registeredPhone) {
+    const hasEmail = !!email;
+    const hasPhone = phone && isValidPhone;
+
+    if (hasEmail && !hasPhone) {
       // (1) Register email as preference
-      await this.setVoorkeurDigitiaalAdres(partij, registeredEmail.uuid);
-    } else if (registeredPhone && !registeredEmail) {
+      const adres = await this.registerDigitaalAdres(email, 'email', partij.uuid);
+      await this.setVoorkeurDigitiaalAdres(partij, adres.uuid);
+    } else if (hasPhone && !hasEmail) {
       // (2) Register phone as preference
-      await this.setVoorkeurDigitiaalAdres(partij, registeredPhone.uuid);
-    } else if (registeredEmail && registeredPhone && preference == 'email') {
+      const adres = await this.registerDigitaalAdres(phone, 'telefoonnummer', partij.uuid);
+      await this.setVoorkeurDigitiaalAdres(partij, adres.uuid);
+    } else if (hasEmail && hasPhone && preference == 'email') {
       // (3) Register email as preference
-      await this.setVoorkeurDigitiaalAdres(partij, registeredEmail.uuid);
-    } else if (registeredEmail && registeredPhone && preference == 'sms') {
+      const adres = await this.registerDigitaalAdres(email, 'email', partij.uuid);
+      await this.setVoorkeurDigitiaalAdres(partij, adres.uuid);
+    } else if (hasEmail && hasPhone && preference == 'sms') {
       // (3) Register phone as preference
-      await this.setVoorkeurDigitiaalAdres(partij, registeredPhone.uuid);
-    } else if (registeredEmail && registeredPhone && !preference) {
-      // (4) Register phone as preference
-      await this.setVoorkeurDigitiaalAdres(partij, registeredPhone.uuid);
-    } else if (!registeredEmail && !registeredPhone) {
+      const adres = await this.registerDigitaalAdres(phone, 'telefoonnummer', partij.uuid);
+      await this.setVoorkeurDigitiaalAdres(partij, adres.uuid);
+    } else if (hasEmail && hasPhone && !preference) {
+      // (4) Register email as preference
+      const adres = await this.registerDigitaalAdres(email, 'email', partij.uuid);
+      await this.setVoorkeurDigitiaalAdres(partij, adres.uuid);
+    } else if (!hasEmail && !hasPhone) {
       // (5) Well now we only can throw an error
       throw new Error('Failed to set a preference as we do not have any registered digitaal adres');
     } else {
       logger.error('Not registering any preference, how did this happen?');
     }
 
+  }
+
+  private async registerDigitaalAdres(adres: string, type: "telefoonnummer" | "email" | "overig", partijUuid: string) {
+    return this.configuration.openKlantApi.addDigitaalAdres({
+      adres: adres,
+      omschrijving: type,
+      soortDigitaalAdres: type,
+      verstrektDoorBetrokkene: null,
+      verstrektDoorPartij: {
+        uuid: partijUuid,
+      },
+    });
   }
 
   private createTemporaryPartijIdentificatie(partijUuid: string) {
