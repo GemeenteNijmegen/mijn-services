@@ -5,12 +5,20 @@ Gist: registration service wordt 2 keer getriggered door het verwijderen en opni
 
 ```mermaid
 sequenceDiagram
+  participant VIP
   participant OpenZaak
+  participant Objecten API
   participant Notificaties
   participant RegistratieService
   participant OpenKlant
   participant SubmissionStorage
+  participant OMC
+  participant NotifyNL
 
+
+  Note over OpenZaak, NotifyNL: Notificatie: Rol aangemaakt bij zaak
+
+  VIP ->> OpenZaak: Registreren zaak (incl. status, rol etc.)
   OpenZaak ->> Notificaties: Publish: Rol Create
   Notificaties ->> RegistratieService: Subscribed: Rol Create
   activate RegistratieService
@@ -19,6 +27,9 @@ sequenceDiagram
   RegistratieService ->> OpenZaak: Delete rol (update part 1)
   RegistratieService ->> OpenZaak: Create rol (update part 2) (incl. partij url)
   deactivate RegistratieService
+
+
+  Note over OpenZaak, NotifyNL: Notificatie: Rol opnieuw aangemaakt (delete & create)
 
   OpenZaak ->> Notificaties: Publish: Rol Create
   Notificaties ->> RegistratieService: Subscribed: Rol Create
@@ -31,4 +42,15 @@ sequenceDiagram
   RegistratieService ->> OpenKlant: POST digitaalAdress (email)
   RegistratieService ->> OpenKlant: PATCH partij (set voorkeurskanaal)
   deactivate RegistratieService
+
+
+  Note over OpenZaak, NotifyNL: Notificatie: Taak aangemaakt (in objecten API)
+
+  VIP ->> Objecten API: Aanmaken taak
+  Objecten API ->> Notificaties: Publish: Object create
+  Notificaties ->> OMC: Subscribed: Object create
+  OMC ->> OpenKlant: get partij (incl. digitale adressen)
+  OMC ->> NotifyNL: Send notification
+
+
 ```
