@@ -591,7 +591,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'woweb-omc',
         path: 'woweb-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.14.6',
+        image: 'worthnl/notifynl-omc:1.15.3',
         debug: true,
         mode: 'Production',
         openKlantUrl: 'mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',

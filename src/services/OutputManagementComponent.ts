@@ -131,11 +131,11 @@ export class OMCService extends Construct {
 
       // Whitelisted IDs used by OMC web API?
       // Let op: Dit zijn de UUIDs van de zaaktypes etc. De URL wordt zelf opgebouwd.
-      ZGW_WHITELIST_ZAAKCREATE_IDS: '*', // LETOP: Zaaktype identificatie geen UUID!	Is provided by the user based on "Identificatie" property of case type retrieved from case URI ("zaak") from "OpenZaak" Web API service
-      ZGW_WHITELIST_ZAAKUPDATE_IDS: '*', // LETOP: Zaaktype identificatie geen UUID!	Is provided by the user based on "Identificatie" property of case type retrieved from case URI ("zaak") from "OpenZaak" Web API service
-      ZGW_WHITELIST_ZAAKCLOSE_IDS: '*', //  LETOP: Zaaktype identificatie geen UUID! Is provided by the user based on "Identificatie" property of case type retrieved from case URI ("zaak") from "OpenZaak" Web API service
-      ZGW_WHITELIST_TASKASSIGNED_IDS: '*', // 	Is provided by the user based on "Identificatie" property of case type retrieved from case URI ("zaak") from "OpenZaak" Web API service
-      ZGW_WHITELIST_DECISIONMADE_IDS: '*', // 	Is provided by the user based on "Identificatie" property of case type retrieved from case URI ("zaak") from "OpenZaak" Web API service
+      ZGW_WHITELIST_ZAAKCREATE_IDS: this.props.omcConfiguration.templates.zaakCreateEmail ? '*' : '', // LETOP: Zaaktype identificatie geen UUID!	Is provided by the user based on "Identificatie" property of case type retrieved from case URI ("zaak") from "OpenZaak" Web API service
+      ZGW_WHITELIST_ZAAKUPDATE_IDS: this.props.omcConfiguration.templates.zaakUpdateEmail ? '*' : '', // LETOP: Zaaktype identificatie geen UUID!	Is provided by the user based on "Identificatie" property of case type retrieved from case URI ("zaak") from "OpenZaak" Web API service
+      ZGW_WHITELIST_ZAAKCLOSE_IDS: this.props.omcConfiguration.templates.zaakCloseEmail ? '*' : '', //  LETOP: Zaaktype identificatie geen UUID! Is provided by the user based on "Identificatie" property of case type retrieved from case URI ("zaak") from "OpenZaak" Web API service
+      ZGW_WHITELIST_TASKASSIGNED_IDS: this.props.omcConfiguration.templates.zaakUpdateEmail ? '*' : '', // 	Is provided by the user based on "Identificatie" property of case type retrieved from case URI ("zaak") from "OpenZaak" Web API service
+      ZGW_WHITELIST_DECISIONMADE_IDS: '', // Never notify on beslissing
       ZGW_WHITELIST_MESSAGE_ALLOWED: 'true', // Cannot be missing and have null or empty value 	Is provided by the user
       ZGW_VARIABLE_OBJECTTYPE_TASKOBJECTTYPE_UUID: this.props.omcConfiguration.taakObjecttypeUuid ?? DEFAULT_UUID, // Cannot be missing and have null or empty value + must be in UUID format 	Is provided by the user based on "objectType" from "kenmerken" from the initial notification received from "Notificaties" Web API service
       ZGW_VARIABLE_OBJECTTYPE_MESSAGEOBJECTTYPE_UUID: DEFAULT_UUID, // Cannot be missing and have null or empty value + must be in UUID format 	Is provided by the user based on "informatieobjecttype" from "informatieobject" retrieved from "OpenZaak" Web API service when querying "besluiten"
