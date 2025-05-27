@@ -14,11 +14,17 @@ sequenceDiagram
   participant SubmissionStorage
   participant OMC
   participant NotifyNL
+  participant AWS
+
 
 
   Note over OpenZaak, NotifyNL: Notificatie: Rol aangemaakt bij zaak
 
+  VIP ->> VIP: Zaak registratie triggered
+  activate VIP
   VIP ->> OpenZaak: Registreren zaak (incl. status, rol etc.)
+  deactivate VIP
+
   OpenZaak ->> Notificaties: Publish: Rol Create
   Notificaties ->> RegistratieService: Subscribed: Rol Create
   activate RegistratieService
@@ -27,6 +33,7 @@ sequenceDiagram
   RegistratieService ->> OpenZaak: Delete rol (update part 1)
   RegistratieService ->> OpenZaak: Create rol (update part 2) (incl. partij url)
   deactivate RegistratieService
+
 
 
   Note over OpenZaak, NotifyNL: Notificatie: Rol opnieuw aangemaakt (delete & create)
@@ -44,9 +51,15 @@ sequenceDiagram
   deactivate RegistratieService
 
 
+
   Note over OpenZaak, NotifyNL: Notificatie: Taak aangemaakt (in objecten API)
 
+  VIP ->> VIP: Taak registratie triggered
+  activate VIP
+  VIP ->> AWS: Bijlagen naar bucket
   VIP ->> Objecten API: Aanmaken taak
+  deactivate VIP
+
   Objecten API ->> Notificaties: Publish: Object create
   Notificaties ->> OMC: Subscribed: Object create
   OMC ->> OpenKlant: get partij (incl. digitale adressen)
