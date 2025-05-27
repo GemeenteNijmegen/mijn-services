@@ -204,34 +204,6 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
       logger.info('Invalid phonenumber, not registering in open-klant');
     }
 
-    // // Register phone number if provied and correct format
-    // let registeredPhone = undefined;
-    // if (phone && isValidPhone) {
-    //   registeredPhone = await this.configuration.openKlantApi.addDigitaalAdres({
-    //     adres: phone,
-    //     omschrijving: 'Telefoon',
-    //     soortDigitaalAdres: OpenKlantMapper.TELEFOONNUMMER,
-    //     verstrektDoorBetrokkene: null,
-    //     verstrektDoorPartij: {
-    //       uuid: partij.uuid,
-    //     },
-    //   });
-    // }
-
-    // // Register email if prived and correct format
-    // let registeredEmail = undefined;
-    // if (email) {
-    //   registeredEmail = await this.configuration.openKlantApi.addDigitaalAdres({
-    //     adres: email,
-    //     omschrijving: 'Email',
-    //     soortDigitaalAdres: OpenKlantMapper.EMAIL,
-    //     verstrektDoorBetrokkene: null,
-    //     verstrektDoorPartij: {
-    //       uuid: partij.uuid,
-    //     },
-    //   });
-    // }
-
     // Logic reasoning
     // 1. Has only email -> Use that (disregard preference)
     // 2. Has only phone -> Use that (disregard preference)
