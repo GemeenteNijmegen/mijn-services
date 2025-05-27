@@ -271,7 +271,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
 
   }
 
-  private async registerDigitaalAdres(adres: string, type: "telefoonnummer" | "email" | "overig", partijUuid: string) {
+  private async registerDigitaalAdres(adres: string, type: 'telefoonnummer' | 'email' | 'overig', partijUuid: string) {
     return this.configuration.openKlantApi.addDigitaalAdres({
       adres: adres,
       omschrijving: type,

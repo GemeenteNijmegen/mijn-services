@@ -149,14 +149,12 @@ describe('RolStrategyWithForm', () => {
 
     // Test
     expect(openKlantMock.updatePartij).toHaveBeenCalled();
-    expect(openKlantMock.addDigitaalAdres).toHaveBeenCalledTimes(2);
+    expect(openKlantMock.addDigitaalAdres).toHaveBeenCalledTimes(1);
 
-    // expect: telefoon as voorkeur
+    // expect: telefoon as voorkeur (no email)
     const telefoon = openKlantMock.addDigitaalAdres.mock.results[0].value as OpenKlantDigitaalAdresWithUuid;
-    const email = openKlantMock.addDigitaalAdres.mock.results[1].value as OpenKlantDigitaalAdresWithUuid;
     const updatePartij = openKlantMock.updatePartij.mock.lastCall[0] as OpenKlantPartijWithUuid;
     expect(updatePartij.voorkeursDigitaalAdres?.uuid).toBe(telefoon.uuid);
-    expect(updatePartij.voorkeursDigitaalAdres?.uuid).not.toBe(email.uuid);
 
   });
 
@@ -182,14 +180,12 @@ describe('RolStrategyWithForm', () => {
 
     // Test
     expect(openKlantMock.updatePartij).toHaveBeenCalled();
-    expect(openKlantMock.addDigitaalAdres).toHaveBeenCalledTimes(2);
+    expect(openKlantMock.addDigitaalAdres).toHaveBeenCalledTimes(1);
 
-    // expect: telefoon as voorkeur
+    // expect: telefoon as voorkeur (no email)
     const telefoon = openKlantMock.addDigitaalAdres.mock.results[0].value as OpenKlantDigitaalAdresWithUuid;
-    const email = openKlantMock.addDigitaalAdres.mock.results[1].value as OpenKlantDigitaalAdresWithUuid;
     const updatePartij = openKlantMock.updatePartij.mock.lastCall[0] as OpenKlantPartijWithUuid;
-    expect(updatePartij.voorkeursDigitaalAdres?.uuid).not.toBe(telefoon.uuid);
-    expect(updatePartij.voorkeursDigitaalAdres?.uuid).toBe(email.uuid);
+    expect(updatePartij.voorkeursDigitaalAdres?.uuid).toBe(telefoon.uuid);
 
   });
 
@@ -214,14 +210,12 @@ describe('RolStrategyWithForm', () => {
 
     // Test
     expect(openKlantMock.updatePartij).toHaveBeenCalled();
-    expect(openKlantMock.addDigitaalAdres).toHaveBeenCalledTimes(2);
+    expect(openKlantMock.addDigitaalAdres).toHaveBeenCalledTimes(1);
 
-    // expect: telefoon as voorkeur
+    // expect: telefoon as voorkeur (no email)
     const telefoon = openKlantMock.addDigitaalAdres.mock.results[0].value as OpenKlantDigitaalAdresWithUuid;
-    const email = openKlantMock.addDigitaalAdres.mock.results[1].value as OpenKlantDigitaalAdresWithUuid;
     const updatePartij = openKlantMock.updatePartij.mock.lastCall[0] as OpenKlantPartijWithUuid;
     expect(updatePartij.voorkeursDigitaalAdres?.uuid).toBe(telefoon.uuid);
-    expect(updatePartij.voorkeursDigitaalAdres?.uuid).not.toBe(email.uuid);
 
   });
 
