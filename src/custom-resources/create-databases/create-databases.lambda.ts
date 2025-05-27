@@ -25,7 +25,7 @@ export async function handler(event: CdkCustomResourceEvent) {
       password: credentials.password,
       host: process.env.DB_HOST!,
       port: parseInt(process.env.DB_PORT!),
-      database: process.env.DB_NAME,
+      database: database,
     });
     await client.connect();
     const exists = await existsDatabase(client, database);
