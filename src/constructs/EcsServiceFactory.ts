@@ -139,7 +139,7 @@ export class EcsServiceFactory {
 
   /**
    * This adds a cloudwatch alarm for unresponsive services. Health checks should catch this, but they're not yet stable enough.
-   * 
+   *
    * The service will stop reporting statistics to cloudwatch, this catches missing data for CPUUtilization and will alarm based on that.
    * NB: This will not auto-remediate.
    */
