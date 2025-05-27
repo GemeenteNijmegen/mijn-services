@@ -14,20 +14,20 @@ export async function handler(event: CdkCustomResourceEvent) {
   const credentialsObj = await AWS.getSecret(process.env.DB_CREDENTIALS_ARN!);
   const credentials = JSON.parse(credentialsObj);
 
-  const client = new postgres.Client({
-    user: credentials.username,
-    password: credentials.password,
-    host: process.env.DB_HOST!,
-    port: parseInt(process.env.DB_PORT!),
-    database: process.env.DB_NAME,
-  });
-  await client.connect();
-
   // Check if databases exist otherwise create them
   const listOfDatabases = event.ResourceProperties.listOfDatabases;
   console.log('Found list of databases', listOfDatabases);
   const databases = listOfDatabases.split(',');
   for (const database of databases) {
+    // Create a new client for each database
+    const client = new postgres.Client({
+      user: credentials.username,
+      password: credentials.password,
+      host: process.env.DB_HOST!,
+      port: parseInt(process.env.DB_PORT!),
+      database: process.env.DB_NAME,
+    });
+    await client.connect();
     const exists = await existsDatabase(client, database);
     if (!exists) {
       console.info('Creating database', database);
@@ -45,18 +45,8 @@ async function existsDatabase(client: postgres.Client, name: string) {
   return resp.rowCount !== 0;
 }
 
-async function createDatabase(databaseName: string, credentials: any) {
+async function createDatabase(databaseName: string, client: postgres.Client) {
   try {
-    // Create a new client for the target database
-    const client = new postgres.Client({
-      user: credentials.username,
-      password: credentials.password,
-      host: process.env.DB_HOST!,
-      port: parseInt(process.env.DB_PORT!),
-      database: databaseName,
-    });
-
-    await client.connect();
     await client.query(`CREATE DATABASE "${databaseName}";`);
     await client.end();
   } catch (err) {
