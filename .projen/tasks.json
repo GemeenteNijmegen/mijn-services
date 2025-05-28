@@ -47,6 +47,9 @@
       "description": "Prepare assets",
       "steps": [
         {
+          "spawn": "bundle:custom-resources/create-database-per-user/create-database-per-user.lambda"
+        },
+        {
           "spawn": "bundle:custom-resources/create-databases/create-databases.lambda"
         },
         {
@@ -54,6 +57,24 @@
         },
         {
           "spawn": "bundle:services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda"
+        }
+      ]
+    },
+    "bundle:custom-resources/create-database-per-user/create-database-per-user.lambda": {
+      "name": "bundle:custom-resources/create-database-per-user/create-database-per-user.lambda",
+      "description": "Create a JavaScript bundle from src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/create-database-per-user/create-database-per-user.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+        }
+      ]
+    },
+    "bundle:custom-resources/create-database-per-user/create-database-per-user.lambda:watch": {
+      "name": "bundle:custom-resources/create-database-per-user/create-database-per-user.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/create-database-per-user/create-database-per-user.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
