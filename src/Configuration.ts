@@ -512,7 +512,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           userId: 'nijmegen_devops',
           username: 'nijmegen_devops',
         },
-        taakObjecttypeUuid: 'd5c77844-7e00-4908-9839-f18a8ac6a045',
+        taakObjecttypeUuid: 'fa36dfdd-899c-4b40-92ad-6d5c0077748a',
         templates: {
           // zaakCreateEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
           // zaakUpdateEmail: 'e868044f-4a30-42c9-b1bf-8ad95ec2a6b8',
