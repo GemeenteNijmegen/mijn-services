@@ -596,9 +596,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         mode: 'Production',
         openKlantUrl: 'mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'openzaak.nijmegen.cloud/zaken/api/v1',
-        notificatiesApiUrl: 'opennotificaties.nijmegen.cloud/api/v1',
-        objectenApiUrl: 'objects-api.nijmegen.cloud/api/v2',
-        objecttypenApiUrl: 'objecttypes-api.nijmegen.cloud/api/v2',
+        notificatiesApiUrl: 'mijn-services.nijmegen.nl/open-notificaties/api/v1',
+        objectenApiUrl: 'mijn-services.nijmegen.nl/objects/api/v2',
+        objecttypenApiUrl: 'mijn-services.nijmegen.nl/objecttypes/api/v2',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'nijmegen_devops',
