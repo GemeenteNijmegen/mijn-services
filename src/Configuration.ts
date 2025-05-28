@@ -605,7 +605,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           userId: 'nijmegen_devops',
           username: 'nijmegen_devops',
         },
-        taakObjecttypeUuid: 'bf3dbb29-5391-40e3-94a8-c662bedcd0f7',
+        taakObjecttypeUuid: 'fa36dfdd-899c-4b40-92ad-6d5c0077748a', // Let op: gelijk getrokken met acceptatie
         templates: { // IDs refer to templates in NotifyNL service: APV - Gemeente Nijmegen
           // zaakCreateEmail: '06ff0f61-a0a3-4ea5-a583-4106dac20c33',
           // zaakUpdateEmail: 'ff09a540-3a88-4f70-9717-11a6c0fac356',
