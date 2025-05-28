@@ -18,9 +18,3 @@ export class CatalogiApi extends ZgwApi implements ICatalogiApi {
   }
 
 }
-
-export class CatalogiApiMock implements ICatalogiApi {
-  async getRolType(_url: string): Promise<RolType> {
-    throw new Error('This method should be mocked.');
-  }
-}

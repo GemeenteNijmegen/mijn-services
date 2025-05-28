@@ -1,5 +1,7 @@
+import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Duration } from 'aws-cdk-lib';
 import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
+import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem, IFileSystem } from 'aws-cdk-lib/aws-efs';
@@ -131,7 +133,36 @@ export class EcsServiceFactory {
       this.createVolumes(service, options.id, options.volumeMounts);
     }
 
+    this.UnresponsiveServiceAlarm(options.id, service);
+
     return service;
+  }
+
+  /**
+   * This adds a cloudwatch alarm for unresponsive services. Health checks should catch this, but they're not yet stable enough.
+   *
+   * The service will stop reporting statistics to cloudwatch, this catches missing data for CPUUtilization and will alarm based on that.
+   * NB: This will not auto-remediate.
+   */
+  private UnresponsiveServiceAlarm(idPrefix: string, service: FargateService) {
+    const criticality = new Criticality('critical');
+    new Alarm(this.scope, `${idPrefix}-service-unresponsive-alarm`, {
+      alarmName: `${service.serviceName}-unresponsive-${criticality.toString()}`,
+      evaluationPeriods: 1,
+      metric: new Metric({
+        dimensionsMap: {
+          ClusterName: this.props.cluster.clusterName,
+          ServiceName: service.serviceName,
+        },
+        metricName: 'CPUUtilization',
+        namespace: 'AWS/ECS',
+        statistic: 'SampleCount',
+        period: Duration.minutes(3),
+      }),
+      threshold: 0,
+      comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: TreatMissingData.BREACHING,
+    });
   }
 
   attachEphemeralStorage(container: ContainerDefinition, name: string, ...mountpoints: string[]) {
