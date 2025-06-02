@@ -149,8 +149,8 @@ export class OpenZaakService extends Construct {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
       volumes: [{ name: VOLUME_NAME }],
-      cpu: this.props.openZaakConfiguration.taskSize?.cpu,
-      memoryMiB: this.props.openZaakConfiguration.taskSize?.memory,
+      cpu: this.props.openZaakConfiguration.taskSize?.cpu ?? '256',
+      memoryMiB: this.props.openZaakConfiguration.taskSize?.memory ?? '512',
     });
 
     // 3th Main service container
