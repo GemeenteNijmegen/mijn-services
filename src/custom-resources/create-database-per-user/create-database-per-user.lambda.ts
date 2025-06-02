@@ -27,12 +27,14 @@ export async function handler(event: CdkCustomResourceEvent) {
       database: database,
     });
     await client.connect();
-    const exists = await existsDatabase(client, database);
+
+    const databaseName = 'db_' + database; // Prefix the database name to avoid conflicts with the user name
+    const exists = await existsDatabase(client, databaseName);
     if (!exists) {
-      console.info('Creating database', database);
-      await createDatabase(client, database);
+      console.info('Creating database', databaseName);
+      await createDatabase(client, databaseName);
     } else {
-      console.info('Database', database, 'already exists... skipping creation.');
+      console.info('Database', databaseName, 'already exists... skipping creation.');
     }
   }
 
