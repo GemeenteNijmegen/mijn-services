@@ -158,7 +158,7 @@ export interface OpenNotificatiesConfiguration {
   persitNotifications?: boolean;
 }
 
-export interface OpenZaakConfiguration {
+export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -408,6 +408,28 @@ export interface GZACConfiguration {
   debug?: boolean;
 }
 
+export interface MainTaskSizeConfiguration {
+  /**
+   * Configure the task size for the main service
+   * @default - cdk defaults
+   */
+  taskSize?: {
+    cpu: string;
+    memory: string;
+  }
+}
+
+export interface CeleryTaskSizeConfiguration {
+  /**
+   * Configure the task size for the celery service
+   * @default - cdk defaults
+   */
+  celeryTaskSize?: {
+    cpu: string;
+    memory: string;
+  }
+}
+
 const EnvironmentConfigurations: { [key: string]: Configuration } = {
   acceptance: {
     branch: 'acceptance',
@@ -630,6 +652,14 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'INFO',
       debug: false,
       apiVersion: '1.3.1',
+      taskSize: {
+        cpu: '512',
+        memory: '2048'
+      },
+      // celeryTaskSize: { // I dont think we need this just yet
+      //   cpu: '512',
+      //   memory: '2048'
+      // }
     },
     objecttypesService: {
       image: 'maykinmedia/objecttypes-api:3.0.0',
