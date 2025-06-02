@@ -601,8 +601,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         zakenApiUrl: 'https://openzaak.nijmegen.cloud/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'partijperroldry', // Unique partij per rol (of zaak dus)
-        // TODO change from dryrun later (but do not yet write results back to openzaak)
+        strategy: 'partijperrol-with-form', // Unique partij per rol (of zaak dus)
         enabled: true,
         catalogiWhitelist: [
           '84f9e30d-8a3e-4ca0-8011-556ae3cbdd41', // VIP catalogus op productie
