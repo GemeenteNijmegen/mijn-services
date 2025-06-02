@@ -1,0 +1,70 @@
+{
+  "wanneerIsDeOrganisatieGestart": "12-12-2026",
+  "naamVoorzitter": "m2",
+  "adresVoorzitter3": {
+    "adresVoorzitter3-postalcode": "6511PP",
+    "adresVoorzitter3-housenr": "6",
+    "adresVoorzitter3-streetname": "Korte Nieuwstraat",
+    "adresVoorzitter3-city": "Nijmegen"
+  },
+  "naamSecretaris": "6511PP",
+  "adresSecretaris": {
+    "adresSecretaris-postalcode": "6511PP",
+    "adresSecretaris-housenr": "6",
+    "adresSecretaris-streetname": "Korte Nieuwstraat",
+    "adresSecretaris-city": "Nijmegen"
+  },
+  "naamSecretaris1": "6511PP",
+  "adresPenningmeester": {
+    "adresPenningmeester-postalcode": "6511PP",
+    "adresPenningmeester-housenr": "6",
+    "adresPenningmeester-streetname": "Korte Nieuwstraat",
+    "adresPenningmeester-city": "Nijmegen"
+  },
+  "kenmerk": "APV-33.722",
+  "naamIngelogdeGebruiker": "H. de Jong",
+  "totaalbedrag": "0",
+  "volgende": true,
+  "watGaatUOrganiseren": "bingoOfKienenOfRadVanAvontuur",
+  "naarWelkGoedDoelGaanDeInkomstenVanDeBingoOfLoterij": "123",
+  "vipZaaktype": "4953995e-c108-428b-b9ea-9e2c7012d796",
+  "vorige1": false,
+  "volgende1": true,
+  "ikHebAlleVragenNaarWaarheidBeantwoord": true,
+  "vorige5": false,
+  "verzenden1": true,
+  "form": {
+    "data": {
+      "inlogmiddel": "digid",
+      "bsn": "900026236",
+      "eMailadres": "h.de.jong@example.com",
+      "deGemeenteMagDitEMailadresGebruikenOmTeReagerenOpMijnAanvraag": "ja",
+      "telefoonnummer": "+31612121212",
+      "namensWieVraagtUEenOntheffingAan": "mijzelf",
+      "contactpersoon": "ja"
+    },
+    "metadata": {}
+  },
+  "wieOrganiseertDeBingo": {
+    "voorzitter": true,
+    "secretaris": false,
+    "penningmeester": false,
+    "anderBestuurslid": false
+  },
+  "waarWordtHetBingoGeorganiseerd": "123",
+  "datumBingo": "12-12-2026",
+  "starttijdBingo": "12:12",
+  "starttijdBingo1": "13:41",
+  "heeftUEerderEenBingoGeorganiseerdEnGemeldBijDeGemeente": "ja",
+  "geefPerRondeAanWatDeWaardeGeldOfSpullenIsVanDePrijsen": [
+    {
+      "container": {
+        "ronde": "123",
+        "waardePrijzenInEuros": "123"
+      }
+    }
+  ],
+  "totaal": "123,00",
+  "vorige2": false,
+  "volgende2": true
+}

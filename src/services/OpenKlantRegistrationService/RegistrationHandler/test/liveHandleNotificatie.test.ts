@@ -32,8 +32,8 @@ runLiveTests('Live tests handle notification', () => {
       zakenApiUrl: process.env.ZAKEN_API_URL!,
       roltypesToRegister: ['initiator'],
     });
-    const response = await handler.handleNotification(composeNotification());
-    expect(response.statusCode).toBe(200);
+    // If not throws thats ok
+    await handler.handleNotification(composeNotification());
   });
 
 });

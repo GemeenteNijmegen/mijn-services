@@ -1,0 +1,85 @@
+{
+  "waarWiltUTijdelijkDrankMetAlcoholVerkopen": "123",
+  "waaromWiltUAlcoholSchenken": "123",
+  "datumTijdVerkopenDrankMetAlcohol": [
+    {
+      "container": {
+        "datum": "12-12-2026",
+        "starttijd": "12:12:00",
+        "eindtijd": "13:13"
+      }
+    }
+  ],
+  "kenmerk": "APV-33.731",
+  "naamIngelogdeGebruiker": "H. de Jong",
+  "inlogmiddel": "digid",
+  "totaalbedrag": "169.25",
+  "vipZaaktype": "2c86b174-fe1a-45dc-a57d-3f7b5ff4ad2e",
+  "volledigadres": "",
+  "postbusnummer": "",
+  "volgende": true,
+  "inlogMetEHerkenning": {
+    "geefDeGegevensVanAlleLeidinggevenden": [
+      {
+        "containerEherkenning": {
+          "naam1": "Ikzelf",
+          "adres_nijmegen": {
+            "inlogMetEHerkenning.geefDeGegevensVanAlleLeidinggevenden[0].containerEherkenning[0].adres_nijmegen-postalcode": "6511PP",
+            "inlogMetEHerkenning.geefDeGegevensVanAlleLeidinggevenden[0].containerEherkenning[0].adres_nijmegen-housenr": "6",
+            "inlogMetEHerkenning.geefDeGegevensVanAlleLeidinggevenden[0].containerEherkenning[0].adres_nijmegen-streetname": "Korte Nieuwstraat",
+            "inlogMetEHerkenning.geefDeGegevensVanAlleLeidinggevenden[0].containerEherkenning[0].adres_nijmegen-city": "Nijmegen"
+          },
+          "geboortedatum": "12-12-1990"
+        }
+      }
+    ]
+  },
+  "vorige1": false,
+  "volgende2": true,
+  "vorige2": false,
+  "volgende3": true,
+  "ikHebAlleVragenNaarWaarheidBeantwoord": true,
+  "vorige3": false,
+  "verzenden": true,
+  "vragenBijInlogDigiD": {
+    "gegevensAndereLeidinggevende": [
+      {
+        "containerDigiD": {
+          "naam": "123",
+          "adres_nijmegen": {
+            "vragenBijInlogDigiD.gegevensAndereLeidinggevende[0].containerDigiD[0].adres_nijmegen-postalcode": "6511PP",
+            "vragenBijInlogDigiD.gegevensAndereLeidinggevende[0].containerDigiD[0].adres_nijmegen-housenr": "6",
+            "vragenBijInlogDigiD.gegevensAndereLeidinggevende[0].containerDigiD[0].adres_nijmegen-streetname": "Korte Nieuwstraat",
+            "vragenBijInlogDigiD.gegevensAndereLeidinggevende[0].containerDigiD[0].adres_nijmegen-city": "Nijmegen"
+          },
+          "geboortedatum": "21-10-1990"
+        }
+      }
+    ],
+    "bentUZelfLeidinggevendeInDeOrganisatieOfHetBedrijf": "ja"
+  },
+  "nonhiddenfieldsform": {
+    "data": {
+      "naamIngelogdeGebruiker": "H. de Jong",
+      "straatnaam": "Kelfkensbos",
+      "huisnummerfield": "80-A-1",
+      "postcode": "6511 RN",
+      "woonplaats": "Nijmegen"
+    },
+    "metadata": {}
+  },
+  "form": {
+    "data": {
+      "naamOrganisatie": "123",
+      "hoeWiltUDatDeGemeenteContactMetUOpneemtOverAanvraagAlsDatNodigIs": "viaTelefoon",
+      "bsn": "900026236",
+      "kvk": "",
+      "inlogmiddel": "digid",
+      "inschrijfnummerKamerVanKoophandel": "12345678",
+      "contactpersoon": "ja",
+      "telefoonnummer": "+31612345612",
+      "eMailadres1": ""
+    },
+    "metadata": {}
+  }
+}

@@ -11,6 +11,7 @@ interface OpenKlantApiProps {
 export interface IOpenKlantApi {
   findPartij(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid | undefined>;
   findPartijen(id: string | undefined | null, type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijenWithUuid>;
+  getPartij(url: string): Promise<OpenKlantPartijWithUuid>;
   registerPartij(partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid>;
   updatePartij(partij: Partial<OpenKlantPartijWithUuid>): Promise<OpenKlantPartijWithUuid>;
   addPartijIdentificatie(identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid>;
@@ -56,6 +57,12 @@ export class OpenKlantApi implements IOpenKlantApi {
     const response = await this.callApi('GET', url);
     const result = await response.json() as any;
     return OpenKlantPartijenWithUuidSchema.parse(result);
+  }
+
+  async getPartij(url: string): Promise<OpenKlantPartijWithUuid> {
+    const response = await this.callApi('GET', url);
+    const result = await response.json();
+    return OpenKlantPartijSchemaWithUuid.parse(result);
   }
 
   async addDigitaalAdres(address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
@@ -140,32 +147,4 @@ export class OpenKlantApi implements IOpenKlantApi {
 
   }
 
-}
-
-
-export class OpenKlantApiMock implements IOpenKlantApi {
-  deleteDigitaalAdres(_uuid: string): Promise<boolean> {
-    throw new Error('Method should be mocked.');
-  }
-  findPartijen(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijenWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
-  findPartij(_id: string | undefined | null, _type: 'organisatie' | 'contactpersoon' | 'persoon'): Promise<OpenKlantPartijWithUuid | undefined> {
-    throw new Error('Method should be mocked.');
-  }
-  getEndpoint(): string {
-    throw new Error('Method should be mocked.');
-  }
-  registerPartij(_partij: OpenKlantPartij): Promise<OpenKlantPartijWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
-  updatePartij(_partij: Partial<OpenKlantPartijWithUuid>): Promise<OpenKlantPartijWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
-  addPartijIdentificatie(_identificatie: OpenKlantPartijIdentificiatie): Promise<OpenKlantPartijIdentificiatieWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
-  addDigitaalAdres(_address: OpenKlantDigitaalAdres): Promise<OpenKlantDigitaalAdresWithUuid> {
-    throw new Error('Method should be mocked.');
-  }
 }
