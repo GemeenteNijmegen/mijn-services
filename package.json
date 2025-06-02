@@ -4,6 +4,8 @@
     "build": "npx projen build",
     "bump": "npx projen bump",
     "bundle": "npx projen bundle",
+    "bundle:custom-resources/create-database-per-user/create-database-per-user.lambda": "npx projen bundle:custom-resources/create-database-per-user/create-database-per-user.lambda",
+    "bundle:custom-resources/create-database-per-user/create-database-per-user.lambda:watch": "npx projen bundle:custom-resources/create-database-per-user/create-database-per-user.lambda:watch",
     "bundle:custom-resources/create-databases/create-databases.lambda": "npx projen bundle:custom-resources/create-databases/create-databases.lambda",
     "bundle:custom-resources/create-databases/create-databases.lambda:watch": "npx projen bundle:custom-resources/create-databases/create-databases.lambda:watch",
     "bundle:services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda": "npx projen bundle:services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda",
