@@ -416,7 +416,7 @@ export interface MainTaskSizeConfiguration {
   taskSize?: {
     cpu: string;
     memory: string;
-  }
+  };
 }
 
 export interface CeleryTaskSizeConfiguration {
@@ -427,7 +427,7 @@ export interface CeleryTaskSizeConfiguration {
   celeryTaskSize?: {
     cpu: string;
     memory: string;
-  }
+  };
 }
 
 const EnvironmentConfigurations: { [key: string]: Configuration } = {
@@ -654,7 +654,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       apiVersion: '1.3.1',
       taskSize: {
         cpu: '512',
-        memory: '2048'
+        memory: '2048',
       },
       // celeryTaskSize: { // I dont think we need this just yet
       //   cpu: '512',
