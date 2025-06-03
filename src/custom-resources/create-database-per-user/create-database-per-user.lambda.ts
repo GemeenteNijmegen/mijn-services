@@ -28,28 +28,16 @@ export async function handler(event: CdkCustomResourceEvent) {
   console.log('Found list of databases', listOfDatabases);
   const databases = listOfDatabases.split(',');
   for (const database of databases) {
-    // Ensure user exists
-    await createUser(adminClient, database, credentials.password);
-
-    // Connect as that user
-    const client = new postgres.Client({
-      user: database,
-      password: credentials.password,
-      host: process.env.DB_HOST!,
-      port: parseInt(process.env.DB_PORT!),
-      database: database,
-    });
-    await client.connect();
-
     const databaseName = 'db_' + database;
-    const exists = await existsDatabase(client, databaseName);
+    const databaseUser = await createUser(adminClient, database, credentials.password);
+    const exists = await existsDatabase(adminClient, databaseName);
     if (!exists) {
-      console.info('Creating database', databaseName);
-      await createDatabase(client, databaseName);
+      console.info('Creating database', databaseName, 'owned by user', databaseUser);
+      await createDatabase(adminClient, databaseName, databaseUser);
     } else {
       console.info('Database', databaseName, 'already exists... skipping creation.');
     }
-    await client.end();
+    // await adminClient.end();
   }
   await adminClient.end();
 }
@@ -61,9 +49,9 @@ async function existsDatabase(client: postgres.Client, name: string) {
   return resp.rowCount !== 0;
 }
 
-async function createDatabase(client: postgres.Client, name: string) {
+async function createDatabase(client: postgres.Client, name: string, owner: string = name) {
   try {
-    await client.query(`CREATE DATABASE "${name}";`);
+    await client.query(`CREATE DATABASE "${name}" OWNER "${owner}";`);
   } catch (err) {
     console.error(err);
     throw Error(`Could not create database ${name}`);
@@ -82,4 +70,5 @@ async function createUser(client: postgres.Client, username: string, password: s
     END
     $$;
   `);
+  return username;
 }
