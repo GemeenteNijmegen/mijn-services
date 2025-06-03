@@ -37,7 +37,7 @@ export class DatabaseStack extends Stack {
 
     if (props.configuration.databases) {
       this.createDatabasePerUserIfNotExistent(props.configuration.databases);
-      // this.createRequiredDatabasesIfNotExistent(props.configuration.databases);
+      this.createRequiredDatabasesIfNotExistent(props.configuration.databases);
     }
 
   }
