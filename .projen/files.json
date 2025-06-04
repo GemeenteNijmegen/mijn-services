@@ -16,6 +16,7 @@
     ".projen/tasks.json",
     "cdk.json",
     "LICENSE",
+    "src/custom-resources/create-database-per-user/create-database-per-user-function.ts",
     "src/custom-resources/create-databases/create-databases-function.ts",
     "src/services/OpenKlantRegistrationService/NotificationReceiver/receiver-function.ts",
     "src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler-function.ts",
