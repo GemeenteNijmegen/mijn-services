@@ -99,9 +99,9 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     }
 
     // The the form submission
-    const userType = rol.betrokkeneType == 'natuurlijk_persoon' ? 'person' : 'organization';
+    const userType = rol.betrokkeneType == 'natuurlijk_persoon' ? 'person' : 'organisation';
     const userId = userType == 'person' ? rol.betrokkeneIdentificatie.inpBsn : rol.betrokkeneIdentificatie.annIdentificatie;
-    const form = await this.submissisonStorage.getFormJson(reference, userId!, userType!);
+    const form = await this.submissisonStorage.getFormJson(reference, userId!, userType);
 
     // Based on the form contents add digital adresses
     await this.setDigitaleAdressenForPartijFromRol(partij, form, rol);
