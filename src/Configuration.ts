@@ -657,8 +657,8 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       },
       celeryTaskSize: {
         cpu: '512',
-        memory: '2048'
-      }
+        memory: '2048',
+      },
     },
     objecttypesService: {
       image: 'maykinmedia/objecttypes-api:3.0.0',
