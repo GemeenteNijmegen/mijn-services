@@ -143,9 +143,10 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
+    const rol: Partial<Rol> = {};
 
     // Call
-    await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form);
+    await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form, rol as Rol);
 
     // Test
     expect(openKlantMock.updatePartij).toHaveBeenCalled();
@@ -174,9 +175,10 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
+    const rol: Partial<Rol> = {};
 
     // Call
-    await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form);
+    await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form, rol as Rol);
 
     // Test
     expect(openKlantMock.updatePartij).toHaveBeenCalled();
@@ -204,9 +206,11 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
+    const rol: Partial<Rol> = {};
+
 
     // Call
-    await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form);
+    await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form, rol as Rol);
 
     // Test
     expect(openKlantMock.updatePartij).toHaveBeenCalled();
@@ -234,9 +238,11 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
+    const rol: Partial<Rol> = {};
+
 
     // Call
-    await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form);
+    await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form, rol as Rol);
 
     // Test
     expect(openKlantMock.updatePartij).toHaveBeenCalled();
@@ -264,9 +270,11 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
+    const rol: Partial<Rol> = {};
+
 
     // Call
-    await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form);
+    await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form, rol as Rol);
 
     // Test
     expect(openKlantMock.updatePartij).toHaveBeenCalled();
@@ -294,9 +302,10 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
+    const rol: Partial<Rol> = {};
 
     // Call
-    const call = strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form);
+    const call = strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form, rol as Rol);
     await expect(call).rejects.toThrow('Failed to set a preference as we do not have any registered digitaal adres');
 
     // Test
