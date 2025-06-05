@@ -99,12 +99,12 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     }
 
     // The the form submission
-    const userType = rol.betrokkeneType == 'natuurlijk_persoon' ? 'person' : 'organization';
+    const userType = rol.betrokkeneType == 'natuurlijk_persoon' ? 'person' : 'organisation';
     const userId = userType == 'person' ? rol.betrokkeneIdentificatie.inpBsn : rol.betrokkeneIdentificatie.annIdentificatie;
-    const form = await this.submissisonStorage.getFormJson(reference, userId!, userType!);
+    const form = await this.submissisonStorage.getFormJson(reference, userId!, userType);
 
     // Based on the form contents add digital adresses
-    await this.setDigitaleAdressenForPartijFromRol(partij, form);
+    await this.setDigitaleAdressenForPartijFromRol(partij, form, rol);
   }
 
   private async createPartijAndUpdateRol(rol: Rol) {
@@ -187,7 +187,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     return updatedRole;
   }
 
-  async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, submission: any) {
+  async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, submission: any, rol: Rol) {
 
     // First try to parse the form data from the submission
     const form = JSON.parse(submission.submission.Message);
@@ -195,8 +195,8 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     // Check if a phone number is valid using the following expression (used in open-klant)
     const phonenumberRegex = /^(0[8-9]00[0-9]{4,7})|(0[1-9][0-9]{8})|(\+[0-9]{9,20}|1400|140[0-9]{2,3})$/;
 
-    const phone = SubmissionUtils.findTelefoon(form);
-    const email = SubmissionUtils.findEmail(form);
+    const phone = SubmissionUtils.findTelefoon(form) ?? rol.contactpersoonRol?.telefoonnummer;
+    const email = SubmissionUtils.findEmail(form) ?? rol.contactpersoonRol?.emailadres;
     const preference = SubmissionUtils.findKanaalvoorkeur(form);
     const isValidPhone = phone ? phonenumberRegex.test(phone) : false;
 
