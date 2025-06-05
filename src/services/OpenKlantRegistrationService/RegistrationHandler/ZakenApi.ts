@@ -1,7 +1,7 @@
+import { NotFoundError, ZgwApi, ZgwApiProps } from './ZgwApi';
 import { logger } from '../Shared/Logger';
 import { Rol, RolSchema } from '../Shared/model/Rol';
 import { Zaak, ZaakSchema } from '../Shared/model/Zaak';
-import { NotFoundError, ZgwApi, ZgwApiProps } from './ZgwApi';
 
 export interface IZakenApi {
   getRol(url: string): Promise<Rol>;
@@ -75,7 +75,7 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
 
       // If the rol was not deleted or the delete call failed, don't panic the rol still exists.
       if (deleted) {
-        // If an error is thrown after the rol was deleted -> do panic! 
+        // If an error is thrown after the rol was deleted -> do panic!
         logger.error('ROL UPDATE FAILED'); // This is picked up by a critical level alarm
         logger.error('Failed to delete and recreate rol! This is the original role:', { originalRol });
         logger.error('Rol update failed', { error });
