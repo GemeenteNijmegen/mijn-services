@@ -63,8 +63,8 @@
     "@aws-lambda-powertools/idempotency": "^2.21.0",
     "@aws-lambda-powertools/logger": "^2.21.0",
     "@aws-lambda-powertools/tracer": "^2.21.0",
-    "@aws-sdk/client-dynamodb": "^3.825.0",
-    "@aws-sdk/client-sqs": "^3.825.0",
+    "@aws-sdk/client-dynamodb": "^3.826.0",
+    "@aws-sdk/client-sqs": "^3.826.0",
     "@gemeentenijmegen/apigateway-http": "^0.0.26",
     "@gemeentenijmegen/aws-constructs": "^0.0.36",
     "@gemeentenijmegen/utils": "^0.0.32",
@@ -76,7 +76,7 @@
     "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.0",
-    "zod": "^3.25.52"
+    "zod": "^3.25.56"
   },
   "license": "EUPL-1.2",
   "publishConfig": {
