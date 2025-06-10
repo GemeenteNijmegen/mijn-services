@@ -30,6 +30,7 @@ export class SubmissionUtils {
 
   static findValueByKey(obj: any, keyToFind: string): any | undefined {
     if (typeof obj !== 'object' || obj === null) {
+      console.log('UNDEFINED');
       return undefined;
     }
 
