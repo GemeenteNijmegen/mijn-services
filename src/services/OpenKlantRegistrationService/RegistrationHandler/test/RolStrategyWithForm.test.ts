@@ -143,7 +143,12 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
-    const rol: Partial<Rol> = {};
+    const rol: Partial<Rol> = {
+      contactpersoonRol: {
+        emailadres: 'abc@example.com',
+        telefoonnummer: '+31612345678',
+      }
+    };
 
     // Call
     await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form, rol as Rol);
@@ -175,7 +180,12 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
-    const rol: Partial<Rol> = {};
+    const rol: Partial<Rol> = {
+      contactpersoonRol: {
+        emailadres: 'abc@example.com',
+        telefoonnummer: '+31612345678',
+      }
+    };
 
     // Call
     await strategy.setDigitaleAdressenForPartijFromRol(partij as OpenKlantPartijWithUuid, form, rol as Rol);
@@ -206,7 +216,12 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
-    const rol: Partial<Rol> = {};
+    const rol: Partial<Rol> = {
+      contactpersoonRol: {
+        emailadres: 'abc@example.com',
+        telefoonnummer: '+31612345678',
+      }
+    };
 
 
     // Call
@@ -238,7 +253,11 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
-    const rol: Partial<Rol> = {};
+    const rol: Partial<Rol> = {
+      contactpersoonRol: {
+        emailadres: 'abc@example.com',
+      }
+    };
 
 
     // Call
@@ -270,7 +289,11 @@ describe('RolStrategyWithForm', () => {
     const partij: Partial<OpenKlantPartijWithUuid> = {
       uuid: randomUUID(),
     };
-    const rol: Partial<Rol> = {};
+    const rol: Partial<Rol> = {
+      contactpersoonRol: {
+        telefoonnummer: '+31612345678',
+      }
+    };
 
 
     // Call
