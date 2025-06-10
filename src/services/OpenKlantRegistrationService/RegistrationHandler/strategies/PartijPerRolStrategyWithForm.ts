@@ -87,25 +87,28 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     return;
   }
 
-  private async addDataToPartij(rol: Rol, notification: Notification) {
+  async addDataToPartij(rol: Rol, notification: Notification) {
     // Get the existing partij
     const partij = await this.configuration.openKlantApi.getPartij(rol.betrokkene!);
 
-    // Get the form reference
-    const zaak = await this.configuration.zakenApi.getZaak(notification.hoofdObject);
-    const reference = zaak._expand?.eigenschappen?.find(eigenschap => eigenschap.naam == 'formulier_referentie')?.waarde;
-    if (!reference) {
-      throw Error('Could not find form reference so no data can be transfered to open-klant.');
-    }
-
-    // The the form submission
-    const userType = rol.betrokkeneType == 'natuurlijk_persoon' ? 'person' : 'organisation';
-    const userId = userType == 'person' ? rol.betrokkeneIdentificatie.inpBsn : rol.betrokkeneIdentificatie.annIdentificatie;
     let form = undefined;
+
     try {
+
+      // Get the form reference
+      const zaak = await this.configuration.zakenApi.getZaak(notification.hoofdObject);
+      const reference = zaak._expand?.eigenschappen?.find(eigenschap => eigenschap.naam == 'formulier_referentie')?.waarde;
+      if (!reference) {
+        throw Error('Could not find form reference so no data can be transfered to open-klant.');
+      }
+
+      // Get the form submission
+      const userType = rol.betrokkeneType == 'natuurlijk_persoon' ? 'person' : 'organisation';
+      const userId = userType == 'person' ? rol.betrokkeneIdentificatie.inpBsn : rol.betrokkeneIdentificatie.annIdentificatie;
       form = await this.submissisonStorage.getFormJson(reference, userId!, userType);
+
     } catch (error) {
-      logger.error('Could not load form', { error });
+      logger.info('Could not load form, resuming anyway', { error });
     }
 
     // Based on the form contents add digital adresses
