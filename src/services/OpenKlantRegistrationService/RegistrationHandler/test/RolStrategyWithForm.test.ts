@@ -147,7 +147,7 @@ describe('RolStrategyWithForm', () => {
       contactpersoonRol: {
         emailadres: 'abc@example.com',
         telefoonnummer: '+31612345678',
-      }
+      },
     };
 
     // Call
@@ -184,7 +184,7 @@ describe('RolStrategyWithForm', () => {
       contactpersoonRol: {
         emailadres: 'abc@example.com',
         telefoonnummer: '+31612345678',
-      }
+      },
     };
 
     // Call
@@ -220,7 +220,7 @@ describe('RolStrategyWithForm', () => {
       contactpersoonRol: {
         emailadres: 'abc@example.com',
         telefoonnummer: '+31612345678',
-      }
+      },
     };
 
 
@@ -256,7 +256,7 @@ describe('RolStrategyWithForm', () => {
     const rol: Partial<Rol> = {
       contactpersoonRol: {
         emailadres: 'abc@example.com',
-      }
+      },
     };
 
 
@@ -292,7 +292,7 @@ describe('RolStrategyWithForm', () => {
     const rol: Partial<Rol> = {
       contactpersoonRol: {
         telefoonnummer: '+31612345678',
-      }
+      },
     };
 
 
