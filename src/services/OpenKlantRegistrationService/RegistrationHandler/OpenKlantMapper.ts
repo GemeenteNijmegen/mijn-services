@@ -1,8 +1,8 @@
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
+import { StrategyStatics } from './strategies/StrategyStatics';
 import { OpenKlantDigitaalAdres, OpenKlantPartij, OpenKlantPartijIdentificiatie } from '../Shared/model/Partij';
 import { Rol } from '../Shared/model/Rol';
-import { StrategyStatics } from './strategies/StrategyStatics';
 
 /**
  * Mapping functinos to convert from zaken API to
@@ -26,7 +26,7 @@ export class OpenKlantMapper {
 
     const naam = rol.contactpersoonRol?.naam;
     const geslachtsnaam = rol?.betrokkeneIdentificatie.geslachtsnaam;
-    const usedName = (naam && naam !== "") ? naam : geslachtsnaam;
+    const usedName = (naam && naam !== '') ? naam : geslachtsnaam;
     if (!usedName) {
       throw new ErrorResponse(400, 'No name found in rol');
     }
