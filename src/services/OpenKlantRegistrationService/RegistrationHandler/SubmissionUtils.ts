@@ -85,4 +85,14 @@ export class SubmissionUtils {
     return undefined;
   }
 
+  static sanatizePhoneNumber(phonenumber: string | undefined | null) {
+    if (!phonenumber) {
+      return undefined;
+    }
+    let sanatized = phonenumber;
+    sanatized = sanatized.replaceAll('-', ''); // Hypens
+    sanatized = sanatized.replaceAll(' ', ''); // Spaces
+    return sanatized;
+  }
+
 }
