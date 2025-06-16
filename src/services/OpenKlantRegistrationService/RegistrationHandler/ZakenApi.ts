@@ -1,7 +1,7 @@
-import { NotFoundError, ZgwApi, ZgwApiProps } from './ZgwApi';
 import { logger } from '../Shared/Logger';
 import { Rol, RolSchema } from '../Shared/model/Rol';
 import { Zaak, ZaakSchema } from '../Shared/model/Zaak';
+import { NotFoundError, ZgwApi, ZgwApiProps } from './ZgwApi';
 
 export interface IZakenApi {
   getRol(url: string): Promise<Rol>;
@@ -43,6 +43,10 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
   async updateRol(rol: Rol): Promise<Rol> {
     if (!rol.url) {
       throw Error('Cannot update a rol without URL');
+    }
+
+    if (!rol.contactpersoonRol?.naam || rol.contactpersoonRol.naam === "") {
+      throw Error('Cannot update a rol without naam in contactpersoonRol');
     }
 
     const originalRol = await this.getRol(rol.url);
