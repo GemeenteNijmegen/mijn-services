@@ -509,7 +509,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       debug: true,
     },
     openProductServices: {
-      image: 'maykinmedia/open-product:latest',
+      image: 'maykinmedia/open-product:1.2.0',
       logLevel: 'DEBUG',
       debug: true,
     },

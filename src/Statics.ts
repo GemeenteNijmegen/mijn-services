@@ -73,6 +73,7 @@ export class Statics {
     Statics.databaseObjects,
     Statics.databaseKeyCloak, // GZAC
     Statics.databaseGZAC, // GZAC
+    Statics.databaseOpenProduct
   ];
 
   // MARK: Environments
