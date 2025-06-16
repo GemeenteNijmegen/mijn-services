@@ -1,5 +1,3 @@
-import { debug } from 'console';
-import { LogLevel } from '@aws-lambda-powertools/logger';
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Environment } from 'aws-cdk-lib';
 import { Statics } from './Statics';
