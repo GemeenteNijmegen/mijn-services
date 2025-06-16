@@ -89,13 +89,12 @@ export class OpenProductService extends Construct {
       // Conectivity
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
 
-
       // Open notificaties specific stuff
-      SENDFILE_BACKEND: 'django_sendfile.backends.simple', // Django backend to download files
-      OPENPRODUCT_DOMAIN: trustedDomains[0],
-      OPENPRODUCT_ORGANIZATION: Statics.organization,
-      NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notificaties/api/v1/`, // TODO remove hardcoded path
-      OPENZAAK_NOTIF_CONFIG_ENABLE: 'True', // Enable the configuration setup for connecting to open-notificaties
+      //   SENDFILE_BACKEND: 'django_sendfile.backends.simple', // Django backend to download files
+      //   OPENPRODUCT_DOMAIN: trustedDomains[0],
+      //   OPENPRODUCT_ORGANIZATION: Statics.organization,
+      //   NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notificaties/api/v1/`, // TODO remove hardcoded path
+      //   OPENZAAK_NOTIF_CONFIG_ENABLE: 'True', // Enable the configuration setup for connecting to open-notificaties
 
       // Somehow this is required aswell...
     //   DEMO_CONFIG_ENABLE: 'False',
@@ -116,8 +115,8 @@ export class OpenProductService extends Construct {
       DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openProductCredentials, 'username'),
       DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.openProductCredentials, 'password'),
       DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openProductCredentials, 'email'),
-      OPENPRODUCT_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openProductCredentials, 'username'),
-      OPENPRODUCT_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openProductCredentials, 'email'),
+      // OPENPRODUCT_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openProductCredentials, 'username'),
+      // OPENPRODUCT_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openProductCredentials, 'email'),
 
     };
     return secrets;
