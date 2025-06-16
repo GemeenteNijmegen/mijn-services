@@ -23,6 +23,7 @@ export class Statics {
   static readonly _ssmOpenZaakCredentials = `/${Statics.projectName}/internal/open-zaak/credentials`;
   static readonly _ssmObjecttypesCredentials = `/${Statics.projectName}/internal/objecttypes/credentials`;
   static readonly _ssmObjectsCredentials = `/${Statics.projectName}/internal/objects/credentials`;
+  static readonly _ssmOpenProductCredentials = `/${Statics.projectName}/internal/open-product/credentials`;
   static readonly _ssmDatabaseArn = `/${Statics.projectName}/internal/database/arn`;
   static readonly _ssmDatabaseHostname = `/${Statics.projectName}/internal/database/hostname`;
   static readonly _ssmDatabasePort = `/${Statics.projectName}/internal/database/post`;
@@ -40,6 +41,7 @@ export class Statics {
   static readonly databaseObjects = 'objects';
   static readonly databaseKeyCloak = 'keycloak'; // GZAC Static
   static readonly databaseGZAC = 'gzac'; // GZAC Static
+  static readonly databaseOpenProduct = 'open-product';
 
   // MARK: Vulservice
   static readonly ssmHaalCentraalBRPBaseUrl = `/${Statics.projectName}/api/haalcentraalbrp/baseurl`;
