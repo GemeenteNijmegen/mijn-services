@@ -314,11 +314,8 @@ export class MainStack extends Stack {
       );
       return;
     }
-    for (const openKlantRegistrationService of this.configuration
-      .openKlantRegistrationServices) {
-      new OpenKlantRegistrationService(
-        this,
-        openKlantRegistrationService.cdkId,
+    for (const openKlantRegistrationService of this.configuration.openKlantRegistrationServices) {
+      new OpenKlantRegistrationService( this, openKlantRegistrationService.cdkId,
         {
           api: api.api,
           openKlantRegistrationServiceConfiguration:

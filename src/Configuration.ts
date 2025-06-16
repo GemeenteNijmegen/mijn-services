@@ -163,8 +163,7 @@ export interface OpenNotificatiesConfiguration {
 }
 
 export interface OpenZaakConfiguration
-  extends MainTaskSizeConfiguration,
-  CeleryTaskSizeConfiguration {
+  extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -521,11 +520,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         image: 'worthnl/notifynl-omc:1.15.3',
         debug: true,
         mode: 'Development',
-        openKlantUrl:
-          'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
-        notificatiesApiUrl:
-          'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
+        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'OMC',
@@ -549,11 +546,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         image: 'worthnl/notifynl-omc:1.15.3',
         debug: true,
         mode: 'Development',
-        openKlantUrl:
-          'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'openzaak.woweb.app/zaken/api/v1',
-        notificatiesApiUrl:
-          'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
+        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
         objectenApiUrl: 'mijn-services.accp.nijmegen.nl/objects/api/v2',
         objecttypenApiUrl: 'mijn-services.accp.nijmegen.nl/objecttypes/api/v2',
         zgwTokenInformation: {
@@ -591,8 +586,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'open-klant-registration-service-woweb',
         debug: true,
-        openKlantUrl:
-          'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://openzaak.woweb.app/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
@@ -624,8 +618,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'open-klant-registration-service-woweb',
         debug: false,
-        openKlantUrl:
-          'https://mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'https://mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://openzaak.nijmegen.cloud/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
@@ -643,11 +636,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         image: 'worthnl/notifynl-omc:1.15.3',
         debug: true,
         mode: 'Production',
-        openKlantUrl:
-          'mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'openzaak.nijmegen.cloud/zaken/api/v1',
-        notificatiesApiUrl:
-          'mijn-services.nijmegen.nl/open-notificaties/api/v1',
+        notificatiesApiUrl: 'mijn-services.nijmegen.nl/open-notificaties/api/v1',
         objectenApiUrl: 'mijn-services.nijmegen.nl/objects/api/v2',
         objecttypenApiUrl: 'mijn-services.nijmegen.nl/objecttypes/api/v2',
         zgwTokenInformation: {
