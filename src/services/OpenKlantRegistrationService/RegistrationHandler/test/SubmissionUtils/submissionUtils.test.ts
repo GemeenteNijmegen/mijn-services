@@ -62,10 +62,10 @@ describe('SubmissionUtils', () => {
   });
 
   test('Sanatize phone number', () => {
-    const test1 = '+31-12345667'
-    const test2 = '+31 12 34 56 - 67'
-    const test3 = '06-12345667'
-    const test4 = '0031612345667'
+    const test1 = '+31-12345667';
+    const test2 = '+31 12 34 56 - 67';
+    const test3 = '06-12345667';
+    const test4 = '0031612345667';
     const regex = /(0[8-9]00[0-9]{4,7})|(0[1-9][0-9]{8})|(\+[0-9]{9,20}|1400|140[0-9]{2,3})/; // See open-klant api docs
     expect(SubmissionUtils.sanatizePhoneNumber(test1)).toBe('+3112345667');
     expect(SubmissionUtils.sanatizePhoneNumber(test2)).toBe('+3112345667');
