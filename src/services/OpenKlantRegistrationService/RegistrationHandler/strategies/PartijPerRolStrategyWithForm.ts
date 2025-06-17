@@ -198,7 +198,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
   async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, submission: any, rol: Rol) {
 
     // Set values values
-    const phone = rol.contactpersoonRol?.telefoonnummer;
+    const phone = SubmissionUtils.sanatizePhoneNumber(rol.contactpersoonRol?.telefoonnummer);
     const email = rol.contactpersoonRol?.emailadres;
     let preference = 'email';
 
@@ -210,7 +210,7 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     }
 
     // Check if a phone number is valid using the following expression (used in open-klant)
-    const phonenumberRegex = /^(0[8-9]00[0-9]{4,7})|(0[1-9][0-9]{8})|(\+[0-9]{9,20}|1400|140[0-9]{2,3})$/;
+    const phonenumberRegex = /(0[8-9]00[0-9]{4,7})|(0[1-9][0-9]{8})|(\+[0-9]{9,20}|1400|140[0-9]{2,3})/;
 
     const isValidPhone = phone ? phonenumberRegex.test(phone) : false;
 

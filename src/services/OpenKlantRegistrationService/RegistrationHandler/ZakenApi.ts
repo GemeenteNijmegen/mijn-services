@@ -45,6 +45,10 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
       throw Error('Cannot update a rol without URL');
     }
 
+    if (!rol.contactpersoonRol?.naam || rol.contactpersoonRol.naam === '') {
+      throw Error('Cannot update a rol without naam in contactpersoonRol');
+    }
+
     const originalRol = await this.getRol(rol.url);
     let deleted = false;
     try {
