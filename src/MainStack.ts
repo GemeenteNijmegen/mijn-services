@@ -18,11 +18,12 @@ import { ObjecttypesService } from './services/Objecttypes';
 import { OpenKlantService } from './services/OpenKlant';
 import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationService/OpenKlantRegistrationService';
 import { OpenNotificatiesService } from './services/OpenNotificaties';
+import { OpenProductService } from './services/OpenProduct/OpenProduct';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
 
-interface MainStackProps extends StackProps, Configurable { }
+interface MainStackProps extends StackProps, Configurable {}
 
 /**
  * Main stack of this project
@@ -71,6 +72,7 @@ export class MainStack extends Stack {
     this.keyCloakService(api, platform);
     this.gzacService(api, platform);
     this.gzacFrontendService(api, platform);
+    this.openProductServices(api, platform);
   }
 
   private openKlantService(api: ApiGateway, platform: ContainerPlatform) {
@@ -313,15 +315,42 @@ export class MainStack extends Stack {
       return;
     }
     for (const openKlantRegistrationService of this.configuration.openKlantRegistrationServices) {
-      new OpenKlantRegistrationService(this, openKlantRegistrationService.cdkId, {
-        api: api.api,
-        openKlantRegistrationServiceConfiguration: openKlantRegistrationService,
-        criticality: this.configuration.criticality,
-        key: this.key,
-      });
+      new OpenKlantRegistrationService( this, openKlantRegistrationService.cdkId,
+        {
+          api: api.api,
+          openKlantRegistrationServiceConfiguration:
+            openKlantRegistrationService,
+          criticality: this.configuration.criticality,
+          key: this.key,
+        },
+      );
     }
   }
 
+  private openProductServices(api: ApiGateway, platform: ContainerPlatform) {
+    if (!this.configuration.openProductServices) {
+      console.warn('No openProduct configuration provided. Skipping creation!');
+      return;
+    }
+    new OpenProductService(this, 'open-product', {
+      hostedzone: this.hostedzone,
+      key: this.key,
+      cache: this.cache,
+      cacheDatabaseIndex: 11,
+      cacheDatabaseIndexCelery: 12,
+      alternativeDomainNames: this.configuration.alternativeDomainNames,
+      path: 'open-product',
+      service: {
+        api: api.api,
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      openProductConfiguration: this.configuration.openProductServices,
+    });
+  }
   private importHostedzone() {
     return HostedZone.fromHostedZoneAttributes(this, 'hostedzone', {
       hostedZoneId: StringParameter.valueForStringParameter(
