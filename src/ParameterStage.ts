@@ -43,6 +43,7 @@ export class ParameterStack extends Stack {
     this.addKeyCloakParameters();
     this.addGZACBackendParameters();
     // this.addGZACFrontendParameters();
+    this.addOpenProductParameters();
 
   }
 
