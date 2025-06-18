@@ -112,10 +112,14 @@ export interface Configuration {
    */
   keyCloackService?: KeyCloakConfiguration;
 
-
+  /**
+   * Config for services meant for acc only right now
+   */
   gzacService?: GZACConfiguration;
 
   gzacFrontendService?: GZACFrontendConfiguration;
+
+  openProductServices?: OpenProductServicesConfiguration;
 }
 
 export interface OpenKlantConfiguration {
@@ -158,7 +162,8 @@ export interface OpenNotificatiesConfiguration {
   persitNotifications?: boolean;
 }
 
-export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+export interface OpenZaakConfiguration
+  extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -339,10 +344,10 @@ export interface OpenKlantRegistrationServiceConfiguration {
    * See the README of this particular service for more information.
    */
   strategy:
-  | 'rolregistrationsinglepartij' // Convert the rol to a partij and store the partij id in the rol. Check if the partij exists and update digitale addressen (cannot be used in production)
-  | 'partijperrol' // Convert the rol to a partij en store the partij id in the rol. Uses a dummy partij identificatie to keep each partij unique and for easy removal later on.
-  | 'partijperroldry' // Without updating the rol in the Zaken api
-  | 'partijperrol-with-form'; // Get contactgegevens and preference from form instead of rol
+    | 'rolregistrationsinglepartij' // Convert the rol to a partij and store the partij id in the rol. Check if the partij exists and update digitale addressen (cannot be used in production)
+    | 'partijperrol' // Convert the rol to a partij en store the partij id in the rol. Uses a dummy partij identificatie to keep each partij unique and for easy removal later on.
+    | 'partijperroldry' // Without updating the rol in the Zaken api
+    | 'partijperrol-with-form'; // Get contactgegevens and preference from form instead of rol
   /**
    * Flag to enable processing of notifications
    */
@@ -398,6 +403,21 @@ export interface GZACConfiguration {
    * Usually includes the version number.
    */
   frontendImage: string;
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+}
+
+export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+  /**
+   * Open Product imagetag
+   */
+  image: string;
   /**
    * Log level for the container
    */
@@ -488,18 +508,21 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
+    openProductServices: {
+      image: 'maykinmedia/open-product:1.2.0',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
     outputManagementComponents: [
       {
         cdkId: 'local-omc',
         path: 'local-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.3',
+        image: 'worthnl/notifynl-omc:1.15.5',
         debug: true,
         mode: 'Development',
-        openKlantUrl:
-          'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
-        notificatiesApiUrl:
-          'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
+        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'OMC',
@@ -520,7 +543,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'woweb-omc',
         path: 'woweb-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.3',
+        image: 'worthnl/notifynl-omc:1.15.5',
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
@@ -563,8 +586,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'open-klant-registration-service-woweb',
         debug: true,
-        openKlantUrl:
-          'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://openzaak.woweb.app/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
@@ -596,8 +618,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'open-klant-registration-service-woweb',
         debug: false,
-        openKlantUrl:
-          'https://mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'https://mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://openzaak.nijmegen.cloud/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
@@ -612,7 +633,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'woweb-omc',
         path: 'woweb-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.3',
+        image: 'worthnl/notifynl-omc:1.15.5',
         debug: true,
         mode: 'Production',
         openKlantUrl: 'mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
@@ -627,7 +648,8 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           username: 'nijmegen_devops',
         },
         taakObjecttypeUuid: 'fa36dfdd-899c-4b40-92ad-6d5c0077748a', // Let op: gelijk getrokken met acceptatie
-        templates: { // IDs refer to templates in NotifyNL service: APV - Gemeente Nijmegen
+        templates: {
+          // IDs refer to templates in NotifyNL service: APV - Gemeente Nijmegen
           // zaakCreateEmail: '06ff0f61-a0a3-4ea5-a583-4106dac20c33',
           // zaakUpdateEmail: 'ff09a540-3a88-4f70-9717-11a6c0fac356',
           // zaakCloseEmail: '9582f057-acf4-4fe1-b856-0bfdb6e7e956',
