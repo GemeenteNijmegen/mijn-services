@@ -120,8 +120,8 @@ export class ObjectsService extends Construct {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
       volumes: [{ name: VOLUME_NAME }],
-      cpu: '512',
-      memoryMiB: '1024',
+      cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
+      memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
 
     // Main service container
@@ -217,6 +217,8 @@ export class ObjectsService extends Construct {
     ];
     const task = this.serviceFactory.createTaskDefinition('celery', {
       volumes: [{ name: VOLUME_NAME }],
+      cpu: this.props.serviceConfiguration.celeryTaskSize?.cpu ?? '256',
+      memoryMiB: this.props.serviceConfiguration.celeryTaskSize?.memory ?? '512',
     });
 
     const container = task.addContainer('celery', {

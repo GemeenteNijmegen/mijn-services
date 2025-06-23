@@ -122,7 +122,7 @@ export interface Configuration {
   openProductServices?: OpenProductServicesConfiguration;
 }
 
-export interface OpenKlantConfiguration {
+export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -138,7 +138,7 @@ export interface OpenKlantConfiguration {
   debug?: boolean;
 }
 
-export interface OpenNotificatiesConfiguration {
+export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -162,8 +162,7 @@ export interface OpenNotificatiesConfiguration {
   persitNotifications?: boolean;
 }
 
-export interface OpenZaakConfiguration
-  extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -186,7 +185,7 @@ export interface OpenZaakConfiguration
   apiVersion: string;
 }
 
-export interface ObjecttypesConfiguration {
+export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -202,7 +201,7 @@ export interface ObjecttypesConfiguration {
   debug?: boolean;
 }
 
-export interface ObjectsConfiguration {
+export interface ObjectsConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -344,10 +343,10 @@ export interface OpenKlantRegistrationServiceConfiguration {
    * See the README of this particular service for more information.
    */
   strategy:
-    | 'rolregistrationsinglepartij' // Convert the rol to a partij and store the partij id in the rol. Check if the partij exists and update digitale addressen (cannot be used in production)
-    | 'partijperrol' // Convert the rol to a partij en store the partij id in the rol. Uses a dummy partij identificatie to keep each partij unique and for easy removal later on.
-    | 'partijperroldry' // Without updating the rol in the Zaken api
-    | 'partijperrol-with-form'; // Get contactgegevens and preference from form instead of rol
+  | 'rolregistrationsinglepartij' // Convert the rol to a partij and store the partij id in the rol. Check if the partij exists and update digitale addressen (cannot be used in production)
+  | 'partijperrol' // Convert the rol to a partij en store the partij id in the rol. Uses a dummy partij identificatie to keep each partij unique and for easy removal later on.
+  | 'partijperroldry' // Without updating the rol in the Zaken api
+  | 'partijperrol-with-form'; // Get contactgegevens and preference from form instead of rol
   /**
    * Flag to enable processing of notifications
    */
@@ -691,6 +690,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       image: 'maykinmedia/objects-api:3.0.0',
       logLevel: 'INFO',
       debug: false,
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
   },
 };

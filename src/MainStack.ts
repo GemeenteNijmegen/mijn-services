@@ -23,7 +23,7 @@ import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
 
-interface MainStackProps extends StackProps, Configurable {}
+interface MainStackProps extends StackProps, Configurable { }
 
 /**
  * Main stack of this project
@@ -91,6 +91,7 @@ export class MainStack extends Stack {
       image: this.configuration.openklant.image,
       logLevel: this.configuration.openklant.logLevel,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
+      serviceConfiguration: this.configuration.openklant,
       path: 'open-klant',
       service: {
         api: api.api,
@@ -315,7 +316,7 @@ export class MainStack extends Stack {
       return;
     }
     for (const openKlantRegistrationService of this.configuration.openKlantRegistrationServices) {
-      new OpenKlantRegistrationService( this, openKlantRegistrationService.cdkId,
+      new OpenKlantRegistrationService(this, openKlantRegistrationService.cdkId,
         {
           api: api.api,
           openKlantRegistrationServiceConfiguration:

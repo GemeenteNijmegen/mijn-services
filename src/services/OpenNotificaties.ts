@@ -249,6 +249,8 @@ export class OpenNotificatiesService extends Construct {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
       volumes: [{ name: VOLUME_NAME }],
+      cpu: this.props.openNotificationsConfiguration.taskSize?.cpu ?? '256',
+      memoryMiB: this.props.openNotificationsConfiguration.taskSize?.memory ?? '512',
     });
 
     // Main service container
@@ -302,6 +304,8 @@ export class OpenNotificatiesService extends Construct {
     ];
     const task = this.serviceFactory.createTaskDefinition('celery', {
       volumes: [{ name: VOLUME_NAME }],
+      cpu: this.props.openNotificationsConfiguration.celeryTaskSize?.cpu ?? '256',
+      memoryMiB: this.props.openNotificationsConfiguration.celeryTaskSize?.memory ?? '512',
     });
     const celeryContainer = task.addContainer('celery', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
