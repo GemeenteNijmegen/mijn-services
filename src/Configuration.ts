@@ -693,7 +693,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       taskSize: {
         cpu: '512',
         memory: '1024',
-      }
+      },
     },
   },
 };
