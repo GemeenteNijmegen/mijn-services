@@ -10,6 +10,7 @@ import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { OpenKlantConfiguration } from '../Configuration';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
@@ -25,6 +26,7 @@ export interface OpenKlantServiceProps {
   hostedzone: IHostedZone;
   alternativeDomainNames?: string[];
   key: Key;
+  serviceConfiguration: OpenKlantConfiguration;
 }
 
 export class OpenKlantService extends Construct {
@@ -147,7 +149,10 @@ export class OpenKlantService extends Construct {
   }
 
   setupService() {
-    const task = this.serviceFactory.createTaskDefinition('main');
+    const task = this.serviceFactory.createTaskDefinition('main', {
+      cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
+      memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
+    });
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
@@ -187,6 +192,8 @@ export class OpenKlantService extends Construct {
     const VOLUME_NAME = 'temp';
     const task = this.serviceFactory.createTaskDefinition('celery', {
       volumes: [{ name: VOLUME_NAME }],
+      cpu: this.props.serviceConfiguration.celeryTaskSize?.cpu ?? '256',
+      memoryMiB: this.props.serviceConfiguration.celeryTaskSize?.memory ?? '512',
     });
 
     // Setup celery container

@@ -160,6 +160,8 @@ export class ObjecttypesService extends Construct {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
       volumes: [{ name: VOLUME_NAME }],
+      cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
+      memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
 
     // Main service container
