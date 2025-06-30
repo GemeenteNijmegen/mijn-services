@@ -149,6 +149,8 @@ export class OpenZaakService extends Construct {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
       volumes: [{ name: VOLUME_NAME }],
+      cpu: this.props.openZaakConfiguration.taskSize?.cpu ?? '256',
+      memoryMiB: this.props.openZaakConfiguration.taskSize?.memory ?? '512',
     });
 
     // 3th Main service container
@@ -255,6 +257,9 @@ export class OpenZaakService extends Construct {
     const VOLUME_NAME = 'temp';
     const task = this.serviceFactory.createTaskDefinition('celery', {
       volumes: [{ name: VOLUME_NAME }],
+      cpu: this.props.openZaakConfiguration.celeryTaskSize?.cpu ?? '256',
+      memoryMiB: this.props.openZaakConfiguration.celeryTaskSize?.memory ?? '512',
+
     });
 
     const container = task.addContainer('celery', {

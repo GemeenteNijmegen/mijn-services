@@ -3,7 +3,7 @@ import * as z from 'zod';
 export const SubmissionSchema = z.object({
   userId: z.string(),
   userType: z.enum([
-    'person', 'organization',
+    'person', 'organisation',
   ]),
   key: z.string(),
   formName: z.string(),

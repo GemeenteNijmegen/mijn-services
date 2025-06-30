@@ -43,6 +43,7 @@ export class ParameterStack extends Stack {
     this.addKeyCloakParameters();
     this.addGZACBackendParameters();
     // this.addGZACFrontendParameters();
+    this.addOpenProductParameters();
 
   }
 
@@ -218,4 +219,18 @@ export class ParameterStack extends Stack {
     });
   };
   // private addGZACFrontendParameters(){};
+  private addOpenProductParameters() {
+    new Secret(this, 'open-product-credentials', {
+      description: 'Credentials for the open product superuser',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: 'open-product',
+          email: 'devops@nijmegen.nl',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmOpenProductCredentials,
+    });
+  }
 }

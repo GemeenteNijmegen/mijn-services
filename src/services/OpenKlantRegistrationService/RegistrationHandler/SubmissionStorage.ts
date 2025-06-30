@@ -3,7 +3,7 @@ import { logger } from '../Shared/Logger';
 import { Submission, SubmissionSchema } from '../Shared/model/Submisison';
 
 export interface ISubmissionStorage {
-  getFormJson(reference: string, userId: string, userType: 'person' | 'organization'): Promise<Submission>;
+  getFormJson(reference: string, userId: string, userType: 'person' | 'organisation'): Promise<Submission>;
 }
 
 export class SubmissionStorage implements ISubmissionStorage {
@@ -31,7 +31,7 @@ export class SubmissionStorage implements ISubmissionStorage {
    * @param reference The form reference to retreive the submission
    * @returns
    */
-  async getFormJson(reference: string, userId: string, userType: 'person' | 'organization'): Promise<Submission> {
+  async getFormJson(reference: string, userId: string, userType: 'person' | 'organisation'): Promise<Submission> {
     const config = await this.getConfig();
     const url = `${config.endpoint}/${reference}?user_id=${userId}&user_type=${userType}&full_submission=true`;
     const formJson = await this.callApi('GET', url);

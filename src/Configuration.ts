@@ -112,13 +112,17 @@ export interface Configuration {
    */
   keyCloackService?: KeyCloakConfiguration;
 
-
+  /**
+   * Config for services meant for acc only right now
+   */
   gzacService?: GZACConfiguration;
 
   gzacFrontendService?: GZACFrontendConfiguration;
+
+  openProductServices?: OpenProductServicesConfiguration;
 }
 
-export interface OpenKlantConfiguration {
+export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -134,7 +138,7 @@ export interface OpenKlantConfiguration {
   debug?: boolean;
 }
 
-export interface OpenNotificatiesConfiguration {
+export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -158,7 +162,7 @@ export interface OpenNotificatiesConfiguration {
   persitNotifications?: boolean;
 }
 
-export interface OpenZaakConfiguration {
+export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -181,7 +185,7 @@ export interface OpenZaakConfiguration {
   apiVersion: string;
 }
 
-export interface ObjecttypesConfiguration {
+export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -197,7 +201,7 @@ export interface ObjecttypesConfiguration {
   debug?: boolean;
 }
 
-export interface ObjectsConfiguration {
+export interface ObjectsConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -408,6 +412,43 @@ export interface GZACConfiguration {
   debug?: boolean;
 }
 
+export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+  /**
+   * Open Product imagetag
+   */
+  image: string;
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+}
+
+export interface MainTaskSizeConfiguration {
+  /**
+   * Configure the task size for the main service
+   * @default - cdk defaults
+   */
+  taskSize?: {
+    cpu: string;
+    memory: string;
+  };
+}
+
+export interface CeleryTaskSizeConfiguration {
+  /**
+   * Configure the task size for the celery service
+   * @default - cdk defaults
+   */
+  celeryTaskSize?: {
+    cpu: string;
+    memory: string;
+  };
+}
+
 const EnvironmentConfigurations: { [key: string]: Configuration } = {
   acceptance: {
     branch: 'acceptance',
@@ -466,18 +507,21 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
+    openProductServices: {
+      image: 'maykinmedia/open-product:1.2.0',
+      logLevel: 'DEBUG',
+      debug: true,
+    },
     outputManagementComponents: [
       {
         cdkId: 'local-omc',
         path: 'local-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.3',
+        image: 'worthnl/notifynl-omc:1.15.5',
         debug: true,
         mode: 'Development',
-        openKlantUrl:
-          'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
-        notificatiesApiUrl:
-          'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
+        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'OMC',
@@ -498,7 +542,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'woweb-omc',
         path: 'woweb-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.3',
+        image: 'worthnl/notifynl-omc:1.15.5',
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
@@ -541,8 +585,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'open-klant-registration-service-woweb',
         debug: true,
-        openKlantUrl:
-          'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://openzaak.woweb.app/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
@@ -574,13 +617,11 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'open-klant-registration-service-woweb',
         debug: false,
-        openKlantUrl:
-          'https://mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
+        openKlantUrl: 'https://mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'https://openzaak.nijmegen.cloud/zaken/api/v1',
         path: '/open-klant-registration-service-woweb/callback',
         roltypesToRegister: ['initiator'],
-        strategy: 'partijperroldry', // Unique partij per rol (of zaak dus)
-        // TODO change from dryrun later (but do not yet write results back to openzaak)
+        strategy: 'partijperrol-with-form', // Unique partij per rol (of zaak dus)
         enabled: true,
         catalogiWhitelist: [
           '84f9e30d-8a3e-4ca0-8011-556ae3cbdd41', // VIP catalogus op productie
@@ -591,22 +632,23 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'woweb-omc',
         path: 'woweb-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.3',
+        image: 'worthnl/notifynl-omc:1.15.5',
         debug: true,
         mode: 'Production',
         openKlantUrl: 'mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
         zakenApiUrl: 'openzaak.nijmegen.cloud/zaken/api/v1',
-        notificatiesApiUrl: 'opennotificaties.nijmegen.cloud/api/v1',
-        objectenApiUrl: 'objects-api.nijmegen.cloud/api/v2',
-        objecttypenApiUrl: 'objecttypes-api.nijmegen.cloud/api/v2',
+        notificatiesApiUrl: 'mijn-services.nijmegen.nl/open-notificaties/api/v1',
+        objectenApiUrl: 'mijn-services.nijmegen.nl/objects/api/v2',
+        objecttypenApiUrl: 'mijn-services.nijmegen.nl/objecttypes/api/v2',
         zgwTokenInformation: {
           audience: '', // This must be empty for the token to start working... no clue as to why.
           issuer: 'nijmegen_devops',
           userId: 'nijmegen_devops',
           username: 'nijmegen_devops',
         },
-        taakObjecttypeUuid: 'bf3dbb29-5391-40e3-94a8-c662bedcd0f7',
-        templates: { // IDs refer to templates in NotifyNL service: APV - Gemeente Nijmegen
+        taakObjecttypeUuid: 'fa36dfdd-899c-4b40-92ad-6d5c0077748a', // Let op: gelijk getrokken met acceptatie
+        templates: {
+          // IDs refer to templates in NotifyNL service: APV - Gemeente Nijmegen
           // zaakCreateEmail: '06ff0f61-a0a3-4ea5-a583-4106dac20c33',
           // zaakUpdateEmail: 'ff09a540-3a88-4f70-9717-11a6c0fac356',
           // zaakCloseEmail: '9582f057-acf4-4fe1-b856-0bfdb6e7e956',
@@ -630,6 +672,14 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'INFO',
       debug: false,
       apiVersion: '1.3.1',
+      taskSize: {
+        cpu: '512',
+        memory: '2048',
+      },
+      celeryTaskSize: {
+        cpu: '512',
+        memory: '2048',
+      },
     },
     objecttypesService: {
       image: 'maykinmedia/objecttypes-api:3.0.0',
@@ -640,6 +690,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       image: 'maykinmedia/objects-api:3.0.0',
       logLevel: 'INFO',
       debug: false,
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
   },
 };

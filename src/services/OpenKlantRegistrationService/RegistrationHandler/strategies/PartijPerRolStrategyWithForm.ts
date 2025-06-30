@@ -87,24 +87,32 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     return;
   }
 
-  private async addDataToPartij(rol: Rol, notification: Notification) {
+  async addDataToPartij(rol: Rol, notification: Notification) {
     // Get the existing partij
     const partij = await this.configuration.openKlantApi.getPartij(rol.betrokkene!);
 
-    // Get the form reference
-    const zaak = await this.configuration.zakenApi.getZaak(notification.hoofdObject);
-    const reference = zaak._expand?.eigenschappen?.find(eigenschap => eigenschap.naam == 'formulier_referentie')?.waarde;
-    if (!reference) {
-      throw Error('Could not find form reference so no data can be transfered to open-klant.');
+    let form = undefined;
+
+    try {
+
+      // Get the form reference
+      const zaak = await this.configuration.zakenApi.getZaak(notification.hoofdObject);
+      const reference = zaak._expand?.eigenschappen?.find(eigenschap => eigenschap.naam == 'formulier_referentie')?.waarde;
+      if (!reference) {
+        throw Error('Could not find form reference so no data can be transfered to open-klant.');
+      }
+
+      // Get the form submission
+      const userType = rol.betrokkeneType == 'natuurlijk_persoon' ? 'person' : 'organisation';
+      const userId = userType == 'person' ? rol.betrokkeneIdentificatie.inpBsn : rol.betrokkeneIdentificatie.annIdentificatie;
+      form = await this.submissisonStorage.getFormJson(reference, userId!, userType);
+
+    } catch (error) {
+      logger.info('Could not load form, resuming anyway', { error });
     }
 
-    // The the form submission
-    const userType = rol.betrokkeneType == 'natuurlijk_persoon' ? 'person' : 'organization';
-    const userId = userType == 'person' ? rol.betrokkeneIdentificatie.inpBsn : rol.betrokkeneIdentificatie.annIdentificatie;
-    const form = await this.submissisonStorage.getFormJson(reference, userId!, userType!);
-
     // Based on the form contents add digital adresses
-    await this.setDigitaleAdressenForPartijFromRol(partij, form);
+    await this.setDigitaleAdressenForPartijFromRol(partij, form, rol);
   }
 
   private async createPartijAndUpdateRol(rol: Rol) {
@@ -187,17 +195,23 @@ export class PartijPerRolStrategyWithForm implements IRegistrationStrategy {
     return updatedRole;
   }
 
-  async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, submission: any) {
+  async setDigitaleAdressenForPartijFromRol(partij: OpenKlantPartijWithUuid, submission: any, rol: Rol) {
 
-    // First try to parse the form data from the submission
-    const form = JSON.parse(submission.submission.Message);
+    // Set values values
+    const phone = SubmissionUtils.sanatizePhoneNumber(rol.contactpersoonRol?.telefoonnummer);
+    const email = rol.contactpersoonRol?.emailadres;
+    let preference = 'email';
+
+    // First try to parse the form data from the submission and find a preference
+    if (submission) {
+      const form = JSON.parse(submission.submission.Message);
+      const formPreference = SubmissionUtils.findKanaalvoorkeur(form);
+      preference = formPreference ?? preference;
+    }
 
     // Check if a phone number is valid using the following expression (used in open-klant)
-    const phonenumberRegex = /^(0[8-9]00[0-9]{4,7})|(0[1-9][0-9]{8})|(\+[0-9]{9,20}|1400|140[0-9]{2,3})$/;
+    const phonenumberRegex = /(0[8-9]00[0-9]{4,7})|(0[1-9][0-9]{8})|(\+[0-9]{9,20}|1400|140[0-9]{2,3})/;
 
-    const phone = SubmissionUtils.findTelefoon(form);
-    const email = SubmissionUtils.findEmail(form);
-    const preference = SubmissionUtils.findKanaalvoorkeur(form);
     const isValidPhone = phone ? phonenumberRegex.test(phone) : false;
 
     if (phone && !isValidPhone) {

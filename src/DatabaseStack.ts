@@ -6,10 +6,11 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { Database } from './constructs/Database';
+import { CreateDatabasePerUserFunction } from './custom-resources/create-database-per-user/create-database-per-user-function';
 import { CreateDatabasesFunction } from './custom-resources/create-databases/create-databases-function';
 import { Statics } from './Statics';
 
-interface DatabaseStackProps extends StackProps, Configurable {}
+interface DatabaseStackProps extends StackProps, Configurable { }
 
 
 /**
@@ -35,6 +36,7 @@ export class DatabaseStack extends Stack {
     });
 
     if (props.configuration.databases) {
+      this.createDatabasePerUserIfNotExistent(props.configuration.databases);
       this.createRequiredDatabasesIfNotExistent(props.configuration.databases);
     }
 
@@ -75,6 +77,43 @@ export class DatabaseStack extends Stack {
     });
     resource.node.addDependency(this.database.db);
 
+
+  }
+
+  private createDatabasePerUserIfNotExistent(databases: string[]) {
+    const LIST_OF_DATABASES = databases.join(',');
+
+    const port = this.database.db.instanceEndpoint.port;
+    const hostname = this.database.db.instanceEndpoint.hostname;
+
+    const createDatabasePerUserFunction = new CreateDatabasePerUserFunction(this, 'database-per-user', {
+      vpc: this.vpc.vpc,
+      vpcSubnets: {
+        subnetType: SubnetType.PRIVATE_ISOLATED, // Make sure this is the same as the database
+      },
+      environment: {
+        LIST_OF_DATABASES,
+        DB_CREDENTIALS_ARN: this.credentials.secretArn,
+        DB_HOST: hostname,
+        DB_PORT: port.toString(),
+        DB_NAME: Statics.defaultDatabaseName,
+        BUMP: '1',
+      },
+    });
+    this.credentials.grantRead(createDatabasePerUserFunction);
+    this.database.db.connections.allowFrom(createDatabasePerUserFunction.connections, Port.tcp(port));
+
+    // Run the custom resources
+    const provider = new Provider(this, 'cr-provider-db-per-user', {
+      onEventHandler: createDatabasePerUserFunction,
+    });
+    const resource = new CustomResource(this, 'cr-db-per-user', {
+      serviceToken: provider.serviceToken,
+      properties: {
+        listOfDatabases: LIST_OF_DATABASES,
+      },
+    });
+    resource.node.addDependency(this.database.db);
 
   }
 

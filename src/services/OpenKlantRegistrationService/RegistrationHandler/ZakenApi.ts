@@ -45,10 +45,18 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
       throw Error('Cannot update a rol without URL');
     }
 
+    if (!rol.contactpersoonRol?.naam || rol.contactpersoonRol.naam === '') {
+      throw Error('Cannot update a rol without naam in contactpersoonRol');
+    }
+
     const originalRol = await this.getRol(rol.url);
+    let deleted = false;
     try {
+
       logger.debug('Updating rol');
       await this.delete(rol.url);
+      deleted = true;
+
       const response = await this.post(this.zakenApiUrl + '/rollen', {
         body: JSON.stringify({
           ...rol,
@@ -68,9 +76,16 @@ export class ZakenApi extends ZgwApi implements IZakenApi {
       }
       return RolSchema.parse(json);
     } catch (error) {
-      logger.error('ROL UPDATE FAILED'); // This is picked up by a critical level alarm
-      logger.error('Failed to delete and recreate rol! This is the original role:', { originalRol });
-      logger.error('Rol update failed', { error });
+
+      // If the rol was not deleted or the delete call failed, don't panic the rol still exists.
+      if (deleted) {
+        // If an error is thrown after the rol was deleted -> do panic!
+        logger.error('ROL UPDATE FAILED'); // This is picked up by a critical level alarm
+        logger.error('Failed to delete and recreate rol! This is the original role:', { originalRol });
+        logger.error('Rol update failed', { error });
+      } else {
+        logger.error('Failed to update rol (deletion failed)', { error });
+      }
       // Note: we use this to recover from failure manually thats why the original role is in the logs
       throw Error('Could not update rol');
     }
