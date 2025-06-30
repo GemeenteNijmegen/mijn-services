@@ -5,7 +5,7 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { Configurable, Configuration } from './Configuration';
+import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';

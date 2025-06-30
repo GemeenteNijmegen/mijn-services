@@ -4,7 +4,7 @@ import { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { FileSystem } from 'aws-cdk-lib/aws-efs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { Configurable } from './Configuration';
+import { Configurable } from './ConfigurationInterfaces';
 import { Statics } from './Statics';
 import { TransferServer } from './TransferServer';
 import { TransferUser } from './TransferUser';

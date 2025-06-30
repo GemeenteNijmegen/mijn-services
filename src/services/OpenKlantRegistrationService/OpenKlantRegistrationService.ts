@@ -11,7 +11,7 @@ import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { OpenKlantRegistrationServiceConfiguration } from '../../Configuration';
+import { OpenKlantRegistrationServiceConfiguration } from '../../ConfigurationInterfaces';
 import { Statics } from '../../Statics';
 import { ReceiverFunction } from './NotificationReceiver/receiver-function';
 import { RegistrationHandlerFunction } from './RegistrationHandler/registration-handler-function';

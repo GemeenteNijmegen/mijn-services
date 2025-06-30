@@ -4,7 +4,7 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
-import { OutputManagementComponentConfiguration } from '../Configuration';
+import { OutputManagementComponentConfiguration } from '../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { Statics } from '../Statics';
 

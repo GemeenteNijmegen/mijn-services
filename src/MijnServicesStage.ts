@@ -2,7 +2,7 @@ import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
 import { Aspects, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { BackupStack } from './BackupStack';
-import { Configurable } from './Configuration';
+import { Configurable } from './ConfigurationInterfaces';
 import { DatabaseStack } from './DatabaseStack';
 import { MainStack } from './MainStack';
 import { StorageStack } from './StorageStack';
