@@ -39,7 +39,7 @@ export class LoadBalancer extends Construct {
     return httpsListener;
   }
 
-  attachECSService(service: FargateService, domain: string, priority?: number) {
+  attachECSService(id: string, service: FargateService, domain: string, priority?: number) {
     const listenerProps = {
       port: 80,
       targets: [service],
@@ -60,7 +60,7 @@ export class LoadBalancer extends Construct {
       deregistrationDelay: Duration.minutes(1),
     };
     console.debug(listenerProps);
-    this.listener.addTargets(`${service.node.id}-ecs-target`, listenerProps);
+    this.listener.addTargets(id, listenerProps);
     this.priority += 1;
   }
 }
