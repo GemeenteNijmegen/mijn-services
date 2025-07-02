@@ -39,12 +39,12 @@ export class LoadBalancer extends Construct {
     return httpsListener;
   }
 
-  attachECSService(service: FargateService, domain: string, priority?: number) {
+  attachECSService(service: FargateService, path: string, priority?: number) {
     const listenerProps = {
       port: 80,
       targets: [service],
       conditions: [
-        ListenerCondition.hostHeaders([`${domain}`]),
+        ListenerCondition.pathPatterns([path])
       ],
       priority: priority ?? this.priority,
       healthCheck: {
