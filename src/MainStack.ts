@@ -162,7 +162,7 @@ export class MainStack extends Stack {
       },
       openZaakConfiguration: this.configuration.openZaak,
     });
-    platform.addServiceToLoadBalancer(service.service, `${this.hostedzone}/${path}`);
+    platform.addServiceToLoadBalancer(service.service, `${this.hostedzone.zoneName}/${path}`);
   }
 
   private outputManagementComponent(

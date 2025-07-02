@@ -55,6 +55,6 @@ export class ContainerPlatform extends Construct {
   }
 
   addServiceToLoadBalancer(service: FargateService, domain: string) {
-    this.loadbalancer.attachECSService('openzaak-target', service, domain);
+    this.loadbalancer.attachECSService(service, domain);
   }
 }
