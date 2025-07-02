@@ -1,6 +1,6 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { EcsTask } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
@@ -40,6 +40,8 @@ export class OpenZaakService extends Construct {
   private readonly clientCredentialsNotificationsZaak: ISecret;
   private readonly clientCredentialsZaakNotifications: ISecret;
 
+  readonly service: FargateService;
+
   constructor(scope: Construct, id: string, props: OpenZaakServiceProps) {
     super(scope, id);
     this.props = props;
@@ -58,7 +60,7 @@ export class OpenZaakService extends Construct {
     });
 
     this.setupConfigurationService();
-    this.setupService();
+    this.service = this.setupService();
     this.setupCeleryService();
   }
 

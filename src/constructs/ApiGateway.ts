@@ -28,6 +28,7 @@ export interface ApiGatewayProps {
 export class ApiGateway extends Construct {
 
   readonly api: HttpApi;
+  readonly certificate: Certificate;
 
   constructor(scope: Construct, id: string, props: ApiGatewayProps) {
     super(scope, id);
@@ -38,6 +39,7 @@ export class ApiGateway extends Construct {
       validation: validation,
       subjectAlternativeNames: props.alternativeDomainNames,
     });
+    this.certificate = cert;
 
     const domain = new DomainName(this, 'domain', {
       certificate: cert,

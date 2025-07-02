@@ -60,7 +60,9 @@ export class MainStack extends Stack {
 
     const platform = new ContainerPlatform(this, 'containers', {
       vpc: this.vpc.vpc,
+      certificate: api.certificate,
     });
+
 
     this.openKlantService(api, platform);
     this.openNotificatiesServices(api, platform);
@@ -141,7 +143,8 @@ export class MainStack extends Stack {
       );
       return;
     }
-    new OpenZaakService(this, 'open-zaak', {
+    const path = 'open-zaak';
+    const service = new OpenZaakService(this, 'open-zaak', {
       hostedzone: this.hostedzone,
       key: this.key,
       cache: this.cache,
@@ -159,6 +162,7 @@ export class MainStack extends Stack {
       },
       openZaakConfiguration: this.configuration.openZaak,
     });
+    platform.addServiceToLoadBalancer(service.service, `${this.hostedzone}/${path}`);
   }
 
   private outputManagementComponent(

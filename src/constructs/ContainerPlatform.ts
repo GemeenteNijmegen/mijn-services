@@ -1,14 +1,18 @@
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Cluster } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, FargateService } from 'aws-cdk-lib/aws-ecs';
+import { IListenerCertificate } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
+import { LoadBalancer } from './LoadBalancer';
 
 export interface ContainerPlatformProps {
   /**
    * The VPC to place the redis instance in.
    */
   vpc: IVpc;
+
+  certificate: IListenerCertificate;
 }
 
 export class ContainerPlatform extends Construct {
@@ -17,6 +21,8 @@ export class ContainerPlatform extends Construct {
   readonly vpcLink: VpcLink;
   readonly vpcLinkSecurityGroup: SecurityGroup;
   readonly namespace: PrivateDnsNamespace;
+
+  private loadbalancer: LoadBalancer;
 
   constructor(scope: Construct, id: string, props: ContainerPlatformProps) {
     super(scope, id);
@@ -41,6 +47,14 @@ export class ContainerPlatform extends Construct {
       vpc: props.vpc,
     });
 
+    this.loadbalancer = new LoadBalancer(this, 'lb', {
+      vpc: props.vpc,
+      securityGroup: this.vpcLinkSecurityGroup,
+      certificate: props.certificate,
+    });
   }
 
+  addServiceToLoadBalancer(service: FargateService, domain: string) {
+    this.loadbalancer.attachECSService(service, domain);
+  }
 }
