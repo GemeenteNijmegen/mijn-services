@@ -28,7 +28,7 @@ export class LoadBalancer extends Construct {
   createListener(certificate: IListenerCertificate) {
     const httpsListener = this.alb.addListener('listener', {
       port: 443,
-      certificates: [certificate],
+      // certificates: [certificate],
       open: true,
       defaultAction: ListenerAction.fixedResponse(404, {
         contentType: 'text/plain',
@@ -44,7 +44,7 @@ export class LoadBalancer extends Construct {
       port: 80,
       targets: [service],
       conditions: [
-        ListenerCondition.pathPatterns([path])
+        ListenerCondition.pathPatterns([path]),
       ],
       priority: priority ?? this.priority,
       healthCheck: {
