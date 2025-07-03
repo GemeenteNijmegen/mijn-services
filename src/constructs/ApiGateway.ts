@@ -54,10 +54,10 @@ export class ApiGateway extends Construct {
       },
     });
 
-    new ARecord(this, 'a', {
-      target: RecordTarget.fromAlias(new ApiGatewayv2DomainProperties(domain.regionalDomainName, domain.regionalHostedZoneId)),
-      zone: props.hostedzone,
-    });
+    // new ARecord(this, 'a', {
+    //   target: RecordTarget.fromAlias(new ApiGatewayv2DomainProperties(domain.regionalDomainName, domain.regionalHostedZoneId)),
+    //   zone: props.hostedzone,
+    // });
 
     for (const alternativeDomainName of props.alternativeDomainNames ?? []) {
       const hash = createHash('sha256').update(alternativeDomainName).digest('base64').substring(0, 5);

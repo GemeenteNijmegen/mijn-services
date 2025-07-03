@@ -2,12 +2,15 @@ import { StackProps, Duration } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { FargateService } from 'aws-cdk-lib/aws-ecs';
 import { IListenerCertificate, ApplicationLoadBalancer, ApplicationListener, ListenerAction, ListenerCondition, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
+import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Construct } from 'constructs';
 
 interface LoadBalancerProps extends StackProps {
   vpc: IVpc;
   securityGroup: SecurityGroup;
   certificate: IListenerCertificate;
+  hostedZone: IHostedZone;
 }
 export class LoadBalancer extends Construct {
   public alb: ApplicationLoadBalancer;
@@ -22,13 +25,26 @@ export class LoadBalancer extends Construct {
       internetFacing: true,
       securityGroup: props.securityGroup,
     });
+
+    this.addDnsRecords();
     this.listener = this.createListener(props.certificate);
+  }
+
+  private addDnsRecords() {
+    new ARecord(this, 'a-record', {
+      target: RecordTarget.fromAlias(new LoadBalancerTarget(this.alb)),
+      zone: this.props.hostedZone,
+    });
+    new AaaaRecord(this, 'aaaa', {
+      target: RecordTarget.fromAlias(new LoadBalancerTarget(this.alb)),
+      zone: this.props.hostedZone,
+    });
   }
 
   createListener(certificate: IListenerCertificate) {
     const httpsListener = this.alb.addListener('listener', {
       port: 443,
-      // certificates: [certificate],
+      certificates: [certificate],
       open: true,
       defaultAction: ListenerAction.fixedResponse(404, {
         contentType: 'text/plain',

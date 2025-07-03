@@ -2,6 +2,7 @@ import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, FargateService } from 'aws-cdk-lib/aws-ecs';
 import { IListenerCertificate } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 import { LoadBalancer } from './LoadBalancer';
@@ -13,6 +14,8 @@ export interface ContainerPlatformProps {
   vpc: IVpc;
 
   certificate: IListenerCertificate;
+
+  hostedZone: IHostedZone;
 }
 
 export class ContainerPlatform extends Construct {
@@ -51,10 +54,11 @@ export class ContainerPlatform extends Construct {
       vpc: props.vpc,
       securityGroup: this.vpcLinkSecurityGroup,
       certificate: props.certificate,
+      hostedZone: props.hostedZone,
     });
   }
 
-  addServiceToLoadBalancer(service: FargateService, domain: string) {
-    this.loadbalancer.attachECSService(service, domain);
+  addServiceToLoadBalancer(service: FargateService, path: string) {
+    this.loadbalancer.attachECSService(service, path);
   }
 }
