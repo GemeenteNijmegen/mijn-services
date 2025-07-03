@@ -59,14 +59,14 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@aws-lambda-powertools/batch": "^2.22.0",
-    "@aws-lambda-powertools/idempotency": "^2.22.0",
-    "@aws-lambda-powertools/logger": "^2.22.0",
-    "@aws-lambda-powertools/tracer": "^2.22.0",
+    "@aws-lambda-powertools/batch": "^2.23.0",
+    "@aws-lambda-powertools/idempotency": "^2.23.0",
+    "@aws-lambda-powertools/logger": "^2.23.0",
+    "@aws-lambda-powertools/tracer": "^2.23.0",
     "@aws-sdk/client-dynamodb": "^3.840.0",
     "@aws-sdk/client-sqs": "^3.840.0",
     "@gemeentenijmegen/apigateway-http": "^0.0.27",
-    "@gemeentenijmegen/aws-constructs": "^0.0.37",
+    "@gemeentenijmegen/aws-constructs": "^0.0.38",
     "@gemeentenijmegen/utils": "^0.0.33",
     "@middy/core": "^6.3.2",
     "@types/aws-lambda": "^8.10.150",
@@ -76,7 +76,7 @@
     "dotenv": "^16.6.1",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3",
-    "zod": "^3.25.67"
+    "zod": "^3.25.69"
   },
   "license": "EUPL-1.2",
   "publishConfig": {
