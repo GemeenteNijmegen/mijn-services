@@ -1,11 +1,11 @@
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, FargateService } from 'aws-cdk-lib/aws-ecs';
-import { IListenerCertificate } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { ApplicationLoadBalancer, IListenerCertificate } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
-import { LoadBalancer } from './LoadBalancer';
+import { ServiceLoadBalancer } from './LoadBalancer';
 
 export interface ContainerPlatformProps {
   /**
@@ -24,8 +24,7 @@ export class ContainerPlatform extends Construct {
   readonly vpcLink: VpcLink;
   readonly vpcLinkSecurityGroup: SecurityGroup;
   readonly namespace: PrivateDnsNamespace;
-
-  private loadbalancer: LoadBalancer;
+  readonly loadBalancer: ServiceLoadBalancer;
 
   constructor(scope: Construct, id: string, props: ContainerPlatformProps) {
     super(scope, id);
@@ -50,15 +49,16 @@ export class ContainerPlatform extends Construct {
       vpc: props.vpc,
     });
 
-    this.loadbalancer = new LoadBalancer(this, 'lb', {
+    const serviceLoadBalancer = new ServiceLoadBalancer(this, 'lb', {
       vpc: props.vpc,
-      securityGroup: this.vpcLinkSecurityGroup,
       certificate: props.certificate,
       hostedZone: props.hostedZone,
     });
+
+    this.loadBalancer = serviceLoadBalancer;
   }
 
   addServiceToLoadBalancer(service: FargateService, path: string) {
-    this.loadbalancer.attachECSService(service, path);
+    this.loadBalancer.attachECSService(service, path);
   }
 }

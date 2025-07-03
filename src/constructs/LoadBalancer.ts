@@ -8,11 +8,11 @@ import { Construct } from 'constructs';
 
 interface LoadBalancerProps extends StackProps {
   vpc: IVpc;
-  securityGroup: SecurityGroup;
   certificate: IListenerCertificate;
   hostedZone: IHostedZone;
 }
-export class LoadBalancer extends Construct {
+
+export class ServiceLoadBalancer extends Construct {
   public alb: ApplicationLoadBalancer;
   private listener: ApplicationListener;
   private priority: number = 1;
@@ -23,7 +23,6 @@ export class LoadBalancer extends Construct {
     this.alb = new ApplicationLoadBalancer(this, 'alb', {
       vpc: props.vpc,
       internetFacing: true,
-      securityGroup: props.securityGroup,
     });
 
     this.addDnsRecords();

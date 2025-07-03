@@ -5,6 +5,7 @@ import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem, IFileSystem } from 'aws-cdk-lib/aws-efs';
+import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -17,6 +18,7 @@ export interface EcsServiceFactoryProps {
   cluster: Cluster;
   api: HttpApi;
   namespace: PrivateDnsNamespace;
+  loadbalancer?: ApplicationLoadBalancer;
   vpcLinkSecurityGroup: SecurityGroup;
   port: number;
 }

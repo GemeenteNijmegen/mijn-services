@@ -328,6 +328,15 @@ export class OpenZaakService extends Construct {
         cacheSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(cachePort)));
       });
     });
+
+
+    serviceSecurityGroups.forEach(serviceSecurityGroup => {
+      if (this.props.service.loadbalancer) {
+        this.props.service.loadbalancer.connections.securityGroups.forEach(securityGroup => {
+          serviceSecurityGroup.addIngressRule(securityGroup, Port.tcp(this.props.service.port));
+        });
+      }
+    });
   }
 
   private allowAccessToSecrets(role: IRole) {
