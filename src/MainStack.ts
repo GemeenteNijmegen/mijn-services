@@ -164,7 +164,7 @@ export class MainStack extends Stack {
       },
       openZaakConfiguration: this.configuration.openZaak,
     });
-    platform.addServiceToLoadBalancer(service.service, path);
+    platform.addServiceToLoadBalancer(service.service, `/${path}*`);
   }
 
   private outputManagementComponent(
