@@ -199,6 +199,7 @@ export class OMCService extends Construct {
       id: 'main',
       task: task,
       path: this.props.omcConfiguration.path,
+      healthCheckPath: '/swagger/index.html',
       requestParameters: {
         'overwrite:path': '/$request.path.proxy', // Remove the /omc-vrijbrp part from the path before forwarding to the integration
       },

@@ -1,7 +1,7 @@
 import { StackProps, Duration } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { FargateService } from 'aws-cdk-lib/aws-ecs';
-import { IListenerCertificate, ApplicationLoadBalancer, ApplicationListener, ListenerAction, ListenerCondition, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { IListenerCertificate, ApplicationLoadBalancer, ApplicationListener, ListenerAction, ListenerCondition, Protocol, AddApplicationTargetsProps } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Construct } from 'constructs';
@@ -54,7 +54,7 @@ export class ServiceLoadBalancer extends Construct {
     return httpsListener;
   }
 
-  attachECSService(service: FargateService, path: string, priority?: number) {
+  attachECSService(service: FargateService, path: string, priority?: number, props?: AddApplicationTargetsProps) {
     const listenerProps = {
       port: 80,
       targets: [service],
@@ -75,7 +75,7 @@ export class ServiceLoadBalancer extends Construct {
       deregistrationDelay: Duration.minutes(1),
     };
     console.debug(listenerProps);
-    this.listener.addTargets(`${path}-target`, listenerProps);
+    this.listener.addTargets(`${path}-target`, { ...listenerProps, ...props });
     this.priority += 1;
   }
 }

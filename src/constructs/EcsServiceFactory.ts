@@ -5,7 +5,7 @@ import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem, IFileSystem } from 'aws-cdk-lib/aws-efs';
-import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { ApplicationLoadBalancer, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -51,6 +51,12 @@ export interface CreateEcsServiceOptions {
    * @default - No integration, route and servicediscovery are created
    */
   path?: string;
+
+  /**
+   * HealthCheckPath is used instead of the root path if provided for
+   * loadbalancer health checks
+   */
+  healthCheckPath?: string;
 
 
   /**
@@ -130,7 +136,7 @@ export class EcsServiceFactory {
 
     if (options.path || options.isRootPath) {
       service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
-      this.addRoute(service, options.path ?? '', options.id, options.requestParameters, options.apiVersionHeaderValue, options.isRootPath);
+      this.addRoute(service, options.path ?? '', options.id, options.requestParameters, options.apiVersionHeaderValue, options.isRootPath, options.healthCheckPath);
     }
     if (options.volumeMounts) {
       this.createVolumes(service, options.id, options.volumeMounts);
@@ -289,8 +295,25 @@ export class EcsServiceFactory {
       string>,
     apiVersionHeaderValue?: string,
     isRootPath?: boolean,
+    healthCheckPath?: string,
   ) {
-    this.props.loadbalancer.attachECSService(service, `/${path}*`);
+    let props = undefined;
+
+    if (healthCheckPath) {
+      props = {
+        healthCheck: {
+          enabled: true,
+          path: healthCheckPath,
+          healthyHttpCodes: '200',
+          healthyThresholdCount: 2,
+          unhealthyThresholdCount: 6,
+          timeout: Duration.seconds(10),
+          interval: Duration.seconds(15),
+          protocol: Protocol.HTTP,
+        },
+      };
+    }
+    this.props.loadbalancer.attachECSService(service, `/${path}*`, undefined, props);
 
     if (!service.cloudMapService) {
       throw Error('Cannot add route if ther\'s no cloudmap service configured');
