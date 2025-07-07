@@ -57,8 +57,4 @@ export class ContainerPlatform extends Construct {
 
     this.loadBalancer = serviceLoadBalancer;
   }
-
-  addServiceToLoadBalancer(service: FargateService, path: string) {
-    this.loadBalancer.attachECSService(service, path);
-  }
 }

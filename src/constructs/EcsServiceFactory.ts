@@ -11,14 +11,15 @@ import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicedisco
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { Statics } from '../Statics';
+import { ServiceLoadBalancer } from './LoadBalancer';
 
 
 export interface EcsServiceFactoryProps {
   link: VpcLink;
   cluster: Cluster;
   api: HttpApi;
+  loadbalancer: ServiceLoadBalancer;
   namespace: PrivateDnsNamespace;
-  loadbalancer?: ApplicationLoadBalancer;
   vpcLinkSecurityGroup: SecurityGroup;
   port: number;
 }
@@ -289,6 +290,8 @@ export class EcsServiceFactory {
     apiVersionHeaderValue?: string,
     isRootPath?: boolean,
   ) {
+    this.props.loadbalancer.attachECSService(service, `/${path}*`);
+
     if (!service.cloudMapService) {
       throw Error('Cannot add route if ther\'s no cloudmap service configured');
     }

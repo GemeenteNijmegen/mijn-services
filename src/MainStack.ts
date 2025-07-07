@@ -101,6 +101,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -130,6 +131,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -144,8 +146,7 @@ export class MainStack extends Stack {
       );
       return;
     }
-    const path = 'open-zaak';
-    const service = new OpenZaakService(this, 'open-zaak', {
+    new OpenZaakService(this, 'open-zaak', {
       hostedzone: this.hostedzone,
       key: this.key,
       cache: this.cache,
@@ -158,13 +159,12 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
-        loadbalancer: platform.loadBalancer.alb,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       openZaakConfiguration: this.configuration.openZaak,
     });
-    platform.addServiceToLoadBalancer(service.service, `/${path}*`);
   }
 
   private outputManagementComponent(
@@ -184,6 +184,7 @@ export class MainStack extends Stack {
           cluster: platform.cluster,
           link: platform.vpcLink,
           namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
           port: 8080,
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
@@ -211,6 +212,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -238,6 +240,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -261,6 +264,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -283,6 +287,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -307,6 +312,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -352,6 +358,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
