@@ -75,7 +75,7 @@ export class ServiceLoadBalancer extends Construct {
       deregistrationDelay: Duration.minutes(1),
     };
     console.debug(listenerProps);
-    this.listener.addTargets(`${service.node.id}-target`, listenerProps);
+    this.listener.addTargets(`${path}-target`, listenerProps);
     this.priority += 1;
   }
 }

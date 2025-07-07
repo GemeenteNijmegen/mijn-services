@@ -332,7 +332,7 @@ export class OpenZaakService extends Construct {
 
     serviceSecurityGroups.forEach(serviceSecurityGroup => {
       if (this.props.service.loadbalancer) {
-        this.props.service.loadbalancer.connections.securityGroups.forEach(securityGroup => {
+        this.props.service.loadbalancer.alb.connections.securityGroups.forEach(securityGroup => {
           serviceSecurityGroup.addIngressRule(securityGroup, Port.tcp(this.props.service.port));
         });
       }
