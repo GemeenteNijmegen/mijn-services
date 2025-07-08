@@ -47,7 +47,7 @@
     "aws-cdk": "^2",
     "aws-sdk-client-mock": "^4.1.0",
     "commit-and-tag-version": "^12",
-    "esbuild": "^0.25.5",
+    "esbuild": "^0.25.6",
     "eslint": "^9",
     "eslint-import-resolver-typescript": "^3.10.1",
     "eslint-plugin-import": "^2.32.0",
@@ -66,7 +66,7 @@
     "@aws-sdk/client-dynamodb": "^3.840.0",
     "@aws-sdk/client-sqs": "^3.840.0",
     "@gemeentenijmegen/apigateway-http": "^0.0.27",
-    "@gemeentenijmegen/aws-constructs": "^0.0.38",
+    "@gemeentenijmegen/aws-constructs": "^0.0.39",
     "@gemeentenijmegen/utils": "^0.0.33",
     "@middy/core": "^6.3.2",
     "@types/aws-lambda": "^8.10.150",
@@ -76,7 +76,7 @@
     "dotenv": "^16.6.1",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3",
-    "zod": "^3.25.74"
+    "zod": "^3.25.75"
   },
   "license": "EUPL-1.2",
   "publishConfig": {
