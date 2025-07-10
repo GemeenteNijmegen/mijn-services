@@ -1,6 +1,6 @@
+import { aws_cloudfront_origins } from 'aws-cdk-lib';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Distribution, ViewerProtocolPolicy, PriceClass } from 'aws-cdk-lib/aws-cloudfront';
-import { aws_cloudfront_origins } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 

@@ -5,6 +5,7 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { CloudfrontDistributionForLoadBalancer } from './CloudfrontDistributionForLoadBalancer';
 import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
@@ -22,7 +23,6 @@ import { OpenProductService } from './services/OpenProduct/OpenProduct';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
-import { CloudfrontDistributionForLoadBalancer } from './CloudfrontDistributionForLoadBalancer';
 
 interface MainStackProps extends StackProps, Configurable { }
 
