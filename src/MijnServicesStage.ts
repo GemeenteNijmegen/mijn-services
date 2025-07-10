@@ -18,6 +18,7 @@ export class MijnServicesStage extends Stage {
 
     if(props?.env?.region) {
       new UsEastCertificateStack(this, 'certificate', { 
+        env: { region: 'us-east-1' },
         mainRegion: props.env.region,
       });
     }
