@@ -1,4 +1,5 @@
 import {
+  Duration,
   aws_ssm as SSM, Stack,
   StackProps,
 } from 'aws-cdk-lib';
@@ -29,12 +30,14 @@ export class UsEastCertificateStack extends Stack {
     const zoneParams = new RemoteParameters(scope, 'zone-params', {
       path: Statics.ssmAccountRootHostedZonePath,
       region: fromRegion,
+      timeout: Duration.seconds(10),
     });
     return HostedZone.fromHostedZoneAttributes(scope, 'zone', {
       hostedZoneId: zoneParams.get(Statics.ssmAccountRootHostedZoneId),
       zoneName: zoneParams.get(Statics.ssmAccountRootHostedZoneName),
     });
   }
+
   createCertificate(hostedZone: IHostedZone, alternativeDomainNames?: string[]) {
     const validation = alternativeDomainNames ? CertificateValidation.fromDns() : CertificateValidation.fromDns(hostedZone);
     const cert = new Certificate(this, 'certificate', {
