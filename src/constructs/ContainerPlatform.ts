@@ -1,7 +1,7 @@
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, FargateService } from 'aws-cdk-lib/aws-ecs';
-import { ApplicationLoadBalancer, IListenerCertificate } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { Cluster } from 'aws-cdk-lib/aws-ecs';
+import { IListenerCertificate } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';

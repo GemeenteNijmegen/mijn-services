@@ -22,6 +22,7 @@ import { OpenProductService } from './services/OpenProduct/OpenProduct';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
+import { CloudfrontDistributionForLoadBalancer } from './CloudfrontDistributionForLoadBalancer';
 
 interface MainStackProps extends StackProps, Configurable { }
 
@@ -64,6 +65,15 @@ export class MainStack extends Stack {
       hostedZone: this.hostedzone,
     });
 
+    const domains = [this.hostedzone.zoneName];
+    if (props.configuration.alternativeDomainNames) {
+      domains.push( ...props.configuration.alternativeDomainNames);
+    }
+    new CloudfrontDistributionForLoadBalancer(this, 'distribution', {
+      certificate: api.certificate,
+      domains,
+      loadbalancer: platform.loadBalancer.alb,
+    });
 
     this.openKlantService(api, platform);
     this.openNotificatiesServices(api, platform);
@@ -412,3 +422,5 @@ export class MainStack extends Stack {
     return key;
   }
 }
+
+
