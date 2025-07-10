@@ -2,11 +2,11 @@ import {
   aws_ssm as SSM, Stack,
   StackProps,
 } from 'aws-cdk-lib';
+import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
+import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
 import { Statics } from './Statics';
-import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
-import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
-import { RemoteParameters } from 'cdk-remote-stack';
 
 export interface UsEastCertificateStackProps extends StackProps {
   mainRegion: string;
@@ -24,7 +24,7 @@ export class UsEastCertificateStack extends Stack {
     const hostedZone = this.importProjectHostedZone(this, props.mainRegion);
     this.createCertificate(hostedZone, props.alternativeDomainNames);
   }
-  
+
   private importProjectHostedZone(scope: Construct, fromRegion: string) {
     const zoneParams = new RemoteParameters(scope, 'zone-params', {
       path: Statics.ssmAccountRootHostedZonePath,
@@ -48,7 +48,6 @@ export class UsEastCertificateStack extends Stack {
       parameterName: Statics.ssmCertificateArn,
     });
 
-  
 
-}
+  }
 }
