@@ -16,8 +16,8 @@ export class MijnServicesStage extends Stage {
     super(scope, id, props);
     Aspects.of(this).add(new PermissionsBoundaryAspect());
 
-    if(props?.env?.region) {
-      new UsEastCertificateStack(this, 'certificate', { 
+    if (props?.env?.region) {
+      new UsEastCertificateStack(this, 'certificate', {
         env: { region: 'us-east-1' },
         mainRegion: props.env.region,
       });
