@@ -6,6 +6,7 @@ import { Configurable } from './ConfigurationInterfaces';
 import { DatabaseStack } from './DatabaseStack';
 import { MainStack } from './MainStack';
 import { StorageStack } from './StorageStack';
+import { UsEastCertificateStack } from './UsEastStack';
 
 interface MijnServicesStageProps extends StageProps, Configurable {}
 
@@ -14,6 +15,12 @@ export class MijnServicesStage extends Stage {
   constructor(scope: Construct, id: string, props: MijnServicesStageProps) {
     super(scope, id, props);
     Aspects.of(this).add(new PermissionsBoundaryAspect());
+
+    if(props?.env?.region) {
+      new UsEastCertificateStack(this, 'certificate', { 
+        mainRegion: props.env.region,
+      });
+    }
 
     const backupStack = new BackupStack(this, 'backup-stack', {
       env: props.configuration.deploymentEnvironment,
