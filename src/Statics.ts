@@ -4,7 +4,8 @@ export class Statics {
   static readonly organization = 'GemeenteNijmegen';
 
   // MARK: SSM Parameters
-  static readonly ssmDummyParameter = `/${Statics.projectName}/dummy/parameter`;
+  static readonly ssmCertificatePath = `/${Statics.projectName}/certificate`;
+  static readonly ssmCertificateArn = `/${Statics.projectName}/certificate/arn`;
 
   // Managed in dns-managment project:
   // Below references the new hosted zone separeted from webformulieren
