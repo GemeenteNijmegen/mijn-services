@@ -1,4 +1,4 @@
-import { aws_cloudfront_origins } from 'aws-cdk-lib';
+import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Distribution, ViewerProtocolPolicy, PriceClass, OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -26,6 +26,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
     const parameters = new RemoteParameters(this, 'params', {
       path: `${Statics.ssmCertificatePath}/`,
       region: 'us-east-1',
+      timeout: Duration.seconds(10),
     });
     const certificateArn = parameters.get(Statics.ssmCertificateArn);
     return certificateArn;
