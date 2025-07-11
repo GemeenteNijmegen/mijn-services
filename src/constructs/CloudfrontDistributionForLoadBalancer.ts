@@ -41,7 +41,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
       defaultBehavior: {
         origin: aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
           protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
-          originId: 'alborigin'
+          originId: 'alborigin',
         }),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
 
