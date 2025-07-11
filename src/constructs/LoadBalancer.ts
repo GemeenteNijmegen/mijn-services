@@ -4,6 +4,7 @@ import { FargateService } from 'aws-cdk-lib/aws-ecs';
 import { IListenerCertificate, ApplicationLoadBalancer, ApplicationListener, ListenerAction, ListenerCondition, Protocol, AddApplicationTargetsProps } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 interface LoadBalancerProps extends StackProps {
@@ -27,6 +28,13 @@ export class ServiceLoadBalancer extends Construct {
 
     this.addDnsRecords();
     this.listener = this.createListener(props.certificate);
+
+    this.addAccessLogging();
+  }
+
+  private addAccessLogging() {
+    const bucket = new Bucket(this, 'access-logs');
+    this.alb.logAccessLogs(bucket);
   }
 
   private addDnsRecords() {
