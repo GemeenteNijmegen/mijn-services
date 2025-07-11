@@ -43,6 +43,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
           protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
         }),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+
       },
       defaultRootObject: 'index.html',
       certificate: certificate,
