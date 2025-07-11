@@ -1,5 +1,5 @@
 import { StackProps, Duration } from 'aws-cdk-lib';
-import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, Peer, Port, PrefixList, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { FargateService } from 'aws-cdk-lib/aws-ecs';
 import { IListenerCertificate, ApplicationLoadBalancer, ApplicationListener, ListenerAction, ListenerCondition, Protocol, AddApplicationTargetsProps } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -24,6 +24,12 @@ export class ServiceLoadBalancer extends Construct {
       vpc: props.vpc,
       internetFacing: true,
     });
+
+
+    const cfOriginFacing = PrefixList.fromLookup(this, 'CloudFrontOriginFacing', {
+      prefixListName: 'com.amazonaws.global.cloudfront.origin-facing',
+    });
+    this.alb.connections.allowFrom(Peer.prefixList(cfOriginFacing.prefixListId), Port.HTTP);
 
     this.addDnsRecords();
     this.listener = this.createListener(props.certificate);

@@ -34,6 +34,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
 
   createDistribution() {
     const certificate = Certificate.fromCertificateArn(this, 'certificate', this.certificateArn());
+    
     const distribution = new Distribution(this, 'MyDistribution', {
       comment: 'Distribution for my services loadbalancer',
       defaultBehavior: {

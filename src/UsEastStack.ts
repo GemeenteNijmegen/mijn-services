@@ -50,7 +50,5 @@ export class UsEastCertificateStack extends Stack {
       stringValue: cert.certificateArn,
       parameterName: Statics.ssmCertificateArn,
     });
-
-
   }
 }
