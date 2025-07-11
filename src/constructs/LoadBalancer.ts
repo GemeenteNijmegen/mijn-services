@@ -1,5 +1,5 @@
 import { StackProps, Duration } from 'aws-cdk-lib';
-import { IVpc, Peer, Port, PrefixList, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, Peer, Port, PrefixList, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { FargateService } from 'aws-cdk-lib/aws-ecs';
 import { IListenerCertificate, ApplicationLoadBalancer, ApplicationListener, ListenerAction, ListenerCondition, Protocol, AddApplicationTargetsProps } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -23,7 +23,9 @@ export class ServiceLoadBalancer extends Construct {
     // Import VPC
     this.alb = new ApplicationLoadBalancer(this, 'alb', {
       vpc: props.vpc,
-      internetFacing: true,
+      vpcSubnets: {
+        subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+      },
     });
 
     this.addDnsRecords();
@@ -49,17 +51,16 @@ export class ServiceLoadBalancer extends Construct {
   }
 
   createListener(certificate: IListenerCertificate) {
-    const httpsListener = this.alb.addListener('listener', {
-      port: 443,
-      certificates: [certificate],
-      open: true,
+    const httpListener = this.alb.addListener('listener', {
+      port: 80,
+      open: false,
       defaultAction: ListenerAction.fixedResponse(404, {
         contentType: 'text/plain',
         messageBody: 'Niet gevonden',
       }),
     });
 
-    return httpsListener;
+    return httpListener;
   }
 
   attachECSService(service: FargateService, path: string, priority?: number, props?: AddApplicationTargetsProps) {

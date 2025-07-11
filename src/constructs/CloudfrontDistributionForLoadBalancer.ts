@@ -1,6 +1,6 @@
 import { aws_cloudfront_origins } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { Distribution, ViewerProtocolPolicy, PriceClass } from 'aws-cdk-lib/aws-cloudfront';
+import { Distribution, ViewerProtocolPolicy, PriceClass, OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
@@ -38,7 +38,9 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
     const distribution = new Distribution(this, 'MyDistribution', {
       comment: 'Distribution for my services loadbalancer',
       defaultBehavior: {
-        origin: aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer),
+        origin: aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
+          protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
+        }),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       defaultRootObject: 'index.html',
