@@ -25,12 +25,6 @@ export class ServiceLoadBalancer extends Construct {
       internetFacing: true,
     });
 
-
-    const cfOriginFacing = PrefixList.fromLookup(this, 'CloudFrontOriginFacing', {
-      prefixListName: 'com.amazonaws.global.cloudfront.origin-facing',
-    });
-    this.alb.connections.allowFrom(Peer.prefixList(cfOriginFacing.prefixListId), Port.HTTP);
-
     this.addDnsRecords();
     this.listener = this.createListener(props.certificate);
   }
