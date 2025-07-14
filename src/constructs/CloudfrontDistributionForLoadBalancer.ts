@@ -54,6 +54,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
       domainNames: this.props.domains,
       priceClass: PriceClass.PRICE_CLASS_100,
     });
+    this.addDnsRecords(distribution);
     return distribution;
   }
 
