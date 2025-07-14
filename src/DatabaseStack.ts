@@ -4,7 +4,7 @@ import { Port, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { Configurable } from './Configuration';
+import { Configurable } from './ConfigurationInterfaces';
 import { Database } from './constructs/Database';
 import { CreateDatabasePerUserFunction } from './custom-resources/create-database-per-user/create-database-per-user-function';
 import { CreateDatabasesFunction } from './custom-resources/create-databases/create-databases-function';

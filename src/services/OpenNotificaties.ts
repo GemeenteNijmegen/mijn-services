@@ -11,7 +11,7 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { OpenNotificatiesConfiguration } from '../Configuration';
+import { OpenNotificatiesConfiguration } from '../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';

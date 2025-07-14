@@ -28,6 +28,7 @@ export interface ApiGatewayProps {
 export class ApiGateway extends Construct {
 
   readonly api: HttpApi;
+  readonly certificate: Certificate;
 
   constructor(scope: Construct, id: string, props: ApiGatewayProps) {
     super(scope, id);
@@ -38,6 +39,7 @@ export class ApiGateway extends Construct {
       validation: validation,
       subjectAlternativeNames: props.alternativeDomainNames,
     });
+    this.certificate = cert;
 
     const domain = new DomainName(this, 'domain', {
       certificate: cert,
@@ -52,10 +54,10 @@ export class ApiGateway extends Construct {
       },
     });
 
-    new ARecord(this, 'a', {
-      target: RecordTarget.fromAlias(new ApiGatewayv2DomainProperties(domain.regionalDomainName, domain.regionalHostedZoneId)),
-      zone: props.hostedzone,
-    });
+    // new ARecord(this, 'a', {
+    //   target: RecordTarget.fromAlias(new ApiGatewayv2DomainProperties(domain.regionalDomainName, domain.regionalHostedZoneId)),
+    //   zone: props.hostedzone,
+    // });
 
     for (const alternativeDomainName of props.alternativeDomainNames ?? []) {
       const hash = createHash('sha256').update(alternativeDomainName).digest('base64').substring(0, 5);

@@ -3,7 +3,7 @@ import { Aspects, Stack, Stage, StageProps, Tags } from 'aws-cdk-lib';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { Configurable } from './Configuration';
+import { Configurable } from './ConfigurationInterfaces';
 import { Statics } from './Statics';
 
 export interface ParameterStageProps extends StageProps, Configurable { }
