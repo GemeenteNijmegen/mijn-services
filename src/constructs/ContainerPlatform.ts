@@ -52,7 +52,6 @@ export class ContainerPlatform extends Construct {
     const serviceLoadBalancer = new ServiceLoadBalancer(this, 'lb', {
       vpc: props.vpc,
       certificate: props.certificate,
-      hostedZone: props.hostedZone,
     });
 
     this.loadBalancer = serviceLoadBalancer;

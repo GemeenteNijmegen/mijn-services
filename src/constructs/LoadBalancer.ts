@@ -1,16 +1,13 @@
 import { StackProps, Duration } from 'aws-cdk-lib';
-import { IVpc, Peer, Port, PrefixList, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { FargateService } from 'aws-cdk-lib/aws-ecs';
 import { IListenerCertificate, ApplicationLoadBalancer, ApplicationListener, ListenerAction, ListenerCondition, Protocol, AddApplicationTargetsProps } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
-import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 interface LoadBalancerProps extends StackProps {
   vpc: IVpc;
   certificate: IListenerCertificate;
-  hostedZone: IHostedZone;
 }
 
 export class ServiceLoadBalancer extends Construct {
@@ -28,7 +25,6 @@ export class ServiceLoadBalancer extends Construct {
       },
     });
 
-    this.addDnsRecords();
     this.listener = this.createListener(props.certificate);
 
     this.addAccessLogging();
@@ -39,16 +35,6 @@ export class ServiceLoadBalancer extends Construct {
     this.alb.logAccessLogs(bucket);
   }
 
-  private addDnsRecords() {
-    new ARecord(this, 'a-record', {
-      target: RecordTarget.fromAlias(new LoadBalancerTarget(this.alb)),
-      zone: this.props.hostedZone,
-    });
-    new AaaaRecord(this, 'aaaa', {
-      target: RecordTarget.fromAlias(new LoadBalancerTarget(this.alb)),
-      zone: this.props.hostedZone,
-    });
-  }
 
   createListener(certificate: IListenerCertificate) {
     const httpListener = this.alb.addListener('listener', {

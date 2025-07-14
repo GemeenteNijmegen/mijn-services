@@ -2,6 +2,8 @@ import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Distribution, ViewerProtocolPolicy, PriceClass, OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
+import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
 import { Statics } from '../Statics';
@@ -10,6 +12,7 @@ class CloudfrontDistributionForLoadBalancerProps {
   domains: string[];
   loadbalancer: ApplicationLoadBalancer;
   certificate: ICertificate;
+  hostedZone: IHostedZone;
 }
 export class CloudfrontDistributionForLoadBalancer extends Construct {
   constructor(scope: Construct, id: string, private props: CloudfrontDistributionForLoadBalancerProps) {
@@ -52,5 +55,17 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
       priceClass: PriceClass.PRICE_CLASS_100,
     });
     return distribution;
+  }
+
+
+  private addDnsRecords(distribution: Distribution) {
+    new ARecord(this, 'a-record', {
+      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+      zone: this.props.hostedZone,
+    });
+    new AaaaRecord(this, 'aaaa', {
+      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+      zone: this.props.hostedZone,
+    });
   }
 }

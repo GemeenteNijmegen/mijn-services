@@ -73,6 +73,7 @@ export class MainStack extends Stack {
       certificate: api.certificate,
       domains,
       loadbalancer: platform.loadBalancer.alb,
+      hostedZone: this.hostedzone,
     });
 
     this.openKlantService(api, platform);
