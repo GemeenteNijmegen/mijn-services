@@ -36,7 +36,7 @@
     "projen": "npx projen"
   },
   "devDependencies": {
-    "@gemeentenijmegen/projen-project-type": "^1.11.0",
+    "@gemeentenijmegen/projen-project-type": "^1.11.1",
     "@stylistic/eslint-plugin": "^2",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.10",
@@ -68,7 +68,7 @@
     "@gemeentenijmegen/apigateway-http": "^0.0.28",
     "@gemeentenijmegen/aws-constructs": "^0.0.40",
     "@gemeentenijmegen/utils": "^0.0.34",
-    "@middy/core": "^6.3.2",
+    "@middy/core": "^6.4.1",
     "@types/aws-lambda": "^8.10.150",
     "aws-cdk-lib": "^2.1.0",
     "cdk-remote-stack": "^2.1.0",
