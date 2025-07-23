@@ -22,6 +22,7 @@
 /package.json linguist-generated
 /src/custom-resources/create-database-per-user/create-database-per-user-function.ts linguist-generated
 /src/custom-resources/create-databases/create-databases-function.ts linguist-generated
+/src/custom-resources/securitygroupByName/securitygroupByName-function.ts linguist-generated
 /src/services/OpenKlantRegistrationService/NotificationReceiver/receiver-function.ts linguist-generated
 /src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler-function.ts linguist-generated
 /tsconfig.dev.json linguist-generated
