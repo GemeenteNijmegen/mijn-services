@@ -1,15 +1,14 @@
-import { aws_cloudfront_origins, CustomResource, Duration } from 'aws-cdk-lib';
+import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Distribution, ViewerProtocolPolicy, PriceClass, OriginProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
-import { Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
-import { Provider } from 'aws-cdk-lib/custom-resources';
 import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
-import { SecuritygroupByNameFunction } from '../custom-resources/securitygroupByName/securitygroupByName-function';
 import { Statics } from '../Statics';
+import { SecurityGroupFromId } from './SecurityGroupFromId';
 
 class CloudfrontDistributionForLoadBalancerProps {
   domains: string[];
@@ -65,21 +64,9 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
   }
 
   private allowAccessToLoadBalancer(lb: ApplicationLoadBalancer) {
-    const cloudfrontSecurityGroupId = new SecuritygroupByNameFunction(this, 'vpcsg');
-    const provider = new Provider(this, 'sg-provider', {
-      onEventHandler: cloudfrontSecurityGroupId,
-    });
-
-    const resource = new CustomResource(this, 'sg-resource', {
-      serviceToken: provider.serviceToken,
-      properties: {
-        securityGroupName: 'CloudFront-VPCOrigins-Service-SG',
-      },
-    });
-    const groupId = resource.getAttString('groupId');
-    const group = SecurityGroup.fromSecurityGroupId(this, 'cfsg', groupId);
+    const group = new SecurityGroupFromId(this, 'cfsg', 'CloudFront-VPCOrigins-Service-SG');
     lb.connections.securityGroups.forEach(sg => {
-      sg.addIngressRule(group, Port.HTTP, 'allow access from cloudfront to loadbalancer');
+      sg.addIngressRule(group.group, Port.HTTP, 'allow access from cloudfront to loadbalancer');
     });
   }
 
