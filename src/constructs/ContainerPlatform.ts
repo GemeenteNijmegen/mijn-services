@@ -1,11 +1,12 @@
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Cluster } from 'aws-cdk-lib/aws-ecs';
-import { IListenerCertificate } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 import { ServiceLoadBalancer } from './LoadBalancer';
+import { CloudfrontDistributionForLoadBalancer } from './CloudfrontDistributionForLoadBalancer';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 
 export interface ContainerPlatformProps {
   /**
@@ -13,9 +14,11 @@ export interface ContainerPlatformProps {
    */
   vpc: IVpc;
 
-  certificate: IListenerCertificate;
+  certificate: ICertificate;
 
   hostedZone: IHostedZone;
+
+  domains: string[];
 }
 
 export class ContainerPlatform extends Construct {
@@ -52,6 +55,13 @@ export class ContainerPlatform extends Construct {
     const serviceLoadBalancer = new ServiceLoadBalancer(this, 'lb', {
       vpc: props.vpc,
       certificate: props.certificate,
+    });
+
+    new CloudfrontDistributionForLoadBalancer(this, 'distribution', {
+      certificate: props.certificate,
+      domains: props.domains,
+      loadbalancer: this.loadBalancer.alb,
+      hostedZone: props.hostedZone,
     });
 
     this.loadBalancer = serviceLoadBalancer;

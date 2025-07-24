@@ -59,21 +59,17 @@ export class MainStack extends Stack {
       alternativeDomainNames: props.configuration.alternativeDomainNames,
     });
 
-    const platform = new ContainerPlatform(this, 'containers', {
-      vpc: this.vpc.vpc,
-      certificate: api.certificate,
-      hostedZone: this.hostedzone,
-    });
 
     const domains = [this.hostedzone.zoneName];
     if (props.configuration.alternativeDomainNames) {
       domains.push( ...props.configuration.alternativeDomainNames);
     }
-    new CloudfrontDistributionForLoadBalancer(this, 'distribution', {
+
+    const platform = new ContainerPlatform(this, 'containers', {
+      vpc: this.vpc.vpc,
       certificate: api.certificate,
-      domains,
-      loadbalancer: platform.loadBalancer.alb,
       hostedZone: this.hostedzone,
+      domains,
     });
 
     this.openKlantService(api, platform);
