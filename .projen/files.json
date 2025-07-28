@@ -19,6 +19,7 @@
     "src/custom-resources/create-database-per-user/create-database-per-user-function.ts",
     "src/custom-resources/create-databases/create-databases-function.ts",
     "src/custom-resources/securitygroupByName/securitygroupByName-function.ts",
+    "src/lambdas/rewrite-function/rewrite-function.ts",
     "src/services/OpenKlantRegistrationService/NotificationReceiver/receiver-function.ts",
     "src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler-function.ts",
     "tsconfig.dev.json",
