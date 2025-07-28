@@ -43,7 +43,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
     const certificate = Certificate.fromCertificateArn(this, 'certificate', this.certificateArn());
 
     const params = new RemoteParameters(this, 'remote-params', {
-      path: Statics._ssmRewriteFunctionArn.substring(0, Statics._ssmRewriteFunctionArn.lastIndexOf('/') - 1),
+      path: Statics._ssmRewriteFunctionPath,
       region: 'us-east-1',
       timeout: Duration.seconds(10),
     });

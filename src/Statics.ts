@@ -32,6 +32,7 @@ export class Statics {
   static readonly _ssmFilesystemSecurityGroupId = `/${Statics.projectName}/internal/filesystem-security-group-id`;
   static readonly _ssmFilesystemArn = `/${Statics.projectName}/internal/filesystem-arn`;
   static readonly _ssmBackupVaultArn = `/${Statics.projectName}/internal/backup/vault-arn`;
+  static readonly _ssmRewriteFunctionPath = `/${Statics.projectName}/internal/cloudfront-rewrite`;
   static readonly _ssmRewriteFunctionArn = `/${Statics.projectName}/internal/cloudfront-rewrite/function-arn`;
 
   // MARK: Databases
