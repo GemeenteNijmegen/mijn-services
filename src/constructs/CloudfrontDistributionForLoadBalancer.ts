@@ -1,9 +1,8 @@
 import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { Distribution, FunctionEventType, OriginProtocolPolicy, PriceClass, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { Distribution, Function, FunctionCode, FunctionEventType, FunctionRuntime, OriginProtocolPolicy, PriceClass, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { Function } from 'aws-cdk-lib/aws-lambda';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { RemoteParameters } from 'cdk-remote-stack';
@@ -42,12 +41,12 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
   createDistribution() {
     const certificate = Certificate.fromCertificateArn(this, 'certificate', this.certificateArn());
 
-    const params = new RemoteParameters(this, 'remote-params', {
-      path: Statics._ssmRewriteFunctionPath,
-      region: 'us-east-1',
-      timeout: Duration.seconds(10),
+    const rewrite = new Function(this, 'rewrite', {
+      code: FunctionCode.fromFile({
+        filePath: 'src/lambdas/rewrite-function/rewrite.js',
+      }),
+      runtime: FunctionRuntime.JS_2_0,
     });
-    const rewrite = Function.fromFunctionArn(this, 'rewrite', params.get(Statics._ssmRewriteFunctionArn));
 
     const origin = aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
       protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,

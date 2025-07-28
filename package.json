@@ -10,8 +10,6 @@
     "bundle:custom-resources/create-databases/create-databases.lambda:watch": "npx projen bundle:custom-resources/create-databases/create-databases.lambda:watch",
     "bundle:custom-resources/securitygroupByName/securitygroupByName.lambda": "npx projen bundle:custom-resources/securitygroupByName/securitygroupByName.lambda",
     "bundle:custom-resources/securitygroupByName/securitygroupByName.lambda:watch": "npx projen bundle:custom-resources/securitygroupByName/securitygroupByName.lambda:watch",
-    "bundle:lambdas/rewrite-function/rewrite.lambda": "npx projen bundle:lambdas/rewrite-function/rewrite.lambda",
-    "bundle:lambdas/rewrite-function/rewrite.lambda:watch": "npx projen bundle:lambdas/rewrite-function/rewrite.lambda:watch",
     "bundle:services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda": "npx projen bundle:services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda",
     "bundle:services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda:watch": "npx projen bundle:services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda:watch",
     "bundle:services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda": "npx projen bundle:services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda",
