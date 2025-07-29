@@ -33,7 +33,7 @@ export class Statics {
   static readonly _ssmFilesystemArn = `/${Statics.projectName}/internal/filesystem-arn`;
   static readonly _ssmBackupVaultArn = `/${Statics.projectName}/internal/backup/vault-arn`;
   static readonly _ssmRewriteFunctionPath = `/${Statics.projectName}/internal/rewrite-function`;
-  static readonly _ssmRewriteFunctionArn = `/${Statics.projectName}/internal/rewrite-function/arn`;
+  static readonly _ssmRewriteFunctionArn = `/${Statics.projectName}/internal/rewrite-function/edge-arn`;
 
   // MARK: Databases
   static readonly defaultDatabaseName = 'postgres';

@@ -3,7 +3,7 @@ import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Distribution, LambdaEdgeEventType, OriginProtocolPolicy, PriceClass, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { Function, Version } from 'aws-cdk-lib/aws-lambda';
+import { Version } from 'aws-cdk-lib/aws-lambda';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { RemoteParameters } from 'cdk-remote-stack';
@@ -48,10 +48,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
       region: 'us-east-1',
       timeout: Duration.seconds(10),
     });
-    const rewrite = Function.fromFunctionArn(this, 'rewrite', params.get(Statics._ssmRewriteFunctionArn));
-    const rewriteVersion = new Version(this, 'rewrite-version', {
-      lambda: rewrite,
-    });
+    const rewrite = Version.fromVersionArn(this, 'rewrite', params.get(Statics._ssmRewriteFunctionArn));
 
     const origin = aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
       protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
@@ -65,7 +62,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         edgeLambdas: [
           {
-            functionVersion: rewriteVersion,
+            functionVersion: rewrite,
             eventType: LambdaEdgeEventType.ORIGIN_REQUEST,
           },
         ],
