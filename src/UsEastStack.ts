@@ -27,6 +27,7 @@ export class UsEastCertificateStack extends Stack {
     super(scope, id, props);
     const hostedZone = this.importProjectHostedZone(this, props.mainRegion);
     this.createCertificate(hostedZone, props.alternativeDomainNames);
+    this.pathRewriteEdgeFunction();
   }
 
   private importProjectHostedZone(scope: Construct, fromRegion: string) {
