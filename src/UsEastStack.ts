@@ -5,8 +5,10 @@ import {
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
+import { RewriteFunction } from './lambdas/rewrite-function/rewrite-function';
 import { Statics } from './Statics';
 
 export interface UsEastCertificateStackProps extends StackProps {
@@ -57,6 +59,16 @@ export class UsEastCertificateStack extends Stack {
     new SSM.StringParameter(this, 'cert-arn', {
       stringValue: cert.certificateArn,
       parameterName: Statics.ssmCertificateArn,
+    });
+  }
+
+  pathRewriteEdgeFunction() {
+    const fn = new RewriteFunction(this, 'rewrite', {
+      description: 'Rewrite the uri for mijn-services cloudfront events',
+    });
+    new StringParameter(this, 'rewrite-arn', {
+      parameterName: Statics._ssmRewriteFunctionArn,
+      stringValue: fn.functionArn,
     });
   }
 
