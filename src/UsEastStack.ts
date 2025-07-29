@@ -40,10 +40,18 @@ export class UsEastCertificateStack extends Stack {
 
   createCertificate(hostedZone: IHostedZone, alternativeDomainNames?: string[]) {
     const validation = alternativeDomainNames ? CertificateValidation.fromDns() : CertificateValidation.fromDns(hostedZone);
+
+    const cnames = [
+      `cf.${hostedZone.zoneName}`,
+    ]
+    if (alternativeDomainNames) {
+      cnames.push(...alternativeDomainNames);
+    }
+
     const cert = new Certificate(this, 'certificate', {
       domainName: hostedZone.zoneName,
       validation: validation,
-      subjectAlternativeNames: alternativeDomainNames,
+      subjectAlternativeNames: cnames,
     });
 
     new SSM.StringParameter(this, 'cert-arn', {

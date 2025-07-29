@@ -7,7 +7,6 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ApiGateway } from './constructs/ApiGateway';
-import { CloudfrontDistributionForLoadBalancer } from './constructs/CloudfrontDistributionForLoadBalancer';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { CacheDatabase } from './constructs/Redis';
@@ -60,10 +59,13 @@ export class MainStack extends Stack {
     });
 
 
-    const domains = [this.hostedzone.zoneName];
-    if (props.configuration.alternativeDomainNames) {
-      domains.push( ...props.configuration.alternativeDomainNames);
-    }
+
+    const domains = [
+      `cf.${this.hostedzone.zoneName}`,
+    ];
+    // if (props.configuration.alternativeDomainNames) {
+    //   domains.push( ...props.configuration.alternativeDomainNames);
+    // }
 
     const platform = new ContainerPlatform(this, 'containers', {
       vpc: this.vpc.vpc,
