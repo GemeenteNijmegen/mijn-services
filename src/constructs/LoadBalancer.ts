@@ -1,7 +1,7 @@
-import { StackProps, Duration } from 'aws-cdk-lib';
+import { Duration, StackProps } from 'aws-cdk-lib';
 import { IVpc, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { FargateService } from 'aws-cdk-lib/aws-ecs';
-import { IListenerCertificate, ApplicationLoadBalancer, ApplicationListener, ListenerAction, ListenerCondition, Protocol, AddApplicationTargetsProps } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { AddApplicationTargetsProps, ApplicationListener, ApplicationLoadBalancer, IListenerCertificate, ListenerAction, ListenerCondition, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
@@ -54,7 +54,7 @@ export class ServiceLoadBalancer extends Construct {
       port: 80,
       targets: [service],
       conditions: [
-        ListenerCondition.pathPatterns([path]),
+        ListenerCondition.httpHeader('x-original-uri', [path]), // Set by cloudfront function (used for path rewrites)
       ],
       priority: priority ?? this.priority,
       healthCheck: {
