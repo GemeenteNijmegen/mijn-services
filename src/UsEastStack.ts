@@ -43,7 +43,7 @@ export class UsEastCertificateStack extends Stack {
 
     const cnames = [
       `cf.${hostedZone.zoneName}`,
-    ]
+    ];
     if (alternativeDomainNames) {
       cnames.push(...alternativeDomainNames);
     }
