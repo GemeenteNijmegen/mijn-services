@@ -89,6 +89,9 @@ export class OMCService extends Construct {
   private getEnvironmentConfiguration() {
 
     return {
+
+      OMC_CONTEXT_PATH: this.props.omcConfiguration.path,
+
       // How a user authenticates at OMC
       OMC_AUTH_JWT_ISSUER: 'OMC', // Something identifying Notify NL (OMC Web API) service (it will be used internally) - The OMC is the issuer
       OMC_AUTH_JWT_AUDIENCE: 'OMC', // Cannot be missing 	Something identifying Notify NL (OMC Web API) service (it will be used internally) - The OMC is the audience
