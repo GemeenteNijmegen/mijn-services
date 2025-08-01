@@ -1,6 +1,6 @@
 import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { Distribution, OriginProtocolPolicy, PriceClass, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { Distribution, OriginProtocolPolicy, PriceClass, ResponseHeadersPolicy, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -51,6 +51,18 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
       defaultBehavior: {
         origin,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        responseHeadersPolicy: new ResponseHeadersPolicy(this, 'response-header-policy', {
+          comment: 'Response headers allowed for mijn-services',
+          customHeadersBehavior: {
+            customHeaders: [
+              { // Required for some apps to call open-zaak
+                header: 'API-version',
+                value: '1.3.1',
+                override: false,
+              }
+            ]
+          }
+        })
       },
       defaultRootObject: 'index.html',
       certificate: certificate,
