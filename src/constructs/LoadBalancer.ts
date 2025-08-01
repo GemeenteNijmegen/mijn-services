@@ -50,23 +50,26 @@ export class ServiceLoadBalancer extends Construct {
   }
 
   attachECSService(service: FargateService, path: string, priority?: number, props?: AddApplicationTargetsProps) {
+
+    const defaultHealthCheck = {
+      enabled: true,
+      path: '/',
+      healthyHttpCodes: '200',
+      healthyThresholdCount: 2,
+      unhealthyThresholdCount: 6,
+      timeout: Duration.seconds(10),
+      interval: Duration.seconds(15),
+      protocol: Protocol.HTTP,
+    };
+
     const listenerProps = {
       port: 80,
       targets: [service],
       conditions: [
-        ListenerCondition.httpHeader('x-original-uri', [path]), // Set by cloudfront function (used for path rewrites)
+        ListenerCondition.pathPatterns([path]),
       ],
       priority: priority ?? this.priority,
-      healthCheck: {
-        enabled: true,
-        path: '/',
-        healthyHttpCodes: '200',
-        healthyThresholdCount: 2,
-        unhealthyThresholdCount: 6,
-        timeout: Duration.seconds(10),
-        interval: Duration.seconds(15),
-        protocol: Protocol.HTTP,
-      },
+      healthCheck: props?.healthCheck ?? defaultHealthCheck,
       deregistrationDelay: Duration.minutes(1),
     };
     console.debug(listenerProps);

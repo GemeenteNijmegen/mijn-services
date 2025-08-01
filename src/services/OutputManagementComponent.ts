@@ -90,7 +90,7 @@ export class OMCService extends Construct {
 
     return {
 
-      OMC_CONTEXT_PATH: this.props.omcConfiguration.path,
+      OMC_CONTEXT_PATH: "/" + this.props.omcConfiguration.path,
 
       // How a user authenticates at OMC
       OMC_AUTH_JWT_ISSUER: 'OMC', // Something identifying Notify NL (OMC Web API) service (it will be used internally) - The OMC is the issuer
@@ -202,7 +202,7 @@ export class OMCService extends Construct {
       id: 'main',
       task: task,
       path: this.props.omcConfiguration.path,
-      healthCheckPath: '/swagger/index.html',
+      healthCheckPath: `/${this.props.omcConfiguration.path}/swagger/index.html`,
       requestParameters: {
         'overwrite:path': '/$request.path.proxy', // Remove the /omc-vrijbrp part from the path before forwarding to the integration
       },
