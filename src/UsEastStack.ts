@@ -4,12 +4,9 @@ import {
   StackProps,
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
-import { Version } from 'aws-cdk-lib/aws-lambda';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
-import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
-import { RewriteFunction } from './lambdas/rewrite-function/rewrite-function';
 import { Statics } from './Statics';
 
 export interface UsEastCertificateStackProps extends StackProps {
@@ -27,7 +24,6 @@ export class UsEastCertificateStack extends Stack {
     super(scope, id, props);
     const hostedZone = this.importProjectHostedZone(this, props.mainRegion);
     this.createCertificate(hostedZone, props.alternativeDomainNames);
-    this.pathRewriteEdgeFunction();
   }
 
   private importProjectHostedZone(scope: Construct, fromRegion: string) {
@@ -61,19 +57,6 @@ export class UsEastCertificateStack extends Stack {
     new SSM.StringParameter(this, 'cert-arn', {
       stringValue: cert.certificateArn,
       parameterName: Statics.ssmCertificateArn,
-    });
-  }
-
-  pathRewriteEdgeFunction() {
-    const fn = new RewriteFunction(this, 'rewrite', {
-      description: 'Rewrite the uri for mijn-services cloudfront events',
-    });
-    const version = new Version(this, 'rewrite-version', {
-      lambda: fn,
-    })
-    new StringParameter(this, 'rewrite-edge-arn', {
-      parameterName: Statics._ssmRewriteFunctionArn,
-      stringValue: version.edgeArn,
     });
   }
 
