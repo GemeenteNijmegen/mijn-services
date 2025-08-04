@@ -61,10 +61,11 @@ export class MainStack extends Stack {
 
     const domains = [
       `cf.${this.hostedzone.zoneName}`,
+      this.hostedzone.zoneName,
     ];
-    // if (props.configuration.alternativeDomainNames) {
-    //   domains.push( ...props.configuration.alternativeDomainNames);
-    // }
+    if (props.configuration.alternativeDomainNames) {
+      domains.push(...props.configuration.alternativeDomainNames);
+    }
 
     const platform = new ContainerPlatform(this, 'containers', {
       vpc: this.vpc.vpc,
