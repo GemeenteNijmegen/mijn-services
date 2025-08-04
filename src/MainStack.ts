@@ -5,7 +5,7 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { Configurable, Configuration } from './Configuration';
+import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
@@ -58,8 +58,20 @@ export class MainStack extends Stack {
       alternativeDomainNames: props.configuration.alternativeDomainNames,
     });
 
+
+    const domains = [
+      `cf.${this.hostedzone.zoneName}`,
+      this.hostedzone.zoneName,
+    ];
+    if (props.configuration.alternativeDomainNames) {
+      domains.push(...props.configuration.alternativeDomainNames);
+    }
+
     const platform = new ContainerPlatform(this, 'containers', {
       vpc: this.vpc.vpc,
+      certificate: api.certificate,
+      hostedZone: this.hostedzone,
+      domains,
     });
 
     this.openKlantService(api, platform);
@@ -98,6 +110,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -127,6 +140,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -154,6 +168,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -178,6 +193,7 @@ export class MainStack extends Stack {
           cluster: platform.cluster,
           link: platform.vpcLink,
           namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
           port: 8080,
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
@@ -205,6 +221,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -232,6 +249,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -255,6 +273,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -277,6 +296,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -301,6 +321,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -346,6 +367,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -399,3 +421,5 @@ export class MainStack extends Stack {
     return key;
   }
 }
+
+

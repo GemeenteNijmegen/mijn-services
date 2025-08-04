@@ -1,6 +1,6 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { EcsTask } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
@@ -10,7 +10,7 @@ import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { OpenZaakConfiguration } from '../Configuration';
+import { OpenZaakConfiguration } from '../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
@@ -40,6 +40,8 @@ export class OpenZaakService extends Construct {
   private readonly clientCredentialsNotificationsZaak: ISecret;
   private readonly clientCredentialsZaakNotifications: ISecret;
 
+  readonly service: FargateService;
+
   constructor(scope: Construct, id: string, props: OpenZaakServiceProps) {
     super(scope, id);
     this.props = props;
@@ -58,7 +60,7 @@ export class OpenZaakService extends Construct {
     });
 
     this.setupConfigurationService();
-    this.setupService();
+    this.service = this.setupService();
     this.setupCeleryService();
   }
 
@@ -325,6 +327,15 @@ export class OpenZaakService extends Construct {
         const cacheSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `cache-security-group-${id}-${index}`, cacheSecurityGroupId);
         cacheSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(cachePort)));
       });
+    });
+
+
+    serviceSecurityGroups.forEach(serviceSecurityGroup => {
+      if (this.props.service.loadbalancer) {
+        this.props.service.loadbalancer.alb.connections.securityGroups.forEach(securityGroup => {
+          serviceSecurityGroup.addIngressRule(securityGroup, Port.tcp(this.props.service.port));
+        });
+      }
     });
   }
 

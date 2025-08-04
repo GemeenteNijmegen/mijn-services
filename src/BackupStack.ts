@@ -1,7 +1,7 @@
 import { RemovalPolicy, Stack, StackProps, aws_backup as backup } from 'aws-cdk-lib';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { Configurable } from './Configuration';
+import { Configurable } from './ConfigurationInterfaces';
 import { Statics } from './Statics';
 
 interface BackupStackProps extends StackProps, Configurable { }

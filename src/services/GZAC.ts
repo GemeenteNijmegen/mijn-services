@@ -17,7 +17,7 @@ import {
 import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { GZACConfiguration } from '../Configuration';
+import { GZACConfiguration } from '../ConfigurationInterfaces';
 import {
   EcsServiceFactory,
   EcsServiceFactoryProps,

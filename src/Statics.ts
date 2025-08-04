@@ -4,7 +4,8 @@ export class Statics {
   static readonly organization = 'GemeenteNijmegen';
 
   // MARK: SSM Parameters
-  static readonly ssmDummyParameter = `/${Statics.projectName}/dummy/parameter`;
+  static readonly ssmCertificatePath = `/${Statics.projectName}/certificate`;
+  static readonly ssmCertificateArn = `/${Statics.projectName}/certificate/arn`;
 
   // Managed in dns-managment project:
   // Below references the new hosted zone separeted from webformulieren
@@ -31,6 +32,8 @@ export class Statics {
   static readonly _ssmFilesystemSecurityGroupId = `/${Statics.projectName}/internal/filesystem-security-group-id`;
   static readonly _ssmFilesystemArn = `/${Statics.projectName}/internal/filesystem-arn`;
   static readonly _ssmBackupVaultArn = `/${Statics.projectName}/internal/backup/vault-arn`;
+  static readonly _ssmRewriteFunctionPath = `/${Statics.projectName}/internal/rewrite-function`;
+  static readonly _ssmRewriteFunctionArn = `/${Statics.projectName}/internal/rewrite-function/edge-arn`;
 
   // MARK: Databases
   static readonly defaultDatabaseName = 'postgres';
@@ -79,6 +82,11 @@ export class Statics {
   // MARK: Environments
   static readonly gnBuildEnvironment = {
     account: '836443378780',
+    region: 'eu-central-1',
+  };
+
+  static readonly gnMijnServicesDev = {
+    account: '958979025885',
     region: 'eu-central-1',
   };
 
