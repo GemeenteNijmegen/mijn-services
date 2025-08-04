@@ -70,12 +70,13 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
       priceClass: PriceClass.PRICE_CLASS_100,
     });
     this.addDnsRecords(distribution);
-    this.allowAccessToLoadBalancer(this.props.loadbalancer);
+    this.allowAccessToLoadBalancer(this.props.loadbalancer, distribution);
     return distribution;
   }
 
-  private allowAccessToLoadBalancer(lb: ApplicationLoadBalancer) {
+  private allowAccessToLoadBalancer(lb: ApplicationLoadBalancer, distribution: Distribution) {
     const group = new SecurityGroupFromId(this, 'cfsg', 'CloudFront-VPCOrigins-Service-SG');
+    group.node.addDependency(distribution);
     lb.connections.securityGroups.forEach(sg => {
       sg.addIngressRule(group.group, Port.HTTP, 'allow access from cloudfront to loadbalancer');
     });
