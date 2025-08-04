@@ -59,10 +59,10 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
                 header: 'API-version',
                 value: '1.3.1',
                 override: false,
-              }
-            ]
-          }
-        })
+              },
+            ],
+          },
+        }),
       },
       defaultRootObject: 'index.html',
       certificate: certificate,

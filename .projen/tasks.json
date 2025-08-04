@@ -56,9 +56,6 @@
           "spawn": "bundle:custom-resources/securitygroupByName/securitygroupByName.lambda"
         },
         {
-          "spawn": "bundle:lambdas/rewrite-function/rewrite.lambda"
-        },
-        {
           "spawn": "bundle:services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda"
         },
         {
@@ -117,24 +114,6 @@
       "steps": [
         {
           "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
-        }
-      ]
-    },
-    "bundle:lambdas/rewrite-function/rewrite.lambda": {
-      "name": "bundle:lambdas/rewrite-function/rewrite.lambda",
-      "description": "Create a JavaScript bundle from src/lambdas/rewrite-function/rewrite.lambda.ts",
-      "steps": [
-        {
-          "exec": "esbuild --bundle src/lambdas/rewrite-function/rewrite.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/lambdas/rewrite-function/rewrite.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
-        }
-      ]
-    },
-    "bundle:lambdas/rewrite-function/rewrite.lambda:watch": {
-      "name": "bundle:lambdas/rewrite-function/rewrite.lambda:watch",
-      "description": "Continuously update the JavaScript bundle from src/lambdas/rewrite-function/rewrite.lambda.ts",
-      "steps": [
-        {
-          "exec": "esbuild --bundle src/lambdas/rewrite-function/rewrite.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/lambdas/rewrite-function/rewrite.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },

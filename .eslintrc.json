@@ -156,7 +156,6 @@
           "src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts",
           "src/custom-resources/create-databases/create-databases.lambda.ts",
           "src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts",
-          "src/lambdas/rewrite-function/rewrite.lambda.ts",
           "src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts",
           "src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts",
           ".projenrc.ts",
