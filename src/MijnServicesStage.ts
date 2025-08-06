@@ -8,7 +8,7 @@ import { MainStack } from './MainStack';
 import { StorageStack } from './StorageStack';
 import { UsEastCertificateStack } from './UsEastStack';
 
-interface MijnServicesStageProps extends StageProps, Configurable {}
+interface MijnServicesStageProps extends StageProps, Configurable { }
 
 export class MijnServicesStage extends Stage {
 
@@ -20,6 +20,7 @@ export class MijnServicesStage extends Stage {
       new UsEastCertificateStack(this, 'certificate', {
         env: { region: 'us-east-1' },
         mainRegion: props.env.region,
+        alternativeDomainNames: props.configuration.alternativeDomainNames,
       });
     }
 
