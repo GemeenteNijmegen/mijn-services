@@ -64,6 +64,7 @@ export class ContainerPlatform extends Construct {
           domains: props.domains,
           loadbalancer: serviceLoadBalancer.alb,
           hostedZone: props.hostedZone,
+          deployDnsRecords: props.configuration.deployCloudFrontDnsRecords,
         });
       }
       this.loadBalancer = serviceLoadBalancer;

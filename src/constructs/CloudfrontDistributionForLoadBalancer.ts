@@ -15,6 +15,7 @@ class CloudfrontDistributionForLoadBalancerProps {
   loadbalancer: ApplicationLoadBalancer;
   certificate: ICertificate;
   hostedZone: IHostedZone;
+  deployDnsRecords?: boolean;
 }
 export class CloudfrontDistributionForLoadBalancer extends Construct {
   constructor(scope: Construct, id: string, private props: CloudfrontDistributionForLoadBalancerProps) {
@@ -84,14 +85,16 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
 
 
   private addDnsRecords(distribution: Distribution) {
-    new ARecord(this, 'a-record', {
-      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
-      zone: this.props.hostedZone,
-    });
-    new AaaaRecord(this, 'aaaa', {
-      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
-      zone: this.props.hostedZone,
-    });
+    if (this.props.deployDnsRecords) {
+      new ARecord(this, 'a-record', {
+        target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+        zone: this.props.hostedZone,
+      });
+      new AaaaRecord(this, 'aaaa', {
+        target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+        zone: this.props.hostedZone,
+      });
+    }
     new ARecord(this, 'a-record-cf', {
       target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
       zone: this.props.hostedZone,

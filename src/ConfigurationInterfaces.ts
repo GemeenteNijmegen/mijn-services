@@ -137,6 +137,14 @@ export interface Configuration {
   deployCloudFront?: boolean;
 
 
+  /**
+   * Feature flag deploys DNS records pointing to cloudfront (turn on after manual migration)
+   * only has effect when loadbalancer is deployed
+   * @default false
+   */
+  deployCloudFrontDnsRecords?: boolean;
+
+
 }
 
 export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
