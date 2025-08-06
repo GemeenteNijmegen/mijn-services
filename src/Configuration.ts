@@ -177,7 +177,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'local-omc',
         path: 'local-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.5',
+        image: 'worthnl/notifynl-omc:1.15.8',
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
@@ -203,7 +203,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'woweb-omc',
         path: 'woweb-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.5',
+        image: 'worthnl/notifynl-omc:1.15.8',
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
@@ -293,7 +293,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'woweb-omc',
         path: 'woweb-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.5',
+        image: 'worthnl/notifynl-omc:1.15.8',
         debug: true,
         mode: 'Production',
         openKlantUrl: 'mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
