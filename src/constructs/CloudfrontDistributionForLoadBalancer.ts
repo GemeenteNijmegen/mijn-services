@@ -69,7 +69,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
           cookieBehavior: OriginRequestCookieBehavior.all(),
           headerBehavior: OriginRequestHeaderBehavior.all(), // TODO should be refined before going to production
           queryStringBehavior: OriginRequestQueryStringBehavior.all(),
-        })
+        }),
       },
       defaultRootObject: 'index.html',
       certificate: certificate,

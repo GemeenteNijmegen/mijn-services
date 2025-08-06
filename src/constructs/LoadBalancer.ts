@@ -2,6 +2,8 @@ import { Duration, StackProps } from 'aws-cdk-lib';
 import { IVpc, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { FargateService } from 'aws-cdk-lib/aws-ecs';
 import { AddApplicationTargetsProps, ApplicationListener, ApplicationLoadBalancer, IListenerCertificate, ListenerAction, ListenerCondition, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
+import { Function } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
@@ -76,8 +78,15 @@ export class ServiceLoadBalancer extends Construct {
     this.priority += 1;
   }
 
-  attachLambda(_lambda: FargateService, _path: string, _priority?: number, _props?: AddApplicationTargetsProps) {
-    // TODO implement this
+  attachLambda(lambda: Function, path: string, priority?: number, _props?: AddApplicationTargetsProps) {
+    const listenerProps: AddApplicationTargetsProps = {
+      targets: [new LambdaTarget(lambda)],
+      conditions: [
+        ListenerCondition.pathPatterns([path]),
+      ],
+      priority: priority ?? this.priority,
+    };
+    this.listener.addTargets(`${path}-target`, listenerProps);
     this.priority += 1;
   }
 }
