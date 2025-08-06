@@ -5,6 +5,8 @@ import { Statics } from './Statics';
 const EnvironmentConfigurations: { [key: string]: Configuration } = {
   development: {
     branch: 'development',
+    deployCloudFront: true,
+    deployLoadbalancer: true,
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesDev,
     criticality: new Criticality('low'),
@@ -109,6 +111,8 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
   },
   acceptance: {
     branch: 'acceptance',
+    deployLoadbalancer: true,
+    deployCloudFront: false,
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesAccp,
     criticality: new Criticality('medium'),
