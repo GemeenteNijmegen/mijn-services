@@ -78,7 +78,7 @@ export class ServiceLoadBalancer extends Construct {
     this.priority += 1;
   }
 
-  attachLambda(lambda: Function, path: string, priority?: number, _props?: AddApplicationTargetsProps) {
+  attachLambda(lambda: Function, path: string, priority?: number, props?: AddApplicationTargetsProps) {
     const listenerProps: AddApplicationTargetsProps = {
       targets: [new LambdaTarget(lambda)],
       conditions: [
@@ -86,7 +86,7 @@ export class ServiceLoadBalancer extends Construct {
       ],
       priority: priority ?? this.priority,
     };
-    this.listener.addTargets(`${path}-target`, listenerProps);
+    this.listener.addTargets(`${path}-target`, { ...listenerProps, ...props });
     this.priority += 1;
   }
 }

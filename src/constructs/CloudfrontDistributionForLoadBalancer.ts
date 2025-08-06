@@ -1,6 +1,6 @@
 import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { AllowedMethods, Distribution, OriginProtocolPolicy, OriginRequestCookieBehavior, OriginRequestHeaderBehavior, OriginRequestPolicy, OriginRequestQueryStringBehavior, PriceClass, ResponseHeadersPolicy, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { AllowedMethods, CachePolicy, Distribution, OriginProtocolPolicy, OriginRequestPolicy, PriceClass, ResponseHeadersPolicy, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -65,11 +65,8 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
             ],
           },
         }),
-        originRequestPolicy: new OriginRequestPolicy(this, 'origin-request-policy', {
-          cookieBehavior: OriginRequestCookieBehavior.all(),
-          headerBehavior: OriginRequestHeaderBehavior.all(), // TODO should be refined before going to production
-          queryStringBehavior: OriginRequestQueryStringBehavior.all(),
-        }),
+        originRequestPolicy: OriginRequestPolicy.ALL_VIEWER,
+        cachePolicy: CachePolicy.CACHING_DISABLED, // Maybe later we can look into this
       },
       defaultRootObject: 'index.html',
       certificate: certificate,
