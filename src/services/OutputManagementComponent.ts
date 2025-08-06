@@ -2,7 +2,7 @@ import { Duration } from 'aws-cdk-lib';
 import { AwsLogDriver, ContainerImage, Secret as EcsSecret, Protocol } from 'aws-cdk-lib/aws-ecs';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
+import { ISecret, Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { OutputManagementComponentConfiguration } from '../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
@@ -22,6 +22,7 @@ export class OMCService extends Construct {
   private readonly props: OMCServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly configurationParameters: any;
+  private readonly dockerhubCredentials: ISecret;
 
   constructor(scope: Construct, id: string, props: OMCServiceProps) {
     super(scope, id);
@@ -31,6 +32,8 @@ export class OMCService extends Construct {
 
     this.configurationParameters = this.setupConfigurationParameters(id);
     this.setupService();
+
+    this.dockerhubCredentials = Secret.fromSecretNameV2(this, 'docherhub-credentials', Statics.dockerhubCredentialsSecret);
   }
 
   private setupConfigurationParameters(id: string) {
@@ -174,7 +177,9 @@ export class OMCService extends Construct {
     });
 
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.omcConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.omcConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'], // TODO figurout a health check?
         interval: Duration.seconds(10),

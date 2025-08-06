@@ -45,6 +45,7 @@ export class OpenNotificatiesService extends Construct {
   private readonly clientCredentialsNotificationsZaak: ISecret;
   private readonly clientCredentialsZaakNotifications: ISecret;
   private readonly secretKey: ISecret;
+  private readonly dockerhubCredentials: ISecret;
 
   constructor(scope: Construct, id: string, props: OpenNotificatiesServiceProps) {
     super(scope, id);
@@ -62,6 +63,8 @@ export class OpenNotificatiesService extends Construct {
         excludePunctuation: true,
       },
     });
+
+    this.dockerhubCredentials = SecretParameter.fromSecretNameV2(this, 'docherhub-credentials', Statics.dockerhubCredentialsSecret);
 
     this.setupConfigurationService();
 
@@ -166,7 +169,9 @@ export class OpenNotificatiesService extends Construct {
   private setupRabbitMqService() {
     const task = this.serviceFactory.createTaskDefinition('rabbit-mq');
     task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.rabbitMqImage),
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.rabbitMqImage, {
+        credentials: this.dockerhubCredentials,
+      }),
       logging: new AwsLogDriver({
         streamPrefix: 'rabbit-mq',
         logGroup: this.logs,
@@ -255,7 +260,9 @@ export class OpenNotificatiesService extends Construct {
 
     // Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         interval: Duration.seconds(10),
@@ -308,7 +315,9 @@ export class OpenNotificatiesService extends Construct {
       memoryMiB: this.props.openNotificationsConfiguration.celeryTaskSize?.memory ?? '512',
     });
     const celeryContainer = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
@@ -345,7 +354,9 @@ export class OpenNotificatiesService extends Construct {
     });
 
     const beat = task.addContainer('beat', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery', 'inspect', 'ping', '--app', 'nrc'],
         interval: Duration.seconds(10),

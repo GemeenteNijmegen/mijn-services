@@ -32,6 +32,7 @@ export class KeyCloakService extends Construct {
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
   private readonly keyCloakAdminCredentials: ISecret;
+  private readonly dockerhubCredentials: ISecret;
 
 
   constructor(scope: Construct, id: string, props: KeyCloakServiceProps) {
@@ -42,6 +43,7 @@ export class KeyCloakService extends Construct {
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.keyCloakAdminCredentials = SecretParameter.fromSecretNameV2(this, 'keycloak-admin-credentials', Statics._ssmGZACKeyCloakAdminCredentials);
+    this.dockerhubCredentials = SecretParameter.fromSecretNameV2(this, 'docherhub-credentials', Statics.dockerhubCredentialsSecret);
 
     // this.setupConfigurationService();
     this.setupService();
@@ -97,7 +99,9 @@ export class KeyCloakService extends Construct {
     // Main service container
     // const container =
     task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'curl --head -fsS http://localhost:9000/health/ready || exit 1'],
         interval: Duration.seconds(10),

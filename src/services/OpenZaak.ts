@@ -41,6 +41,8 @@ export class OpenZaakService extends Construct {
   private readonly clientCredentialsZaakNotifications: ISecret;
 
   readonly service: FargateService;
+  private readonly dockerhubCredentials: ISecret;
+
 
   constructor(scope: Construct, id: string, props: OpenZaakServiceProps) {
     super(scope, id);
@@ -58,6 +60,7 @@ export class OpenZaakService extends Construct {
         excludePunctuation: true,
       },
     });
+    this.dockerhubCredentials = SecretParameter.fromSecretNameV2(this, 'docherhub-credentials', Statics.dockerhubCredentialsSecret);
 
     this.setupConfigurationService();
     this.service = this.setupService();
@@ -157,7 +160,9 @@ export class OpenZaakService extends Construct {
 
     // 3th Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
         // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
@@ -218,7 +223,9 @@ export class OpenZaakService extends Construct {
 
     // Configuration - initialization container
     const initContainer = task.addContainer('init-config', {
-      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       command: undefined, // Do not set a command as the entrypoint will handle this for us (see Dockerfile)
       readonlyRootFilesystem: false, // The HTTP Cache using SQLite prevents us from running without write to root...
       essential: true,
@@ -265,7 +272,9 @@ export class OpenZaakService extends Construct {
     });
 
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),

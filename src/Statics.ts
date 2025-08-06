@@ -50,6 +50,9 @@ export class Statics {
   static readonly ssmHaalCentraalBRPBaseUrl = `/${Statics.projectName}/api/haalcentraalbrp/baseurl`;
   static readonly ssmHaalCentraalBRPApiKeySecret = `/${Statics.projectName}/api/haalcentraalbrp/apikey`;
 
+  // MARK: Dockerhub
+  static readonly dockerhubCredentialsSecret = `/${Statics.projectName}/dockerhub/credentials`;
+
   /**
    * PRODUCTION
    * List all databases that should be

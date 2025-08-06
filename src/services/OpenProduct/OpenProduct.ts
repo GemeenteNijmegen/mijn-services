@@ -1,5 +1,5 @@
 import { Duration, Token } from 'aws-cdk-lib';
-import { ISecurityGroup, SecurityGroup, Port } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
@@ -9,7 +9,7 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenProductServicesConfiguration } from '../../ConfigurationInterfaces';
-import { EcsServiceFactoryProps, EcsServiceFactory } from '../../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps } from '../../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../../constructs/Redis';
 import { Statics } from '../../Statics';
 import { Utils } from '../../Utils';
@@ -35,6 +35,7 @@ export class OpenProductService extends Construct {
   private readonly databaseCredentials: ISecret;
   private readonly openProductCredentials: ISecret;
   private readonly secretKey: ISecret;
+  private readonly dockerhubCredentials: ISecret;
 
   constructor(scope: Construct, id: string, props: OpenProductServiceProps) {
     super(scope, id);
@@ -50,6 +51,8 @@ export class OpenProductService extends Construct {
         excludePunctuation: true,
       },
     });
+    this.dockerhubCredentials = SecretParameter.fromSecretNameV2(this, 'docherhub-credentials', Statics.dockerhubCredentialsSecret);
+
     this.setupService();
     this.setupCeleryService();
   }
@@ -97,9 +100,9 @@ export class OpenProductService extends Construct {
       //   OPENZAAK_NOTIF_CONFIG_ENABLE: 'True', // Enable the configuration setup for connecting to open-notificaties
 
       // Somehow this is required aswell...
-    //   DEMO_CONFIG_ENABLE: 'False',
-    //   DEMO_CLIENT_ID: 'demo-client',
-    //   DEMO_SECRET: 'demo-secret',
+      //   DEMO_CONFIG_ENABLE: 'False',
+      //   DEMO_CLIENT_ID: 'demo-client',
+      //   DEMO_SECRET: 'demo-secret',
     };
   }
 
@@ -137,7 +140,9 @@ export class OpenProductService extends Construct {
 
     // Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
         // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
@@ -194,7 +199,9 @@ export class OpenProductService extends Construct {
     });
 
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),

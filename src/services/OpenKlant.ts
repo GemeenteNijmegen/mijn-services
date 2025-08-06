@@ -36,12 +36,15 @@ export class OpenKlantService extends Construct {
   private readonly databaseCredentials: ISecret;
   private readonly openKlantCredentials: ISecret;
   private readonly secretKey: ISecret;
+  private readonly dockerhubCredentials: ISecret;
+
   constructor(scope: Construct, id: string, props: OpenKlantServiceProps) {
     super(scope, id);
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
+    this.dockerhubCredentials = SecretParameter.fromSecretNameV2(this, 'docherhub-credentials', Statics.dockerhubCredentialsSecret);
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.openKlantCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenKlantCredentials);
@@ -112,7 +115,9 @@ export class OpenKlantService extends Construct {
   private setupConfigurationService() {
     const task = this.serviceFactory.createTaskDefinition('init');
     task.addContainer('init', {
-      image: ContainerImage.fromRegistry(this.props.image),
+      image: ContainerImage.fromRegistry(this.props.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'], // Not sure what to check when executing a single script
         startPeriod: Duration.seconds(30), // Give the script an inital 30 seconds to run before starting the health check
@@ -154,7 +159,9 @@ export class OpenKlantService extends Construct {
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
     task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.image),
+      image: ContainerImage.fromRegistry(this.props.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         interval: Duration.seconds(10),
@@ -198,7 +205,9 @@ export class OpenKlantService extends Construct {
 
     // Setup celery container
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.image),
+      image: ContainerImage.fromRegistry(this.props.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),

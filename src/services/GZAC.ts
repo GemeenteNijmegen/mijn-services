@@ -42,12 +42,14 @@ export class GZACService extends Construct {
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
   private readonly m2mCredentials: ISecret;
+  private readonly dockerhubCredentials: ISecret;
 
   constructor(scope: Construct, id: string, props: GZACServiceProps) {
     super(scope, id);
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+    this.dockerhubCredentials = SecretParameter.fromSecretNameV2(this, 'docherhub-credentials', Statics.dockerhubCredentialsSecret);
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(
       this,
@@ -132,9 +134,9 @@ export class GZACService extends Construct {
       memoryMiB: '1024',
     });
     task.addContainer('gzac-backend', {
-      image: ContainerImage.fromRegistry(
-        this.props.serviceConfiguration.backendImage,
-      ),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.backendImage, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),

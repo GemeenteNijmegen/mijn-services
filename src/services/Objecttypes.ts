@@ -39,6 +39,7 @@ export class ObjecttypesService extends Construct {
   private readonly databaseCredentials: ISecret;
   private readonly superuserCredetials: ISecret;
   private readonly secretKey: ISecret;
+  private readonly dockerhubCredentials: ISecret;
 
   constructor(scope: Construct, id: string, props: ObjecttypesServiceProps) {
     super(scope, id);
@@ -54,6 +55,7 @@ export class ObjecttypesService extends Construct {
         excludePunctuation: true,
       },
     });
+    this.dockerhubCredentials = SecretParameter.fromSecretNameV2(this, 'docherhub-credentials', Statics.dockerhubCredentialsSecret);
 
     this.setupConfigurationService();
     this.setupService();
@@ -122,7 +124,9 @@ export class ObjecttypesService extends Construct {
 
     // Configuration container
     const initContainer = task.addContainer('setup', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'], // See django docs
       readonlyRootFilesystem: true,
       essential: true,
@@ -166,7 +170,9 @@ export class ObjecttypesService extends Construct {
 
     // Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image, {
+        credentials: this.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         interval: Duration.seconds(10),

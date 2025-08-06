@@ -45,6 +45,8 @@ export class ParameterStack extends Stack {
     // this.addGZACFrontendParameters();
     this.addOpenProductParameters();
 
+    this.addDockerhubCredentials();
+
   }
 
 
@@ -231,6 +233,12 @@ export class ParameterStack extends Stack {
         generateStringKey: 'password',
       },
       secretName: Statics._ssmOpenProductCredentials,
+    });
+  }
+
+  private addDockerhubCredentials() {
+    new Secret(this, 'dockerhub-credentials', {
+      secretName: Statics.dockerhubCredentialsSecret,
     });
   }
 }
