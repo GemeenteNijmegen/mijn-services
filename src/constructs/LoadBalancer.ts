@@ -50,7 +50,6 @@ export class ServiceLoadBalancer extends Construct {
   }
 
   attachECSService(service: FargateService, path: string, priority?: number, props?: AddApplicationTargetsProps) {
-
     const defaultHealthCheck = {
       enabled: true,
       path: '/',
@@ -62,7 +61,7 @@ export class ServiceLoadBalancer extends Construct {
       protocol: Protocol.HTTP,
     };
 
-    const listenerProps = {
+    const listenerProps: AddApplicationTargetsProps = {
       port: 80,
       targets: [service],
       conditions: [
@@ -74,6 +73,11 @@ export class ServiceLoadBalancer extends Construct {
     };
     console.debug(listenerProps);
     this.listener.addTargets(`${path}-target`, { ...listenerProps, ...props });
+    this.priority += 1;
+  }
+
+  attachLambda(_lambda: FargateService, _path: string, _priority?: number, _props?: AddApplicationTargetsProps) {
+    // TODO implement this
     this.priority += 1;
   }
 }

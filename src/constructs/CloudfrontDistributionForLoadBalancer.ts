@@ -1,6 +1,6 @@
 import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { Distribution, OriginProtocolPolicy, PriceClass, ResponseHeadersPolicy, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { AllowedMethods, Distribution, OriginProtocolPolicy, OriginRequestCookieBehavior, OriginRequestHeaderBehavior, OriginRequestPolicy, OriginRequestQueryStringBehavior, PriceClass, ResponseHeadersPolicy, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -52,6 +52,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
       defaultBehavior: {
         origin,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        allowedMethods: AllowedMethods.ALLOW_ALL,
         responseHeadersPolicy: new ResponseHeadersPolicy(this, 'response-header-policy', {
           comment: 'Response headers allowed for mijn-services',
           customHeadersBehavior: {
@@ -64,6 +65,11 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
             ],
           },
         }),
+        originRequestPolicy: new OriginRequestPolicy(this, 'origin-request-policy', {
+          cookieBehavior: OriginRequestCookieBehavior.all(),
+          headerBehavior: OriginRequestHeaderBehavior.all(), // TODO should be refined before going to production
+          queryStringBehavior: OriginRequestQueryStringBehavior.all(),
+        })
       },
       defaultRootObject: 'index.html',
       certificate: certificate,
