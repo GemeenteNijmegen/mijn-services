@@ -112,7 +112,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
   acceptance: {
     branch: 'acceptance',
     deployLoadbalancer: true,
-    deployCloudFront: false,
+    deployCloudFront: true,
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesAccp,
     criticality: new Criticality('medium'),
