@@ -120,6 +120,23 @@ export interface Configuration {
   gzacFrontendService?: GZACFrontendConfiguration;
 
   openProductServices?: OpenProductServicesConfiguration;
+
+
+  /**
+   * Feature flag deploys loadbalancer
+   * @default false
+   */
+  deployLoadbalancer?: boolean;
+
+
+  /**
+   * Feature flag deploys cloudfront
+   * only has effect when loadbalancer is deployed
+   * @default false
+   */
+  deployCloudFront?: boolean;
+
+
 }
 
 export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {

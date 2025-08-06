@@ -5,10 +5,11 @@ import { Cluster } from 'aws-cdk-lib/aws-ecs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
+import { Configurable } from '../ConfigurationInterfaces';
 import { CloudfrontDistributionForLoadBalancer } from './CloudfrontDistributionForLoadBalancer';
 import { ServiceLoadBalancer } from './LoadBalancer';
 
-export interface ContainerPlatformProps {
+export interface ContainerPlatformProps extends Configurable {
   /**
    * The VPC to place the redis instance in.
    */
@@ -52,18 +53,21 @@ export class ContainerPlatform extends Construct {
       vpc: props.vpc,
     });
 
-    const serviceLoadBalancer = new ServiceLoadBalancer(this, 'lb', {
-      vpc: props.vpc,
-      certificate: props.certificate,
-    });
+    if (props.configuration.deployLoadbalancer) {
+      const serviceLoadBalancer = new ServiceLoadBalancer(this, 'lb', {
+        vpc: props.vpc,
+        certificate: props.certificate,
+      });
+      if (props.configuration.deployCloudFront) {
+        new CloudfrontDistributionForLoadBalancer(this, 'distribution', {
+          certificate: props.certificate,
+          domains: props.domains,
+          loadbalancer: serviceLoadBalancer.alb,
+          hostedZone: props.hostedZone,
+        });
+      }
+      this.loadBalancer = serviceLoadBalancer;
+    }
 
-    new CloudfrontDistributionForLoadBalancer(this, 'distribution', {
-      certificate: props.certificate,
-      domains: props.domains,
-      loadbalancer: serviceLoadBalancer.alb,
-      hostedZone: props.hostedZone,
-    });
-
-    this.loadBalancer = serviceLoadBalancer;
   }
 }
