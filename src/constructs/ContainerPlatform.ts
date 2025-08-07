@@ -56,7 +56,7 @@ export class ContainerPlatform extends Construct {
     if (props.configuration.deployLoadbalancer) {
       const serviceLoadBalancer = new ServiceLoadBalancer(this, 'lb', {
         vpc: props.vpc,
-        certificate: props.certificate,
+        hostedzone: props.hostedZone,
       });
       if (props.configuration.deployCloudFront) {
         new CloudfrontDistributionForLoadBalancer(this, 'distribution', {
