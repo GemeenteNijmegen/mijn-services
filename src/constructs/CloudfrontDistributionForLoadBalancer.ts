@@ -88,7 +88,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
     const group = new SecurityGroupFromId(this, 'cfsg', 'CloudFront-VPCOrigins-Service-SG');
     group.node.addDependency(distribution);
     lb.connections.securityGroups.forEach(sg => {
-      sg.addIngressRule(group.group, Port.HTTP, 'allow access from cloudfront to loadbalancer');
+      sg.addIngressRule(group.group, Port.HTTPS, 'allow access from cloudfront to loadbalancer');
     });
   }
 
