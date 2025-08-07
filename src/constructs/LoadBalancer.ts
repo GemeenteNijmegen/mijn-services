@@ -1,15 +1,18 @@
 import { Duration, StackProps } from 'aws-cdk-lib';
+import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { FargateService } from 'aws-cdk-lib/aws-ecs';
 import { AddApplicationTargetsProps, ApplicationListener, ApplicationLoadBalancer, IListenerCertificate, ListenerAction, ListenerCondition, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { Function } from 'aws-cdk-lib/aws-lambda';
+import { ARecord, IHostedZone, PrivateHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
+import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 interface LoadBalancerProps extends StackProps {
   vpc: IVpc;
-  certificate: IListenerCertificate;
+  hostedzone: IHostedZone,
 }
 
 export class ServiceLoadBalancer extends Construct {
@@ -19,6 +22,16 @@ export class ServiceLoadBalancer extends Construct {
   constructor(scope: Construct, id: string, private readonly props: LoadBalancerProps) {
     super(scope, id);
 
+    const privateHostedZone = new PrivateHostedZone(this, 'private-hostedzone', {
+      vpc: props.vpc,
+      zoneName: `alb.${props.hostedzone.zoneName}`,
+      comment: 'Used for privat ALB dns name',
+    });
+    const certificate = new Certificate(this, 'cert', {
+      domainName: `alb.${props.hostedzone.zoneName}`,
+      validation: CertificateValidation.fromDns(props.hostedzone), // Note: we use the public hosted zone here
+    });
+
     // Import VPC
     this.alb = new ApplicationLoadBalancer(this, 'alb', {
       vpc: props.vpc,
@@ -27,7 +40,13 @@ export class ServiceLoadBalancer extends Construct {
       },
     });
 
-    this.listener = this.createListener(props.certificate);
+    new ARecord(this, 'a-record', {
+      target: RecordTarget.fromAlias(new LoadBalancerTarget(this.alb)),
+      zone: privateHostedZone,
+      recordName: `alb.${privateHostedZone.zoneName}`,
+    });
+
+    this.listener = this.createListener(certificate);
 
     this.addAccessLogging();
   }
@@ -40,7 +59,8 @@ export class ServiceLoadBalancer extends Construct {
 
   createListener(certificate: IListenerCertificate) {
     const httpListener = this.alb.addListener('listener', {
-      port: 80,
+      port: 443,
+      certificates: [certificate],
       open: false,
       defaultAction: ListenerAction.fixedResponse(404, {
         contentType: 'text/plain',
