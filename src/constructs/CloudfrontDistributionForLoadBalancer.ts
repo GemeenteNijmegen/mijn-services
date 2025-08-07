@@ -42,15 +42,21 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
   createDistribution() {
     const certificate = Certificate.fromCertificateArn(this, 'certificate', this.certificateArn());
 
-    const origin = aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
-      protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
+    // TODO remove this after succesfull deployment
+    aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
+      protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
       originId: 'alborigin',
+    });
+
+    const originHttps = aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
+      protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
+      originId: 'alborigin-https',
     });
 
     const distribution = new Distribution(this, 'MyDistribution', {
       comment: 'Distribution for my services loadbalancer',
       defaultBehavior: {
-        origin,
+        origin: originHttps,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: AllowedMethods.ALLOW_ALL,
         responseHeadersPolicy: new ResponseHeadersPolicy(this, 'response-header-policy', {
