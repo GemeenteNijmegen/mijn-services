@@ -43,7 +43,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
     const certificate = Certificate.fromCertificateArn(this, 'certificate', this.certificateArn());
 
     const origin = aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
-      protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
+      protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
       originId: 'alborigin',
     });
 
