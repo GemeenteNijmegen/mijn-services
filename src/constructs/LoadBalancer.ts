@@ -12,7 +12,7 @@ import { Construct } from 'constructs';
 
 interface LoadBalancerProps extends StackProps {
   vpc: IVpc;
-  hostedzone: IHostedZone,
+  hostedzone: IHostedZone;
 }
 
 export class ServiceLoadBalancer extends Construct {
