@@ -79,7 +79,7 @@ export class MainStack extends Stack {
     this.openNotificatiesServices(api, platform);
     this.openZaakServices(api, platform);
     this.outputManagementComponent(api, platform);
-    this.openKlantRegistrationServices(api);
+    this.openKlantRegistrationServices(api, platform);
     this.objecttypesService(api, platform);
     this.objectsService(api, platform);
     this.keyCloakService(api, platform);
@@ -330,7 +330,7 @@ export class MainStack extends Stack {
     });
   }
 
-  private openKlantRegistrationServices(api: ApiGateway) {
+  private openKlantRegistrationServices(api: ApiGateway, platform: ContainerPlatform) {
     if (!this.configuration.openKlantRegistrationServices) {
       console.warn(
         'No openKlantRegistrationServices configuration provided. Skipping creation!',
@@ -345,6 +345,7 @@ export class MainStack extends Stack {
             openKlantRegistrationService,
           criticality: this.configuration.criticality,
           key: this.key,
+          loadbalancer: platform.loadBalancer,
         },
       );
     }

@@ -1,6 +1,6 @@
 import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { Distribution, OriginProtocolPolicy, PriceClass, ResponseHeadersPolicy, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { AllowedMethods, CachePolicy, Distribution, OriginProtocolPolicy, OriginRequestPolicy, PriceClass, ResponseHeadersPolicy, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -42,16 +42,24 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
   createDistribution() {
     const certificate = Certificate.fromCertificateArn(this, 'certificate', this.certificateArn());
 
+    // TODO remove this after succesfull deployment
     const origin = aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
       protocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
       originId: 'alborigin',
     });
 
+    aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
+      protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
+      originId: 'alborigin-https',
+      domainName: `alb.${this.props.hostedZone.zoneName}`, // Private DNS hostedzone used for alb.
+    });
+
     const distribution = new Distribution(this, 'MyDistribution', {
       comment: 'Distribution for my services loadbalancer',
       defaultBehavior: {
-        origin,
+        origin: origin,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        allowedMethods: AllowedMethods.ALLOW_ALL,
         responseHeadersPolicy: new ResponseHeadersPolicy(this, 'response-header-policy', {
           comment: 'Response headers allowed for mijn-services',
           customHeadersBehavior: {
@@ -64,6 +72,8 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
             ],
           },
         }),
+        originRequestPolicy: OriginRequestPolicy.ALL_VIEWER,
+        cachePolicy: CachePolicy.CACHING_DISABLED, // Maybe later we can look into this
       },
       defaultRootObject: 'index.html',
       certificate: certificate,
@@ -79,7 +89,7 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
     const group = new SecurityGroupFromId(this, 'cfsg', 'CloudFront-VPCOrigins-Service-SG');
     group.node.addDependency(distribution);
     lb.connections.securityGroups.forEach(sg => {
-      sg.addIngressRule(group.group, Port.HTTP, 'allow access from cloudfront to loadbalancer');
+      sg.addIngressRule(group.group, Port.HTTPS, 'allow access from cloudfront to loadbalancer');
     });
   }
 
