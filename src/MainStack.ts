@@ -75,17 +75,18 @@ export class MainStack extends Stack {
       configuration: this.configuration,
     });
 
+    // Note: The order of which services are created here affects the loadbalancer priority...
+    this.openKlantRegistrationServices(api, platform); // Should be higher in priority than open-klant
     this.openKlantService(api, platform);
     this.openNotificatiesServices(api, platform);
     this.openZaakServices(api, platform);
     this.outputManagementComponent(api, platform);
-    this.openKlantRegistrationServices(api, platform);
     this.objecttypesService(api, platform);
     this.objectsService(api, platform);
     this.keyCloakService(api, platform);
     this.gzacService(api, platform);
-    this.gzacFrontendService(api, platform);
     this.openProductServices(api, platform);
+    this.gzacFrontendService(api, platform); // As this runs on the root /* it should be lowest in priority (accp only)
   }
 
   private openKlantService(api: ApiGateway, platform: ContainerPlatform) {
