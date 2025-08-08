@@ -43,7 +43,6 @@ export class ServiceLoadBalancer extends Construct {
     new ARecord(this, 'a-record', {
       target: RecordTarget.fromAlias(new LoadBalancerTarget(this.alb)),
       zone: privateHostedZone,
-      recordName: `alb.${privateHostedZone.zoneName}`,
     });
 
     this.listener = this.createListener(certificate);
