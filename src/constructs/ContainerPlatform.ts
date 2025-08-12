@@ -53,22 +53,21 @@ export class ContainerPlatform extends Construct {
       vpc: props.vpc,
     });
 
-    if (props.configuration.deployLoadbalancer) {
-      const serviceLoadBalancer = new ServiceLoadBalancer(this, 'lb', {
-        vpc: props.vpc,
-        hostedzone: props.hostedZone,
-      });
-      if (props.configuration.deployCloudFront) {
-        new CloudfrontDistributionForLoadBalancer(this, 'distribution', {
-          certificate: props.certificate,
-          domains: props.domains,
-          loadbalancer: serviceLoadBalancer.alb,
-          hostedZone: props.hostedZone,
-          deployDnsRecords: props.configuration.deployCloudFrontDnsRecords,
-        });
-      }
-      this.loadBalancer = serviceLoadBalancer;
-    }
+
+    const serviceLoadBalancer = new ServiceLoadBalancer(this, 'lb', {
+      vpc: props.vpc,
+      hostedzone: props.hostedZone,
+    });
+
+    new CloudfrontDistributionForLoadBalancer(this, 'distribution', {
+      certificate: props.certificate,
+      domains: props.domains,
+      loadbalancer: serviceLoadBalancer.alb,
+      hostedZone: props.hostedZone,
+    });
+
+    this.loadBalancer = serviceLoadBalancer;
+
 
   }
 }

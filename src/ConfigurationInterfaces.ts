@@ -121,30 +121,6 @@ export interface Configuration {
 
   openProductServices?: OpenProductServicesConfiguration;
 
-
-  /**
-   * Feature flag deploys loadbalancer
-   * @default false
-   */
-  deployLoadbalancer?: boolean;
-
-
-  /**
-   * Feature flag deploys cloudfront
-   * only has effect when loadbalancer is deployed
-   * @default false
-   */
-  deployCloudFront?: boolean;
-
-
-  /**
-   * Feature flag deploys DNS records pointing to cloudfront (turn on after manual migration)
-   * only has effect when loadbalancer is deployed
-   * @default false
-   */
-  deployCloudFrontDnsRecords?: boolean;
-
-
 }
 
 export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
