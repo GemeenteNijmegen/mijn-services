@@ -112,6 +112,10 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-ec2",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-sqs",
       "type": "runtime"
     },

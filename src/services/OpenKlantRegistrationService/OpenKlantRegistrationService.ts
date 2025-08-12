@@ -11,7 +11,8 @@ import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { OpenKlantRegistrationServiceConfiguration } from '../../Configuration';
+import { OpenKlantRegistrationServiceConfiguration } from '../../ConfigurationInterfaces';
+import { ServiceLoadBalancer } from '../../constructs/LoadBalancer';
 import { Statics } from '../../Statics';
 import { ReceiverFunction } from './NotificationReceiver/receiver-function';
 import { RegistrationHandlerFunction } from './RegistrationHandler/registration-handler-function';
@@ -21,6 +22,7 @@ export interface OpenKlantRegistrationServiceProps {
   api: HttpApi;
   criticality: Criticality;
   key: Key;
+  loadbalancer: ServiceLoadBalancer;
 }
 
 export class OpenKlantRegistrationService extends Construct {
@@ -223,6 +225,9 @@ export class OpenKlantRegistrationService extends Construct {
   }
 
   private setupRoute(handler: Function) {
+
+    this.props.loadbalancer.attachLambda(handler, this.props.openKlantRegistrationServiceConfiguration.path);
+
     this.props.api.addRoutes({
       path: this.props.openKlantRegistrationServiceConfiguration.path,
       methods: [HttpMethod.POST],

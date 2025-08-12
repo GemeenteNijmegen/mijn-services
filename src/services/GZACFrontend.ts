@@ -4,7 +4,7 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
-import { GZACFrontendConfiguration } from '../Configuration';
+import { GZACFrontendConfiguration } from '../ConfigurationInterfaces';
 import {
   EcsServiceFactory,
   EcsServiceFactoryProps,

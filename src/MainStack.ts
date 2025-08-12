@@ -5,7 +5,7 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { Configurable, Configuration } from './Configuration';
+import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ApiGateway } from './constructs/ApiGateway';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
@@ -58,21 +58,35 @@ export class MainStack extends Stack {
       alternativeDomainNames: props.configuration.alternativeDomainNames,
     });
 
+
+    const domains = [
+      `cf.${this.hostedzone.zoneName}`,
+      this.hostedzone.zoneName,
+    ];
+    if (props.configuration.alternativeDomainNames) {
+      domains.push(...props.configuration.alternativeDomainNames);
+    }
+
     const platform = new ContainerPlatform(this, 'containers', {
       vpc: this.vpc.vpc,
+      certificate: api.certificate,
+      hostedZone: this.hostedzone,
+      domains,
+      configuration: this.configuration,
     });
 
+    // Note: The order of which services are created here affects the loadbalancer priority...
+    this.openKlantRegistrationServices(api, platform); // Should be higher in priority than open-klant
     this.openKlantService(api, platform);
     this.openNotificatiesServices(api, platform);
     this.openZaakServices(api, platform);
     this.outputManagementComponent(api, platform);
-    this.openKlantRegistrationServices(api);
     this.objecttypesService(api, platform);
     this.objectsService(api, platform);
     this.keyCloakService(api, platform);
     this.gzacService(api, platform);
-    this.gzacFrontendService(api, platform);
     this.openProductServices(api, platform);
+    this.gzacFrontendService(api, platform); // As this runs on the root /* it should be lowest in priority (accp only)
   }
 
   private openKlantService(api: ApiGateway, platform: ContainerPlatform) {
@@ -98,6 +112,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -127,6 +142,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -154,6 +170,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -178,6 +195,7 @@ export class MainStack extends Stack {
           cluster: platform.cluster,
           link: platform.vpcLink,
           namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
           port: 8080,
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
@@ -205,6 +223,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -232,6 +251,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -255,6 +275,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -277,6 +298,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -301,6 +323,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -308,7 +331,7 @@ export class MainStack extends Stack {
     });
   }
 
-  private openKlantRegistrationServices(api: ApiGateway) {
+  private openKlantRegistrationServices(api: ApiGateway, platform: ContainerPlatform) {
     if (!this.configuration.openKlantRegistrationServices) {
       console.warn(
         'No openKlantRegistrationServices configuration provided. Skipping creation!',
@@ -323,6 +346,7 @@ export class MainStack extends Stack {
             openKlantRegistrationService,
           criticality: this.configuration.criticality,
           key: this.key,
+          loadbalancer: platform.loadBalancer,
         },
       );
     }
@@ -346,6 +370,7 @@ export class MainStack extends Stack {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
         port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
@@ -399,3 +424,5 @@ export class MainStack extends Stack {
     return key;
   }
 }
+
+
