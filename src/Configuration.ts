@@ -266,7 +266,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     // Loadbalancer migration steps
     deployLoadbalancer: true, // Phase 1 - Deploy a private loadbalancer
     deployCloudFront: true, // Phase 2 - After loadbalancer is deployed
-    deployCloudFrontDnsRecords: false, // Phase 3 - Only after manually switching DNS records
+    deployCloudFrontDnsRecords: true, // Phase 3 - Only after manually switching DNS records
 
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
