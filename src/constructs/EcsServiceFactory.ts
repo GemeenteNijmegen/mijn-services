@@ -1,11 +1,11 @@
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Duration } from 'aws-cdk-lib';
-import { CfnIntegration, CfnRoute, HttpApi, HttpConnectionType, HttpIntegrationType, VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
+import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem, IFileSystem } from 'aws-cdk-lib/aws-efs';
-import { ApplicationLoadBalancer, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -17,7 +17,6 @@ import { ServiceLoadBalancer } from './LoadBalancer';
 export interface EcsServiceFactoryProps {
   link: VpcLink;
   cluster: Cluster;
-  api: HttpApi;
   loadbalancer: ServiceLoadBalancer;
   namespace: PrivateDnsNamespace;
   vpcLinkSecurityGroup: SecurityGroup;
@@ -136,7 +135,7 @@ export class EcsServiceFactory {
 
     if (options.path || options.isRootPath) {
       service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
-      this.addRoute(service, options.path ?? '', options.id, options.requestParameters, options.apiVersionHeaderValue, options.isRootPath, options.healthCheckPath);
+      this.addRoute(service, options.path ?? '', options.healthCheckPath);
     }
     if (options.volumeMounts) {
       this.createVolumes(service, options.id, options.volumeMounts);
@@ -288,15 +287,7 @@ export class EcsServiceFactory {
     return this.securitygroup;
   }
 
-  private addRoute(service: FargateService,
-    path: string,
-    id: string,
-    requestParameters?: Record<string,
-      string>,
-    apiVersionHeaderValue?: string,
-    isRootPath?: boolean,
-    healthCheckPath?: string,
-  ) {
+  private addRoute(service: FargateService, path: string, healthCheckPath?: string) {
     let props = undefined;
 
     if (healthCheckPath) {
@@ -319,67 +310,6 @@ export class EcsServiceFactory {
       throw Error('Cannot add route if ther\'s no cloudmap service configured');
     }
 
-    // Tja... Ik hoop dit later beter op te lossen (19 feb 2025).
-    let responseParameters: any = undefined;
-    if (apiVersionHeaderValue) {
-      responseParameters = {
-        200: this.apiVersionHeader(apiVersionHeaderValue), //	OK
-        201: this.apiVersionHeader(apiVersionHeaderValue), //	Created
-        202: this.apiVersionHeader(apiVersionHeaderValue), //	Accepted
-        203: this.apiVersionHeader(apiVersionHeaderValue), //	Non - Authoritative Information
-        204: this.apiVersionHeader(apiVersionHeaderValue), //	No Content
-        205: this.apiVersionHeader(apiVersionHeaderValue), //	Reset Content
-        206: this.apiVersionHeader(apiVersionHeaderValue), //	Partial Content
-        207: this.apiVersionHeader(apiVersionHeaderValue), //	Multi - Status
-        208: this.apiVersionHeader(apiVersionHeaderValue), //	Already Reported
-        226: this.apiVersionHeader(apiVersionHeaderValue), //	IM Used
-      };
-    }
-
-    const integration = new CfnIntegration(this.scope, `${id}-integration`, {
-      apiId: this.props.api.apiId,
-      connectionId: this.props.link.vpcLinkId,
-      connectionType: HttpConnectionType.VPC_LINK,
-      integrationType: HttpIntegrationType.HTTP_PROXY,
-      integrationUri: service.cloudMapService?.serviceArn,
-      integrationMethod: 'ANY',
-      payloadFormatVersion: '1.0',
-      requestParameters: {
-        'overwrite:header.X_FORWARDED_PROTO': 'https',
-        ...requestParameters,
-      },
-      responseParameters: responseParameters,
-    });
-
-    integration.node.addDependency(service);
-    integration.node.addDependency(this.props.link);
-
-    let route;
-    if (isRootPath) {
-      route = new CfnRoute(this.scope, `${id}-route`, {
-        apiId: this.props.api.apiId,
-        routeKey: 'ANY /{proxy+}', // TODO: enable root path
-        target: `integrations/${integration.ref}`,
-      });
-    } else {
-      route = new CfnRoute(this.scope, `${id}-route`, {
-        apiId: this.props.api.apiId,
-        routeKey: `ANY /${path}/{proxy+}`, // TODO: enable root path
-        target: `integrations/${integration.ref}`,
-      });
-    }
-    route.addDependency(integration);
-  }
-
-  private apiVersionHeader(apiVersionHeaderValue: string) {
-    return {
-      ResponseParameters: [
-        {
-          Destination: 'overwrite:header.API-version',
-          Source: apiVersionHeaderValue,
-        },
-      ],
-    };
   }
 
 }

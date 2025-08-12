@@ -1,5 +1,4 @@
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
-import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Cluster } from 'aws-cdk-lib/aws-ecs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
@@ -14,8 +13,6 @@ export interface ContainerPlatformProps extends Configurable {
    * The VPC to place the redis instance in.
    */
   vpc: IVpc;
-
-  certificate: ICertificate;
 
   hostedZone: IHostedZone;
 
@@ -60,7 +57,6 @@ export class ContainerPlatform extends Construct {
     });
 
     new CloudfrontDistributionForLoadBalancer(this, 'distribution', {
-      certificate: props.certificate,
       domains: props.domains,
       loadbalancer: serviceLoadBalancer.alb,
       hostedZone: props.hostedZone,

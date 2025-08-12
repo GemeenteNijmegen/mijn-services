@@ -1,5 +1,5 @@
 import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
-import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { AllowedMethods, CachePolicy, Distribution, OriginProtocolPolicy, OriginRequestPolicy, PriceClass, ResponseHeadersPolicy, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -13,7 +13,6 @@ import { SecurityGroupFromId } from './SecurityGroupFromId';
 class CloudfrontDistributionForLoadBalancerProps {
   domains: string[];
   loadbalancer: ApplicationLoadBalancer;
-  certificate: ICertificate;
   hostedZone: IHostedZone;
 }
 export class CloudfrontDistributionForLoadBalancer extends Construct {

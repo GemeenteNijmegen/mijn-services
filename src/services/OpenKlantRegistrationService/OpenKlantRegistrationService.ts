@@ -1,7 +1,5 @@
 import { Criticality, DeadLetterQueue, ErrorMonitoringAlarm } from '@gemeentenijmegen/aws-constructs';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
-import { HttpApi, HttpMethod, MappingValue, ParameterMapping } from 'aws-cdk-lib/aws-apigatewayv2';
-import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { ApplicationLogLevel, Function, LoggingFormat, SystemLogLevel, Tracing } from 'aws-cdk-lib/aws-lambda';
@@ -19,7 +17,6 @@ import { RegistrationHandlerFunction } from './RegistrationHandler/registration-
 
 export interface OpenKlantRegistrationServiceProps {
   openKlantRegistrationServiceConfiguration: OpenKlantRegistrationServiceConfiguration;
-  api: HttpApi;
   criticality: Criticality;
   key: Key;
   loadbalancer: ServiceLoadBalancer;
@@ -225,16 +222,7 @@ export class OpenKlantRegistrationService extends Construct {
   }
 
   private setupRoute(handler: Function) {
-
     this.props.loadbalancer.attachLambda(handler, this.props.openKlantRegistrationServiceConfiguration.path);
-
-    this.props.api.addRoutes({
-      path: this.props.openKlantRegistrationServiceConfiguration.path,
-      methods: [HttpMethod.POST],
-      integration: new HttpLambdaIntegration('integration', handler, {
-        parameterMapping: new ParameterMapping().appendHeader('X-Authorization', MappingValue.requestHeader('Authorization')),
-      }),
-    });
   }
 
   private setupMonitoring(service: RegistrationHandlerFunction) {
