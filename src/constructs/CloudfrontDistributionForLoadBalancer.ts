@@ -1,5 +1,5 @@
 import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
-import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { AllowedMethods, CachePolicy, Distribution, OriginProtocolPolicy, OriginRequestPolicy, PriceClass, ResponseHeadersPolicy, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -13,9 +13,7 @@ import { SecurityGroupFromId } from './SecurityGroupFromId';
 class CloudfrontDistributionForLoadBalancerProps {
   domains: string[];
   loadbalancer: ApplicationLoadBalancer;
-  certificate: ICertificate;
   hostedZone: IHostedZone;
-  deployDnsRecords?: boolean;
 }
 export class CloudfrontDistributionForLoadBalancer extends Construct {
   constructor(scope: Construct, id: string, private props: CloudfrontDistributionForLoadBalancerProps) {
@@ -89,16 +87,14 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
 
 
   private addDnsRecords(distribution: Distribution) {
-    if (this.props.deployDnsRecords) {
-      new ARecord(this, 'a-record', {
-        target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
-        zone: this.props.hostedZone,
-      });
-      new AaaaRecord(this, 'aaaa', {
-        target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
-        zone: this.props.hostedZone,
-      });
-    }
+    new ARecord(this, 'a-record', {
+      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+      zone: this.props.hostedZone,
+    });
+    new AaaaRecord(this, 'aaaa', {
+      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+      zone: this.props.hostedZone,
+    });
     new ARecord(this, 'a-record-cf', {
       target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
       zone: this.props.hostedZone,
