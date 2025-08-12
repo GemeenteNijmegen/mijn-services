@@ -120,8 +120,8 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     criticality: new Criticality('medium'),
     alternativeDomainNames: ['mijn-services.accp.nijmegen.nl'],
     cnameRecords: {
-      _b528d6157c2d9a369bf7d7812881d466: '_189b6977b0d0141d6cbb01e0ba1386e6.djqtsrsxkq.acm-validations.aws.', // mijn-services-accp.csp-nijmegen.nl
-      _22e7332b63fd18e078cd3715738d18d9: '_e5d28e1bd0ff65a32fd6ff0c794963a5.xlfgrmvvlj.acm-validations.aws.', //cf.mijn-services-accp.csp-nijmegen.nl
+      '_b528d6157c2d9a369bf7d7812881d466': '_189b6977b0d0141d6cbb01e0ba1386e6.djqtsrsxkq.acm-validations.aws.', // mijn-services-accp.csp-nijmegen.nl
+      '_22e7332b63fd18e078cd3715738d18d9.cf': '_e5d28e1bd0ff65a32fd6ff0c794963a5.xlfgrmvvlj.acm-validations.aws.', //cf.mijn-services-accp.csp-nijmegen.nl
     },
     createTransferServer: false,
     databases: Statics.databasesAcceptance,
@@ -265,7 +265,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
 
     // Loadbalancer migration steps
     deployLoadbalancer: true, // Phase 1 - Deploy a private loadbalancer
-    deployCloudFront: false, // Phase 2 - After loadbalancer is deployed
+    deployCloudFront: true, // Phase 2 - After loadbalancer is deployed
     deployCloudFrontDnsRecords: false, // Phase 3 - Only after manually switching DNS records
 
     buildEnvironment: Statics.gnBuildEnvironment,
@@ -273,8 +273,8 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     criticality: new Criticality('high'),
     alternativeDomainNames: ['mijn-services.nijmegen.nl'],
     cnameRecords: {
-      _762e893c9ea81e57b34ab11ed543256d:
-        '_1c518863d978cddd100e65875b7c1136.djqtsrsxkq.acm-validations.aws.',
+      '_762e893c9ea81e57b34ab11ed543256d': '_1c518863d978cddd100e65875b7c1136.djqtsrsxkq.acm-validations.aws.',
+      '_b1b085f6b7bb12e30a7deaa16d9137e9.cf': '_8ea358006b327389c8e5c4e02e60bbfd.xlfgrmvvlj.acm-validations.aws.',
     },
     databases: Statics.databasesProduction,
     databaseSnapshotRetentionDays: 35,
