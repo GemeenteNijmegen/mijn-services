@@ -72,10 +72,7 @@ export class GZACFrontendService extends Construct {
     // Main service container
     // const container =
     task.addContainer('gzac-frontend', {
-      // image: ContainerImage.fromAsset('./src/containers/gzac-frontend'),
-      image: ContainerImage.fromRegistry(
-        this.props.serviceConfiguration.image,
-      ),
+      image: ContainerImage.fromAsset('./src/containers/gzac-frontend'),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
