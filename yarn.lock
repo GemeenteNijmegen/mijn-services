@@ -148,10 +148,10 @@
     "@aws-lambda-powertools/commons" "2.25.1"
     aws-xray-sdk-core "^3.10.3"
 
-"@aws-sdk/client-dynamodb@^3.864.0":
-  version "3.864.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.864.0.tgz#50b76a6751ea11676809bc52bd71d8ac34d2d895"
-  integrity sha512-Z+8qCU8A8RKI/vaMZx3bUG3ZIvEBZzYRIEZA06Qx0QHttkDV/i2Q31Bs98Za/UV0aMXJYsgpHCvXeRgR7r8hYA==
+"@aws-sdk/client-dynamodb@^3.868.0":
+  version "3.868.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.868.0.tgz#be8a332f57f1d6ada2c0f9547bffb02caffd19df"
+  integrity sha512-a2uKLRplH3vTHgTHr+MaZ1YH0Sy0yVHK9rhM/drktxgXehMf4p7dZtt783c9SEupZvo46LxXryvwifoUdL4nRg==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -197,10 +197,10 @@
     tslib "^2.6.2"
     uuid "^9.0.1"
 
-"@aws-sdk/client-ec2@^3.866.0":
-  version "3.866.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-ec2/-/client-ec2-3.866.0.tgz#1c23d09f062241dae1e02502e38529fca8c307e9"
-  integrity sha512-Ks5rrnFSBdT+jPZzTkodkQcuwgbmPYJPLWB5b0Jnbu68ec7oFEHoV6w5NZBymsdOg3MPNXJCdkQZejpIeDRHiA==
+"@aws-sdk/client-ec2@^3.868.0":
+  version "3.868.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-ec2/-/client-ec2-3.868.0.tgz#6688dc14faf02738e6c2285d41077581c3adb22d"
+  integrity sha512-IceL6+7+ynlWjIVk4e1I7h/GviHPW5CeBxp7TtJNqcp+yTLK0DprLa6ZdY2PuraGst/QaD3FuB0KyA8YnUBVuw==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -1787,10 +1787,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@middy/core@^6.4.2":
-  version "6.4.2"
-  resolved "https://registry.yarnpkg.com/@middy/core/-/core-6.4.2.tgz#a6d92c75fd3c8e42ed1833c0e8947b89dc1e621a"
-  integrity sha512-qBg5F8AWG04OZBc/c+3FynjM9fAwdGDfUFUD4NGz45tsMdjrDjlBU4F16ZW3L3bPW/+vz3WpJ/hwU1jx3EjNAg==
+"@middy/core@^6.4.3":
+  version "6.4.3"
+  resolved "https://registry.yarnpkg.com/@middy/core/-/core-6.4.3.tgz#23d94797b07a522c6424302a57fa283f8dc55fb9"
+  integrity sha512-bVb6fwG4FhmJFbxJPumr/y7/ujy7b3NpL6d1ld4uuxUy7/FO8l5tvTdsEk4cDqsrnWFq6M6bmAvfFBPgAALi1A==
 
 "@napi-rs/wasm-runtime@^0.2.11":
   version "0.2.12"
@@ -3833,9 +3833,9 @@ ecdsa-sig-formatter@1.0.11:
     safe-buffer "^5.0.1"
 
 electron-to-chromium@^1.5.199:
-  version "1.5.200"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.200.tgz#adffa5db97390ce9d48987f528117a608ed0d7c9"
-  integrity sha512-rFCxROw7aOe4uPTfIAx+rXv9cEcGx+buAF4npnhtTqCJk5KDFRnh3+KYj7rdVh6lsFt5/aPs+Irj9rZ33WMA7w==
+  version "1.5.201"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.201.tgz#bdc8f13e828e2f65d2c925ab2e8b02604928632f"
+  integrity sha512-ZG65vsrLClodGqywuigc+7m0gr4ISoTQttfVh7nfpLv0M7SIwF4WbFNEOywcqTiujs12AUeeXbFyQieDICAIxg==
 
 emitter-listener@^1.0.1:
   version "1.1.2"
@@ -4281,9 +4281,9 @@ fb-watchman@^2.0.0:
     bser "2.1.1"
 
 fdir@^6.4.4:
-  version "6.4.6"
-  resolved "https://registry.yarnpkg.com/fdir/-/fdir-6.4.6.tgz#2b268c0232697063111bbf3f64810a2a741ba281"
-  integrity sha512-hiFoqpyZcfNm1yc4u8oWCf9A2c4D3QjCrks3zmoVKVxpQRzmPNar1hUJcBG2RQHvEVGDN+Jm81ZheVLAQMK6+w==
+  version "6.5.0"
+  resolved "https://registry.yarnpkg.com/fdir/-/fdir-6.5.0.tgz#ed2ab967a331ade62f18d077dae192684d50d350"
+  integrity sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==
 
 figures@^3.2.0:
   version "3.2.0"
