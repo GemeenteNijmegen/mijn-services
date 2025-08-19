@@ -147,6 +147,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       image: 'maykinmedia/objects-api:3.0.0',
       logLevel: 'DEBUG',
       debug: true,
+      taskSize: {
+        cpu: '1024', // 1vCPU
+        memory: '2048', // 2GB
+      }
     },
     keyCloackService: {
       image: 'quay.io/keycloak/keycloak:24.0.1',
