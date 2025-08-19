@@ -150,7 +150,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       taskSize: {
         cpu: '1024', // 1vCPU
         memory: '2048', // 2GB
-      }
+      },
     },
     keyCloackService: {
       image: 'quay.io/keycloak/keycloak:24.0.1',
