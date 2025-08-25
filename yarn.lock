@@ -1787,10 +1787,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@middy/core@^6.4.3":
-  version "6.4.3"
-  resolved "https://registry.yarnpkg.com/@middy/core/-/core-6.4.3.tgz#23d94797b07a522c6424302a57fa283f8dc55fb9"
-  integrity sha512-bVb6fwG4FhmJFbxJPumr/y7/ujy7b3NpL6d1ld4uuxUy7/FO8l5tvTdsEk4cDqsrnWFq6M6bmAvfFBPgAALi1A==
+"@middy/core@^6.4.4":
+  version "6.4.4"
+  resolved "https://registry.yarnpkg.com/@middy/core/-/core-6.4.4.tgz#c73948f6b138aa8e2069853d2269426817a92a9d"
+  integrity sha512-T1WebTmwyLaK+daZ0JBT6K9TS9v2w6roAVzZDgsafXSb1vztrkLOiKPcYos+f5c5IraYMP2QK8EH5baFozMisQ==
 
 "@napi-rs/wasm-runtime@^0.2.11":
   version "0.2.12"
