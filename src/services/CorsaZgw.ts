@@ -93,7 +93,7 @@ export class CorsaZgwService extends Construct {
       LOG_LEVEL: this.props.serviceConfiguration.logLevel.toLocaleLowerCase(),
 
       // Cache store
-      CACHE_STORE: 'file'
+      CACHE_STORE: 'file',
 
     };
 
