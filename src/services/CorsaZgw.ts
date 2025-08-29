@@ -71,8 +71,8 @@ export class CorsaZgwService extends Construct {
       DB_DATABASE: Statics.databaseCorsaZgwDevService,
 
       // App settings
-      APP_NAME: "Corsa ZGW",
-      APP_ENV: "development",
+      APP_NAME: 'Corsa ZGW',
+      APP_ENV: 'development',
       // APP_KEY: "base64: D+ YesZhL + Dy4N84sMUiik0MQc6meK5210MAEuY0nEEM: ", // TODO figure this out
       APP_DEBUG: this.props.serviceConfiguration.debug == true ? 'true' : 'false',
       APP_URL: `https://${this.props.hostedzone.zoneName}/${this.props.serviceConfiguration.path}`,
@@ -82,7 +82,7 @@ export class CorsaZgwService extends Construct {
       APP_FALLBACK_LOCALE: 'en',
       APP_FAKER_LOCALE: 'en_US',
 
-      // Other stuff? 
+      // Other stuff?
       APP_MAINTENANCE_DRIVER: 'file',
       PHP_CLI_SERVER_WORKERS: '4',
       BCRYPT_ROUNDS: '12',
