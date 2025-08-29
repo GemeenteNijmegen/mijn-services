@@ -55,7 +55,7 @@ export class CorsaZgwService extends Construct {
       generateSecretString: {
         excludePunctuation: true,
       },
-    })
+    });
 
     this.setupService();
   }
