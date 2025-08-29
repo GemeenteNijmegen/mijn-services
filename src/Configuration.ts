@@ -70,7 +70,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         logLevel: 'DEBUG',
         path: 'corsa-zgw-dev',
         debug: true,
-        imageTag: '24e1cb130bb90fa12e72a7a3ae4beba0f74b394c',
+        // imageTag: '24e1cb130bb90fa12e72a7a3ae4beba0f74b394c', // USE LATEST
       },
     ],
     outputManagementComponents: [

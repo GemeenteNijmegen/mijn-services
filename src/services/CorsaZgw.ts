@@ -90,7 +90,7 @@ export class CorsaZgwService extends Construct {
       LOG_CHANNEL: 'stack',
       LOG_STACK: 'single',
       LOG_DEPRECATIONS_CHANNEL: 'null',
-      LOG_LEVEL: 'debug',
+      LOG_LEVEL: this.props.serviceConfiguration.logLevel.toLocaleLowerCase(),
 
     };
 
@@ -108,7 +108,7 @@ export class CorsaZgwService extends Construct {
     // Configuration container
     const initContainer = task.addContainer('setup', {
       image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
-      command: ['/bin/init.sh'],
+      command: ['/init.sh'],
       essential: false,
       readonlyRootFilesystem: false,
       logging: new AwsLogDriver({
