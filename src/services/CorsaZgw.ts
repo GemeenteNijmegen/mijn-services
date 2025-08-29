@@ -39,7 +39,7 @@ export class CorsaZgwService extends Construct {
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
   // private readonly superuserCredentials: ISecret;
-  // private readonly secretKey: ISecret;
+  private readonly secretKey: ISecret;
 
   constructor(scope: Construct, id: string, props: CorsaZgwProps) {
     super(scope, id);
@@ -50,6 +50,13 @@ export class CorsaZgwService extends Construct {
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
 
+    this.secretKey = new SecretParameter(this, 'secret-key', {
+      description: 'Secret for CorsaZGW Service - ' + id,
+      generateSecretString: {
+        excludePunctuation: true,
+      },
+    })
+
     this.setupService();
   }
 
@@ -57,6 +64,7 @@ export class CorsaZgwService extends Construct {
     return {
       DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       DB_USERNAME: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+      APP_KEY: Secret.fromSecretsManager(this.secretKey),
     };
   }
 
@@ -72,7 +80,6 @@ export class CorsaZgwService extends Construct {
       // App settings
       APP_NAME: 'Corsa ZGW',
       APP_ENV: 'development',
-      // APP_KEY: "base64: D+ YesZhL + Dy4N84sMUiik0MQc6meK5210MAEuY0nEEM: ", // TODO figure this out
       APP_DEBUG: this.props.serviceConfiguration.debug == true ? 'true' : 'false',
       APP_URL: `https://${this.props.hostedzone.zoneName}/${this.props.serviceConfiguration.path}`,
 
