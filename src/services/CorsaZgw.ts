@@ -1,10 +1,11 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
-import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -22,6 +23,8 @@ export interface CorsaZgwProps {
   readonly path: string;
 
   readonly repository: Repository;
+
+  readonly hostedzone: IHostedZone;
 
   /**
    * The configuration for the open configuration installation
@@ -51,13 +54,47 @@ export class CorsaZgwService extends Construct {
     this.setupService();
   }
 
-
-  private getEnvironmentSecrets() {
-    return {};
+  private getEnvironmentSecrets(): Record<string, Secret> {
+    return {
+      DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+      DB_USERNAME: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+    };
   }
 
-  private getEnvironmentVariables() {
-    return {};
+  private getEnvironmentVariables(): Record<string, string> {
+    return {
+
+      // DB settings
+      DB_CONNECTION: 'pgsql',
+      DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
+      DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
+      DB_DATABASE: Statics.databaseCorsaZgwDevService,
+
+      // App settings
+      APP_NAME: "Corsa ZGW",
+      APP_ENV: "development",
+      // APP_KEY: "base64: D+ YesZhL + Dy4N84sMUiik0MQc6meK5210MAEuY0nEEM: ", // TODO figure this out
+      APP_DEBUG: this.props.serviceConfiguration.debug == true ? 'true' : 'false',
+      APP_URL: `https://${this.props.hostedzone.zoneName}/${this.props.serviceConfiguration.path}`,
+
+      // Language
+      APP_LOCALE: 'nl',
+      APP_FALLBACK_LOCALE: 'en',
+      APP_FAKER_LOCALE: 'en_US',
+
+      // Other stuff? 
+      APP_MAINTENANCE_DRIVER: 'file',
+      PHP_CLI_SERVER_WORKERS: '4',
+      BCRYPT_ROUNDS: '12',
+
+      // Logging
+      LOG_CHANNEL: 'stack',
+      LOG_STACK: 'single',
+      LOG_DEPRECATIONS_CHANNEL: 'null',
+      LOG_LEVEL: 'debug',
+
+    };
+
   }
 
   private setupService() {

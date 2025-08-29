@@ -338,6 +338,7 @@ export class MainStack extends Stack {
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
         serviceConfiguration: corsaZgwServiceConfig,
+        hostedzone: this.hostedzone,
       });
     }
   }
