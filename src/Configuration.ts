@@ -64,6 +64,14 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
+    corsaZgwServices: [
+      {
+        cdkId: 'corsa-zgw-dev',
+        logLevel: 'DEBUG',
+        path: 'corsa-zgw-dev',
+        debug: true,
+      },
+    ],
     outputManagementComponents: [
       {
         cdkId: 'local-omc',

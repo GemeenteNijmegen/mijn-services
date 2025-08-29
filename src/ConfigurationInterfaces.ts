@@ -121,6 +121,8 @@ export interface Configuration {
 
   openProductServices?: OpenProductServicesConfiguration;
 
+  corsaZgwServices?: CorsaZgwServiceConfiguration[];
+
 }
 
 export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
@@ -450,4 +452,20 @@ export interface CeleryTaskSizeConfiguration {
     cpu: string;
     memory: string;
   };
+}
+
+
+export interface CorsaZgwServiceConfiguration extends MainTaskSizeConfiguration {
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+
+  cdkId: string;
+
+  path: string;
 }

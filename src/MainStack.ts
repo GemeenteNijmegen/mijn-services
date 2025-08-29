@@ -8,7 +8,9 @@ import { Construct } from 'constructs';
 import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
+import { EcrRepository } from './constructs/EcrRepository';
 import { CacheDatabase } from './constructs/Redis';
+import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
 import { GZACFrontendService } from './services/GZACFrontend';
 import { KeyCloakService } from './services/KeyCloak';
@@ -78,6 +80,7 @@ export class MainStack extends Stack {
     this.gzacService(platform);
     this.openProductServices(platform);
     this.gzacFrontendService(platform); // As this runs on the root /* it should be lowest in priority (accp only)
+    this.corsaZgwServices(platform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
@@ -309,6 +312,33 @@ export class MainStack extends Stack {
       },
       serviceConfiguration: this.configuration.gzacService,
     });
+  }
+
+  private corsaZgwServices(platform: ContainerPlatform) {
+    if (!this.configuration.corsaZgwServices) {
+      console.warn('No corsa zgw services configured, skipping creation!');
+      return;
+    }
+
+    const repo = new EcrRepository(this, 'corsa-zgw-ecr', 'CorsaZgwService');
+
+    for (const corsaZgwServiceConfig of this.configuration.corsaZgwServices) {
+      new CorsaZgwService(this, corsaZgwServiceConfig.cdkId, {
+        redis: this.cache,
+        redisChannel: 1,
+        key: this.key,
+        path: corsaZgwServiceConfig.path,
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          loadbalancer: platform.loadBalancer,
+          namespace: platform.namespace,
+          port: 80,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+        serviceConfiguration: corsaZgwServiceConfig,
+      });
+    }
   }
 
   private openKlantRegistrationServices(platform: ContainerPlatform) {
