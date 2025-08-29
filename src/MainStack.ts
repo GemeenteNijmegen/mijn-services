@@ -325,7 +325,6 @@ export class MainStack extends Stack {
     for (const corsaZgwServiceConfig of this.configuration.corsaZgwServices) {
       new CorsaZgwService(this, corsaZgwServiceConfig.cdkId, {
         redis: this.cache,
-        redisChannel: 1,
         key: this.key,
         path: corsaZgwServiceConfig.path,
         repository: repo.repository,
@@ -334,7 +333,7 @@ export class MainStack extends Stack {
           link: platform.vpcLink,
           loadbalancer: platform.loadBalancer,
           namespace: platform.namespace,
-          port: 80,
+          port: 8080,
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
         serviceConfiguration: corsaZgwServiceConfig,

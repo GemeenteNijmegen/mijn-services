@@ -17,7 +17,6 @@ import { Statics } from '../Statics';
 export interface CorsaZgwProps {
 
   readonly redis: CacheDatabase;
-  readonly redisChannel: number;
 
   readonly service: EcsServiceFactoryProps;
   readonly path: string;
@@ -156,6 +155,7 @@ export class CorsaZgwService extends Construct {
       options: {
         desiredCount: 1,
       },
+      healthCheckPath: '/admin',
     });
     this.setupConnectivity('corsa-zgw', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
