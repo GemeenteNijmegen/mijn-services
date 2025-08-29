@@ -468,4 +468,9 @@ export interface CorsaZgwServiceConfiguration extends MainTaskSizeConfiguration 
   cdkId: string;
 
   path: string;
+
+  /**
+   * @default latest
+   */
+  imageTag?: string;
 }

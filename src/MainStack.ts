@@ -328,6 +328,7 @@ export class MainStack extends Stack {
         redisChannel: 1,
         key: this.key,
         path: corsaZgwServiceConfig.path,
+        repository: repo.repository,
         service: {
           cluster: platform.cluster,
           link: platform.vpcLink,
