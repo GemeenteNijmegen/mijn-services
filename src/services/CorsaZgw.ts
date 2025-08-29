@@ -1,7 +1,7 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
-import { AwsLogDriver, ContainerImage, Protocol } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -69,6 +69,20 @@ export class CorsaZgwService extends Construct {
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
 
+    // Configuration container
+    const initContainer = task.addContainer('setup', {
+      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      command: ['/bin/init.sh'],
+      essential: false,
+      readonlyRootFilesystem: false,
+      logging: new AwsLogDriver({
+        streamPrefix: 'setup',
+        logGroup: this.logs,
+      }),
+      secrets: this.getEnvironmentSecrets(),
+      environment: this.getEnvironmentVariables(),
+    });
+
     // Main service container
     const container = task.addContainer('main', {
       image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
@@ -84,18 +98,19 @@ export class CorsaZgwService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // TODO make this true for security reasons
       secrets: this.getEnvironmentSecrets(),
       environment: this.getEnvironmentVariables(),
+      essential: true,
       logging: new AwsLogDriver({
         streamPrefix: 'corsa-zgw',
         logGroup: this.logs,
       }),
     });
-
-    // this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
-    // 1st Filesystem write access - initialization container
-    // this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
+    container.addContainerDependencies({
+      container: initContainer,
+      condition: ContainerDependencyCondition.COMPLETE,
+    });
 
     const service = this.serviceFactory.createService({
       id: 'corsa-zgw',
