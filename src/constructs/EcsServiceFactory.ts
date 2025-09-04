@@ -91,7 +91,7 @@ export interface CreateEcsServiceOptions {
    * Set to true when using subdomain based alb rules.
    * @default - no subdomain is set
    */
-  subdomain?: string;
+  domain?: string;
 }
 
 export class EcsServiceFactory {
@@ -144,8 +144,8 @@ export class EcsServiceFactory {
       this.addRoute(service, options.path ?? '', options.healthCheckPath);
     }
 
-    if (options.subdomain) {
-      this.props.loadbalancer.attachECSService(service, options.subdomain, undefined, undefined, true); // TODO make healthcheck configurabel
+    if (options.domain) {
+      this.props.loadbalancer.attachECSService(service, options.domain, undefined, undefined, true); // TODO make healthcheck configurabel
     }
 
     if (options.volumeMounts) {

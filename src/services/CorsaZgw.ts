@@ -36,7 +36,7 @@ export interface CorsaZgwProps {
 
 export class CorsaZgwService extends Construct {
 
-  private static readonly SUBDOMAIN = 'corsazgw';
+  private static readonly SUBDOMAIN = 'corsa-zgw';
 
   private readonly logs: LogGroup;
   private readonly props: CorsaZgwProps;
@@ -173,7 +173,7 @@ export class CorsaZgwService extends Construct {
     const service = this.serviceFactory.createService({
       id: 'corsa-zgw',
       task: task,
-      subdomain: CorsaZgwService.SUBDOMAIN,
+      domain: `${CorsaZgwService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`,
       options: {
         desiredCount: 1,
       },
