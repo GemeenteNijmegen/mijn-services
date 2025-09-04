@@ -42,14 +42,14 @@ export class UsEastCertificateStack extends Stack {
     const validation = alternativeDomainNames ? CertificateValidation.fromDns() : CertificateValidation.fromDns(hostedZone);
 
     const cnames = [
-      `*.${hostedZone.zoneName}`, // All subdomains
+      hostedZone.zoneName,
     ];
     if (alternativeDomainNames) {
       cnames.push(...alternativeDomainNames);
     }
 
     const cert = new Certificate(this, 'certificate', {
-      domainName: hostedZone.zoneName,
+      domainName: `*.${hostedZone.zoneName}`, // All subdomains (should be top)
       validation: validation,
       subjectAlternativeNames: cnames,
     });
