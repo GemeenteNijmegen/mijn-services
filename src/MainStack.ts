@@ -314,31 +314,31 @@ export class MainStack extends Stack {
   }
 
   private corsaZgwServices(platform: ContainerPlatform) {
-    if (!this.configuration.corsaZgwServices) {
+    if (!this.configuration.corsaZgwService) {
       console.warn('No corsa zgw services configured, skipping creation!');
       return;
     }
 
     const repo = new EcrRepository(this, 'corsa-zgw-ecr', 'CorsaZgwService');
 
-    for (const corsaZgwServiceConfig of this.configuration.corsaZgwServices) {
-      new CorsaZgwService(this, corsaZgwServiceConfig.cdkId, {
-        redis: this.cache,
-        key: this.key,
-        path: corsaZgwServiceConfig.path,
-        repository: repo.repository,
-        service: {
-          cluster: platform.cluster,
-          link: platform.vpcLink,
-          loadbalancer: platform.loadBalancer,
-          namespace: platform.namespace,
-          port: 8080,
-          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
-        },
-        serviceConfiguration: corsaZgwServiceConfig,
-        hostedzone: this.hostedzone,
-      });
-    }
+    const corsaZgwServiceConfig = this.configuration.corsaZgwService;
+
+    new CorsaZgwService(this, 'corsa-zgw-service', {
+      redis: this.cache,
+      key: this.key,
+      repository: repo.repository,
+      service: {
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        loadbalancer: platform.loadBalancer,
+        namespace: platform.namespace,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+      serviceConfiguration: corsaZgwServiceConfig,
+      hostedzone: this.hostedzone,
+    });
+
   }
 
   private openKlantRegistrationServices(platform: ContainerPlatform) {

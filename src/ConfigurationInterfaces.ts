@@ -121,7 +121,7 @@ export interface Configuration {
 
   openProductServices?: OpenProductServicesConfiguration;
 
-  corsaZgwServices?: CorsaZgwServiceConfiguration[];
+  corsaZgwService?: CorsaZgwServiceConfiguration;
 
 }
 
@@ -464,11 +464,6 @@ export interface CorsaZgwServiceConfiguration extends MainTaskSizeConfiguration 
    * Enable debug mode and logging
    */
   debug?: boolean;
-
-  cdkId: string;
-
-  path: string;
-
   /**
    * @default latest
    */

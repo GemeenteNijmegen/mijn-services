@@ -64,15 +64,11 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
-    corsaZgwServices: [
-      {
-        cdkId: 'corsa-zgw-dev',
-        logLevel: 'DEBUG',
-        path: 'corsa-zgw-dev',
-        debug: true,
-        // imageTag: '24e1cb130bb90fa12e72a7a3ae4beba0f74b394c', // USE LATEST
-      },
-    ],
+    corsaZgwService: {
+      logLevel: 'DEBUG',
+      debug: true,
+      // imageTag: '24e1cb130bb90fa12e72a7a3ae4beba0f74b394c', // USE LATEST
+    },
     outputManagementComponents: [
       {
         cdkId: 'local-omc',

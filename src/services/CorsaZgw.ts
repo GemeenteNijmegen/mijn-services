@@ -22,7 +22,6 @@ export interface CorsaZgwProps {
   readonly redis: CacheDatabase;
 
   readonly service: EcsServiceFactoryProps;
-  readonly path: string;
 
   readonly repository: Repository;
 
@@ -94,7 +93,7 @@ export class CorsaZgwService extends Construct {
       APP_NAME: 'Corsa ZGW',
       APP_ENV: 'development',
       APP_DEBUG: this.props.serviceConfiguration.debug == true ? 'true' : 'false',
-      APP_URL: `https://${this.props.hostedzone.zoneName}/${this.props.serviceConfiguration.path}`,
+      APP_URL: `https://${this.props.hostedzone.zoneName}`,
 
       // Language
       APP_LOCALE: 'nl',
