@@ -76,6 +76,7 @@ export class ServiceLoadBalancer extends Construct {
     priority?: number,
     props?: AddApplicationTargetsProps,
     routeBySubdomain?: boolean,
+    targetGroupId?: string,
   ) {
     const defaultHealthCheck = {
       enabled: true,
@@ -102,7 +103,7 @@ export class ServiceLoadBalancer extends Construct {
       deregistrationDelay: Duration.minutes(1),
     };
     console.debug(listenerProps);
-    this.listener.addTargets(`${pathOrSubdomain}-target`, { ...listenerProps, ...props });
+    this.listener.addTargets(`${targetGroupId ?? pathOrSubdomain}-target`, { ...listenerProps, ...props });
     this.priority += 1;
   }
 

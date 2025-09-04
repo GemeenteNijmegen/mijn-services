@@ -145,7 +145,7 @@ export class EcsServiceFactory {
     }
 
     if (options.domain) {
-      this.props.loadbalancer.attachECSService(service, options.domain, undefined, undefined, true); // TODO make healthcheck configurabel
+      this.props.loadbalancer.attachECSService(service, options.domain, undefined, undefined, true, options.id); // TODO make healthcheck configurabel
     }
 
     if (options.volumeMounts) {
