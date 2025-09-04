@@ -36,7 +36,7 @@ export interface CorsaZgwProps {
 
 export class CorsaZgwService extends Construct {
 
-  private static readonly SUBDOMAIN = 'corsa-zgw';
+  private static readonly SUBDOMAIN = 'corsazgw';
 
   private readonly logs: LogGroup;
   private readonly props: CorsaZgwProps;
