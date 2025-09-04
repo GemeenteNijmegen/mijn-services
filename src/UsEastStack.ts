@@ -61,7 +61,7 @@ export class UsEastCertificateStack extends Stack {
 
     const wildcardCert = new Certificate(this, 'wildcard-certificate', {
       domainName: `*.${hostedZone.zoneName}`,
-      validation: validation,
+      validation: CertificateValidation.fromDns(),
       subjectAlternativeNames: [hostedZone.zoneName, ...cnames],
     });
 
