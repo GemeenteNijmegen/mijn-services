@@ -231,7 +231,7 @@ export class CorsaZgwService extends Construct {
       region: 'us-east-1',
       timeout: Duration.seconds(10),
     });
-    const certificateArn = parameters.get(Statics.ssmCertificateArn);
+    const certificateArn = parameters.get(Statics.ssmWildcardCertificateArn);
     return Certificate.fromCertificateArn(this, 'cert', certificateArn);
   }
 
