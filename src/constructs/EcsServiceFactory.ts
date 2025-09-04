@@ -86,6 +86,12 @@ export interface CreateEcsServiceOptions {
    * @default - no api version header is set in the response
    */
   apiVersionHeaderValue?: string;
+
+  /**
+   * Set to true when using subdomain based alb rules.
+   * @default - no subdomain is set
+   */
+  subdomain?: string;
 }
 
 export class EcsServiceFactory {
@@ -137,6 +143,11 @@ export class EcsServiceFactory {
       service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
       this.addRoute(service, options.path ?? '', options.healthCheckPath);
     }
+
+    if (options.subdomain) {
+      this.props.loadbalancer.attachECSService(service, options.subdomain, undefined, undefined, true); // TODO make healthcheck configurabel
+    }
+
     if (options.volumeMounts) {
       this.createVolumes(service, options.id, options.volumeMounts);
     }

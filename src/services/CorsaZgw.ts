@@ -1,4 +1,5 @@
 import { Duration, Token } from 'aws-cdk-lib';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
@@ -8,10 +9,12 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
 import { CorsaZgwServiceConfiguration } from '../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
+import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { Statics } from '../Statics';
 
 export interface CorsaZgwProps {
@@ -34,12 +37,15 @@ export interface CorsaZgwProps {
 
 export class CorsaZgwService extends Construct {
 
+  private static readonly SUBDOMAIN = 'corsa-zgw';
+
   private readonly logs: LogGroup;
   private readonly props: CorsaZgwProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
   // private readonly superuserCredentials: ISecret;
   private readonly secretKey: ISecret;
+  private readonly distribution: SubdomainCloudfront;
 
   constructor(scope: Construct, id: string, props: CorsaZgwProps) {
     super(scope, id);
@@ -47,6 +53,13 @@ export class CorsaZgwService extends Construct {
 
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+    this.distribution = new SubdomainCloudfront(this, 'subdomain-cloudfront', {
+      certificate: this.certificate(),
+      hostedZone: this.props.hostedzone,
+      loadbalancer: this.props.service.loadbalancer.alb,
+      subdomain: CorsaZgwService.SUBDOMAIN,
+    });
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
 
@@ -161,11 +174,11 @@ export class CorsaZgwService extends Construct {
     const service = this.serviceFactory.createService({
       id: 'corsa-zgw',
       task: task,
-      path: this.props.path,
+      subdomain: CorsaZgwService.SUBDOMAIN,
       options: {
         desiredCount: 1,
       },
-      healthCheckPath: '/admin',
+      // healthCheckPath: '/admin', // Not configurabel yet while using subdomain
     });
     this.setupConnectivity('corsa-zgw', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
@@ -206,6 +219,21 @@ export class CorsaZgwService extends Construct {
     this.databaseCredentials.grantRead(role);
     // this.superuserCredentials.grantRead(role);
     // this.secretKey.grantRead(role);
+  }
+
+  /**
+   * Get the certificate ARN from parameter store in us-east-1
+   * TODO find a better place for this
+   * @returns string Certificate ARN
+   */
+  private certificate() {
+    const parameters = new RemoteParameters(this, 'params', {
+      path: `${Statics.ssmWildcardCertificateArn}/`,
+      region: 'us-east-1',
+      timeout: Duration.seconds(10),
+    });
+    const certificateArn = parameters.get(Statics.ssmCertificateArn);
+    return Certificate.fromCertificateArn(this, 'cert', certificateArn);
   }
 
 }
