@@ -95,16 +95,6 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
       target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
       zone: this.props.hostedZone,
     });
-    new ARecord(this, 'a-record-cf', {
-      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
-      zone: this.props.hostedZone,
-      recordName: `cf.${this.props.hostedZone.zoneName}`,
-    });
-    new AaaaRecord(this, 'aaaa-recrod-cf', {
-      target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
-      zone: this.props.hostedZone,
-      recordName: `cf.${this.props.hostedZone.zoneName}`,
-    });
   }
 
 }

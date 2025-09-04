@@ -54,7 +54,6 @@ export class MainStack extends Stack {
     });
 
     const domains = [
-      `cf.${this.hostedzone.zoneName}`,
       this.hostedzone.zoneName,
     ];
     if (props.configuration.alternativeDomainNames) {
