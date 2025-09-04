@@ -227,7 +227,7 @@ export class CorsaZgwService extends Construct {
    */
   private certificate() {
     const parameters = new RemoteParameters(this, 'params', {
-      path: `${Statics.ssmWildcardCertificateArn}/`,
+      path: `${Statics.ssmWildcardCertificatePath}/`,
       region: 'us-east-1',
       timeout: Duration.seconds(10),
     });
