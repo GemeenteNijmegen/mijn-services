@@ -24,12 +24,11 @@ export class ServiceLoadBalancer extends Construct {
 
     const privateHostedZone = new PrivateHostedZone(this, 'private-hostedzone', {
       vpc: props.vpc,
-      zoneName: props.hostedzone.zoneName,
+      zoneName: `alb.${props.hostedzone.zoneName}`,
       comment: 'Used for privat ALB dns name',
     });
     const certificate = new Certificate(this, 'cert', {
-      domainName: `*.${props.hostedzone.zoneName}`,
-      subjectAlternativeNames: [props.hostedzone.zoneName],
+      domainName: `alb.${props.hostedzone.zoneName}`,
       validation: CertificateValidation.fromDns(props.hostedzone), // Note: we use the public hosted zone here
     });
 
@@ -42,7 +41,6 @@ export class ServiceLoadBalancer extends Construct {
     });
 
     new ARecord(this, 'a-record', {
-      recordName: `*.${props.hostedzone.zoneName}`,
       target: RecordTarget.fromAlias(new LoadBalancerTarget(this.alb)),
       zone: privateHostedZone,
     });
