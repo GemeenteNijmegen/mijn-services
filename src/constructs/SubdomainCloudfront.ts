@@ -28,7 +28,7 @@ export class SubdomainCloudfront extends Construct {
     const httpsOrigin = aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
       protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
       originId: `${this.props.subdomain}-https`,
-      domainName: this.domain,
+      domainName: `alb.${this.props.hostedZone.zoneName}`,
     });
 
     const distribution = new Distribution(this, 'distribution', {
