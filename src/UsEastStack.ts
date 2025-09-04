@@ -42,14 +42,14 @@ export class UsEastCertificateStack extends Stack {
     const validation = alternativeDomainNames ? CertificateValidation.fromDns() : CertificateValidation.fromDns(hostedZone);
 
     const cnames = [
-      hostedZone.zoneName,
+      `cf.${hostedZone.zoneName}`,
     ];
     if (alternativeDomainNames) {
       cnames.push(...alternativeDomainNames);
     }
 
     const cert = new Certificate(this, 'certificate', {
-      domainName: `*.${hostedZone.zoneName}`, // All subdomains (should be top)
+      domainName: hostedZone.zoneName,
       validation: validation,
       subjectAlternativeNames: cnames,
     });
@@ -57,6 +57,17 @@ export class UsEastCertificateStack extends Stack {
     new SSM.StringParameter(this, 'cert-arn', {
       stringValue: cert.certificateArn,
       parameterName: Statics.ssmCertificateArn,
+    });
+
+    const wildcardCert = new Certificate(this, 'wildcard-certificate', {
+      domainName: `*.${hostedZone.zoneName}`,
+      validation: validation,
+      subjectAlternativeNames: [hostedZone.zoneName, ...cnames],
+    });
+
+    new SSM.StringParameter(this, 'wildcard-cert-arn', {
+      stringValue: wildcardCert.certificateArn,
+      parameterName: Statics.ssmWildcardCertificateArn,
     });
   }
 
