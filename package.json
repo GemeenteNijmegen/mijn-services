@@ -71,7 +71,7 @@
     "@gemeentenijmegen/apigateway-http": "^0.0.30",
     "@gemeentenijmegen/aws-constructs": "^0.0.42",
     "@gemeentenijmegen/utils": "^0.0.36",
-    "@middy/core": "^6.4.4",
+    "@middy/core": "^6.4.5",
     "@types/aws-lambda": "^8.10.152",
     "aws-cdk-lib": "^2.1.0",
     "cdk-remote-stack": "^2.1.0",
