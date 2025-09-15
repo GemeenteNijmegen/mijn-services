@@ -63,7 +63,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     //   debug: true,
     // },
     openProductServices: {
-      image: 'maykinmedia/open-product:1.2.0',
+      image: 'maykinmedia/open-product:1.3.0',
       logLevel: 'DEBUG',
       debug: true,
     },
@@ -156,7 +156,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       taskSize: {
         cpu: '1024', // 1vCPU
         memory: '2048', // 2GB
-      }
+      },
     },
     keyCloackService: {
       image: 'quay.io/keycloak/keycloak:24.0.1',
