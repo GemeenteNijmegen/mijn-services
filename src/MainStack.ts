@@ -81,6 +81,7 @@ export class MainStack extends Stack {
     this.openProductServices(platform);
     this.gzacFrontendService(platform); // As this runs on the root /* it should be lowest in priority (accp only)
     this.corsaZgwServices(platform);
+    this.helloWorldService(platform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
