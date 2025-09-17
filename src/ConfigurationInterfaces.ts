@@ -123,6 +123,12 @@ export interface Configuration {
 
   corsaZgwService?: CorsaZgwServiceConfiguration;
 
+  /**
+   * When true deploys a hello world service
+   * @default false
+   */
+  helloWorlService?: boolean;
+
 }
 
 export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {

@@ -111,6 +111,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         enabled: true,
       },
     ],
+    helloWorlService: true,
   },
   acceptance: {
     branch: 'acceptance',

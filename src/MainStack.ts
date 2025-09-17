@@ -13,6 +13,7 @@ import { CacheDatabase } from './constructs/Redis';
 import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
 import { GZACFrontendService } from './services/GZACFrontend';
+import { HelloWorldService } from './services/HelloWorld';
 import { KeyCloakService } from './services/KeyCloak';
 import { ObjectsService } from './services/Objects';
 import { ObjecttypesService } from './services/Objecttypes';
@@ -384,6 +385,25 @@ export class MainStack extends Stack {
       openProductConfiguration: this.configuration.openProductServices,
     });
   }
+
+  private helloWorldService(platform: ContainerPlatform) {
+    if (!this.configuration.helloWorlService) {
+      return;
+    }
+
+    new HelloWorldService(this, 'hello-world', {
+      hostedzone: this.hostedzone,
+      service: {
+        cluster: platform.cluster,
+        link: platform.vpcLink,
+        namespace: platform.namespace,
+        loadbalancer: platform.loadBalancer,
+        port: 8080,
+        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+      },
+    });
+  }
+
   private importHostedzone() {
     return HostedZone.fromHostedZoneAttributes(this, 'hostedzone', {
       hostedZoneId: StringParameter.valueForStringParameter(
