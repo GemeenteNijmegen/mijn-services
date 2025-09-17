@@ -47,9 +47,9 @@ export class HelloWorldService extends Construct {
     });
 
     // Configuration container
-    const initContainer = task.addContainer('hellowordl', {
+    task.addContainer('hellowordl', {
       image: ContainerImage.fromRegistry('nginxdemos/hello'),
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false,
       logging: new AwsLogDriver({
         streamPrefix: 'setup',
         logGroup: this.logs,
