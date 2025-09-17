@@ -1,6 +1,6 @@
 import { Duration } from 'aws-cdk-lib';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { AwsLogDriver, ContainerImage } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, Protocol } from 'aws-cdk-lib/aws-ecs';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { RemoteParameters } from 'cdk-remote-stack';
@@ -54,6 +54,13 @@ export class HelloWorldService extends Construct {
         streamPrefix: 'setup',
         logGroup: this.logs,
       }),
+      portMappings: [
+        {
+          containerPort: this.props.service.port,
+          hostPort: this.props.service.port,
+          protocol: Protocol.TCP,
+        },
+      ],
     });
 
     const service = this.serviceFactory.createService({
