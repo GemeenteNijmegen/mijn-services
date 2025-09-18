@@ -48,7 +48,7 @@ export class HelloWorldService extends Construct {
 
     // Configuration container
     task.addContainer('hellowordl', {
-      image: ContainerImage.fromRegistry('nginxdemos/hello'),
+      image: ContainerImage.fromRegistry('jmalloc/echo-server'),
       readonlyRootFilesystem: false,
       logging: new AwsLogDriver({
         streamPrefix: 'setup',
@@ -61,6 +61,10 @@ export class HelloWorldService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
+      environment: {
+        LOG_HTTP_HEADERS: 'true',
+        LOG_HTTP_BODY: 'true',
+      }
     });
 
     const service = this.serviceFactory.createService({
