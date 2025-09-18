@@ -64,7 +64,7 @@ export class HelloWorldService extends Construct {
       environment: {
         LOG_HTTP_HEADERS: 'true',
         LOG_HTTP_BODY: 'true',
-      }
+      },
     });
 
     const service = this.serviceFactory.createService({
