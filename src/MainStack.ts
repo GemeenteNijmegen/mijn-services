@@ -399,7 +399,7 @@ export class MainStack extends Stack {
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 80,
+        port: 8080,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
     });
