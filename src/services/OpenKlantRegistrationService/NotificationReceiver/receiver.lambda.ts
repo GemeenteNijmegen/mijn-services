@@ -1,9 +1,9 @@
-import { createHash, randomUUID } from 'crypto';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { Response } from '@gemeentenijmegen/apigateway-http';
+import { authenticate } from '@gemeentenijmegen/utils';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
-import { authenticate } from '../Shared/authenticate';
+import { createHash, randomUUID } from 'crypto';
 import { ErrorResponse } from '../Shared/ErrorResponse';
 import { logger } from '../Shared/Logger';
 import { Notification, NotificationSchema } from '../Shared/model/Notification';
@@ -25,14 +25,13 @@ export async function handler(event: APIGatewayProxyEventV2) {
   logger.debug('Incomming event', JSON.stringify(event));
 
   try {
+    await authenticate(event);
+  } catch (error) {
+    logger.error('Failed authentication', { error });
+    Response.error(401, 'Unauthorized');
+  }
 
-    // Check if the caller send the correct API key
-    // Note: this must be done in the lambda as the API gateway only offers API KEYs for the whole stage.
-    const authenticated = await authenticate(event);
-    if (authenticated !== true) {
-      return authenticated;
-    }
-
+  try {
     // Check if we need to handle this notification event
     const notification = parseNotificationFromBody(event);
     return await handleAuthenticatedRequest(notification);
