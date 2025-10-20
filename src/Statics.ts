@@ -6,6 +6,8 @@ export class Statics {
   // MARK: SSM Parameters
   static readonly ssmCertificatePath = `/${Statics.projectName}/certificate`;
   static readonly ssmCertificateArn = `/${Statics.projectName}/certificate/arn`;
+  static readonly ssmWildcardCertificatePath = `/${Statics.projectName}/wildcard-certificate`;
+  static readonly ssmWildcardCertificateArn = `/${Statics.projectName}/wildcard-certificate/arn`;
 
   // Managed in dns-managment project:
   // Below references the new hosted zone separeted from webformulieren
@@ -43,6 +45,7 @@ export class Statics {
   static readonly databaseKeyCloak = 'keycloak'; // GZAC Static
   static readonly databaseGZAC = 'gzac'; // GZAC Static
   static readonly databaseOpenProduct = 'open-product';
+  static readonly databaseCorsaZgwDevService = 'corsa-zgw-dev';
 
   // MARK: Vulservice
   static readonly ssmHaalCentraalBRPBaseUrl = `/${Statics.projectName}/api/haalcentraalbrp/baseurl`;
@@ -75,6 +78,7 @@ export class Statics {
     Statics.databaseKeyCloak, // GZAC
     Statics.databaseGZAC, // GZAC
     Statics.databaseOpenProduct,
+    Statics.databaseCorsaZgwDevService,
   ];
 
   // MARK: Environments

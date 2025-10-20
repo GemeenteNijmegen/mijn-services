@@ -58,6 +58,17 @@ export class UsEastCertificateStack extends Stack {
       stringValue: cert.certificateArn,
       parameterName: Statics.ssmCertificateArn,
     });
+
+    const wildcardCert = new Certificate(this, 'wildcard-certificate', {
+      domainName: `*.${hostedZone.zoneName}`,
+      validation: CertificateValidation.fromDns(),
+      subjectAlternativeNames: [hostedZone.zoneName, ...cnames],
+    });
+
+    new SSM.StringParameter(this, 'wildcard-cert-arn', {
+      stringValue: wildcardCert.certificateArn,
+      parameterName: Statics.ssmWildcardCertificateArn,
+    });
   }
 
 }
