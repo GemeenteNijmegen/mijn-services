@@ -121,29 +121,13 @@ export interface Configuration {
 
   openProductServices?: OpenProductServicesConfiguration;
 
+  corsaZgwService?: CorsaZgwServiceConfiguration;
 
   /**
-   * Feature flag deploys loadbalancer
+   * When true deploys a hello world service
    * @default false
    */
-  deployLoadbalancer?: boolean;
-
-
-  /**
-   * Feature flag deploys cloudfront
-   * only has effect when loadbalancer is deployed
-   * @default false
-   */
-  deployCloudFront?: boolean;
-
-
-  /**
-   * Feature flag deploys DNS records pointing to cloudfront (turn on after manual migration)
-   * only has effect when loadbalancer is deployed
-   * @default false
-   */
-  deployCloudFrontDnsRecords?: boolean;
-
+  helloWorlService?: boolean;
 
 }
 
@@ -474,4 +458,20 @@ export interface CeleryTaskSizeConfiguration {
     cpu: string;
     memory: string;
   };
+}
+
+
+export interface CorsaZgwServiceConfiguration extends MainTaskSizeConfiguration {
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+  /**
+   * @default latest
+   */
+  imageTag?: string;
 }
