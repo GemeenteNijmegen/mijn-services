@@ -99,49 +99,53 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
-"@aws-lambda-powertools/batch@^2.28.1":
-  version "2.28.1"
-  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/batch/-/batch-2.28.1.tgz#20a2f9a3b589353a7830ee6643c4fae4a4636ffe"
-  integrity sha512-Rtfvl7MCu+CxqIzuTV7ancR8+xF2e+ZaVlty+Qj7RjLeOiWopy0aKo9A3qLNquZ19jU4K9UqFi5yL51PJaAz0w==
+"@aws-lambda-powertools/batch@^2.29.0":
+  version "2.29.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/batch/-/batch-2.29.0.tgz#05bc9d09218231b092255a225771c6edb859a0b5"
+  integrity sha512-jVUJZkIw2JiFKp4UwrM12hsQO6U3K9MyFrtiX+pHjz0RWEkguO3Ew1JN+UBLDWB6F2x1jOg7RMMlfFf1Ngi/9w==
   dependencies:
-    "@aws-lambda-powertools/commons" "2.28.1"
+    "@aws-lambda-powertools/commons" "2.29.0"
+    "@aws/lambda-invoke-store" "0.2.1"
     "@standard-schema/spec" "^1.0.0"
 
-"@aws-lambda-powertools/commons@2.28.1":
-  version "2.28.1"
-  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-2.28.1.tgz#d29fd2f325bcefeecb83213e4e0db39316ade9b1"
-  integrity sha512-XZyup4C9gNnxIi5UUNErXudnwursG4F0tXZMaeTsyMslNLwQJp3zl35MTALV4cXx6Fbz1BmdQIUhGBJraKSpnA==
-
-"@aws-lambda-powertools/idempotency@^2.28.1":
-  version "2.28.1"
-  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/idempotency/-/idempotency-2.28.1.tgz#da0b0e07050057aa239b354951a6dbc1fdb9008a"
-  integrity sha512-MmwwdulKAg4ooIDpCmcRTlGGoqbGnJ14XwJA+wT6XgrkbnnbcXDLTz7s0a1eCloEOMOeZo5z0W+/qJP2HHRW6w==
+"@aws-lambda-powertools/commons@2.29.0":
+  version "2.29.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/commons/-/commons-2.29.0.tgz#fcb123d3332098f2630222c6221f90c6b10fb897"
+  integrity sha512-QM65MP6B4wBrwkEUuZX+hcFUv3wjJBY0mPRn30dTPIOW3UVLIEec9L92fNtWhQZKMaEYK/ezDlyAV+8AuiebfA==
   dependencies:
-    "@aws-lambda-powertools/commons" "2.28.1"
-    "@aws-lambda-powertools/jmespath" "2.28.1"
+    "@aws/lambda-invoke-store" "0.2.1"
 
-"@aws-lambda-powertools/jmespath@2.28.1":
-  version "2.28.1"
-  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/jmespath/-/jmespath-2.28.1.tgz#993334c0f7cd1c01925f3d6627b3c11803a1b72c"
-  integrity sha512-V4Gs2qYa3ZtTXGneMP/raNLK0VjTxb6jTtlwytM4BzrI+j9s7YrojawE/SVxO8EvXWZFZdLnaS/VmdwUPAH7oA==
+"@aws-lambda-powertools/idempotency@^2.29.0":
+  version "2.29.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/idempotency/-/idempotency-2.29.0.tgz#c6c41b3088cf287984f00f6116e7d388a01f9a97"
+  integrity sha512-PRiiDHflkglHctC4OEiEnNGqOGariet6YVFZfFMY2twpPOFnjIdCF5H9L6S+8OTQfQRVy/tmn3CZnygNudWWjg==
   dependencies:
-    "@aws-lambda-powertools/commons" "2.28.1"
+    "@aws-lambda-powertools/commons" "2.29.0"
+    "@aws-lambda-powertools/jmespath" "2.29.0"
 
-"@aws-lambda-powertools/logger@^2.28.1":
-  version "2.28.1"
-  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/logger/-/logger-2.28.1.tgz#8e437bcd6ac136771630bfe9a365a78b5f18db7c"
-  integrity sha512-XbXvcbjA5Uid1ZY1DwuNDxjHIcOtE1G1+hG3iQKZTSq7nq+6kTzQ798/yow69E91cIC78RJCUc2GbXyYq62JJw==
+"@aws-lambda-powertools/jmespath@2.29.0":
+  version "2.29.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/jmespath/-/jmespath-2.29.0.tgz#55a24ac711e700e3ab70445ac54dc1e6e1d23e56"
+  integrity sha512-g/7nbU1YTJ+V0zWtE0H4Ty7l87VO7WfHACbMUS4Zs7oIBEY+DKM4Lmtckk36IbrTom5XwMHTjcQjngBh+CWeNg==
   dependencies:
-    "@aws-lambda-powertools/commons" "2.28.1"
+    "@aws-lambda-powertools/commons" "2.29.0"
+
+"@aws-lambda-powertools/logger@^2.29.0":
+  version "2.29.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/logger/-/logger-2.29.0.tgz#40934cacc7ee892f44576ca8814f5ca31e8267c9"
+  integrity sha512-jJBjdZKhEId2h4/0FYGoz6SfPS2qEMfSog/RXuxcuy5dEacyK5CGd6KCoTKgOUQd0uVfFFD03G0p17I5KoP6XQ==
+  dependencies:
+    "@aws-lambda-powertools/commons" "2.29.0"
+    "@aws/lambda-invoke-store" "0.2.1"
     lodash.merge "^4.6.2"
 
-"@aws-lambda-powertools/tracer@^2.28.1":
-  version "2.28.1"
-  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/tracer/-/tracer-2.28.1.tgz#25ee0ca89955aa25c5e549e0871f6c9fe2924b8c"
-  integrity sha512-6Fy3TrU+X7Zjl1hs3EvHRPy5Rv4PTOiKYdlaqvo/1FWYlqKnUVaQEfS/ejJnOYOXL16xMMC6y40j7wOTPiTEjw==
+"@aws-lambda-powertools/tracer@^2.29.0":
+  version "2.29.0"
+  resolved "https://registry.yarnpkg.com/@aws-lambda-powertools/tracer/-/tracer-2.29.0.tgz#a564a1ddaf797447a8533cd64a93160848b2689f"
+  integrity sha512-PjvQg0a1GPPWbSIMe0TRSqFlyqgX5qivYbBgNr1oGjeDadPKF6g6UF5RSEcPJIllCVEcDluSCB7Qn/s1EfmvgQ==
   dependencies:
-    "@aws-lambda-powertools/commons" "2.28.1"
-    aws-xray-sdk-core "^3.11.0"
+    "@aws-lambda-powertools/commons" "2.29.0"
+    aws-xray-sdk-core "^3.12.0"
 
 "@aws-sdk/client-dynamodb@^3.936.0":
   version "3.936.0"
@@ -190,10 +194,10 @@
     "@smithy/util-waiter" "^4.2.5"
     tslib "^2.6.2"
 
-"@aws-sdk/client-ec2@^3.937.0":
-  version "3.937.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-ec2/-/client-ec2-3.937.0.tgz#381070398df221158d297387b6afab7da6ec8b41"
-  integrity sha512-NBsmgFVU0hD5USAxF0NheRKQ28Q6sK+KAyJdwXlmns45gLanlri9os2MRo6mM3JjmtD5HSdnjzz0UdR8duwNhA==
+"@aws-sdk/client-ec2@^3.938.0":
+  version "3.938.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-ec2/-/client-ec2-3.938.0.tgz#d546ae58eb89666e25c1d44f407f00432a42102e"
+  integrity sha512-Nz7d7sA9GCjyHhFuFGWdlklHeGQo8aRB6zEDg9X/VXENnDz0n4l0WYYnnQNSo78xaD5KWhbNOo5syEncGyQebA==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -953,7 +957,7 @@
     fast-xml-parser "5.2.5"
     tslib "^2.6.2"
 
-"@aws/lambda-invoke-store@^0.2.0":
+"@aws/lambda-invoke-store@0.2.1", "@aws/lambda-invoke-store@^0.2.0":
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/@aws/lambda-invoke-store/-/lambda-invoke-store-0.2.1.tgz#ceecff9ebe1f6199369e6911f38633fac3322811"
   integrity sha512-sIyFcoPZkTtNu9xFeEoynMef3bPJIAbOfUh+ueYcfhVl6xm2VRtMcMclSxmZCMnHHd4hlYKJeq/aggmBEWynww==
@@ -3067,9 +3071,9 @@ available-typed-arrays@^1.0.7:
     possible-typed-array-names "^1.0.0"
 
 aws-cdk-lib@^2.1.0:
-  version "2.226.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.226.0.tgz#4573117749f30ac3eee03d6d0b16de5b6b58a2ef"
-  integrity sha512-QothFnuIxq5bobPtU9Owo+Re9ye7sqLgRXOtJSZR3uDywmV+dcRvf9h2VKtFannYKubibk29/7dTrGm6hnpFIQ==
+  version "2.227.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.227.0.tgz#e6cc5c84f3acecd2019d5c92944c27f38e8bcb77"
+  integrity sha512-55zrZrlmtV9IDwciqrqBfy4lV/ZbwZY4nKQosjKJmWC+Y+DYQbK3qO/NbaoeywNFxM5xHZ/bNFYdWqKXNkImWQ==
   dependencies:
     "@aws-cdk/asset-awscli-v1" "2.2.242"
     "@aws-cdk/asset-node-proxy-agent-v6" "^2.1.0"
@@ -3102,7 +3106,7 @@ aws-sdk-client-mock@^4.1.0:
     sinon "^18.0.1"
     tslib "^2.1.0"
 
-aws-xray-sdk-core@^3.11.0:
+aws-xray-sdk-core@^3.12.0:
   version "3.12.0"
   resolved "https://registry.yarnpkg.com/aws-xray-sdk-core/-/aws-xray-sdk-core-3.12.0.tgz#7337f287f022212467271c690e6eafe1648e928e"
   integrity sha512-lwalRdxXRy+Sn49/vN7W507qqmBRk5Fy2o0a9U6XTjL9IV+oR5PUiiptoBrOcaYCiVuGld8OEbNqhm6wvV3m6A==
