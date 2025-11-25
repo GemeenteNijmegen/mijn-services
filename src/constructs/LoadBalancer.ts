@@ -2,7 +2,7 @@ import { Duration, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { FargateService } from 'aws-cdk-lib/aws-ecs';
-import { AddApplicationTargetsProps, ApplicationListener, ApplicationLoadBalancer, IListenerCertificate, ListenerAction, ListenerCondition, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { AddApplicationTargetsProps, ApplicationListener, ApplicationLoadBalancer, ApplicationProtocol, IListenerCertificate, ListenerAction, ListenerCondition, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { ARecord, IHostedZone, PrivateHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -72,13 +72,13 @@ export class ServiceLoadBalancer extends Construct {
   }
 
   forwardHttpToHttps() {
-    const httpListener = this.alb.addListener('listener', {
-      port: 80,
+    const httpListener = this.alb.addListener('http-listener', {
+      protocol: ApplicationProtocol.HTTP,
       open: false,
       defaultAction: ListenerAction.redirect({
         permanent: true,
         protocol: 'https',
-      })
+      }),
     });
 
     return httpListener;
