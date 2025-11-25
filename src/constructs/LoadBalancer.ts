@@ -46,6 +46,7 @@ export class ServiceLoadBalancer extends Construct {
     });
 
     this.listener = this.createListener(certificate);
+    this.forwardHttpToHttps();
 
     this.addAccessLogging();
   }
@@ -65,6 +66,19 @@ export class ServiceLoadBalancer extends Construct {
         contentType: 'text/plain',
         messageBody: 'Niet gevonden',
       }),
+    });
+
+    return httpListener;
+  }
+
+  forwardHttpToHttps() {
+    const httpListener = this.alb.addListener('listener', {
+      port: 80,
+      open: false,
+      defaultAction: ListenerAction.redirect({
+        permanent: true,
+        protocol: 'https',
+      })
     });
 
     return httpListener;
