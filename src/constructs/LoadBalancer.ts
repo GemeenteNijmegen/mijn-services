@@ -77,7 +77,7 @@ export class ServiceLoadBalancer extends Construct {
       open: false,
       defaultAction: ListenerAction.redirect({
         permanent: true,
-        protocol: 'https',
+        protocol: 'HTTPS',
       }),
     });
 
