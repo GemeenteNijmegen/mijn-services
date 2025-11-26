@@ -177,7 +177,7 @@ export class CorsaZgwService extends Construct {
       options: {
         desiredCount: 1,
       },
-      // healthCheckPath: '/admin', // Not configurabel yet while using subdomain
+      // healthCheckPath: '/up', // Not configurabel yet while using subdomain (this is the correct path though)
     });
     this.setupConnectivity('corsa-zgw', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
