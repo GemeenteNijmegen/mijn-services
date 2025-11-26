@@ -44,6 +44,7 @@ export class ParameterStack extends Stack {
     this.addGZACBackendParameters();
     // this.addGZACFrontendParameters();
     this.addOpenProductParameters();
+    this.addCorsaZgwParameters();
 
   }
 
@@ -60,6 +61,20 @@ export class ParameterStack extends Stack {
         generateStringKey: 'password',
       },
       secretName: Statics._ssmOpenKlantCredentials,
+    });
+  }
+
+  private addCorsaZgwParameters() {
+    new Secret(this, 'corsa-zgw-credentials', {
+      description: 'Credentials for the corsa zgw admin user',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          email: 'devops@nijmegen.nl',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmCorsaZgwCredentials,
     });
   }
 

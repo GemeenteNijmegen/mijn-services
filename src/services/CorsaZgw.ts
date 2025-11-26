@@ -32,6 +32,7 @@ export interface CorsaZgwProps {
    */
   readonly serviceConfiguration: CorsaZgwServiceConfiguration;
   readonly key: Key;
+
 }
 
 export class CorsaZgwService extends Construct {
@@ -41,10 +42,12 @@ export class CorsaZgwService extends Construct {
   private readonly logs: LogGroup;
   private readonly props: CorsaZgwProps;
   private readonly serviceFactory: EcsServiceFactory;
-  private readonly databaseCredentials: ISecret;
-  // private readonly superuserCredentials: ISecret;
   private readonly secretKey: ISecret;
   private readonly distribution: SubdomainCloudfront;
+
+  // Secrets
+  private readonly databaseCredentials: ISecret;
+  private readonly adminCredentials: ISecret;
 
   constructor(scope: Construct, id: string, props: CorsaZgwProps) {
     super(scope, id);
@@ -61,6 +64,7 @@ export class CorsaZgwService extends Construct {
     });
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
+    this.adminCredentials = SecretParameter.fromSecretNameV2(this, 'admin-credentials', Statics._ssmCorsaZgwCredentials);
 
     this.secretKey = new SecretParameter(this, 'secret-key', {
       description: 'Secret for CorsaZGW Service - ' + id,
@@ -69,6 +73,7 @@ export class CorsaZgwService extends Construct {
       },
     });
 
+
     this.setupService();
   }
 
@@ -76,6 +81,8 @@ export class CorsaZgwService extends Construct {
     return {
       DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       DB_USERNAME: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+      ADMIN_EMAIL: Secret.fromSecretsManager(this.adminCredentials, 'email'),
+      ADMIN_PASSWORD: Secret.fromSecretsManager(this.adminCredentials, 'password'),
       APP_KEY: Secret.fromSecretsManager(this.secretKey),
     };
   }
