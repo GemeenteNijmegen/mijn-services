@@ -183,6 +183,7 @@ export class CorsaZgwService extends Construct {
       domain: `${CorsaZgwService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`,
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
       // healthCheckPath: '/up', // Not configurabel yet while using subdomain (this is the correct path though)
     });
