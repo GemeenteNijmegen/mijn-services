@@ -48,6 +48,9 @@ export class CorsaZgwService extends Construct {
   // Secrets
   private readonly databaseCredentials: ISecret;
   private readonly adminCredentials: ISecret;
+  private readonly credentialsForConnectingToOpenZaak: ISecret;
+  private readonly openZaakCatalogusUrl: StringParameter;
+  private readonly openZaakUrl: StringParameter;
 
   constructor(scope: Construct, id: string, props: CorsaZgwProps) {
     super(scope, id);
@@ -73,6 +76,26 @@ export class CorsaZgwService extends Construct {
       },
     });
 
+    this.credentialsForConnectingToOpenZaak = new SecretParameter(this, 'open-zaak', {
+      description: 'Credentials for connecting to open zaak from corsa zgw',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          clientId: 'corsa-zgw-service',
+        }),
+        generateStringKey: 'clientSecret',
+      },
+    });
+
+    this.openZaakCatalogusUrl = new StringParameter(this, 'open-zaak-catalogus-url', {
+      description: 'Corza ZGW: open-zaak catalogus url',
+      stringValue: '-',
+    });
+
+    this.openZaakUrl = new StringParameter(this, 'open-zaak-url', {
+      description: 'Corza ZGW: open-zaak url',
+      stringValue: '-',
+    });
 
     this.setupService();
   }
@@ -84,6 +107,12 @@ export class CorsaZgwService extends Construct {
       ADMIN_EMAIL: Secret.fromSecretsManager(this.adminCredentials, 'email'),
       ADMIN_PASSWORD: Secret.fromSecretsManager(this.adminCredentials, 'password'),
       APP_KEY: Secret.fromSecretsManager(this.secretKey),
+
+      // Open zaak gegevens
+      OPENZAAK_CLIENT_ID: Secret.fromSecretsManager(this.credentialsForConnectingToOpenZaak, 'clientId'),
+      OPENZAAK_CLIENT_SECRET: Secret.fromSecretsManager(this.credentialsForConnectingToOpenZaak, 'clientSecret'),
+      OPENZAAK_URL: Secret.fromSsmParameter(this.openZaakUrl),
+      OPENZAAK_CATALOGI_URL: Secret.fromSsmParameter(this.openZaakCatalogusUrl),
     };
   }
 
@@ -120,6 +149,8 @@ export class CorsaZgwService extends Construct {
 
       // Cache store
       CACHE_STORE: 'file',
+
+
 
     };
 

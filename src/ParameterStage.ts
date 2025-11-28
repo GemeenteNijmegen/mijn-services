@@ -66,7 +66,7 @@ export class ParameterStack extends Stack {
 
   private addCorsaZgwParameters() {
     new Secret(this, 'corsa-zgw-credentials', {
-      description: 'Credentials for the corsa zgw admin user',
+      description: 'Credentials for the corsa zgw admin user (not in use)',
       generateSecretString: {
         excludePunctuation: true,
         secretStringTemplate: JSON.stringify({
