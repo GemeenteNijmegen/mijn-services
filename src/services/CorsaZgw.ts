@@ -273,6 +273,79 @@ export class CorsaZgwService extends Construct {
     return service;
   }
 
+  private setupWorkers() {
+
+    const VOLUME_NAME = 'tmp';
+    const task = this.serviceFactory.createTaskDefinition('worker', {
+      volumes: [{ name: VOLUME_NAME }],
+      cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
+      memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
+    });
+
+    // Allow execute commands using ECS console
+    task.addToTaskRolePolicy(new PolicyStatement({
+      actions: [
+        "ssmmessages:CreateControlChannel",
+        "ssmmessages:CreateDataChannel",
+        "ssmmessages:OpenControlChannel",
+        "ssmmessages:OpenDataChannel",
+      ],
+      effect: Effect.ALLOW,
+      resources: ['*'],
+    }));
+
+    // Configuration container
+    const initContainer = task.addContainer('setup', {
+      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      command: ['/init.sh'],
+      essential: false,
+      readonlyRootFilesystem: false,
+      logging: new AwsLogDriver({
+        streamPrefix: 'worker-setup',
+        logGroup: this.logs,
+      }),
+      secrets: this.getEnvironmentSecrets(),
+      environment: this.getEnvironmentVariables(),
+    });
+
+    // Main service container
+    const container = task.addContainer('worker', {
+      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      command: ['php', 'artisan', 'horizon'],
+      healthCheck: {
+        command: ['CMD-SHELL', 'php artisan horizon:status'],
+        interval: Duration.seconds(10),
+        startPeriod: Duration.seconds(30),
+      },
+      readonlyRootFilesystem: false, // TODO make this true for security reasons
+      secrets: this.getEnvironmentSecrets(),
+      environment: this.getEnvironmentVariables(),
+      essential: true,
+      logging: new AwsLogDriver({
+        streamPrefix: 'corsa-zgw-worker',
+        logGroup: this.logs,
+      }),
+    });
+    container.addContainerDependencies({
+      container: initContainer,
+      condition: ContainerDependencyCondition.COMPLETE,
+    });
+
+    const service = this.serviceFactory.createService({
+      id: 'corsa-zgw-worker',
+      task: task,
+      domain: `${CorsaZgwService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`,
+      options: {
+        desiredCount: 1,
+        enableExecuteCommand: true,
+      },
+      // healthCheckPath: '/up', // Not configurabel yet while using subdomain (this is the correct path though)
+    });
+    this.setupConnectivity('corsa-zgw-worker', service.connections.securityGroups);
+    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    return service;
+  }
+
 
   private logGroup() {
     return new LogGroup(this, 'logs', {
