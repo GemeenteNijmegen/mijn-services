@@ -164,6 +164,7 @@ export class CorsaZgwService extends Construct {
       REDIS_HOST: this.props.redis.db.attrRedisEndpointAddress,
       REDIS_PORT: this.props.redis.db.attrRedisEndpointPort,
       REDIS_DB: this.props.cacheChannel.toString(),
+      QUEUE_CONNECTION: 'redis',
 
     };
 
