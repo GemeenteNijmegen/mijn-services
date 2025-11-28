@@ -1,4 +1,5 @@
-import { Duration, Token } from 'aws-cdk-lib';
+import { QueueWithDlq } from '@gemeentenijmegen/aws-constructs';
+import { Duration, Stack, Token } from 'aws-cdk-lib';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
@@ -39,18 +40,22 @@ export class CorsaZgwService extends Construct {
 
   private static readonly SUBDOMAIN = 'corsa-zgw';
 
+  // Infra for service
   private readonly logs: LogGroup;
   private readonly props: CorsaZgwProps;
   private readonly serviceFactory: EcsServiceFactory;
-  private readonly secretKey: ISecret;
   private readonly distribution: SubdomainCloudfront;
 
-  // Secrets
+  // Secrets & parameters
+  private readonly secretKey: ISecret;
   private readonly databaseCredentials: ISecret;
   private readonly adminCredentials: ISecret;
   private readonly credentialsForConnectingToOpenZaak: ISecret;
   private readonly openZaakCatalogusUrl: StringParameter;
   private readonly openZaakUrl: StringParameter;
+
+  // Functional infrastructure
+  private readonly queue: QueueWithDlq;
 
   constructor(scope: Construct, id: string, props: CorsaZgwProps) {
     super(scope, id);
@@ -97,8 +102,14 @@ export class CorsaZgwService extends Construct {
       stringValue: '-',
     });
 
+    this.queue = new QueueWithDlq(this, 'queue', {
+      identifier: 'corsa-zgw',
+      kmsKey: this.props.key,
+    });
+
     this.setupService();
   }
+
 
   private getEnvironmentSecrets(): Record<string, Secret> {
     return {
@@ -117,6 +128,9 @@ export class CorsaZgwService extends Construct {
   }
 
   private getEnvironmentVariables(): Record<string, string> {
+
+    const region = Stack.of(this).region;
+
     return {
 
       // DB settings
@@ -150,7 +164,14 @@ export class CorsaZgwService extends Construct {
       // Cache store
       CACHE_STORE: 'file',
 
-
+      // Queue connections
+      // AWS_ACCESS_KEY_ID: '', // Default set by ECS
+      // AWS_SECRET_ACCESS_KEY: '', // Default set by ECS
+      QUEUE_CONNECTION: 'sqs',
+      SQS_PREFIX: 'https://sqs.us-east-1.amazonaws.com/your-account-id',
+      SQS_QUEUE: this.queue.queue.queueName,
+      AWS_DEFAULT_REGION: region
+      // SQS_SUFFIX: '', // Guess we don't need this
 
     };
 
@@ -165,6 +186,11 @@ export class CorsaZgwService extends Construct {
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
 
+    // Allow queue access
+    this.queue.queue.grantSendMessages(task.taskRole);
+    this.queue.queue.grantConsumeMessages(task.taskRole);
+
+    // Allow execute commands using ECS console
     task.addToTaskRolePolicy(new PolicyStatement({
       actions: [
         "ssmmessages:CreateControlChannel",
