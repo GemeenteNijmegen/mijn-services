@@ -314,12 +314,10 @@ export class CorsaZgwService extends Construct {
     const service = this.serviceFactory.createService({
       id: 'corsa-zgw-worker',
       task: task,
-      domain: `${CorsaZgwService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`,
       options: {
         desiredCount: 1,
         enableExecuteCommand: true,
       },
-      // healthCheckPath: '/up', // Not configurabel yet while using subdomain (this is the correct path though)
     });
     this.setupConnectivity('corsa-zgw-worker', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
