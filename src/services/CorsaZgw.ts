@@ -36,7 +36,6 @@ export interface CorsaZgwProps {
   readonly key: Key;
 
 
-
 }
 
 export class CorsaZgwService extends Construct {
@@ -186,10 +185,10 @@ export class CorsaZgwService extends Construct {
     // Allow execute commands using ECS console
     task.addToTaskRolePolicy(new PolicyStatement({
       actions: [
-        "ssmmessages:CreateControlChannel",
-        "ssmmessages:CreateDataChannel",
-        "ssmmessages:OpenControlChannel",
-        "ssmmessages:OpenDataChannel",
+        'ssmmessages:CreateControlChannel',
+        'ssmmessages:CreateDataChannel',
+        'ssmmessages:OpenControlChannel',
+        'ssmmessages:OpenDataChannel',
       ],
       effect: Effect.ALLOW,
       resources: ['*'],
@@ -265,10 +264,10 @@ export class CorsaZgwService extends Construct {
     // Allow execute commands using ECS console
     task.addToTaskRolePolicy(new PolicyStatement({
       actions: [
-        "ssmmessages:CreateControlChannel",
-        "ssmmessages:CreateDataChannel",
-        "ssmmessages:OpenControlChannel",
-        "ssmmessages:OpenDataChannel",
+        'ssmmessages:CreateControlChannel',
+        'ssmmessages:CreateDataChannel',
+        'ssmmessages:OpenControlChannel',
+        'ssmmessages:OpenDataChannel',
       ],
       effect: Effect.ALLOW,
       resources: ['*'],
