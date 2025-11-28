@@ -105,11 +105,7 @@ export class CorsaZgwService extends Construct {
       stringValue: '-',
     });
 
-    // this.queue = new QueueWithDlq(this, 'queue', {
-    //   identifier: 'corsa-zgw',
-    //   kmsKey: this.props.key,
-    // });
-
+    this.setupWorkers();
     this.setupService();
   }
 
@@ -131,11 +127,6 @@ export class CorsaZgwService extends Construct {
   }
 
   private getEnvironmentVariables(): Record<string, string> {
-
-    // const region = Stack.of(this).region;
-
-    const cacheHost = this.props.redis.db.attrRedisEndpointAddress + ':' + this.props.redis.db.attrRedisEndpointPort + '/';
-
     return {
 
       // DB settings
@@ -169,22 +160,11 @@ export class CorsaZgwService extends Construct {
       // Cache store
       CACHE_STORE: 'file',
 
-      // Queue connections (disabled)
-      // AWS_ACCESS_KEY_ID: '', // Default set by ECS
-      // AWS_SECRET_ACCESS_KEY: '', // Default set by ECS
-      // QUEUE_CONNECTION: 'sqs',
-      // SQS_PREFIX: 'https://sqs.us-east-1.amazonaws.com/your-account-id',
-      // SQS_QUEUE: this.queue.queue.queueName,
-      // AWS_DEFAULT_REGION: region
-      // SQS_SUFFIX: '', // Guess we don't need this
-
-
       // Redis configuration
       REDIS_CLIENT: 'phpredis',
       REDIS_HOST: this.props.redis.db.attrRedisEndpointAddress,
       REDIS_PORT: this.props.redis.db.attrRedisEndpointPort,
       REDIS_DB: this.props.cacheChannel.toString(),
-
 
     };
 
