@@ -136,7 +136,7 @@ export class CorsaZgwService extends Construct {
 
       // App settings
       APP_NAME: 'Corsa ZGW',
-      APP_ENV: 'development',
+      APP_ENV: 'production', // must match configuration in container
       APP_DEBUG: this.props.serviceConfiguration.debug == true ? 'true' : 'false',
       APP_URL: `https://${this.props.hostedzone.zoneName}`,
 
