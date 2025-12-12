@@ -61,10 +61,10 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@aws-lambda-powertools/batch": "^2.29.0",
-    "@aws-lambda-powertools/idempotency": "^2.29.0",
-    "@aws-lambda-powertools/logger": "^2.29.0",
-    "@aws-lambda-powertools/tracer": "^2.29.0",
+    "@aws-lambda-powertools/batch": "^2.30.0",
+    "@aws-lambda-powertools/idempotency": "^2.30.0",
+    "@aws-lambda-powertools/logger": "^2.30.0",
+    "@aws-lambda-powertools/tracer": "^2.30.0",
     "@aws-sdk/client-dynamodb": "^3.948.0",
     "@aws-sdk/client-ec2": "^3.948.0",
     "@aws-sdk/client-sqs": "^3.948.0",
