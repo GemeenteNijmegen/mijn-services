@@ -327,6 +327,7 @@ export class MainStack extends Stack {
 
     new CorsaZgwService(this, 'corsa-zgw-service', {
       redis: this.cache,
+      cacheChannel: 13,
       key: this.key,
       repository: repo.repository,
       service: {
