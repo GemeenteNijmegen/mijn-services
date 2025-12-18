@@ -2,7 +2,7 @@ import { Duration, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { FargateService } from 'aws-cdk-lib/aws-ecs';
-import { AddApplicationTargetsProps, ApplicationListener, ApplicationLoadBalancer, IListenerCertificate, ListenerAction, ListenerCondition, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { AddApplicationTargetsProps, ApplicationListener, ApplicationLoadBalancer, ApplicationProtocol, IListenerCertificate, ListenerAction, ListenerCondition, Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { ARecord, IHostedZone, PrivateHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -46,6 +46,7 @@ export class ServiceLoadBalancer extends Construct {
     });
 
     this.listener = this.createListener(certificate);
+    this.forwardHttpToHttps();
 
     this.addAccessLogging();
   }
@@ -70,7 +71,27 @@ export class ServiceLoadBalancer extends Construct {
     return httpListener;
   }
 
-  attachECSService(service: FargateService, path: string, priority?: number, props?: AddApplicationTargetsProps) {
+  forwardHttpToHttps() {
+    const httpListener = this.alb.addListener('http-listener', {
+      protocol: ApplicationProtocol.HTTP,
+      open: false,
+      defaultAction: ListenerAction.redirect({
+        permanent: true,
+        protocol: 'HTTPS',
+      }),
+    });
+
+    return httpListener;
+  }
+
+  attachECSService(
+    service: FargateService,
+    pathOrSubdomain: string,
+    priority?: number,
+    props?: AddApplicationTargetsProps,
+    routeBySubdomain?: boolean,
+    targetGroupId?: string,
+  ) {
     const defaultHealthCheck = {
       enabled: true,
       path: '/',
@@ -82,18 +103,21 @@ export class ServiceLoadBalancer extends Construct {
       protocol: Protocol.HTTP,
     };
 
+    let condition = ListenerCondition.pathPatterns([pathOrSubdomain]);
+    if (routeBySubdomain) {
+      condition = ListenerCondition.hostHeaders([pathOrSubdomain]);
+    }
+
     const listenerProps: AddApplicationTargetsProps = {
       port: 80,
       targets: [service],
-      conditions: [
-        ListenerCondition.pathPatterns([path]),
-      ],
+      conditions: [condition],
       priority: priority ?? this.priority,
       healthCheck: props?.healthCheck ?? defaultHealthCheck,
       deregistrationDelay: Duration.minutes(1),
     };
     console.debug(listenerProps);
-    this.listener.addTargets(`${path}-target`, { ...listenerProps, ...props });
+    this.listener.addTargets(`${targetGroupId ?? pathOrSubdomain}-target`, { ...listenerProps, ...props });
     this.priority += 1;
   }
 

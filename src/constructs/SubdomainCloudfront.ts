@@ -1,53 +1,38 @@
-import { aws_cloudfront_origins, Duration } from 'aws-cdk-lib';
-import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { aws_cloudfront_origins } from 'aws-cdk-lib';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { AllowedMethods, CachePolicy, Distribution, OriginProtocolPolicy, OriginRequestPolicy, PriceClass, ResponseHeadersPolicy, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
-import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
-import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
-import { Statics } from '../Statics';
-import { SecurityGroupFromId } from './SecurityGroupFromId';
 
-class CloudfrontDistributionForLoadBalancerProps {
-  domains: string[];
+class SubdomainCloudfrontProps {
+  subdomain: string;
   loadbalancer: ApplicationLoadBalancer;
   hostedZone: IHostedZone;
+  certificate: ICertificate;
 }
-export class CloudfrontDistributionForLoadBalancer extends Construct {
-  constructor(scope: Construct, id: string, private props: CloudfrontDistributionForLoadBalancerProps) {
-    super(scope, id);
+export class SubdomainCloudfront extends Construct {
 
+  private domain: string;
+
+  constructor(scope: Construct, id: string, private props: SubdomainCloudfrontProps) {
+    super(scope, id);
+    this.domain = `${this.props.subdomain}.${this.props.hostedZone.zoneName}`;
     this.createDistribution();
   }
 
-  /**
-   * Get the certificate ARN from parameter store in us-east-1
-   * @returns string Certificate ARN
-   */
-  private certificateArn() {
-    const parameters = new RemoteParameters(this, 'params', {
-      path: `${Statics.ssmCertificatePath}/`,
-      region: 'us-east-1',
-      timeout: Duration.seconds(10),
-    });
-    const certificateArn = parameters.get(Statics.ssmCertificateArn);
-    return certificateArn;
-  }
-
-
   createDistribution() {
-    const certificate = Certificate.fromCertificateArn(this, 'certificate', this.certificateArn());
 
+    // Note: VpcOrigin access to lb is managed using custom resource in CloudfrontDistributionForLoadBalancer construct.
     const httpsOrigin = aws_cloudfront_origins.VpcOrigin.withApplicationLoadBalancer(this.props.loadbalancer, {
       protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
-      originId: 'alborigin-https',
-      domainName: `alb.${this.props.hostedZone.zoneName}`, // Private DNS hostedzone used for alb.
+      originId: `${this.props.subdomain}-https`,
+      domainName: `alb.${this.props.hostedZone.zoneName}`,
     });
 
-    const distribution = new Distribution(this, 'MyDistribution', {
-      comment: 'Distribution for my services loadbalancer',
+    const distribution = new Distribution(this, 'distribution', {
+      comment: `Distribution for ${this.props.subdomain} subdomain`,
       defaultBehavior: {
         origin: httpsOrigin,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -67,31 +52,22 @@ export class CloudfrontDistributionForLoadBalancer extends Construct {
         originRequestPolicy: OriginRequestPolicy.ALL_VIEWER,
         cachePolicy: CachePolicy.CACHING_DISABLED, // Maybe later we can look into this
       },
-      defaultRootObject: 'index.html',
-      certificate: certificate,
-      domainNames: this.props.domains,
+      certificate: this.props.certificate,
+      domainNames: [this.domain],
       priceClass: PriceClass.PRICE_CLASS_100,
     });
     this.addDnsRecords(distribution);
-    this.allowAccessToLoadBalancer(this.props.loadbalancer, distribution);
     return distribution;
   }
 
-  private allowAccessToLoadBalancer(lb: ApplicationLoadBalancer, distribution: Distribution) {
-    const group = new SecurityGroupFromId(this, 'cfsg', 'CloudFront-VPCOrigins-Service-SG');
-    group.node.addDependency(distribution);
-    lb.connections.securityGroups.forEach(sg => {
-      sg.addIngressRule(group.group, Port.HTTPS, 'allow access from cloudfront to loadbalancer');
-    });
-  }
-
-
   private addDnsRecords(distribution: Distribution) {
     new ARecord(this, 'a-record', {
+      recordName: this.domain,
       target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
       zone: this.props.hostedZone,
     });
     new AaaaRecord(this, 'aaaa', {
+      recordName: this.domain,
       target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
       zone: this.props.hostedZone,
     });

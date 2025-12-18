@@ -6,6 +6,8 @@ export class Statics {
   // MARK: SSM Parameters
   static readonly ssmCertificatePath = `/${Statics.projectName}/certificate`;
   static readonly ssmCertificateArn = `/${Statics.projectName}/certificate/arn`;
+  static readonly ssmWildcardCertificatePath = `/${Statics.projectName}/wildcard-certificate`;
+  static readonly ssmWildcardCertificateArn = `/${Statics.projectName}/wildcard-certificate/arn`;
 
   // Managed in dns-managment project:
   // Below references the new hosted zone separeted from webformulieren
@@ -17,6 +19,7 @@ export class Statics {
   static readonly _ssmCertificateArn = `/${Statics.projectName}/internal/cloudfront/cert-arn`;
   static readonly _ssmDatabaseCredentials = `/${Statics.projectName}/internal/database/credentials`;
   static readonly _ssmOpenKlantCredentials = `/${Statics.projectName}/internal/open-klant/credentials`;
+  static readonly _ssmCorsaZgwCredentials = `/${Statics.projectName}/internal/corsa-zgw/credentials`;
   static readonly _ssmOpenNotificatiesCredentials = `/${Statics.projectName}/internal/open-notificaties/credentials`;
   static readonly _ssmRabbitMqCredentials = `/${Statics.projectName}/internal/open-notificaties/rabbit-mq/credentials`;
   static readonly _ssmClientCredentialsZaakNotifications = `/${Statics.projectName}/internal/open-notificaties/client/credentials/zaak-notifications`;
@@ -43,6 +46,7 @@ export class Statics {
   static readonly databaseKeyCloak = 'keycloak'; // GZAC Static
   static readonly databaseGZAC = 'gzac'; // GZAC Static
   static readonly databaseOpenProduct = 'open-product';
+  static readonly databaseCorsaZgwDevService = 'corsa-zgw-dev';
 
   // MARK: Vulservice
   static readonly ssmHaalCentraalBRPBaseUrl = `/${Statics.projectName}/api/haalcentraalbrp/baseurl`;
@@ -75,6 +79,7 @@ export class Statics {
     Statics.databaseKeyCloak, // GZAC
     Statics.databaseGZAC, // GZAC
     Statics.databaseOpenProduct,
+    Statics.databaseCorsaZgwDevService,
   ];
 
   // MARK: Environments

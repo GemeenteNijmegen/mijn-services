@@ -5,9 +5,6 @@ import { Statics } from './Statics';
 const EnvironmentConfigurations: { [key: string]: Configuration } = {
   development: {
     branch: 'development',
-    deployCloudFront: true,
-    deployLoadbalancer: true,
-    deployCloudFrontDnsRecords: true,
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesDev,
     criticality: new Criticality('low'),
@@ -67,6 +64,11 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
+    corsaZgwService: {
+      logLevel: 'DEBUG',
+      debug: true,
+      imageTag: '97a274e513d72897acc95e5fa50085eb76ba994d',
+    },
     outputManagementComponents: [
       {
         cdkId: 'local-omc',
@@ -109,12 +111,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         enabled: true,
       },
     ],
+    helloWorlService: true,
   },
   acceptance: {
     branch: 'acceptance',
-    deployLoadbalancer: true,
-    deployCloudFront: true,
-    deployCloudFrontDnsRecords: true,
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesAccp,
     criticality: new Criticality('medium'),
@@ -266,12 +266,6 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
   },
   main: {
     branch: 'main',
-
-    // Loadbalancer migration steps
-    deployLoadbalancer: true, // Phase 1 - Deploy a private loadbalancer
-    deployCloudFront: true, // Phase 2 - After loadbalancer is deployed
-    deployCloudFrontDnsRecords: true, // Phase 3 - Only after manually switching DNS records
-
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
     criticality: new Criticality('high'),
