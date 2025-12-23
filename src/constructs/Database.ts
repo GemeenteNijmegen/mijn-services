@@ -28,8 +28,9 @@ export class Database extends Construct {
 
     this.db = new rds.DatabaseInstance(this, 'db-instance', {
       engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_16_4,
+        version: rds.PostgresEngineVersion.VER_17_5,
       }),
+      allowMajorVersionUpgrade: true, // Note: required to be able to upgrade Postgres
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO), // Smallest instance possible to start with
       credentials: {
         username: props.databaseSecret.secretValueFromJson('username').toString(),
