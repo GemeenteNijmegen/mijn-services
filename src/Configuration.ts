@@ -97,20 +97,6 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         },
       },
     ],
-    openKlantRegistrationServices: [
-      {
-        cdkId: 'open-klant-registration-service-test',
-        debug: true,
-        openKlantUrl:
-          'https://mijn-services.dev.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl:
-          'https://mijn-services.dev.nijmegen.nl/open-zaak/zaken/api/v1',
-        path: '/open-klant-registration-service-test/callback',
-        roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol-with-form', // Unique partij per rol (of zaak dus)
-        enabled: true,
-      },
-    ],
     helloWorlService: true,
   },
   acceptance: {
@@ -206,62 +192,6 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           taskAssignedSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
         },
       },
-      {
-        cdkId: 'woweb-omc',
-        path: 'woweb-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.8',
-        debug: true,
-        mode: 'Development',
-        openKlantUrl: 'mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'openzaak.woweb.app/zaken/api/v1',
-        notificatiesApiUrl: 'mijn-services.accp.nijmegen.nl/open-notificaties/api/v1',
-        objectenApiUrl: 'mijn-services.accp.nijmegen.nl/objects/api/v2',
-        objecttypenApiUrl: 'mijn-services.accp.nijmegen.nl/objecttypes/api/v2',
-        zgwTokenInformation: {
-          audience: '', // This must be empty for the token to start working... no clue as to why.
-          issuer: 'nijmegen_devops',
-          userId: 'nijmegen_devops',
-          username: 'nijmegen_devops',
-        },
-        taakObjecttypeUuid: 'fa36dfdd-899c-4b40-92ad-6d5c0077748a',
-        templates: {
-          // zaakCreateEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
-          // zaakUpdateEmail: 'e868044f-4a30-42c9-b1bf-8ad95ec2a6b8',
-          // zaakCloseEmail: '14cebdee-a179-4e0e-b7de-c660fdd47c57',
-          taskAssignedEmail: 'ec835216-4629-4bba-ac3a-6bc4770062e8',
-          // zaakCreateSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
-          // zaakUpdateSms: '0ff5f21a-2af1-4fd4-8080-45cff34e0df7',
-          // zaakCloseSms: 'ac885f24-09d8-4702-845f-2f53cd045790',
-          taskAssignedSms: '2ab3d68e-0a8a-4a9a-b091-0e934ed1c64b',
-        },
-      },
-    ],
-    openKlantRegistrationServices: [
-      {
-        cdkId: 'open-klant-registration-service-test',
-        debug: true,
-        openKlantUrl:
-          'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl:
-          'https://mijn-services.accp.nijmegen.nl/open-zaak/zaken/api/v1',
-        path: '/open-klant-registration-service-test/callback',
-        roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol-with-form', // Unique partij per rol (of zaak dus)
-        enabled: true,
-      },
-      {
-        cdkId: 'open-klant-registration-service-woweb',
-        debug: true,
-        openKlantUrl: 'https://mijn-services.accp.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'https://openzaak.woweb.app/zaken/api/v1',
-        path: '/open-klant-registration-service-woweb/callback',
-        roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol-with-form', // Unique partij per rol (of zaak dus)
-        enabled: true,
-        catalogiWhitelist: [
-          '84f9e30d-8a3e-4ca0-8011-556ae3cbdd41', // VIP catalogus on acceptance
-        ],
-      },
     ],
   },
   main: {
@@ -280,21 +210,6 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       image: 'maykinmedia/open-klant:2.5.0',
       logLevel: 'INFO',
     },
-    openKlantRegistrationServices: [
-      {
-        cdkId: 'open-klant-registration-service-woweb',
-        debug: false,
-        openKlantUrl: 'https://mijn-services.nijmegen.nl/open-klant/klantinteracties/api/v1',
-        zakenApiUrl: 'https://openzaak.nijmegen.cloud/zaken/api/v1',
-        path: '/open-klant-registration-service-woweb/callback',
-        roltypesToRegister: ['initiator'],
-        strategy: 'partijperrol-with-form', // Unique partij per rol (of zaak dus)
-        enabled: true,
-        catalogiWhitelist: [
-          '84f9e30d-8a3e-4ca0-8011-556ae3cbdd41', // VIP catalogus op productie
-        ],
-      },
-    ],
     outputManagementComponents: [
       {
         cdkId: 'woweb-omc',
