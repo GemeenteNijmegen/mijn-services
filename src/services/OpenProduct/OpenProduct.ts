@@ -173,7 +173,6 @@ export class OpenProductService extends Construct {
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, downloadConfiguration, '/tmp', '/app/setup_configuration');
 
 
-
     const service = this.serviceFactory.createService({
       id: 'main',
       task: task,
