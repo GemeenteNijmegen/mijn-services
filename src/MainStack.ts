@@ -24,6 +24,7 @@ import { OpenProductService } from './services/OpenProduct/OpenProduct';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
+import { OpenConfigurationStore } from './constructs/OpenConfigurationStore';
 
 interface MainStackProps extends StackProps, Configurable { }
 
@@ -40,6 +41,8 @@ export class MainStack extends Stack {
   constructor(scope: Construct, id: string, props: MainStackProps) {
     super(scope, id, props);
     this.configuration = props.configuration;
+
+    new OpenConfigurationStore(this, 'open-config', { configuration: props.configuration });
 
     this.key = this.setupGeneralEncryptionKey();
     this.hostedzone = this.importHostedzone();
