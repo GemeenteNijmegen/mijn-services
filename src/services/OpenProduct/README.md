@@ -29,3 +29,6 @@ I think we can run the configuration by doing: `src/manage.py setup_configuratio
 
 
 Misschien moeten we hier ook nog wat mee: `src/manage.py migrate`
+
+
+21:49 - Upgrade naar 1.4.0 is geslaagd, migratie script hierboven wordt automatisch uitgevoerd bij starten.
