@@ -167,8 +167,10 @@ export class OpenProductService extends Construct {
     // File system prermissions for ephemeral storage
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/setup_configuration');
 
-    // Download configuration task
-    this.serviceFactory.downloadConfiguration(task, this.logs, container, '/open-product', '/app/setup_configuration');
+    // Download configuration
+    const configLocation = `s3://${this.props.openConfigStore.bucket.bucketName}/open-product`;
+    const configTarget = '/app/setup_configuration';
+    this.serviceFactory.downloadConfiguration(task, this.logs, container, configLocation, configTarget);
 
 
     const service = this.serviceFactory.createService({
