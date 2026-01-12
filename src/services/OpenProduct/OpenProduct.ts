@@ -189,7 +189,7 @@ export class OpenProductService extends Construct {
       },
     });
 
-    this.props.openConfigStore.grantReadConfig(service.taskDefinition.executionRole!, 'open-product');
+    this.props.openConfigStore.grantReadConfig(service.taskDefinition.taskRole!, 'open-product');
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
