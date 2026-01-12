@@ -102,8 +102,6 @@ export class OpenProductService extends Construct {
       //   DEMO_CONFIG_ENABLE: 'False',
       //   DEMO_CLIENT_ID: 'demo-client',
       //   DEMO_SECRET: 'demo-secret',
-
-      OPEN_CONFIG_STORE_BUCKET: this.props.openConfigStore.bucket.bucketName,
     };
   }
 
@@ -168,6 +166,7 @@ export class OpenProductService extends Construct {
     const configLocation = `s3://${this.props.openConfigStore.bucket.bucketName}/open-product`;
     const configTarget = '/app/setup_configuration';
     const downloadConfiguration = this.serviceFactory.downloadConfiguration(task, this.logs, container, configLocation, configTarget);
+    this.serviceFactory.attachEphemeralStorage(downloadConfiguration, VOLUME_NAME, '/app/setup_configuration');
 
     // File system prermissions for ephemeral storage (1st to run)
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, downloadConfiguration, '/tmp', '/app/setup_configuration');
