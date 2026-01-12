@@ -35,6 +35,11 @@ const project = new GemeenteNijmegenCdkApp({
       setupFiles: ['dotenv/config'],
     },
   },
+  tsconfig: {
+    compilerOptions: {
+      isolatedModules: true,
+    },
+  },
 });
 
 /**
