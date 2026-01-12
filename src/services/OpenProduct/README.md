@@ -23,3 +23,9 @@ Maybe we should set env:
 ``
 
 See https://github.com/maykinmedia/open-product/blob/master/docker-compose.yml#L60
+
+
+I think we can run the configuration by doing: `src/manage.py setup_configuration --yaml-file /app/setup_configuration/configuration.yaml`
+
+
+Misschien moeten we hier ook nog wat mee: `src/manage.py migrate`
