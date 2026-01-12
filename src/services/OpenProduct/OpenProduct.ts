@@ -1,5 +1,5 @@
 import { Duration, Token } from 'aws-cdk-lib';
-import { ISecurityGroup, SecurityGroup, Port } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
@@ -9,7 +9,7 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenProductServicesConfiguration } from '../../ConfigurationInterfaces';
-import { EcsServiceFactoryProps, EcsServiceFactory } from '../../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps } from '../../constructs/EcsServiceFactory';
 import { OpenConfigurationStore } from '../../constructs/OpenConfigurationStore';
 import { CacheDatabase } from '../../constructs/Redis';
 import { Statics } from '../../Statics';
@@ -162,13 +162,14 @@ export class OpenProductService extends Construct {
         logGroup: this.logs,
       }),
     });
-    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/setup_configuration');
 
-    // This is the init container but defined centrally in the service factory. I think we have options.
-    // 1. decentralize this and do this in each open-* file
-    // 2. Extend this function to something that can setup writable volumes as well
-    // 3. Create another centralized function for running the download configuration steup container (two init steps before starting the main container)
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp');
+    // File system prermissions for ephemeral storage
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/setup_configuration');
+
+    // Download configuration task
+    this.serviceFactory.downloadConfiguration(task, this.logs, container, '/open-product', '/app/setup_configuration');
+
 
     const service = this.serviceFactory.createService({
       id: 'main',

@@ -4,7 +4,7 @@ import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
 import { Configurable } from '../ConfigurationInterfaces';
 
-interface ConfigurationStoreProps extends Configurable {};
+interface ConfigurationStoreProps extends Configurable { };
 
 /**
  * Responsible for saving configuration files to a location accessible to
