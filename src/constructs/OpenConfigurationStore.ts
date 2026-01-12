@@ -11,7 +11,7 @@ interface ConfigurationStoreProps extends Configurable {};
  * fargate tasks, so (Django) config files can be loaded.
  */
 export class OpenConfigurationStore extends Construct {
-  private bucket: Bucket;
+  readonly bucket: Bucket;
   constructor(scope: Construct, id: string, props: ConfigurationStoreProps) {
     super(scope, id);
     
@@ -28,7 +28,11 @@ export class OpenConfigurationStore extends Construct {
     });
   }
 
-  deployConfig(bucket: IBucket, environment: string) {
+  grantReadConfig(grantee: IGrantable, serviceName: string) {
+    this.bucket.grantRead(grantee, `${serviceName}/*`);
+  }
+
+  private deployConfig(bucket: IBucket, environment: string) {
     new BucketDeployment(this, 'bucketdeploy', {
       destinationBucket: bucket,
       sources: [
@@ -37,7 +41,4 @@ export class OpenConfigurationStore extends Construct {
     });
   }
 
-  grantReadConfig(grantee: IGrantable, serviceName: string){
-    this.bucket.grantRead(grantee, `${serviceName}/*`);
-  }
 }

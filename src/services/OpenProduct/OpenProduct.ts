@@ -14,6 +14,7 @@ import { CacheDatabase } from '../../constructs/Redis';
 import { Statics } from '../../Statics';
 import { Utils } from '../../Utils';
 import { ServiceInfraUtils } from '../ServiceInfraUtils';
+import { OpenConfigurationStore } from '../../constructs/OpenConfigurationStore';
 
 export interface OpenProductServiceProps {
   cache: CacheDatabase;
@@ -25,6 +26,7 @@ export interface OpenProductServiceProps {
   alternativeDomainNames?: string[];
   key: Key;
   openProductConfiguration: OpenProductServicesConfiguration;
+  openConfigStore: OpenConfigurationStore;
 }
 
 export class OpenProductService extends Construct {
@@ -100,6 +102,8 @@ export class OpenProductService extends Construct {
     //   DEMO_CONFIG_ENABLE: 'False',
     //   DEMO_CLIENT_ID: 'demo-client',
     //   DEMO_SECRET: 'demo-secret',
+
+      OPEN_CONFIG_STORE_BUCKET: this.props.openConfigStore.bucket.bucketName,
     };
   }
 
@@ -140,7 +144,6 @@ export class OpenProductService extends Construct {
       image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
-        // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
@@ -161,6 +164,10 @@ export class OpenProductService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
 
+    // This is the init container but defined centrally in the service factory. I think we have options.
+    // 1. decentralize this and do this in each open-* file
+    // 2. Extend this function to something that can setup writable volumes as well
+    // 3. Create another centralized function for running the download configuration steup container (two init steps before starting the main container)
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp');
 
     const service = this.serviceFactory.createService({

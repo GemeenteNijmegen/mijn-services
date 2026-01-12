@@ -17,7 +17,7 @@ export class CreateDatabasesFunction extends lambda.Function {
     super(scope, id, {
       description: 'src/custom-resources/create-databases/create-databases.lambda.ts',
       ...props,
-      runtime: new lambda.Runtime('nodejs24.x', lambda.RuntimeFamily.NODEJS),
+      runtime: new lambda.Runtime('nodejs22.x', lambda.RuntimeFamily.NODEJS),
       handler: 'index.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../../../assets/custom-resources/create-databases/create-databases.lambda')),
     });

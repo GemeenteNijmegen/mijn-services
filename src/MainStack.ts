@@ -38,11 +38,12 @@ export class MainStack extends Stack {
   private readonly vpc: GemeenteNijmegenVpc;
   private readonly cache: CacheDatabase;
   private readonly key: Key;
+  private readonly openConfigStore: OpenConfigurationStore;
   constructor(scope: Construct, id: string, props: MainStackProps) {
     super(scope, id, props);
     this.configuration = props.configuration;
 
-    new OpenConfigurationStore(this, 'open-config', { configuration: props.configuration });
+    this.openConfigStore = new OpenConfigurationStore(this, 'open-config', { configuration: props.configuration });
 
     this.key = this.setupGeneralEncryptionKey();
     this.hostedzone = this.importHostedzone();
@@ -388,6 +389,7 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       openProductConfiguration: this.configuration.openProductServices,
+      openConfigStore: this.openConfigStore
     });
   }
 

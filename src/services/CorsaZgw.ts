@@ -1,4 +1,3 @@
-import { QueueWithDlq } from '@gemeentenijmegen/aws-constructs';
 import { Duration, Token } from 'aws-cdk-lib';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
@@ -55,9 +54,6 @@ export class CorsaZgwService extends Construct {
   private readonly credentialsForConnectingToOpenZaak: ISecret;
   private readonly openZaakCatalogusUrl: StringParameter;
   private readonly openZaakUrl: StringParameter;
-
-  // Functional infrastructure
-  private readonly queue: QueueWithDlq;
 
   constructor(scope: Construct, id: string, props: CorsaZgwProps) {
     super(scope, id);
