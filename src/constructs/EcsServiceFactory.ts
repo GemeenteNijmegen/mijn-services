@@ -221,6 +221,7 @@ export class EcsServiceFactory {
     dirs.forEach(dir => {
       this.attachEphemeralStorage(fsInitContainer, volumeName, dir);
     });
+    return fsInitContainer;
   }
 
   /**
@@ -235,7 +236,7 @@ export class EcsServiceFactory {
     task: TaskDefinition,
     logs: LogGroup,
     runBeforeContainer:
-    ContainerDefinition,
+      ContainerDefinition,
     configLocation: string,
     configTarget: string,
   ) {
@@ -253,6 +254,7 @@ export class EcsServiceFactory {
       container: downloadConfiguration,
       condition: ContainerDependencyCondition.SUCCESS,
     });
+    return downloadConfiguration;
   }
 
   private createVolumes(service: FargateService, id: string, volumeMounts: volumeMounts) {

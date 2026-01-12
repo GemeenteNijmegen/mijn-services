@@ -139,7 +139,7 @@ export class OpenProductService extends Construct {
       memoryMiB: this.props.openProductConfiguration.taskSize?.memory ?? '512',
     });
 
-    // Main service container
+    // Main service container (3th to run)
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
       healthCheck: {
@@ -164,13 +164,14 @@ export class OpenProductService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/setup_configuration');
 
-    // File system prermissions for ephemeral storage
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/setup_configuration');
-
-    // Download configuration
+    // Download configuration (2nd to run)
     const configLocation = `s3://${this.props.openConfigStore.bucket.bucketName}/open-product`;
     const configTarget = '/app/setup_configuration';
-    this.serviceFactory.downloadConfiguration(task, this.logs, container, configLocation, configTarget);
+    const downloadConfiguration = this.serviceFactory.downloadConfiguration(task, this.logs, container, configLocation, configTarget);
+
+    // File system prermissions for ephemeral storage (1st to run)
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, downloadConfiguration, '/tmp', '/app/setup_configuration');
+
 
 
     const service = this.serviceFactory.createService({
