@@ -9,6 +9,7 @@ import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { EcrRepository } from './constructs/EcrRepository';
+import { OpenConfigurationStore } from './constructs/OpenConfigurationStore';
 import { CacheDatabase } from './constructs/Redis';
 import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
@@ -24,7 +25,6 @@ import { OpenProductService } from './services/OpenProduct/OpenProduct';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
 import { Statics } from './Statics';
-import { OpenConfigurationStore } from './constructs/OpenConfigurationStore';
 
 interface MainStackProps extends StackProps, Configurable { }
 
@@ -389,7 +389,7 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       openProductConfiguration: this.configuration.openProductServices,
-      openConfigStore: this.openConfigStore
+      openConfigStore: this.openConfigStore,
     });
   }
 

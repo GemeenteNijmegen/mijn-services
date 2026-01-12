@@ -10,11 +10,11 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenProductServicesConfiguration } from '../../ConfigurationInterfaces';
 import { EcsServiceFactoryProps, EcsServiceFactory } from '../../constructs/EcsServiceFactory';
+import { OpenConfigurationStore } from '../../constructs/OpenConfigurationStore';
 import { CacheDatabase } from '../../constructs/Redis';
 import { Statics } from '../../Statics';
 import { Utils } from '../../Utils';
 import { ServiceInfraUtils } from '../ServiceInfraUtils';
-import { OpenConfigurationStore } from '../../constructs/OpenConfigurationStore';
 
 export interface OpenProductServiceProps {
   cache: CacheDatabase;
@@ -99,9 +99,9 @@ export class OpenProductService extends Construct {
       //   OPENZAAK_NOTIF_CONFIG_ENABLE: 'True', // Enable the configuration setup for connecting to open-notificaties
 
       // Somehow this is required aswell...
-    //   DEMO_CONFIG_ENABLE: 'False',
-    //   DEMO_CLIENT_ID: 'demo-client',
-    //   DEMO_SECRET: 'demo-secret',
+      //   DEMO_CONFIG_ENABLE: 'False',
+      //   DEMO_CLIENT_ID: 'demo-client',
+      //   DEMO_SECRET: 'demo-secret',
 
       OPEN_CONFIG_STORE_BUCKET: this.props.openConfigStore.bucket.bucketName,
     };

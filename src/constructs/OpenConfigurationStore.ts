@@ -1,8 +1,8 @@
-import { BlockPublicAccess, Bucket, IBucket } from "aws-cdk-lib/aws-s3";
-import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
-import { Construct } from "constructs";
-import { Configurable } from "../ConfigurationInterfaces";
-import { IGrantable } from "aws-cdk-lib/aws-iam";
+import { IGrantable } from 'aws-cdk-lib/aws-iam';
+import { BlockPublicAccess, Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
+import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
+import { Construct } from 'constructs';
+import { Configurable } from '../ConfigurationInterfaces';
 
 interface ConfigurationStoreProps extends Configurable {};
 
@@ -14,7 +14,7 @@ export class OpenConfigurationStore extends Construct {
   readonly bucket: Bucket;
   constructor(scope: Construct, id: string, props: ConfigurationStoreProps) {
     super(scope, id);
-    
+
     this.bucket = this.setupConfigBucket();
     this.deployConfig(this.bucket, props.configuration.branch);
   }
@@ -36,8 +36,8 @@ export class OpenConfigurationStore extends Construct {
     new BucketDeployment(this, 'bucketdeploy', {
       destinationBucket: bucket,
       sources: [
-        Source.asset(`{src/config/${environment}`)
-      ]
+        Source.asset(`./src/config/${environment}`),
+      ],
     });
   }
 

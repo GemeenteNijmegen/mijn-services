@@ -68,7 +68,7 @@
       "description": "Create a JavaScript bundle from src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/create-database-per-user/create-database-per-user.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/create-database-per-user/create-database-per-user.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -77,7 +77,7 @@
       "description": "Continuously update the JavaScript bundle from src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/create-database-per-user/create-database-per-user.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/create-database-per-user/create-database-per-user.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -86,7 +86,7 @@
       "description": "Create a JavaScript bundle from src/custom-resources/create-databases/create-databases.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -95,7 +95,7 @@
       "description": "Continuously update the JavaScript bundle from src/custom-resources/create-databases/create-databases.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -104,7 +104,7 @@
       "description": "Create a JavaScript bundle from src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -113,7 +113,7 @@
       "description": "Continuously update the JavaScript bundle from src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -122,7 +122,7 @@
       "description": "Create a JavaScript bundle from src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -131,7 +131,7 @@
       "description": "Continuously update the JavaScript bundle from src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -140,7 +140,7 @@
       "description": "Create a JavaScript bundle from src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -149,7 +149,7 @@
       "description": "Continuously update the JavaScript bundle from src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node22\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -243,7 +243,8 @@
       "name": "eslint",
       "description": "Runs eslint against the codebase",
       "env": {
-        "ESLINT_USE_FLAT_CONFIG": "false"
+        "ESLINT_USE_FLAT_CONFIG": "false",
+        "NODE_NO_WARNINGS": "1"
       },
       "steps": [
         {
@@ -397,7 +398,7 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@gemeentenijmegen/projen-project-type,@types/jest,@types/jsonwebtoken,@types/node,@types/pg,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript,@aws-lambda-powertools/batch,@aws-lambda-powertools/idempotency,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-ec2,@aws-sdk/client-sqs,@gemeentenijmegen/apigateway-http,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/utils,@middy/core,@types/aws-lambda,cdk-remote-stack,dotenv,jsonwebtoken,pg,zod"
+          "exec": "npx npm-check-updates@18 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@gemeentenijmegen/projen-project-type,@types/jest,@types/jsonwebtoken,@types/node,@types/pg,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript,@aws-lambda-powertools/batch,@aws-lambda-powertools/idempotency,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-ec2,@aws-sdk/client-sqs,@gemeentenijmegen/apigateway-http,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/utils,@middy/core,@types/aws-lambda,cdk-remote-stack,dotenv,jsonwebtoken,pg,zod"
         },
         {
           "exec": "yarn install --check-files"
