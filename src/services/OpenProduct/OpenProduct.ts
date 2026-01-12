@@ -14,7 +14,6 @@ import { OpenConfigurationStore } from '../../constructs/OpenConfigurationStore'
 import { CacheDatabase } from '../../constructs/Redis';
 import { Statics } from '../../Statics';
 import { Utils } from '../../Utils';
-import { ServiceInfraUtils } from '../ServiceInfraUtils';
 
 export interface OpenProductServiceProps {
   cache: CacheDatabase;
@@ -140,11 +139,11 @@ export class OpenProductService extends Construct {
     // Main service container (3th to run)
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
-      healthCheck: {
-        command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(30),
-      },
+      // healthCheck: {
+      //   command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
+      //   interval: Duration.seconds(10),
+      //   startPeriod: Duration.seconds(30),
+      // },
       portMappings: [
         {
           containerPort: this.props.service.port,
