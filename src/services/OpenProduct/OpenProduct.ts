@@ -172,13 +172,13 @@ export class OpenProductService extends Construct {
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, downloadConfiguration, '/tmp', '/app/setup_configuration');
 
 
-
     const service = this.serviceFactory.createService({
       id: 'main',
       task: task,
       path: this.props.path,
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
       volumeMounts: {
         fileSystemRoot: '/openproduct',
@@ -231,6 +231,7 @@ export class OpenProductService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
       volumeMounts: {
         fileSystemRoot: '/openproduct',

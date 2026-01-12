@@ -179,18 +179,6 @@ export class CorsaZgwService extends Construct {
     // this.queue.queue.grantSendMessages(task.taskRole);
     // this.queue.queue.grantConsumeMessages(task.taskRole);
 
-    // Allow execute commands using ECS console
-    task.addToTaskRolePolicy(new PolicyStatement({
-      actions: [
-        'ssmmessages:CreateControlChannel',
-        'ssmmessages:CreateDataChannel',
-        'ssmmessages:OpenControlChannel',
-        'ssmmessages:OpenDataChannel',
-      ],
-      effect: Effect.ALLOW,
-      resources: ['*'],
-    }));
-
     // Configuration container
     const initContainer = task.addContainer('setup', {
       image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),

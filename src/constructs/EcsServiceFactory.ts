@@ -6,6 +6,7 @@ import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem, IFileSystem } from 'aws-cdk-lib/aws-efs';
 import { Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -139,6 +140,20 @@ export class EcsServiceFactory {
       ...options.options,
     });
 
+    // Allow execute commands using ECS console when enableExecuteCommand is set
+    if (options.options?.enableExecuteCommand) {
+      options.task.addToTaskRolePolicy(new PolicyStatement({
+        actions: [
+          'ssmmessages:CreateControlChannel',
+          'ssmmessages:CreateDataChannel',
+          'ssmmessages:OpenControlChannel',
+          'ssmmessages:OpenDataChannel',
+        ],
+        effect: Effect.ALLOW,
+        resources: ['*'],
+      }));
+    }
+
     if (options.path || options.isRootPath) {
       service.connections.allowFrom(this.props.vpcLinkSecurityGroup, Port.tcp(this.props.port));
       this.addRoute(service, options.path ?? '', options.healthCheckPath);
@@ -236,7 +251,7 @@ export class EcsServiceFactory {
     task: TaskDefinition,
     logs: LogGroup,
     runBeforeContainer:
-      ContainerDefinition,
+    ContainerDefinition,
     configLocation: string,
     configTarget: string,
   ) {

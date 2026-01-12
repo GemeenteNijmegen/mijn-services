@@ -1,8 +1,6 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
-import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
-import { EcsTask } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -59,7 +57,6 @@ export class OpenZaakService extends Construct {
       },
     });
 
-    this.setupConfigurationService();
     this.service = this.setupService();
     this.setupCeleryService();
   }
@@ -189,6 +186,7 @@ export class OpenZaakService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
       apiVersionHeaderValue: this.props.openZaakConfiguration.apiVersion,
       volumeMounts: {
@@ -205,55 +203,6 @@ export class OpenZaakService extends Construct {
     return service;
   }
 
-  /**
-   * This service is disabled by default an can be ran manually to
-   * setup the configuration when deploying a new open-zaak.
-   * @returns
-   */
-  private setupConfigurationService() {
-    const VOLUME_NAME = 'tmp';
-    const task = this.serviceFactory.createTaskDefinition('setup-configuration', {
-      volumes: [{ name: VOLUME_NAME }],
-    });
-
-    // Configuration - initialization container
-    const initContainer = task.addContainer('init-config', {
-      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
-      command: undefined, // Do not set a command as the entrypoint will handle this for us (see Dockerfile)
-      readonlyRootFilesystem: false, // The HTTP Cache using SQLite prevents us from running without write to root...
-      essential: true,
-      secrets: this.getSecretConfiguration(),
-      environment: {
-        ...this.getEnvironmentConfiguration(),
-        RUN_SETUP_CONFIG: 'true', // Make sure the setup script can run?
-      },
-      logging: new AwsLogDriver({
-        streamPrefix: 'logs',
-        logGroup: this.logs,
-      }),
-    });
-    this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/setup_configuration');
-
-    // Make sure we have a writable volume
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/setup_configuration');
-
-    // Scheduel a task in the past (so we can run it manually)
-    const rule = new Rule(this, 'scheudle-setup', {
-      schedule: Schedule.cron({
-        year: '2020',
-      }),
-      description: 'Rule to run setup configuration for open-zaak (manually)',
-    });
-    const ecsTask = new EcsTask({
-      cluster: this.props.service.cluster,
-      taskDefinition: task,
-    });
-    rule.addTarget(ecsTask);
-
-    // Setup connectivity
-    this.setupConnectivity('setup', ecsTask.securityGroups ?? []);
-    this.allowAccessToSecrets(task.executionRole!);
-  }
 
   private setupCeleryService() {
     const VOLUME_NAME = 'temp';
@@ -291,6 +240,7 @@ export class OpenZaakService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
       volumeMounts: {
         fileSystemRoot: '/openzaak',
