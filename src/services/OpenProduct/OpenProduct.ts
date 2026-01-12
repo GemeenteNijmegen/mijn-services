@@ -180,6 +180,7 @@ export class OpenProductService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
       volumeMounts: {
         fileSystemRoot: '/openproduct',
@@ -232,6 +233,7 @@ export class OpenProductService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
       volumeMounts: {
         fileSystemRoot: '/openproduct',
