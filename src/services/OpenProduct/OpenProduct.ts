@@ -132,8 +132,8 @@ export class OpenProductService extends Construct {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
       volumes: [{ name: VOLUME_NAME }],
-      cpu: this.props.openProductConfiguration.taskSize?.cpu ?? '256',
-      memoryMiB: this.props.openProductConfiguration.taskSize?.memory ?? '512',
+      cpu: this.props.openProductConfiguration.taskSize?.cpu ?? '512',
+      memoryMiB: this.props.openProductConfiguration.taskSize?.memory ?? '1024',
     });
 
     // Main service container (3th to run)
