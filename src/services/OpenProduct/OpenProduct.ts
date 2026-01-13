@@ -72,7 +72,7 @@ export class OpenProductService extends Construct {
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'True',
-      UWSGI_PORT: this.props.service.port.toString(),
+      // UWSGI_PORT: this.props.service.port.toString(), // MD: this breakes UWSGI aparently now?
 
       LOG_LEVEL: this.props.openProductConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openProductConfiguration.debug, false),
