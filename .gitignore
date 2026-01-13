@@ -65,4 +65,5 @@ junit.xml
 !/src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler-function.ts
 !/.github/workflows/emergency.yml
 !/.github/workflows/auto-merge.yml
+!/.nvmrc
 !/.projenrc.ts
