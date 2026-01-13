@@ -32,3 +32,6 @@ Misschien moeten we hier ook nog wat mee: `src/manage.py migrate`
 
 
 21:49 - Upgrade naar 1.4.0 is geslaagd, migratie script hierboven wordt automatisch uitgevoerd bij starten.
+
+
+09:34 - Found this url https://open-product.readthedocs.io/en/latest/installation/config/openproduct_config_cli.html#installation-configuration-cli
