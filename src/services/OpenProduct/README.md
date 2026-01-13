@@ -35,3 +35,6 @@ Misschien moeten we hier ook nog wat mee: `src/manage.py migrate`
 
 
 09:34 - Found this url https://open-product.readthedocs.io/en/latest/installation/config/openproduct_config_cli.html#installation-configuration-cli
+
+
+09:37 - Het lijkt erop dat al vanaf 1.1.0 het setup configuration cli commando gebruikt kan worden. https://github.com/maykinmedia/open-product/blob/master/CHANGELOG.rst#110-09-05-2025
