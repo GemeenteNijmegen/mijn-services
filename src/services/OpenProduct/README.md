@@ -7,6 +7,10 @@ The current goals are expiremental. It will only be deployed on acc.
 - https://github.com/maykinmedia/open-product/blob/master/CHANGELOG.rst
 
 
+## Loading UPL / UPN
+In the container
+`python src/manage.py load_upl --url https://standaarden.overheid.nl/owms/oquery/UPL-actueel.csv`
+
 ## Setup configuration
 
 To setup the configuration:
@@ -38,3 +42,5 @@ Misschien moeten we hier ook nog wat mee: `src/manage.py migrate`
 
 
 09:37 - Het lijkt erop dat al vanaf 1.1.0 het setup configuration cli commando gebruikt kan worden. https://github.com/maykinmedia/open-product/blob/master/CHANGELOG.rst#110-09-05-2025
+```
+
