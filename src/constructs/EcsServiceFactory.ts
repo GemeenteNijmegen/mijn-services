@@ -236,7 +236,7 @@ export class EcsServiceFactory {
     task: TaskDefinition,
     logs: LogGroup,
     runBeforeContainer:
-      ContainerDefinition,
+    ContainerDefinition,
     configLocation: string,
     configTarget: string,
   ) {

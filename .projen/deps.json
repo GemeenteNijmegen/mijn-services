@@ -124,6 +124,10 @@
       "type": "runtime"
     },
     {
+      "name": "@gemeentenijmegen/attestatie-registratie-component",
+      "type": "runtime"
+    },
+    {
       "name": "@gemeentenijmegen/aws-constructs",
       "type": "runtime"
     },
