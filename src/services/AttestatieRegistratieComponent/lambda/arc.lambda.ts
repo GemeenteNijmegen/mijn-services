@@ -1,35 +1,52 @@
-import { randomUUID } from 'crypto';
 import { AttestatieRegestratieComponent, ProductenService, VerIdAttestationService } from '@gemeentenijmegen/attestatie-registratie-component';
 import { AWS } from '@gemeentenijmegen/utils';
 import { ALBEvent, ALBResult } from 'aws-lambda';
+import { randomUUID } from 'crypto';
 /**
  * Very minimal setup to test full cycle
  * @param event
  * @returns
  */
 export async function handler(event: ALBEvent): Promise<ALBResult> {
-  const arc = new AttestatieRegestratieComponent({
-    attestationService: new VerIdAttestationService({
-      client_id: process.env.VERID_CLIENT_ID!,
-      client_secret: await AWS.getSecret(process.env.VERID_CLIENT_SECRET!),
-      issuerUri: process.env.VERID_ISSUER_URL!,
-      redirectUri: process.env.ARC_CALLBACK_ENDPOINT!,
-    }),
-    productenService: new ProductenService(),
-  });
 
-  if (event.path.includes('/start')) {
-    return start(event, arc);
-  };
+  try {
 
-  if (event.path.includes('/callback')) {
-    return callback(event, arc);
-  };
+
+    const arc = new AttestatieRegestratieComponent({
+      attestationService: new VerIdAttestationService({
+        client_id: process.env.VERID_CLIENT_ID!,
+        client_secret: await AWS.getSecret(process.env.VERID_CLIENT_SECRET!),
+        issuerUri: process.env.VERID_ISSUER_URL!,
+        redirectUri: process.env.ARC_CALLBACK_ENDPOINT!,
+      }),
+      productenService: new ProductenService(),
+    });
+
+    if (event.path.includes('/start')) {
+      return start(event, arc);
+    };
+
+    if (event.path.includes('/callback')) {
+      return callback(event, arc);
+    };
+
+  } catch (error) {
+    console.log(error);
+
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Request not handled' }),
+      headers: {
+        "Conten-Type": 'application/json',
+      }
+    };
+  }
 
   return {
     statusCode: 400,
     body: JSON.stringify({ error: 'Request not handled' }),
   };
+
 
 }
 

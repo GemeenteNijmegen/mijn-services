@@ -72,7 +72,7 @@
     "@aws-sdk/client-ec2": "^3.971.0",
     "@aws-sdk/client-sqs": "^3.971.0",
     "@gemeentenijmegen/apigateway-http": "^0.0.35",
-    "@gemeentenijmegen/attestatie-registratie-component": "^0.0.8",
+    "@gemeentenijmegen/attestatie-registratie-component": "^0.0.10",
     "@gemeentenijmegen/aws-constructs": "^0.0.47",
     "@gemeentenijmegen/utils": "^0.0.38",
     "@middy/core": "^6.4.5",

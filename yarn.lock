@@ -1479,10 +1479,10 @@
   dependencies:
     "@types/aws-lambda" "^8.10.159"
 
-"@gemeentenijmegen/attestatie-registratie-component@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/attestatie-registratie-component/-/attestatie-registratie-component-0.0.8.tgz#f3e14428821167bcecb8eda5770fd73c24c307e6"
-  integrity sha512-jyAg2xlOINkCvt2zKl0/cQwlUhtFX2TTYcCxE8TRs6aObFszItdx6346kb608xMqJD0v3FL/2xqszBm8xBx4KA==
+"@gemeentenijmegen/attestatie-registratie-component@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/attestatie-registratie-component/-/attestatie-registratie-component-0.0.10.tgz#3253591c56bf16e24405d0d7aa0a980c73cdc8e1"
+  integrity sha512-SUz5tg4fkz8nMVNuSYtfKQipqX39jMmHt2FATzZ/A7nQnpzszelqgSXTsudmmSLseWtRJjGnLp4aSzyCUB6oCw==
   dependencies:
     "@ver-id/node-client" "^0.6.1"
     dotenv "^17.2.3"
