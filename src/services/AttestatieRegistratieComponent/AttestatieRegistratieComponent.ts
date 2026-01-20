@@ -1,7 +1,7 @@
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
-import { ArcFunction } from './lambda/arc-function';
 import { ServiceLoadBalancer } from '../../constructs/LoadBalancer';
+import { ArcFunction } from './lambda/arc-function';
 
 export interface AttestatieRegistratieComponentProps {
   loadbalancer: ServiceLoadBalancer;
@@ -20,7 +20,7 @@ export class AttestatieRegistratieComponent extends Construct {
   }
 
   private setupRoute(handler: Function) {
-    this.props.loadbalancer.attachLambda(handler, 'arc');
+    this.props.loadbalancer.attachLambda(handler, '/arc*');
   }
 
 }
