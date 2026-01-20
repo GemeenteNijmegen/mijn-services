@@ -10,6 +10,10 @@
       "type": "build"
     },
     {
+      "name": "@types/aws-lambda",
+      "type": "build"
+    },
+    {
       "name": "@types/jest",
       "type": "build"
     },
@@ -77,6 +81,7 @@
     },
     {
       "name": "projen",
+      "version": "0.98.29",
       "type": "build"
     },
     {
@@ -121,6 +126,10 @@
     },
     {
       "name": "@gemeentenijmegen/apigateway-http",
+      "type": "runtime"
+    },
+    {
+      "name": "@gemeentenijmegen/attestatie-registratie-component",
       "type": "runtime"
     },
     {

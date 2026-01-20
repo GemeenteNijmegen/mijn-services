@@ -56,6 +56,9 @@
           "spawn": "bundle:custom-resources/securitygroupByName/securitygroupByName.lambda"
         },
         {
+          "spawn": "bundle:services/AttestatieRegistratieComponent/lambda/arc.lambda"
+        },
+        {
           "spawn": "bundle:services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda"
         },
         {
@@ -114,6 +117,24 @@
       "steps": [
         {
           "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+        }
+      ]
+    },
+    "bundle:services/AttestatieRegistratieComponent/lambda/arc.lambda": {
+      "name": "bundle:services/AttestatieRegistratieComponent/lambda/arc.lambda",
+      "description": "Create a JavaScript bundle from src/services/AttestatieRegistratieComponent/lambda/arc.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/services/AttestatieRegistratieComponent/lambda/arc.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/AttestatieRegistratieComponent/lambda/arc.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+        }
+      ]
+    },
+    "bundle:services/AttestatieRegistratieComponent/lambda/arc.lambda:watch": {
+      "name": "bundle:services/AttestatieRegistratieComponent/lambda/arc.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/services/AttestatieRegistratieComponent/lambda/arc.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/services/AttestatieRegistratieComponent/lambda/arc.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/AttestatieRegistratieComponent/lambda/arc.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -398,13 +419,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@18 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@gemeentenijmegen/projen-project-type,@types/jest,@types/jsonwebtoken,@types/node,@types/pg,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript,@aws-lambda-powertools/batch,@aws-lambda-powertools/idempotency,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-ec2,@aws-sdk/client-sqs,@gemeentenijmegen/apigateway-http,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/utils,@middy/core,@types/aws-lambda,cdk-remote-stack,dotenv,jsonwebtoken,pg,zod"
+          "exec": "npx npm-check-updates@18 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@gemeentenijmegen/projen-project-type,@types/aws-lambda,@types/jest,@types/jsonwebtoken,@types/node,@types/pg,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,ts-jest,ts-node,typescript,@aws-lambda-powertools/batch,@aws-lambda-powertools/idempotency,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-ec2,@aws-sdk/client-sqs,@gemeentenijmegen/apigateway-http,@gemeentenijmegen/attestatie-registratie-component,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/utils,@middy/core,cdk-remote-stack,dotenv,jsonwebtoken,pg,zod"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @gemeentenijmegen/projen-project-type @stylistic/eslint-plugin @types/jest @types/jsonwebtoken @types/node @types/pg @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk aws-sdk-client-mock commit-and-tag-version esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen ts-jest ts-node typescript @aws-lambda-powertools/batch @aws-lambda-powertools/idempotency @aws-lambda-powertools/logger @aws-lambda-powertools/tracer @aws-sdk/client-dynamodb @aws-sdk/client-ec2 @aws-sdk/client-sqs @gemeentenijmegen/apigateway-http @gemeentenijmegen/aws-constructs @gemeentenijmegen/utils @middy/core @types/aws-lambda aws-cdk-lib cdk-remote-stack constructs dotenv jsonwebtoken pg zod"
+          "exec": "yarn upgrade @gemeentenijmegen/projen-project-type @stylistic/eslint-plugin @types/aws-lambda @types/jest @types/jsonwebtoken @types/node @types/pg @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk aws-sdk-client-mock commit-and-tag-version esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen ts-jest ts-node typescript @aws-lambda-powertools/batch @aws-lambda-powertools/idempotency @aws-lambda-powertools/logger @aws-lambda-powertools/tracer @aws-sdk/client-dynamodb @aws-sdk/client-ec2 @aws-sdk/client-sqs @gemeentenijmegen/apigateway-http @gemeentenijmegen/attestatie-registratie-component @gemeentenijmegen/aws-constructs @gemeentenijmegen/utils @middy/core aws-cdk-lib cdk-remote-stack constructs dotenv jsonwebtoken pg zod"
         },
         {
           "exec": "npx projen"
