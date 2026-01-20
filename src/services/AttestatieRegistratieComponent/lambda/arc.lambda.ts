@@ -8,7 +8,6 @@ import { randomUUID } from 'crypto';
  * @returns
  */
 export async function handler(event: ALBEvent): Promise<ALBResult> {
-  console.log(event);
   const arc = new AttestatieRegestratieComponent({
     attestationService: new VerIdAttestationService({
       client_id: process.env.VERID_CLIENT_ID!,
@@ -18,6 +17,25 @@ export async function handler(event: ALBEvent): Promise<ALBResult> {
     }),
     productenService: new ProductenService(),
   });
+
+  if (event.path.includes('/start')) {
+    return start(event, arc);
+  };
+
+  if (event.path.includes('/callback')) {
+    return callback(event, arc);
+  };
+
+  return {
+    statusCode: 400,
+    body: JSON.stringify({ error: 'Request not handled' }),
+  };
+
+}
+
+
+async function start(event: ALBEvent, arc: AttestatieRegestratieComponent): Promise<ALBResult> {
+  console.log('Handling start...', event);
 
   const redirectUri = arc.start({
     id: randomUUID(),
@@ -30,5 +48,18 @@ export async function handler(event: ALBEvent): Promise<ALBResult> {
     headers: {
       'Content-Type': 'application/json',
     },
+  };
+}
+
+async function callback(event: ALBEvent, arc: AttestatieRegestratieComponent): Promise<ALBResult> {
+  console.log('Handling callback...', event);
+
+  arc.callback({
+    id: randomUUID(),
+    type: 'producten',
+  });
+  return {
+    statusCode: 400,
+    body: JSON.stringify({ error: 'this call is not yet implemented' }),
   };
 }
