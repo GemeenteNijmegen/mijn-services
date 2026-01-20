@@ -1479,10 +1479,10 @@
   dependencies:
     "@types/aws-lambda" "^8.10.159"
 
-"@gemeentenijmegen/attestatie-registratie-component@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/attestatie-registratie-component/-/attestatie-registratie-component-0.0.2.tgz#352acebe58632a96190a238fd6149d62395c4eac"
-  integrity sha512-lb9o0sEXEHeSXKpHodbG5+MumVKYAsxqcsjlEnU25orwkch29mw3ib7ZK9ZV32o0iQDorFzSRE81/YqsoGTtlg==
+"@gemeentenijmegen/attestatie-registratie-component@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/attestatie-registratie-component/-/attestatie-registratie-component-0.0.3.tgz#56dcb62898b8096b563f28ad2e8c4c64a11dfef9"
+  integrity sha512-jCkg4tVzU3A2OfxSLSWxDHlHEFyYi6dyxbA8aI+cjxm8VwhNnGXGHtLE1ueTJzpq3vwDYsR3sFdagiZa0F0ifg==
   dependencies:
     "@types/jsonpath" "^0.2.4"
     "@ver-id/node-client" "^0.6.1"
@@ -1494,7 +1494,7 @@
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/aws-constructs/-/aws-constructs-0.0.47.tgz#f718c539d71ff567ee9dc38e0374968c27f80347"
   integrity sha512-/oedntMDPqqNQS3GawlnpWc6HXMJ77g5UjmU8N8wV5ybzPZ7wkCMbaoRmTMDITxCIBFu7n14yX7axVmK4Y0FPA==
 
-"@gemeentenijmegen/projen-project-type@^1.11.10":
+"@gemeentenijmegen/projen-project-type@^1.12.0":
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.12.0.tgz#61b4c8b8d4c9b638c5a69322f7763f54a214a2b4"
   integrity sha512-dLGFm/BSKWQI9hF/EkZptP6vZzlSrW9lRPLxFINEaB2vwGmLLjmykUwKHfguaS7q57or9ewLmpBC6jdD9p7DhQ==

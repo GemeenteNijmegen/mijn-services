@@ -2,7 +2,7 @@
 
 * text=auto eol=lf
 *.snap linguist-generated
-/.eslintrc.json linguist-generated linguist-language=JSON-with-Comments
+/.eslintrc.json linguist-generated
 /.gitattributes linguist-generated
 /.github/pull_request_template.md linguist-generated
 /.github/workflows/auto-merge.yml linguist-generated
@@ -27,6 +27,6 @@
 /src/services/AttestatieRegistratieComponent/lambda/arc-function.ts linguist-generated
 /src/services/OpenKlantRegistrationService/NotificationReceiver/receiver-function.ts linguist-generated
 /src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler-function.ts linguist-generated
-/tsconfig.dev.json linguist-generated linguist-language=JSON-with-Comments
-/tsconfig.json linguist-generated linguist-language=JSON-with-Comments
+/tsconfig.dev.json linguist-generated
+/tsconfig.json linguist-generated
 /yarn.lock linguist-generated
