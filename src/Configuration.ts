@@ -60,7 +60,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     //   debug: true,
     // },
     openProductServices: {
-      image: 'maykinmedia/open-product:1.3.0',
+      image: 'maykinmedia/open-product:1.5.0',
       logLevel: 'DEBUG',
       debug: true,
     },

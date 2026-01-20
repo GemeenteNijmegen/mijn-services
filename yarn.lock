@@ -1479,6 +1479,14 @@
   dependencies:
     "@types/aws-lambda" "^8.10.159"
 
+"@gemeentenijmegen/attestatie-registratie-component@^0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/attestatie-registratie-component/-/attestatie-registratie-component-0.0.12.tgz#8e2981001eeb88e8684d167c3a8352aaa47c90e2"
+  integrity sha512-vnCABdsBZmvW04bjeImDjJqX9WLTxqIV+7R+7mCWkyR/0aOf/cp61Ak5FjO+Ro+Mg4L9SBMaQ9IBbSjifyw7rw==
+  dependencies:
+    "@ver-id/node-client" "^0.7.1"
+    dotenv "^17.2.3"
+
 "@gemeentenijmegen/aws-constructs@^0.0.47":
   version "0.0.47"
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/aws-constructs/-/aws-constructs-0.0.47.tgz#f718c539d71ff567ee9dc38e0374968c27f80347"
@@ -2822,6 +2830,11 @@
   resolved "https://registry.yarnpkg.com/@unrs/resolver-binding-win32-x64-msvc/-/resolver-binding-win32-x64-msvc-1.11.1.tgz#538b1e103bf8d9864e7b85cc96fa8d6fb6c40777"
   integrity sha512-lrW200hZdbfRtztbygyaq/6jP6AKE8qQN2KvPcJ+x7wiD038YtnYtZ82IMNJ69GJibV7bwL3y9FgK+5w/pYt6g==
 
+"@ver-id/node-client@^0.7.1":
+  version "0.7.1"
+  resolved "https://npm.pkg.github.com/download/@ver-id/node-client/0.7.1/5234e53c7922df42bd781f823231edb9b538a852#5234e53c7922df42bd781f823231edb9b538a852"
+  integrity sha512-wTQPFc8cRLVm3hz22Kh5zdtrjkKHjLHkngWwd8V0ghjNsIcsI9B8cfQ5ROkj8+OLuBha6kyVDgJ51gT/NiUF9w==
+
 JSONStream@^1.3.5:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/JSONStream/-/JSONStream-1.3.5.tgz#3208c1f08d3a4d99261ab64f92302bc15e111ca0"
@@ -3746,9 +3759,9 @@ diff@^4.0.1:
   integrity sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
 
 diff@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/diff/-/diff-5.2.0.tgz#26ded047cd1179b78b9537d5ef725503ce1ae531"
-  integrity sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-5.2.1.tgz#fdc594705dc4eaf1046bff3dd1384729f92163c8"
+  integrity sha512-V53rScgj1+eW0hk+mbXiz/Q6uR0ef13cEvv0tsnin1JHAP2wJwfKjlHn+r7t/WAG4Tj8G8Civn5CdZ6zGb7K/w==
 
 doctrine@^2.1.0:
   version "2.1.0"
@@ -3768,6 +3781,11 @@ dotenv@^16.6.1:
   version "16.6.1"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.6.1.tgz#773f0e69527a8315c7285d5ee73c4459d20a8020"
   integrity sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==
+
+dotenv@^17.2.3:
+  version "17.2.3"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-17.2.3.tgz#ad995d6997f639b11065f419a22fabf567cdb9a2"
+  integrity sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==
 
 dotgitignore@^2.1.0:
   version "2.1.0"

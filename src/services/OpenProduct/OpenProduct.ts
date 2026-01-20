@@ -1,7 +1,7 @@
 import { Duration, Token } from 'aws-cdk-lib';
-import { ISecurityGroup, SecurityGroup, Port } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
-import { IRole } from 'aws-cdk-lib/aws-iam';
+import { Effect, IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
@@ -9,11 +9,11 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenProductServicesConfiguration } from '../../ConfigurationInterfaces';
-import { EcsServiceFactoryProps, EcsServiceFactory } from '../../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps } from '../../constructs/EcsServiceFactory';
+import { OpenConfigurationStore } from '../../constructs/OpenConfigurationStore';
 import { CacheDatabase } from '../../constructs/Redis';
 import { Statics } from '../../Statics';
 import { Utils } from '../../Utils';
-import { ServiceInfraUtils } from '../ServiceInfraUtils';
 
 export interface OpenProductServiceProps {
   cache: CacheDatabase;
@@ -25,6 +25,7 @@ export interface OpenProductServiceProps {
   alternativeDomainNames?: string[];
   key: Key;
   openProductConfiguration: OpenProductServicesConfiguration;
+  openConfigStore: OpenConfigurationStore;
 }
 
 export class OpenProductService extends Construct {
@@ -71,7 +72,7 @@ export class OpenProductService extends Construct {
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'True',
-      UWSGI_PORT: this.props.service.port.toString(),
+      // UWSGI_PORT: this.props.service.port.toString(), // MD: this breakes UWSGI aparently now?
 
       LOG_LEVEL: this.props.openProductConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openProductConfiguration.debug, false),
@@ -97,9 +98,9 @@ export class OpenProductService extends Construct {
       //   OPENZAAK_NOTIF_CONFIG_ENABLE: 'True', // Enable the configuration setup for connecting to open-notificaties
 
       // Somehow this is required aswell...
-    //   DEMO_CONFIG_ENABLE: 'False',
-    //   DEMO_CLIENT_ID: 'demo-client',
-    //   DEMO_SECRET: 'demo-secret',
+      //   DEMO_CONFIG_ENABLE: 'False',
+      //   DEMO_CLIENT_ID: 'demo-client',
+      //   DEMO_SECRET: 'demo-secret',
     };
   }
 
@@ -131,19 +132,18 @@ export class OpenProductService extends Construct {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
       volumes: [{ name: VOLUME_NAME }],
-      cpu: this.props.openProductConfiguration.taskSize?.cpu ?? '256',
-      memoryMiB: this.props.openProductConfiguration.taskSize?.memory ?? '512',
+      cpu: this.props.openProductConfiguration.taskSize?.cpu ?? '512',
+      memoryMiB: this.props.openProductConfiguration.taskSize?.memory ?? '1024',
     });
 
-    // Main service container
+    // Main service container (3th to run)
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
-      healthCheck: {
-        command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
-        // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(30),
-      },
+      // healthCheck: {
+      //   command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
+      //   interval: Duration.seconds(10),
+      //   startPeriod: Duration.seconds(30),
+      // },
       portMappings: [
         {
           containerPort: this.props.service.port,
@@ -159,9 +159,28 @@ export class OpenProductService extends Construct {
         logGroup: this.logs,
       }),
     });
-    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp');
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/setup_configuration');
 
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp');
+    // Download configuration (2nd to run)
+    const configLocation = `s3://${this.props.openConfigStore.bucket.bucketName}/open-product`;
+    const configTarget = '/app/setup_configuration';
+    const downloadConfiguration = this.serviceFactory.downloadConfiguration(task, this.logs, container, configLocation, configTarget);
+    this.serviceFactory.attachEphemeralStorage(downloadConfiguration, VOLUME_NAME, '/app/setup_configuration');
+
+    // File system prermissions for ephemeral storage (1st to run)
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, downloadConfiguration, '/tmp', '/app/setup_configuration');
+
+
+    task.addToTaskRolePolicy(new PolicyStatement({
+      actions: [
+        'ssmmessages:CreateControlChannel',
+        'ssmmessages:CreateDataChannel',
+        'ssmmessages:OpenControlChannel',
+        'ssmmessages:OpenDataChannel',
+      ],
+      effect: Effect.ALLOW,
+      resources: ['*'],
+    }));
 
     const service = this.serviceFactory.createService({
       id: 'main',
@@ -169,6 +188,7 @@ export class OpenProductService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
       volumeMounts: {
         fileSystemRoot: '/openproduct',
@@ -179,6 +199,7 @@ export class OpenProductService extends Construct {
       },
     });
 
+    this.props.openConfigStore.grantReadConfig(service.taskDefinition.taskRole!, 'open-product');
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;

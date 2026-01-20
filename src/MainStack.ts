@@ -9,7 +9,9 @@ import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { EcrRepository } from './constructs/EcrRepository';
+import { OpenConfigurationStore } from './constructs/OpenConfigurationStore';
 import { CacheDatabase } from './constructs/Redis';
+import { AttestatieRegistratieComponent } from './services/AttestatieRegistratieComponent/AttestatieRegistratieComponent';
 import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
 import { GZACFrontendService } from './services/GZACFrontend';
@@ -37,9 +39,12 @@ export class MainStack extends Stack {
   private readonly vpc: GemeenteNijmegenVpc;
   private readonly cache: CacheDatabase;
   private readonly key: Key;
+  private readonly openConfigStore: OpenConfigurationStore;
   constructor(scope: Construct, id: string, props: MainStackProps) {
     super(scope, id, props);
     this.configuration = props.configuration;
+
+    this.openConfigStore = new OpenConfigurationStore(this, 'open-config', { configuration: props.configuration });
 
     this.key = this.setupGeneralEncryptionKey();
     this.hostedzone = this.importHostedzone();
@@ -61,7 +66,7 @@ export class MainStack extends Stack {
       domains.push(...props.configuration.alternativeDomainNames);
     }
 
-    const platform = new ContainerPlatform(this, 'containers', {
+    const containerPlatform = new ContainerPlatform(this, 'containers', {
       vpc: this.vpc.vpc,
       hostedZone: this.hostedzone,
       domains,
@@ -69,19 +74,20 @@ export class MainStack extends Stack {
     });
 
     // Note: The order of which services are created here affects the loadbalancer priority...
-    this.openKlantRegistrationServices(platform); // Should be higher in priority than open-klant
-    this.openKlantService(platform);
-    this.openNotificatiesServices(platform);
-    this.openZaakServices(platform);
-    this.outputManagementComponent(platform);
-    this.objecttypesService(platform);
-    this.objectsService(platform);
-    this.keyCloakService(platform);
-    this.gzacService(platform);
-    this.openProductServices(platform);
-    this.gzacFrontendService(platform); // As this runs on the root /* it should be lowest in priority (accp only)
-    this.corsaZgwServices(platform);
-    this.helloWorldService(platform);
+    this.openKlantRegistrationServices(containerPlatform); // Should be higher in priority than open-klant
+    this.openKlantService(containerPlatform);
+    this.openNotificatiesServices(containerPlatform);
+    this.openZaakServices(containerPlatform);
+    this.outputManagementComponent(containerPlatform);
+    this.objecttypesService(containerPlatform);
+    this.objectsService(containerPlatform);
+    this.keyCloakService(containerPlatform);
+    this.gzacService(containerPlatform);
+    this.openProductServices(containerPlatform);
+    this.gzacFrontendService(containerPlatform); // As this runs on the root /* it should be lowest in priority (accp only)
+    this.corsaZgwServices(containerPlatform);
+    this.helloWorldService(containerPlatform);
+    this.attestationRegistrationComponent(containerPlatform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
@@ -381,11 +387,20 @@ export class MainStack extends Stack {
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 8080,
+        port: 8000,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       openProductConfiguration: this.configuration.openProductServices,
+      openConfigStore: this.openConfigStore,
     });
+  }
+
+  private attestationRegistrationComponent(platform: ContainerPlatform) {
+    if (this.configuration.branch == 'development') {
+      new AttestatieRegistratieComponent(this, 'arc', {
+        loadbalancer: platform.loadBalancer,
+      });
+    }
   }
 
   private helloWorldService(platform: ContainerPlatform) {

@@ -1,0 +1,82 @@
+import { AttestatieRegestratieComponent, ProductenService, VerIdAttestationService } from '@gemeentenijmegen/attestatie-registratie-component';
+import { AWS } from '@gemeentenijmegen/utils';
+import { ALBEvent, ALBResult } from 'aws-lambda';
+import { randomUUID } from 'crypto';
+/**
+ * Very minimal setup to test full cycle
+ * @param event
+ * @returns
+ */
+export async function handler(event: ALBEvent): Promise<ALBResult> {
+
+  try {
+
+
+    const arc = new AttestatieRegestratieComponent({
+      attestationService: new VerIdAttestationService({
+        client_id: process.env.VERID_CLIENT_ID!,
+        client_secret: await AWS.getSecret(process.env.VERID_CLIENT_SECRET!),
+        issuerUri: process.env.VERID_ISSUER_URL!,
+        redirectUri: process.env.ARC_CALLBACK_ENDPOINT!,
+      }),
+      productenService: new ProductenService(),
+    });
+
+    if (event.path.includes('/start')) {
+      return await start(event, arc);
+    };
+
+    if (event.path.includes('/callback')) {
+      return await callback(event, arc);
+    };
+
+  } catch (error) {
+    console.log(error);
+
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Request not handled' }),
+      headers: {
+        'Conten-Type': 'application/json',
+      },
+    };
+  }
+
+  return {
+    statusCode: 400,
+    body: JSON.stringify({ error: 'Request not handled' }),
+  };
+
+
+}
+
+
+async function start(event: ALBEvent, arc: AttestatieRegestratieComponent): Promise<ALBResult> {
+  console.log('Handling start...', event);
+
+  const redirectUri = await arc.start({
+    id: randomUUID(),
+    type: 'producten',
+  });
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ url: redirectUri }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+}
+
+async function callback(event: ALBEvent, arc: AttestatieRegestratieComponent): Promise<ALBResult> {
+  console.log('Handling callback...', event);
+
+  const success = await arc.callback(event);
+
+  return {
+    statusCode: 302,
+    headers: {
+      'Location': `https://mijn.dev.nijmegen.nl/producten?is_wallet_ingeladen=true&status=${success}`,
+    }
+  };
+}
