@@ -1,6 +1,7 @@
 import { AttestatieRegestratieComponent, ProductenService, VerIdAttestationService } from '@gemeentenijmegen/attestatie-registratie-component';
 import { AWS } from '@gemeentenijmegen/utils';
 import { ALBEvent, ALBResult } from 'aws-lambda';
+import { randomUUID } from 'crypto';
 /**
  * Very minimal setup to test full cycle
  * @param event
@@ -17,9 +18,15 @@ export async function handler(event: ALBEvent): Promise<ALBResult> {
     }),
     productenService: new ProductenService(),
   });
+
+  const redirectUri = arc.start({
+    id: randomUUID(),
+    type: 'producten',
+  });
+
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: arc.hello() }),
+    body: JSON.stringify({ url: redirectUri }),
     headers: {
       'Content-Type': 'application/json',
     },
