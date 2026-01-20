@@ -71,12 +71,12 @@ async function start(event: ALBEvent, arc: AttestatieRegestratieComponent): Prom
 async function callback(event: ALBEvent, arc: AttestatieRegestratieComponent): Promise<ALBResult> {
   console.log('Handling callback...', event);
 
-  await arc.callback({
-    id: randomUUID(),
-    type: 'producten',
-  });
+  const success = await arc.callback(event);
+
   return {
-    statusCode: 400,
-    body: JSON.stringify({ error: 'this call is not yet implemented' }),
+    statusCode: 302,
+    headers: {
+      'Location': `https://mijn.dev.nijmegen.nl/producten?is_wallet_ingeladen=true&status=${success}`,
+    }
   };
 }
