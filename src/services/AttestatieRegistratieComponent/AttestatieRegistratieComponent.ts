@@ -1,7 +1,7 @@
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
-import { ServiceLoadBalancer } from '../../constructs/LoadBalancer';
 import { ArcFunction } from './lambda/arc-function';
+import { ServiceLoadBalancer } from '../../constructs/LoadBalancer';
 
 export interface AttestatieRegistratieComponentProps {
   loadbalancer: ServiceLoadBalancer;

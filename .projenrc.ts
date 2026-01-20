@@ -17,6 +17,7 @@ const project = new GemeenteNijmegenCdkApp({
     '@types/pg',
     '@types/jsonwebtoken',
     'aws-sdk-client-mock',
+    '@types/aws-lambda',
   ],
   deps: [
     'dotenv',
