@@ -1,7 +1,7 @@
+import { randomUUID } from 'crypto';
 import { AttestatieRegestratieComponent, ProductenService, VerIdAttestationService } from '@gemeentenijmegen/attestatie-registratie-component';
 import { AWS } from '@gemeentenijmegen/utils';
 import { ALBEvent, ALBResult } from 'aws-lambda';
-import { randomUUID } from 'crypto';
 /**
  * Very minimal setup to test full cycle
  * @param event
@@ -37,7 +37,7 @@ export async function handler(event: ALBEvent): Promise<ALBResult> {
 async function start(event: ALBEvent, arc: AttestatieRegestratieComponent): Promise<ALBResult> {
   console.log('Handling start...', event);
 
-  const redirectUri = arc.start({
+  const redirectUri = await arc.start({
     id: randomUUID(),
     type: 'producten',
   });
@@ -54,7 +54,7 @@ async function start(event: ALBEvent, arc: AttestatieRegestratieComponent): Prom
 async function callback(event: ALBEvent, arc: AttestatieRegestratieComponent): Promise<ALBResult> {
   console.log('Handling callback...', event);
 
-  arc.callback({
+  await arc.callback({
     id: randomUUID(),
     type: 'producten',
   });
