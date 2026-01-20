@@ -23,11 +23,11 @@ export async function handler(event: ALBEvent): Promise<ALBResult> {
     });
 
     if (event.path.includes('/start')) {
-      return start(event, arc);
+      return await start(event, arc);
     };
 
     if (event.path.includes('/callback')) {
-      return callback(event, arc);
+      return await callback(event, arc);
     };
 
   } catch (error) {
@@ -37,8 +37,8 @@ export async function handler(event: ALBEvent): Promise<ALBResult> {
       statusCode: 400,
       body: JSON.stringify({ error: 'Request not handled' }),
       headers: {
-        "Conten-Type": 'application/json',
-      }
+        'Conten-Type': 'application/json',
+      },
     };
   }
 
