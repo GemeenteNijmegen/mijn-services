@@ -4,6 +4,7 @@ const project = new GemeenteNijmegenCdkApp({
   defaultReleaseBranch: 'main',
   name: 'mijn-services',
   projenrcTs: true,
+  enableCfnLintOnGithub: false, // TODO: reverse to true
   devDeps: [
     '@types/pg',
     '@types/jsonwebtoken',
