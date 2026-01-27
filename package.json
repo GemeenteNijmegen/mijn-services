@@ -66,7 +66,7 @@
     "@aws-lambda-powertools/logger": "^2.30.2",
     "@aws-lambda-powertools/tracer": "^2.30.2",
     "@aws-sdk/client-dynamodb": "^3.975.0",
-    "@aws-sdk/client-ec2": "^3.975.0",
+    "@aws-sdk/client-ec2": "^3.976.0",
     "@aws-sdk/client-sqs": "^3.975.0",
     "@gemeentenijmegen/apigateway-http": "^0.0.35",
     "@gemeentenijmegen/aws-constructs": "^0.0.47",
