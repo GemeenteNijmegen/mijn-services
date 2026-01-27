@@ -6,6 +6,9 @@ import { Configurable } from './ConfigurationInterfaces';
 import { MijnServicesStage } from './MijnServicesStage';
 import { ParameterStage } from './ParameterStage';
 import { Statics } from './Statics';
+import { PipelineType } from 'aws-cdk-lib/aws-codepipeline';
+import { getNodeVersion } from '@gemeentenijmegen/projen-project-type';
+import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
 
 export interface PipelineStackProps extends StackProps, Configurable { }
 
@@ -99,6 +102,18 @@ export class PipelineStack extends Stack {
       crossAccountKeys: true,
       synth: synthStep,
       dockerCredentials: [pipelines.DockerCredential.dockerHub(dockerHub)],
+      pipelineType: PipelineType.V1,
+      synthCodeBuildDefaults: {
+        partialBuildSpec: BuildSpec.fromObject({
+          phases: {
+            install: {
+              'runtime-versions': {
+                nodejs: getNodeVersion(),
+              },
+            },
+          },
+        }),
+      },
     });
 
     return pipeline;
