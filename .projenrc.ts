@@ -5,12 +5,12 @@ const project = new GemeenteNijmegenCdkApp({
   name: 'mijn-services',
   projenrcTs: true,
   devDeps: [
-    '@gemeentenijmegen/projen-project-type',
     '@types/pg',
     '@types/jsonwebtoken',
     'aws-sdk-client-mock',
   ],
   deps: [
+    '@gemeentenijmegen/projen-project-type',
     'dotenv',
     '@types/aws-lambda',
     '@gemeentenijmegen/aws-constructs',
