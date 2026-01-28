@@ -5,7 +5,7 @@ import { Port } from 'aws-cdk-lib/aws-ec2';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AaaaRecord, ARecord, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
-import { RemoteParameters } from 'cdk-remote-stack';
+import { RemoteParameters } from '@gemeentenijmegen/cross-region-parameters';
 import { Construct } from 'constructs';
 import { Statics } from '../Statics';
 import { SecurityGroupFromId } from './SecurityGroupFromId';

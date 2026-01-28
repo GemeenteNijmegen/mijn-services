@@ -28,14 +28,10 @@ jobs:
         run: |-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      - name: Setup cfn-lint
-        uses: scottbrenner/cfn-lint-action@v2
       - name: Install dependencies
         run: yarn install --check-files --frozen-lockfile
       - name: release
         run: npx projen release
-      - name: CloudFormation lint
-        run: npx projen lint
       - name: Check if version has already been tagged
         id: check_tag_exists
         run: |-

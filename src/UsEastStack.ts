@@ -5,7 +5,7 @@ import {
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
-import { RemoteParameters } from 'cdk-remote-stack';
+import { RemoteParameters } from '@gemeentenijmegen/cross-region-parameters';
 import { Construct } from 'constructs';
 import { Statics } from './Statics';
 

@@ -10,7 +10,7 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { RemoteParameters } from 'cdk-remote-stack';
+import { RemoteParameters } from '@gemeentenijmegen/cross-region-parameters';
 import { Construct } from 'constructs';
 import { CorsaZgwServiceConfiguration } from '../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';

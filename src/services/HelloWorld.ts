@@ -3,7 +3,7 @@ import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { AwsLogDriver, ContainerImage, Protocol } from 'aws-cdk-lib/aws-ecs';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
-import { RemoteParameters } from 'cdk-remote-stack';
+import { RemoteParameters } from '@gemeentenijmegen/cross-region-parameters';
 import { Construct } from 'constructs';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
