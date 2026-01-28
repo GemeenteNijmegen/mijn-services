@@ -4,19 +4,20 @@ const project = new GemeenteNijmegenCdkApp({
   defaultReleaseBranch: 'main',
   name: 'mijn-services',
   projenrcTs: true,
+  enableCfnLintOnGithub: false, // TODO: reverse to true
   devDeps: [
-    '@gemeentenijmegen/projen-project-type',
     '@types/pg',
     '@types/jsonwebtoken',
     'aws-sdk-client-mock',
   ],
   deps: [
+    '@gemeentenijmegen/projen-project-type',
     'dotenv',
     '@types/aws-lambda',
     '@gemeentenijmegen/aws-constructs',
     '@gemeentenijmegen/utils',
     '@gemeentenijmegen/apigateway-http',
-    'cdk-remote-stack',
+    '@gemeentenijmegen/cross-region-parameters',
     'pg', // Postgres client 🐘
     'zod',
     'jsonwebtoken',

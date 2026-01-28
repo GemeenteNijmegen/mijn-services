@@ -11,11 +11,11 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenZaakConfiguration } from '../ConfigurationInterfaces';
+import { ServiceInfraUtils } from './ServiceInfraUtils';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
-import { ServiceInfraUtils } from './ServiceInfraUtils';
 
 export interface OpenZaakServiceProps {
   cache: CacheDatabase;

@@ -398,13 +398,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@18 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@gemeentenijmegen/projen-project-type,@types/jest,@types/jsonwebtoken,@types/node,@types/pg,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript,@aws-lambda-powertools/batch,@aws-lambda-powertools/idempotency,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-ec2,@aws-sdk/client-sqs,@gemeentenijmegen/apigateway-http,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/utils,@middy/core,@types/aws-lambda,cdk-remote-stack,dotenv,jsonwebtoken,pg,zod"
+          "exec": "npx npm-check-updates@18 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/jsonwebtoken,@types/node,@types/pg,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,ts-jest,ts-node,typescript,@aws-lambda-powertools/batch,@aws-lambda-powertools/idempotency,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-ec2,@aws-sdk/client-sqs,@gemeentenijmegen/apigateway-http,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/cross-region-parameters,@gemeentenijmegen/projen-project-type,@gemeentenijmegen/utils,@middy/core,@types/aws-lambda,dotenv,jsonwebtoken,pg,zod"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @gemeentenijmegen/projen-project-type @stylistic/eslint-plugin @types/jest @types/jsonwebtoken @types/node @types/pg @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk aws-sdk-client-mock commit-and-tag-version esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen ts-jest ts-node typescript @aws-lambda-powertools/batch @aws-lambda-powertools/idempotency @aws-lambda-powertools/logger @aws-lambda-powertools/tracer @aws-sdk/client-dynamodb @aws-sdk/client-ec2 @aws-sdk/client-sqs @gemeentenijmegen/apigateway-http @gemeentenijmegen/aws-constructs @gemeentenijmegen/utils @middy/core @types/aws-lambda aws-cdk-lib cdk-remote-stack constructs dotenv jsonwebtoken pg zod"
+          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/jsonwebtoken @types/node @types/pg @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk aws-sdk-client-mock commit-and-tag-version esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen ts-jest ts-node typescript @aws-lambda-powertools/batch @aws-lambda-powertools/idempotency @aws-lambda-powertools/logger @aws-lambda-powertools/tracer @aws-sdk/client-dynamodb @aws-sdk/client-ec2 @aws-sdk/client-sqs @gemeentenijmegen/apigateway-http @gemeentenijmegen/aws-constructs @gemeentenijmegen/cross-region-parameters @gemeentenijmegen/projen-project-type @gemeentenijmegen/utils @middy/core @types/aws-lambda aws-cdk-lib constructs dotenv jsonwebtoken pg zod"
         },
         {
           "exec": "npx projen"

@@ -1,4 +1,5 @@
 import { QueueWithDlq } from '@gemeentenijmegen/aws-constructs';
+import { RemoteParameters } from '@gemeentenijmegen/cross-region-parameters';
 import { Duration, Token } from 'aws-cdk-lib';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
@@ -10,7 +11,6 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
 import { CorsaZgwServiceConfiguration } from '../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';

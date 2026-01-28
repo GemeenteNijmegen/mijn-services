@@ -1,5 +1,8 @@
 import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
+import { getNodeVersion } from '@gemeentenijmegen/projen-project-type';
 import { Aspects, CfnParameter, Stack, StackProps, Tags, pipelines } from 'aws-cdk-lib';
+import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
+import { PipelineType } from 'aws-cdk-lib/aws-codepipeline';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { Configurable } from './ConfigurationInterfaces';
@@ -77,6 +80,18 @@ export class PipelineStack extends Stack {
       crossAccountKeys: true,
       synth: synthStep,
       dockerCredentials: [pipelines.DockerCredential.dockerHub(dockerHub)],
+      pipelineType: PipelineType.V1,
+      synthCodeBuildDefaults: {
+        partialBuildSpec: BuildSpec.fromObject({
+          phases: {
+            install: {
+              'runtime-versions': {
+                nodejs: getNodeVersion(),
+              },
+            },
+          },
+        }),
+      },
     });
     return pipeline;
   }
