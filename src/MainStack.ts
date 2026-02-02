@@ -11,7 +11,6 @@ import { DnsRecords } from './constructs/DnsRecords';
 import { EcrRepository } from './constructs/EcrRepository';
 import { OpenConfigurationStore } from './constructs/OpenConfigurationStore';
 import { CacheDatabase } from './constructs/Redis';
-import { AttestatieRegistratieComponent } from './services/AttestatieRegistratieComponent/AttestatieRegistratieComponent';
 import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
 import { GZACFrontendService } from './services/GZACFrontend';
@@ -87,7 +86,6 @@ export class MainStack extends Stack {
     this.gzacFrontendService(containerPlatform); // As this runs on the root /* it should be lowest in priority (accp only)
     this.corsaZgwServices(containerPlatform);
     this.helloWorldService(containerPlatform);
-    this.attestationRegistrationComponent(containerPlatform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
@@ -393,14 +391,6 @@ export class MainStack extends Stack {
       openProductConfiguration: this.configuration.openProductServices,
       openConfigStore: this.openConfigStore,
     });
-  }
-
-  private attestationRegistrationComponent(platform: ContainerPlatform) {
-    if (this.configuration.branch == 'development') {
-      new AttestatieRegistratieComponent(this, 'arc', {
-        loadbalancer: platform.loadBalancer,
-      });
-    }
   }
 
   private helloWorldService(platform: ContainerPlatform) {

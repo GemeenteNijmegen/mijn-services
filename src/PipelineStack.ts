@@ -1,14 +1,14 @@
 import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
+import { getNodeVersion } from '@gemeentenijmegen/projen-project-type';
 import { Aspects, CfnParameter, Stack, StackProps, Tags, pipelines } from 'aws-cdk-lib';
+import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
+import { PipelineType } from 'aws-cdk-lib/aws-codepipeline';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { Configurable } from './ConfigurationInterfaces';
 import { MijnServicesStage } from './MijnServicesStage';
 import { ParameterStage } from './ParameterStage';
 import { Statics } from './Statics';
-import { PipelineType } from 'aws-cdk-lib/aws-codepipeline';
-import { getNodeVersion } from '@gemeentenijmegen/projen-project-type';
-import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
 
 export interface PipelineStackProps extends StackProps, Configurable { }
 
