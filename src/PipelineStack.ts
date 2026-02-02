@@ -68,28 +68,11 @@ export class PipelineStack extends Stack {
       description: `Docker credentials for ${Statics.projectName} (${props.configuration.branch})`,
     });
 
-
-    if (props.configuration.branch == 'development') {
-      // For the fieldlab we use a private package
-      const secret = new Secret(this, 'ver-id-github-token', {
-        description: 'Github token for private package from verid',
-      });
-      this.secrets.VER_ID_GH_TOKEN = secret;
-    }
-
     const synthStep = new pipelines.ShellStep('Synth', {
       input: source,
       env: {
         BRANCH_NAME: this.branchName,
       },
-      installCommands: [
-        // We set the node version to the latest 22.x.x release as the middy package used in lambdas requires >=20.
-        'n 22',
-        ...Object.entries(this.secrets).map(([key, secret]) => {
-          return `export ${key}=$(aws secretsmanager get-secret-value --secret-id ${secret.secretArn} --query SecretString --output text)`;
-        }),
-
-      ],
       commands: [
         'yarn install --frozen-lockfile',
         'npx projen build',
