@@ -70,7 +70,7 @@ export class PipelineStack extends Stack {
       ],
       commands: [
         'yarn install --frozen-lockfile',
-        'npx projen build',
+        'npx projen synth', // Builds but skips tests. Deployment is only done through git where all tests are ran before merging a PR. This shaves 6m of the deployment time.
       ],
     });
 
