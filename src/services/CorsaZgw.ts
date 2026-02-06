@@ -143,7 +143,7 @@ export class CorsaZgwService extends Construct {
       CORSA_MTLS_PRIVATE_KEY: Secret.fromSecretsManager(this.corsaMtlsPrivateKey),
       CORSA_MTLS_CERTIFICATE: Secret.fromSsmParameter(this.corsaMtlsCertificat),
       CORSA_MTLS_CA_BUNDLE: Secret.fromSsmParameter(this.corsaMtlsCaBundle),
-      CORSA_ENDPOINT: Secret.fromSsmParameter(this.corsaEndpoint),
+      ZAAKDMS_URL: Secret.fromSsmParameter(this.corsaEndpoint),
 
     };
   }
@@ -195,6 +195,16 @@ export class CorsaZgwService extends Construct {
       // NOTIFICATION_BATCH_MAX_SIZE: '100',
       // NOTIFICATION_USE_QUEUE: 'true',
       // NOTIFICATION_QUEUE: 'default',
+
+
+      // Static corsa connection config
+      ESB__SEND_CERT: '/cert/corsa-mtls.crt',
+      ESB_SEND_PK: '/cert/corsa-mtls.key',
+      ESB_VERIFY: '/cert/corsa-mtls.pem',
+      ZAAKDMS_SENDER_APPLICATION: "VIP", // We are using the VIP cert and key data is as if it were from VIP.
+      ZAAKDMS_SENDER_ADMINISTRATIVE: "APV",
+      ZAAKDMS_SENDER_ORGANISATION: "Woweb B.V.",
+
     };
 
   }
