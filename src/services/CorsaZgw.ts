@@ -162,6 +162,13 @@ export class CorsaZgwService extends Construct {
       REDIS_DB: this.props.cacheChannel.toString(),
       QUEUE_CONNECTION: 'redis',
 
+
+      // Notifications scheduler settings (defaults)
+      // NOTIFICATION_BATCH_TIMEOUT: '60',
+      // NOTIFICATION_BATCH_MAX_SIZE: '100',
+      // NOTIFICATION_USE_QUEUE: 'true',
+      // NOTIFICATION_QUEUE: 'default',
+
     };
 
   }
