@@ -52,6 +52,10 @@ export class CorsaZgwService extends Construct {
   private readonly databaseCredentials: ISecret;
   private readonly adminCredentials: ISecret;
   private readonly credentialsForConnectingToOpenZaak: ISecret;
+  private readonly corsaMtlsPrivateKey: ISecret;
+  private readonly corsaMtlsCertificat: StringParameter;
+  private readonly corsaMtlsCaBundle: StringParameter;
+  private readonly corsaEndpoint: StringParameter;
   private readonly openZaakCatalogusUrl: StringParameter;
   private readonly openZaakUrl: StringParameter;
 
@@ -77,6 +81,22 @@ export class CorsaZgwService extends Construct {
       generateSecretString: {
         excludePunctuation: true,
       },
+    });
+
+    this.corsaMtlsPrivateKey = new SecretParameter(this, 'corsa-mtls-key', {
+      description: 'Corsa-ZGW Corsa MTLs - Private key',
+    });
+    this.corsaMtlsCertificat = new StringParameter(this, 'corsa-mtls-cert', {
+      stringValue: '-',
+      description: 'Corsa-ZGW Corsa MTLs - Certificat',
+    });
+    this.corsaMtlsCaBundle = new StringParameter(this, 'corsa-mtls-ca-bindle', {
+      stringValue: '-',
+      description: 'Corsa-ZGW Corsa MTLs - Ca bundle',
+    });
+    this.corsaEndpoint = new StringParameter(this, 'corsa-endpoint', {
+      stringValue: '-',
+      description: 'Corsa-ZGW Corsa - endpoint',
     });
 
     this.credentialsForConnectingToOpenZaak = new SecretParameter(this, 'open-zaak', {
@@ -118,6 +138,13 @@ export class CorsaZgwService extends Construct {
       OPENZAAK_CLIENT_SECRET: Secret.fromSecretsManager(this.credentialsForConnectingToOpenZaak, 'clientSecret'),
       OPENZAAK_URL: Secret.fromSsmParameter(this.openZaakUrl),
       OPENZAAK_CATALOGI_URL: Secret.fromSsmParameter(this.openZaakCatalogusUrl),
+
+      // Corsa credentials
+      CORSA_MTLS_PRIVATE_KEY: Secret.fromSecretsManager(this.corsaMtlsPrivateKey),
+      CORSA_MTLS_CERTIFICATE: Secret.fromSsmParameter(this.corsaMtlsCertificat),
+      CORSA_MTLS_CA_BUNDLE: Secret.fromSsmParameter(this.corsaMtlsCaBundle),
+      CORSA_MTLS_ENDPOINT: Secret.fromSsmParameter(this.corsaEndpoint),
+
     };
   }
 
@@ -168,7 +195,6 @@ export class CorsaZgwService extends Construct {
       // NOTIFICATION_BATCH_MAX_SIZE: '100',
       // NOTIFICATION_USE_QUEUE: 'true',
       // NOTIFICATION_QUEUE: 'default',
-
     };
 
   }
