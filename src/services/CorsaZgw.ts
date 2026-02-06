@@ -143,7 +143,7 @@ export class CorsaZgwService extends Construct {
       CORSA_MTLS_PRIVATE_KEY: Secret.fromSecretsManager(this.corsaMtlsPrivateKey),
       CORSA_MTLS_CERTIFICATE: Secret.fromSsmParameter(this.corsaMtlsCertificat),
       CORSA_MTLS_CA_BUNDLE: Secret.fromSsmParameter(this.corsaMtlsCaBundle),
-      CORSA_MTLS_ENDPOINT: Secret.fromSsmParameter(this.corsaEndpoint),
+      CORSA_ENDPOINT: Secret.fromSsmParameter(this.corsaEndpoint),
 
     };
   }
