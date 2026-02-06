@@ -198,7 +198,7 @@ export class CorsaZgwService extends Construct {
 
 
       // Static corsa connection config
-      ESB__SEND_CERT: '/cert/corsa-mtls.crt',
+      ESB__SEND_CERT: '/cert/corsa-mtls.crt', // __ is not a typo
       ESB_SEND_PK: '/cert/corsa-mtls.key',
       ESB_VERIFY: '/cert/corsa-mtls.pem',
       ZAAKDMS_SENDER_APPLICATION: "VIP", // We are using the VIP cert and key data is as if it were from VIP.
