@@ -249,7 +249,7 @@ export class CorsaZgwService extends Construct {
         desiredCount: 1,
         enableExecuteCommand: true,
       },
-      // healthCheckPath: '/up', // Not configurabel yet while using subdomain (this is the correct path though)
+      // healthCheckPath: '/health', // TODO Not configurabel yet while using subdomain (this is the correct path though)
     });
     this.setupConnectivity('corsa-zgw', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
@@ -326,7 +326,6 @@ export class CorsaZgwService extends Construct {
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
   }
-
 
   private logGroup() {
     return new LogGroup(this, 'logs', {
