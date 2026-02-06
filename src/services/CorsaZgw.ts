@@ -175,7 +175,7 @@ export class CorsaZgwService extends Construct {
 
       // Logging
       LOG_CHANNEL: 'stack',
-      LOG_STACK: 'single',
+      LOG_STACK: 'stderr', // Stdout and stderr
       LOG_DEPRECATIONS_CHANNEL: 'null',
       LOG_LEVEL: this.props.serviceConfiguration.logLevel.toLocaleLowerCase(),
 
