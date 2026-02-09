@@ -56,6 +56,7 @@ export class CorsaZgwService extends Construct {
   private readonly corsaMtlsCertificat: StringParameter;
   private readonly corsaMtlsCaBundle: StringParameter;
   private readonly corsaEndpoint: StringParameter;
+  private readonly esbTrustCertificate: StringParameter;
   private readonly openZaakCatalogusUrl: StringParameter;
   private readonly openZaakUrl: StringParameter;
 
@@ -97,6 +98,11 @@ export class CorsaZgwService extends Construct {
     this.corsaEndpoint = new StringParameter(this, 'corsa-endpoint', {
       stringValue: '-',
       description: 'Corsa-ZGW Corsa - endpoint',
+    });
+
+    this.esbTrustCertificate = new StringParameter(this, 'esb-trust-cert', {
+      stringValue: '-',
+      description: 'Corsa-ZGW ESB Certificate trust anchor',
     });
 
     this.credentialsForConnectingToOpenZaak = new SecretParameter(this, 'open-zaak', {
@@ -144,6 +150,8 @@ export class CorsaZgwService extends Construct {
       CORSA_MTLS_CERTIFICATE: Secret.fromSsmParameter(this.corsaMtlsCertificat),
       CORSA_MTLS_CA_BUNDLE: Secret.fromSsmParameter(this.corsaMtlsCaBundle),
       ZAAKDMS_URL: Secret.fromSsmParameter(this.corsaEndpoint),
+
+      ESB_TRUST_ANCHOR: Secret.fromSsmParameter(this.esbTrustCertificate),
 
     };
   }
@@ -256,6 +264,10 @@ export class CorsaZgwService extends Construct {
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
+      command: [
+        '/bin/bash', '-c',
+        'echo "$ESB_TRUST_ANCHOR" > /usr/local/share/ca-certificates/esb-trust.crt && update-ca-certificates && exec /entrypoint'
+      ],
       portMappings: [
         {
           containerPort: this.props.service.port,
