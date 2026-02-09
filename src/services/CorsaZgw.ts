@@ -266,7 +266,7 @@ export class CorsaZgwService extends Construct {
       },
       command: [
         '/bin/bash', '-c',
-        'echo "$ESB_TRUST_ANCHOR" > /usr/local/share/ca-certificates/esb-trust.crt && update-ca-certificates && exec /entrypoint'
+        'echo "$ESB_TRUST_ANCHOR" > /etc/ssl/certs/esb-trust.crt && update-ca-certificates && exec /entrypoint'
       ],
       portMappings: [
         {
@@ -342,7 +342,10 @@ export class CorsaZgwService extends Construct {
     // Main service container
     const container = task.addContainer('worker', {
       image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
-      command: ['php', 'artisan', 'horizon'],
+      command: [
+        '/bin/bash', '-c',
+        'echo "$ESB_TRUST_ANCHOR" > /etc/ssl/certs/esb-trust.crt && update-ca-certificates && php artisan horizon'
+      ],
       healthCheck: {
         command: ['CMD-SHELL', 'php artisan horizon:status'],
         interval: Duration.seconds(10),
