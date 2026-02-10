@@ -330,7 +330,7 @@ export class CorsaZgwService extends Construct {
     // Main service container
     const container = task.addContainer('worker', {
       image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
-      command: ['php artisan horizon'],
+      command: ['php', 'artisan', 'horizon'],
       healthCheck: {
         command: ['CMD-SHELL', 'php artisan horizon:status'],
         interval: Duration.seconds(10),
