@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagram Viewer</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, Arial, sans-serif;
+      background: #f5f7fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin: 20px 0 10px;
+      font-size: 1.4rem;
+      color: #333;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+      padding: 10px 16px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .controls label {
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .controls input {
+      margin-right: 6px;
+    }
+
+    .controls input:checked+span {
+      font-weight: 600;
+      color: #0b6cff;
+    }
+
+    .viewer {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    img {
+      max-width: 95%;
+      max-height: 80vh;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .footer {
+      font-size: 0.8rem;
+      color: #777;
+      margin: 10px 0 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Diagram Views</h1>
+
+  <div class="controls" id="controls">
+    <!-- Radio buttons will be inserted here -->
+  </div>
+
+  <div class="viewer">
+    <img id="diagram" alt="Diagram view" />
+  </div>
+
+  <div class="footer">
+    Place images named <code>voorstel-*.drawio.png</code> next to this file.
+  </div>
+
+  <script>
+    /**
+     * CONFIG
+     * Ordered list of image name suffixes.
+     * Rendering will follow THIS exact order.
+     */
+
+    const images = [
+      'blank',
+      'notificaties',
+      'producten',
+      'VTB',
+      'zaakaggregator',
+    ];
+
+    const imagePattern = name => `voorstel-${name}.drawio.png`;
+
+    const controls = document.getElementById("controls");
+    const img = document.getElementById("diagram");
+
+    /**
+     * Load images ONCE, preserve order, avoid duplicates
+     */
+
+    const validImages = [];
+    let remainingChecks = images.length;
+
+    function tryLoad(name, index) {
+      const src = imagePattern(name);
+      const testImg = new Image();
+
+      testImg.onload = () => {
+        validImages[index] = { src, name };
+        finalizeCheck();
+      };
+
+      testImg.onerror = finalizeCheck;
+
+      testImg.src = src;
+    }
+
+    function finalizeCheck() {
+      remainingChecks--;
+
+      // Wait until ALL images attempted before rendering UI
+      if (remainingChecks === 0) {
+        initUI();
+      }
+    }
+
+    function initUI() {
+      const filtered = validImages.filter(Boolean); // remove missing ones
+
+      if (filtered.length === 0) {
+        controls.textContent = "No images found.";
+        return;
+      }
+
+      filtered.forEach((found, index) => {
+        const id = `view-${index}`;
+
+        const label = document.createElement("label");
+
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "view";
+        radio.value = found.src;
+        radio.id = id;
+
+        if (index === 0) radio.checked = true;
+
+        radio.addEventListener("change", () => {
+          img.src = found.src;
+        });
+
+        const span = document.createElement("span");
+        span.textContent = found.name;
+
+        label.appendChild(radio);
+        label.appendChild(span);
+        controls.appendChild(label);
+      });
+
+      // Show first image
+      img.src = filtered[0].src;
+    }
+
+    // Start loading in deterministic order
+    images.forEach((name, index) => tryLoad(name, index));
+  </script>
+</body>
+
+</html>

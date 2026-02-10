@@ -19,6 +19,8 @@ graph LR
 
 ### Opmerkingen
 - Werkt misschien als utopie, realistisch gezien zal je altijd in een van de andere sitauties terechtkomen in de transiatie hiernaartoe.
+- Voorkeur van aantal grote gemeenten (of sommige kleinen) - Er zijn mensen die dit een goed idee vinden die een lepel in de pap hebben.
+- 10 jaren plan.
 
 ## 2. Elke TSA bepaald zelf
 ```mermaid
