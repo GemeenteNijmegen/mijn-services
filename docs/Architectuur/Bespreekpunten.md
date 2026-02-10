@@ -17,3 +17,8 @@
 - API versies
 - Update strategie voor componenten
 - Beheer (technisch/functioneel) en monitoring
+
+## Toetsen oplossingsrichtingen
+Werken de volgende zaken in de gekozen patronen:
+- Mijn Acties (uitwerken)
+- 
