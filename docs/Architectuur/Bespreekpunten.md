@@ -11,6 +11,7 @@
   - IKO
   - VTB (https://github.com/maykinmedia/open-vtb)
   - Domein registraties (tbv GZAC) (ooit iets over gehoord maar kan niets vinden online).
+  - Documenten
 
 - Governance over componenten
 - API versies
