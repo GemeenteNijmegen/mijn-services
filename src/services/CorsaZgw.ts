@@ -201,9 +201,9 @@ export class CorsaZgwService extends Construct {
       ESB__SEND_CERT: '/cert/corsa-mtls.crt', // __ is not a typo
       ESB_SEND_PK: '/cert/corsa-mtls.key',
       ESB_VERIFY: '/cert/corsa-mtls.pem',
-      ZAAKDMS_SENDER_APPLICATION: "VIP", // We are using the VIP cert and key data is as if it were from VIP.
-      ZAAKDMS_SENDER_ADMINISTRATIVE: "APV",
-      ZAAKDMS_SENDER_ORGANISATION: "Woweb B.V.",
+      ZAAKDMS_SENDER_APPLICATION: 'VIP', // We are using the VIP cert and key data is as if it were from VIP.
+      ZAAKDMS_SENDER_ADMINISTRATIVE: 'APV',
+      ZAAKDMS_SENDER_ORGANISATION: 'Woweb B.V.',
 
     };
 
