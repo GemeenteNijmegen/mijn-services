@@ -76,20 +76,24 @@ graph LR
     subgraph Diagram4["4. Klonen"]
         ZGW4_1[ZGW]
         ZGW4_2[ZGW2]
-        SAP[SAP]
+        STUFF[STUFF]
+        SQL[SQL]
         ZGW4_3["ZGW (duplicated)"]
         TSA4_1[TSA]
         TSA4_2[TSA]
         TSA4_3[TSA]
         TSA4_4["TSA (MijnNijmegen, KISS)"]
+        TSA4_5[TSA]
         
         TSA4_1 --> ZGW4_1
         TSA4_2 --> ZGW4_2
-        TSA4_3 --> SAP
+        TSA4_3 --> STUFF
         TSA4_4 --> ZGW4_3
+        TSA4_5 --> SQL
 
         ZGW4_1 --> ZGW4_3
         ZGW4_2 --> ZGW4_3
-        SAP --> ZGW4_3
+        STUFF --> ZGW4_3
+        SQL --> ZGW4_3
     end
 ```
