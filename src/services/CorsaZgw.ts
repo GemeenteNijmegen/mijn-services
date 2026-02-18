@@ -142,7 +142,7 @@ export class CorsaZgwService extends Construct {
       // Corsa credentials
       CORSA_MTLS_PRIVATE_KEY: Secret.fromSecretsManager(this.corsaMtlsPrivateKey),
       CORSA_MTLS_CERTIFICATE: Secret.fromSsmParameter(this.corsaMtlsCertificat),
-      CORSA_MTLS_CA_BUNDLE: Secret.fromSsmParameter(this.corsaMtlsCaBundle),
+      ESB_CA_CERT: Secret.fromSsmParameter(this.corsaMtlsCaBundle),
       ZAAKDMS_URL: Secret.fromSsmParameter(this.corsaEndpoint),
 
     };
@@ -200,7 +200,7 @@ export class CorsaZgwService extends Construct {
       // Static corsa connection config
       ESB__SEND_CERT: '/cert/corsa-mtls.crt', // __ is not a typo
       ESB_SEND_PK: '/cert/corsa-mtls.key',
-      ESB_VERIFY: '/cert/corsa-mtls.pem',
+      ESB_VERIFY: '/cert/esb-mtls.pem',
       ZAAKDMS_SENDER_APPLICATION: 'VIP', // We are using the VIP cert and key data is as if it were from VIP.
       ZAAKDMS_SENDER_ADMINISTRATIVE: 'APV',
       ZAAKDMS_SENDER_ORGANISATION: 'Woweb B.V.',
