@@ -56,6 +56,9 @@
           "spawn": "bundle:custom-resources/securitygroupByName/securitygroupByName.lambda"
         },
         {
+          "spawn": "bundle:services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda"
+        },
+        {
           "spawn": "bundle:services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda"
         },
         {
@@ -114,6 +117,24 @@
       "steps": [
         {
           "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+        }
+      ]
+    },
+    "bundle:services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda": {
+      "name": "bundle:services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda",
+      "description": "Create a JavaScript bundle from src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+        }
+      ]
+    },
+    "bundle:services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda:watch": {
+      "name": "bundle:services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda:watch",
+      "description": "Continuously update the JavaScript bundle from src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts",
+      "steps": [
+        {
+          "exec": "esbuild --bundle src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },

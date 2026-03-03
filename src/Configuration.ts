@@ -1,4 +1,7 @@
+import { Schedule } from '@aws-sdk/client-ec2';
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
+import { Duration } from 'aws-cdk-lib';
+import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
 import { Configuration } from './ConfigurationInterfaces';
 import { Statics } from './Statics';
 
@@ -98,6 +101,12 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       },
     ],
     helloWorlService: true,
+    ObjectNotificationServices: [
+      {
+        configKey: 'esfTaak',
+        scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+      },
+    ],
   },
   acceptance: {
     branch: 'acceptance',
