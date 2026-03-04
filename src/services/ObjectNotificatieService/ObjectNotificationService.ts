@@ -4,6 +4,7 @@ import { Schedule, ScheduleExpression, ScheduleTargetInput } from 'aws-cdk-lib/a
 import { LambdaInvoke } from 'aws-cdk-lib/aws-scheduler-targets';
 import { Construct } from 'constructs';
 import { NotificationHandlerFunction } from './NotificationHandler/NotificationHandler-function';
+import { ConfigTable } from '@gemeentenijmegen/config/construct';
 
 
 interface ObjectNotificationServiceProps {
@@ -15,9 +16,6 @@ interface ObjectNotificationServiceProps {
 export class ObjectNotificationService extends Construct {
   constructor(scope: Construct, id: string, private props: ObjectNotificationServiceProps) {
     super(scope, id);
-    if (!this.props.configTable) {
-      //TODO config
-    }
     const idemPotencyHashTable = this.setupIdempotencyTable();
     // Create runtime config
     const lambda = new NotificationHandlerFunction(this, 'notificationhandler', {
@@ -36,6 +34,15 @@ export class ObjectNotificationService extends Construct {
       }),
       description: 'This schedule is responsible for invoking the objectnotification service',
     });
+
+    if (!this.props.configTable) {
+      const config = new ConfigTable(this, 'config', {
+        config: {
+          [props.configKey]: {}
+        }
+      });
+      config.table.grantReadData(lambda);
+    }
   }
 
   /**

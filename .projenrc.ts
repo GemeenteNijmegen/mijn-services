@@ -25,6 +25,7 @@ const project = new GemeenteNijmegenCdkApp({
     '@gemeentenijmegen/aws-constructs',
     '@gemeentenijmegen/utils',
     '@gemeentenijmegen/apigateway-http',
+    '@gemeentenijmegen/config',
     'cdk-remote-stack',
     'pg', // Postgres client 🐘
     'zod',

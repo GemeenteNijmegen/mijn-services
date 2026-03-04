@@ -133,6 +133,10 @@
       "type": "runtime"
     },
     {
+      "name": "@gemeentenijmegen/config",
+      "type": "runtime"
+    },
+    {
       "name": "@gemeentenijmegen/utils",
       "type": "runtime"
     },
