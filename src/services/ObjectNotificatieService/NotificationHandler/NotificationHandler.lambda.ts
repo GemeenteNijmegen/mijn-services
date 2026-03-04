@@ -1,4 +1,4 @@
-import { makeIdempotent } from '@aws-lambda-powertools/idempotency';
+import { IdempotencyConfig, makeIdempotent } from '@aws-lambda-powertools/idempotency';
 import { DynamoDBPersistenceLayer } from '@aws-lambda-powertools/idempotency/dynamodb';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { EventBridgeEvent } from 'aws-lambda';
@@ -14,6 +14,7 @@ tracer.addServiceNameAnnotation();
 
 const persistenceStore = new DynamoDBPersistenceLayer({
   tableName: process.env.IDEMPOTENCY_TABLE_NAME!,
+  keyAttr: 'hash'
 });
 
 export const handler = makeIdempotent(async (event: EventBridgeEvent<'Scheduled Event', {}>) => {
@@ -28,5 +29,8 @@ export const handler = makeIdempotent(async (event: EventBridgeEvent<'Scheduled 
   }
 }, {
   persistenceStore,
+  config: new IdempotencyConfig({
+      eventKeyJmesPath: '["detail-type"]',
+  })
 },
 );
