@@ -137,6 +137,10 @@
       "type": "runtime"
     },
     {
+      "name": "@gemeentenijmegen/object-notifier",
+      "type": "runtime"
+    },
+    {
       "name": "@gemeentenijmegen/utils",
       "type": "runtime"
     },

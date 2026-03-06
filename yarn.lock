@@ -1870,6 +1870,13 @@
     "@gemeentenijmegen/utils" "^0.0.38"
     "@types/aws-lambda" "^8.10.159"
 
+"@gemeentenijmegen/object-notifier@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/object-notifier/-/object-notifier-0.0.1.tgz#34fba9726225b0d27789220b6b472a848efb4775"
+  integrity sha512-/fuCfaKhPhXCFSK8EcsoFSQ/izQHguVdlj4hESmvdPwW8uE8++dg8IYOOncOZ+TfPD52FsPixbml6ojQSLnHFA==
+  dependencies:
+    jsonwebtoken "^9.0.3"
+
 "@gemeentenijmegen/projen-project-type@^1.12.0":
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.12.0.tgz#61b4c8b8d4c9b638c5a69322f7763f54a214a2b4"

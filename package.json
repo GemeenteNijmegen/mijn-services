@@ -74,6 +74,7 @@
     "@gemeentenijmegen/apigateway-http": "^0.0.35",
     "@gemeentenijmegen/aws-constructs": "^0.0.47",
     "@gemeentenijmegen/config": "^0.1.0",
+    "@gemeentenijmegen/object-notifier": "^0.0.1",
     "@gemeentenijmegen/utils": "^0.0.38",
     "@middy/core": "^6.4.5",
     "@types/aws-lambda": "^8.10.160",

@@ -1,6 +1,7 @@
 import { Stack } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Configurable, ObjectNotificationServiceConfiguration } from './ConfigurationInterfaces';
+import { ObjectNotificationServicesSecrets } from './ObjectNotificationServicesParameters';
 import { ObjectNotificationService } from './services/ObjectNotificatieService/ObjectNotificationService';
 
 /**
@@ -19,11 +20,10 @@ export class SupportStack extends Stack {
     if (!services) {
       return;
     }
-
+    new ObjectNotificationServicesSecrets(this, 'objectnotifier-params');
     // TODO create config table
     for (let service of services) {
       new ObjectNotificationService(this, `objectservcice-${service.configKey}`, service);
     }
-
   }
 }
