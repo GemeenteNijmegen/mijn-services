@@ -1,8 +1,8 @@
 import { Stack } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Configurable, ObjectNotificationServiceConfiguration } from './ConfigurationInterfaces';
-import { ObjectNotificationServicesSecrets } from './ObjectNotificationServicesParameters';
 import { ObjectNotificationService } from './services/ObjectNotificatieService/ObjectNotificationService';
+import { ObjectNotificationServicesSecrets } from './services/ObjectNotificatieService/ObjectNotificationServicesParameters';
 
 /**
  * Stack for supporting services, which are independent

@@ -1,7 +1,6 @@
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
-import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
-import { Statics } from './Statics';
+import { Statics } from '../../Statics';
 
 /**
  * This class adds a set of parameters for the objects API and NotifyNL. Currently
