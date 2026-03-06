@@ -21,6 +21,7 @@ export class ObjectNotificationService extends Construct {
     const lambda = new NotificationHandlerFunction(this, 'notificationhandler', {
       environment: {
         IDEMPOTENCY_TABLE_NAME: idemPotencyHashTable.tableName,
+        POWERTOOLS_LOG_LEVEL: 'DEBUG',
       },
     });
     idemPotencyHashTable.grantReadWriteData(lambda);

@@ -17,10 +17,11 @@ const persistenceStore = new DynamoDBPersistenceLayer({
   keyAttr: 'hash'
 });
 
+// First check for locks on the execution (default one hour)
 export const handler = makeIdempotent(async (event: EventBridgeEvent<'Scheduled Event', {}>) => {
   logger.debug('Incoming event', JSON.stringify(event));
   try {
-    // First check for locks on the execution
+    // Get config based on the key.
     return {};
   } catch (error) {
     logger.error('Error during processing of event', error as Error);
@@ -30,7 +31,7 @@ export const handler = makeIdempotent(async (event: EventBridgeEvent<'Scheduled 
 }, {
   persistenceStore,
   config: new IdempotencyConfig({
-      eventKeyJmesPath: '["detail-type"]',
+    eventKeyJmesPath: 'configKey',
   })
 },
 );
