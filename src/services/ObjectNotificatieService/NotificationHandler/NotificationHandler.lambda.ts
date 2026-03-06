@@ -3,7 +3,6 @@ import { DynamoDBPersistenceLayer } from '@aws-lambda-powertools/idempotency/dyn
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Config } from '@gemeentenijmegen/config/config';
 import Notifier from '@gemeentenijmegen/object-notifier';
-import { EventBridgeEvent } from 'aws-lambda';
 import { logger } from './Logger';
 
 // ENABLE X-RAY TRACING

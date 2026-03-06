@@ -1,4 +1,3 @@
-import { Schedule } from '@aws-sdk/client-ec2';
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Duration } from 'aws-cdk-lib';
 import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';

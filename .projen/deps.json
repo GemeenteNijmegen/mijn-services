@@ -1,10 +1,6 @@
 {
   "dependencies": [
     {
-      "name": "@gemeentenijmegen/projen-project-type",
-      "type": "build"
-    },
-    {
       "name": "@stylistic/eslint-plugin",
       "version": "^2",
       "type": "build"
@@ -137,7 +133,15 @@
       "type": "runtime"
     },
     {
+      "name": "@gemeentenijmegen/cross-region-parameters",
+      "type": "runtime"
+    },
+    {
       "name": "@gemeentenijmegen/object-notifier",
+      "type": "runtime"
+    },
+    {
+      "name": "@gemeentenijmegen/projen-project-type",
       "type": "runtime"
     },
     {
