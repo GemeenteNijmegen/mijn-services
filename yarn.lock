@@ -143,7 +143,7 @@
     "@aws-lambda-powertools/commons" "2.31.0"
     aws-xray-sdk-core "^3.12.0"
 
-"@aws-sdk/client-dynamodb@^3.1005.0":
+"@aws-sdk/client-dynamodb@^3.1005.0", "@aws-sdk/client-dynamodb@^3.914.0":
   version "3.1005.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1005.0.tgz#499565f05e03bd192f58839f6d33c6a452dba890"
   integrity sha512-lPkeRwkXhXEjyO3YENmxseFMfAQQAjecT9BjohoZqurvceLrqTml94Dt84OYtJpAvAVQua5SK7rOrjk2vEeU5A==
