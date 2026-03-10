@@ -20,8 +20,6 @@ export interface PipelineStackProps extends StackProps, Configurable { }
 export class PipelineStack extends Stack {
   branchName: string;
 
-  private secrets: Record<string, Secret> = {};
-
   constructor(scope: Construct, id: string, props: PipelineStackProps) {
     super(scope, id, props);
     Tags.of(this).add('cdkManaged', 'yes');
@@ -56,12 +54,6 @@ export class PipelineStack extends Stack {
 
     // Trigger build so we can access the synth project
     pipeline.buildPipeline();
-
-    // TODO: Remove this, I'm 99.99% sure this code can't run, this.secrets is always empty?
-    Object.entries(this.secrets).forEach(([name, secret]) => {
-      console.debug('got to secrets, name', name);
-      secret.grantRead(pipeline.synthProject);
-    });
 
   }
 
