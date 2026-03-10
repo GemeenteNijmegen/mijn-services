@@ -1,5 +1,6 @@
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Environment } from 'aws-cdk-lib';
+import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
 
 /**
  * Adds a configuration field to another interface
@@ -129,7 +130,16 @@ export interface Configuration {
    */
   helloWorlService?: boolean;
 
+  ObjectNotificationServices?: ObjectNotificationServiceConfiguration[];
+
 }
+
+export interface ObjectNotificationServiceConfiguration {
+  /** A string parseable as cron string by the eventbridge scheduler */
+  scheduleExpression: ScheduleExpression;
+  configKey: string;
+}
+
 
 export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**

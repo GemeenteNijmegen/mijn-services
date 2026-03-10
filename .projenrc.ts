@@ -4,11 +4,19 @@ const project = new GemeenteNijmegenCdkApp({
   defaultReleaseBranch: 'main',
   name: 'mijn-services',
   projenrcTs: true,
-  enableCfnLintOnGithub: false, // TODO: reverse to true
+  // releaseWorkflowEnv: {
+  //   VER_ID_GH_TOKEN: '${{ secrets.VER_ID_GH_TOKEN }}',
+  // },
+  // buildWorkflowOptions: {
+  //   env: {
+  //     VER_ID_GH_TOKEN: '${{ secrets.VER_ID_GH_TOKEN }}',
+  //   },
+  // },
   devDeps: [
     '@types/pg',
     '@types/jsonwebtoken',
     'aws-sdk-client-mock',
+    '@types/aws-lambda',
   ],
   deps: [
     '@gemeentenijmegen/projen-project-type',
@@ -17,7 +25,10 @@ const project = new GemeenteNijmegenCdkApp({
     '@gemeentenijmegen/aws-constructs',
     '@gemeentenijmegen/utils',
     '@gemeentenijmegen/apigateway-http',
+    '@gemeentenijmegen/config',
     '@gemeentenijmegen/cross-region-parameters',
+    '@gemeentenijmegen/object-notifier',
+    'cdk-remote-stack',
     'pg', // Postgres client 🐘
     'zod',
     'jsonwebtoken',
@@ -34,6 +45,11 @@ const project = new GemeenteNijmegenCdkApp({
   jestOptions: {
     jestConfig: {
       setupFiles: ['dotenv/config'],
+    },
+  },
+  tsconfig: {
+    compilerOptions: {
+      isolatedModules: true,
     },
   },
 });

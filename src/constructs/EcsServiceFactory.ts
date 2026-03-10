@@ -221,6 +221,40 @@ export class EcsServiceFactory {
     dirs.forEach(dir => {
       this.attachEphemeralStorage(fsInitContainer, volumeName, dir);
     });
+    return fsInitContainer;
+  }
+
+  /**
+   * Initalize the writable directories the task requires
+   * @param task
+   * @param logs
+   * @param runBeforeContainer
+   * @param configLocation - Location of config dir in the open config store
+   * @param configTarget - Location where to put the configuration files in the container
+   */
+  downloadConfiguration(
+    task: TaskDefinition,
+    logs: LogGroup,
+    runBeforeContainer:
+    ContainerDefinition,
+    configLocation: string,
+    configTarget: string,
+  ) {
+    const downloadConfiguration = task.addContainer('download-config', {
+      image: ContainerImage.fromRegistry('amazon/aws-cli:latest'),
+      command: ['s3', 'cp', '--recursive', configLocation, configTarget],
+      readonlyRootFilesystem: true,
+      essential: false,
+      logging: new AwsLogDriver({
+        streamPrefix: 'logs',
+        logGroup: logs,
+      }),
+    });
+    runBeforeContainer.addContainerDependencies({
+      container: downloadConfiguration,
+      condition: ContainerDependencyCondition.SUCCESS,
+    });
+    return downloadConfiguration;
   }
 
   private createVolumes(service: FargateService, id: string, volumeMounts: volumeMounts) {

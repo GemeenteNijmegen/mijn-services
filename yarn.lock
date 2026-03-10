@@ -143,7 +143,7 @@
     "@aws-lambda-powertools/commons" "2.31.0"
     aws-xray-sdk-core "^3.12.0"
 
-"@aws-sdk/client-dynamodb@^3.1005.0":
+"@aws-sdk/client-dynamodb@^3.1005.0", "@aws-sdk/client-dynamodb@^3.914.0":
   version "3.1005.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1005.0.tgz#499565f05e03bd192f58839f6d33c6a452dba890"
   integrity sha512-lPkeRwkXhXEjyO3YENmxseFMfAQQAjecT9BjohoZqurvceLrqTml94Dt84OYtJpAvAVQua5SK7rOrjk2vEeU5A==
@@ -1449,6 +1449,15 @@
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/aws-constructs/-/aws-constructs-0.0.48.tgz#cef2eb04d839a3ea7605787249abddfe03204619"
   integrity sha512-dqOU3OUdZvLECLidMhPmMujvGl635xRcvQNEl+m42BNf4V1wSg8pRcDQJlmcIBV9ptJbw1sEt+VEXBjaHjQ2qA==
 
+"@gemeentenijmegen/config@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/config/-/config-0.1.0.tgz#69207adbf14720860c51ab6383f6f1416439b3cf"
+  integrity sha512-PRjUEUMovE16EHtLWZ2qQla+uVOU+aA0So/+xYoOTqpZcRt0GBw8TPYOyBKPhsx8QcQZCP+m0ndCy8uzUI8xgw==
+  dependencies:
+    "@aws-sdk/client-dynamodb" "^3.914.0"
+    "@gemeentenijmegen/utils" "^0.0.38"
+    "@types/aws-lambda" "^8.10.159"
+
 "@gemeentenijmegen/cross-region-parameters@^0.0.5":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/cross-region-parameters/-/cross-region-parameters-0.0.5.tgz#1f754cc0fe6ed42381dbbcbaabb53ac5c5a2ac9d"
@@ -1457,6 +1466,13 @@
     "@aws-sdk/client-ssm" "^3.975.0"
     "@types/aws-lambda" "^8.10.160"
     zod "^4.3.6"
+
+"@gemeentenijmegen/object-notifier@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/object-notifier/-/object-notifier-0.0.1.tgz#34fba9726225b0d27789220b6b472a848efb4775"
+  integrity sha512-/fuCfaKhPhXCFSK8EcsoFSQ/izQHguVdlj4hESmvdPwW8uE8++dg8IYOOncOZ+TfPD52FsPixbml6ojQSLnHFA==
+  dependencies:
+    jsonwebtoken "^9.0.3"
 
 "@gemeentenijmegen/projen-project-type@^1.12.2":
   version "1.12.2"
@@ -2429,7 +2445,7 @@
   dependencies:
     tslib "^2.4.0"
 
-"@types/aws-lambda@^8.10.153", "@types/aws-lambda@^8.10.160", "@types/aws-lambda@^8.10.161":
+"@types/aws-lambda@^8.10.153", "@types/aws-lambda@^8.10.159", "@types/aws-lambda@^8.10.160", "@types/aws-lambda@^8.10.161":
   version "8.10.161"
   resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.161.tgz#36d95723ec46d3d555bf0684f83cf4d4369a28ad"
   integrity sha512-rUYdp+MQwSFocxIOcSsYSF3YYYC/uUpMbCY/mbO21vGqfrEYvNSoPyKYDj6RhXXpPfS0KstW9RwG3qXh9sL7FQ==
@@ -3255,6 +3271,11 @@ case@1.6.3, case@^1.6.3:
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
+
+cdk-remote-stack@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/cdk-remote-stack/-/cdk-remote-stack-2.1.0.tgz#a3d4e557cd5e2fe91cd53d7e19e01f4fda04b504"
+  integrity sha512-ycEmgLuRd/SXXFoJOQwcoSVtKekC/8dJjG9ix3wNaWhOtKJ9dcTB55Rk8uL5kAcXT5Z78ho07z6sebg9UL2uXg==
 
 chalk@^2.4.2:
   version "2.4.2"

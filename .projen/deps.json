@@ -6,6 +6,10 @@
       "type": "build"
     },
     {
+      "name": "@types/aws-lambda",
+      "type": "build"
+    },
+    {
       "name": "@types/jest",
       "type": "build"
     },
@@ -125,7 +129,15 @@
       "type": "runtime"
     },
     {
+      "name": "@gemeentenijmegen/config",
+      "type": "runtime"
+    },
+    {
       "name": "@gemeentenijmegen/cross-region-parameters",
+      "type": "runtime"
+    },
+    {
+      "name": "@gemeentenijmegen/object-notifier",
       "type": "runtime"
     },
     {
@@ -147,6 +159,10 @@
     {
       "name": "aws-cdk-lib",
       "version": "^2.1.0",
+      "type": "runtime"
+    },
+    {
+      "name": "cdk-remote-stack",
       "type": "runtime"
     },
     {
