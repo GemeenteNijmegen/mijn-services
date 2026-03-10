@@ -52,9 +52,6 @@ export class PipelineStack extends Stack {
     });
     pipeline.addStage(api);
 
-    // Trigger build so we can access the synth project
-    pipeline.buildPipeline();
-
   }
 
   pipeline(source: pipelines.CodePipelineSource, props: PipelineStackProps): pipelines.CodePipeline {
