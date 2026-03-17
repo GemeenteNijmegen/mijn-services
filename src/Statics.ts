@@ -103,6 +103,14 @@ export class Statics {
     region: 'eu-central-1',
   };
 
+
+  // MARK: Object notifier
+  static readonly ssmObjectNotifierObjectsBaseUrl = `/${Statics.projectName}/objectnotifier/objectsbaseurl`;
+  static readonly ssmObjectNotifierObjectsToken = `/${Statics.projectName}/objectnotifier/objectstoken`;
+  static readonly ssmObjectNotifierNotifyBaseUrl = `/${Statics.projectName}/objectnotifier/notifybaseurl`;
+  static readonly ssmObjectNotifierNotifyIssuer = `/${Statics.projectName}/objectnotifier/notifyissuer`;
+  static readonly ssmObjectNotifierNotifyToken = `/${Statics.projectName}/objectnotifier/notifytoken`;
+
   /**
    * GZAC Statics
    * Placed separately to make (re)moving easier

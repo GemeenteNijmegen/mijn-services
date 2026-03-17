@@ -1,4 +1,6 @@
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
+import { Duration } from 'aws-cdk-lib';
+import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
 import { Configuration } from './ConfigurationInterfaces';
 import { Statics } from './Statics';
 
@@ -60,14 +62,14 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     //   debug: true,
     // },
     openProductServices: {
-      image: 'maykinmedia/open-product:1.3.0',
+      image: 'maykinmedia/open-product:1.5.0',
       logLevel: 'DEBUG',
       debug: true,
     },
     corsaZgwService: {
       logLevel: 'DEBUG',
       debug: true,
-      imageTag: '97a274e513d72897acc95e5fa50085eb76ba994d',
+      imageTag: '1c0b54e2d2f22988d6a891e389b093c103873beb',
     },
     outputManagementComponents: [
       {
@@ -98,6 +100,12 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       },
     ],
     helloWorlService: true,
+    ObjectNotificationServices: [
+      {
+        configKey: 'esfTaak',
+        scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+      },
+    ],
   },
   acceptance: {
     branch: 'acceptance',

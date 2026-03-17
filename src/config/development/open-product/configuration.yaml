@@ -1,0 +1,79 @@
+oidc_db_config_enable: true
+oidc_db_config_admin_auth:
+  providers:
+  - identifier: admin-oidc
+    oidc_use_nonce: true
+    oidc_nonce_size: 32
+    oidc_state_size: 32
+    endpoint_config:
+        oidc_op_authorization_endpoint: http://localhost:8080/realms/test/protocol/openid-connect/auth
+        oidc_op_jwks_endpoint: http://localhost:8080/realms/test/protocol/openid-connect/certs
+        oidc_op_token_endpoint: http://localhost:8080/realms/test/protocol/openid-connect/token
+        oidc_op_user_endpoint: http://localhost:8080/realms/test/protocol/openid-connect/userinfo
+  items:
+  - identifier: admin-oidc
+    enabled: true
+    oidc_rp_client_id: testid
+    oidc_rp_client_secret: <SECRETVERWIJZINGHIER>
+    oidc_rp_scopes_list:
+    - openid
+    - email
+    - profile
+    oidc_rp_sign_algo: RS256
+    oidc_provider_identifier: admin-oidc
+    options:
+      user_settings:
+        claim_mappings:
+          username:
+            - sub
+          first_name:
+            - given_name
+          email:
+            - email
+        username_case_sensitive: true
+      groups_settings:
+        claim_mapping:
+          - groups
+        sync: true
+        sync_pattern: '*'
+        default_groups: []
+        make_users_staff: true
+        superuser_group_names:
+          - Registreerders
+
+zgw_consumers_config_enable: true
+zgw_consumers:
+  services:
+  - identifier: open-notificaties
+    label: Open Notificaties
+    api_root: https://notificaties.gemeente.local/api/v1/
+    api_type: nrc
+    auth_type: zgw
+    client_id: open-product
+    user_id: open-product
+    secret: open-product-secret
+
+notifications_config_enable: true
+notifications_config:
+  notifications_api_service_identifier: open-notificaties
+  notification_delivery_max_retries: 1
+  notification_delivery_retry_backoff: 2
+  notification_delivery_retry_backoff_max: 3
+
+urn_mapping_config_enable: true
+urn_mapping_config:
+  configs:
+  - urn: maykin:sociaal:ztc:zaak
+    url: https://maykin.ztc.com/api/v1/zaken
+
+  - urn: maykin:sociaal:ztc:taak
+    url: https://maykin.ztc.com/api/v1/taken
+
+dmn_config_enable: true
+dmn_config:
+  configs:
+  - tabel_endpoint: https://gemeente.flowable-dmn.nl/flowable-rest/dmn-api/dmn-repository/
+    naam: main repository
+
+  - tabel_endpoint: https://new.flowable-dmn.nl/flowable-rest/dmn-api/dmn-repository/
+    naam: new repository
