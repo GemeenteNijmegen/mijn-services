@@ -90,6 +90,8 @@ export class OpenKlantService extends Construct {
 
       CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
 
+      OTEL_SDK_DISABLED: 'true',
+
     };
   }
 
@@ -182,6 +184,7 @@ export class OpenKlantService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
@@ -195,6 +198,9 @@ export class OpenKlantService extends Construct {
       cpu: this.props.serviceConfiguration.celeryTaskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.celeryTaskSize?.memory ?? '512',
     });
+
+    // Enable exec
+    this.serviceFactory.allowExecutingCommands(task);
 
     // Setup celery container
     const container = task.addContainer('celery', {
@@ -228,6 +234,7 @@ export class OpenKlantService extends Construct {
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+
   }
 
   private logGroup() {

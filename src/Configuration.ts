@@ -18,7 +18,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     databases: Statics.databasesAcceptance,
     databaseSnapshotRetentionDays: 0,
     openklant: {
-      image: 'maykinmedia/open-klant:2.5.0',
+      image: 'maykinmedia/open-klant:2.15.0',
       logLevel: 'DEBUG',
       debug: true,
     },

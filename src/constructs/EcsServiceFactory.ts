@@ -6,6 +6,7 @@ import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, CloudMapOptions, Cluster, Compatibility, ContainerDefinition, ContainerDependencyCondition, ContainerImage, FargateService, FargateServiceProps, TaskDefinition, TaskDefinitionProps } from 'aws-cdk-lib/aws-ecs';
 import { AccessPoint, FileSystem, IFileSystem } from 'aws-cdk-lib/aws-efs';
 import { Protocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { DnsRecordType, PrivateDnsNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -155,6 +156,23 @@ export class EcsServiceFactory {
     this.UnresponsiveServiceAlarm(options.id, service);
 
     return service;
+  }
+
+  /**
+   * Allows ECS Exec commands in containers, note this should be enabled on service level as well.
+   * @param task the task to allow exec to
+   */
+  allowExecutingCommands(task: TaskDefinition) {
+    task.addToTaskRolePolicy(new PolicyStatement({
+      actions: [
+        'ssmmessages:CreateControlChannel',
+        'ssmmessages:CreateDataChannel',
+        'ssmmessages:OpenControlChannel',
+        'ssmmessages:OpenDataChannel',
+      ],
+      effect: Effect.ALLOW,
+      resources: ['*'],
+    }));
   }
 
   /**
