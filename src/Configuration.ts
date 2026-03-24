@@ -71,6 +71,16 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       debug: true,
       imageTag: '1c0b54e2d2f22988d6a891e389b093c103873beb',
     },
+    vtbServices: [
+      {
+        cdkId: 'vtb-dev',
+        image: 'maykinmedia/open-vtb:latest',
+        subdomain: 'vtb-dev',
+        databaseName: 'vtb-dev',
+        logLevel: 'DEBUG',
+        debug: true,
+      },
+    ],
     outputManagementComponents: [
       {
         cdkId: 'local-omc',
