@@ -3,8 +3,6 @@ import { Duration, Token } from 'aws-cdk-lib';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
-import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
-import { EcsTask } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -70,7 +68,7 @@ export class VtbService extends Construct {
       },
     });
 
-    this.setupConfigurationService();
+    // this.setupConfigurationService();
     this.setupService();
     // this.setupCeleryService(); // TODO enable when this is used by the image (currently its not)
   }
@@ -104,6 +102,9 @@ export class VtbService extends Construct {
       CELERY_LOGLEVEL: this.props.serviceConfiguration.logLevel,
 
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
+
+      OTEL_SDK_DISABLED: 'True',
+
     };
   }
 
@@ -116,29 +117,6 @@ export class VtbService extends Construct {
       DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.superuserCredentials, 'password'),
       DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.superuserCredentials, 'email'),
     };
-  }
-
-  private setupConfigurationService() {
-    const task = this.serviceFactory.createTaskDefinition('init');
-    task.addContainer('init', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
-      command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'],
-      essential: true,
-      readonlyRootFilesystem: true,
-      logging: new AwsLogDriver({ streamPrefix: 'init', logGroup: this.logs }),
-      secrets: this.getSecretConfiguration(),
-      environment: this.getEnvironmentConfiguration(),
-    });
-
-    const rule = new Rule(this, 'schedule-setup', {
-      schedule: Schedule.cron({ year: '2020' }),
-      description: `Rule to run setup configuration for VTB instance ${this.node.id} (manually)`,
-    });
-    const ecsTask = new EcsTask({ cluster: this.props.service.cluster, taskDefinition: task });
-    rule.addTarget(ecsTask);
-
-    this.setupConnectivity('setup', ecsTask.securityGroups ?? []);
-    this.allowAccessToSecrets(task.executionRole!);
   }
 
   private setupService() {
@@ -165,12 +143,17 @@ export class VtbService extends Construct {
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
 
+    this.serviceFactory.allowExecutingCommands(task);
+
     const service = this.serviceFactory.createService({
       id: 'main',
       task,
       path: undefined,
       domain: this.props.serviceConfiguration.subdomain + '.' + this.props.hostedzone.zoneName,
-      options: { desiredCount: 1 },
+      options: {
+        desiredCount: 1,
+        enableExecuteCommand: true,
+      },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);

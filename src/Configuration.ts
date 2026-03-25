@@ -79,6 +79,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         databaseName: 'vtb-dev',
         logLevel: 'DEBUG',
         debug: true,
+        taskSize: {
+          cpu: '512',
+          memory: '1024',
+        },
       },
     ],
     outputManagementComponents: [
