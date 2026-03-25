@@ -72,7 +72,7 @@ export class VtbService extends Construct {
 
     this.setupConfigurationService();
     this.setupService();
-    this.setupCeleryService();
+    // this.setupCeleryService(); // TODO enable when this is used by the image (currently its not)
   }
 
   private getEnvironmentConfiguration() {
@@ -170,7 +170,7 @@ export class VtbService extends Construct {
       task,
       path: undefined,
       domain: this.props.serviceConfiguration.subdomain + '.' + this.props.hostedzone.zoneName,
-      options: { desiredCount: 0 },
+      options: { desiredCount: 1 },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
