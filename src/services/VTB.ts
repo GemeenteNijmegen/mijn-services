@@ -159,7 +159,7 @@ export class VtbService extends Construct {
       task,
       path: undefined,
       domain: this.props.serviceConfiguration.subdomain + '.' + this.props.hostedzone.zoneName,
-      options: { desiredCount: 1 },
+      options: { desiredCount: 0 },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
@@ -195,7 +195,7 @@ export class VtbService extends Construct {
       task,
       path: undefined,
       id: 'celery',
-      options: { desiredCount: 1 },
+      options: { desiredCount: 0 },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
