@@ -81,7 +81,7 @@ export class VtbService extends Construct {
     trustedDomains.push(this.props.hostedzone.zoneName);
 
     return {
-      DJANGO_SETTINGS_MODULE: 'vtb.conf.docker',
+      DJANGO_SETTINGS_MODULE: 'openvtb.conf.docker',
       DB_NAME: this.props.serviceConfiguration.databaseName,
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
