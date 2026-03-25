@@ -36,7 +36,8 @@ export class DatabaseStack extends Stack {
     });
 
     if (props.configuration.databases) {
-      this.createDatabasePerUserIfNotExistent(props.configuration.databases);
+      // TODO these DBs are not used currently and running this custom resource results in a error during deployment
+      // this.createDatabasePerUserIfNotExistent(props.configuration.databases); 
       this.createRequiredDatabasesIfNotExistent(props.configuration.databases);
     }
 
@@ -80,7 +81,11 @@ export class DatabaseStack extends Stack {
 
   }
 
-  private createDatabasePerUserIfNotExistent(databases: string[]) {
+  /**
+   * Results in error during deployment
+   * @param databases 
+   */
+  createDatabasePerUserIfNotExistent(databases: string[]) {
     const LIST_OF_DATABASES = databases.join(',');
 
     const port = this.database.db.instanceEndpoint.port;
