@@ -1,4 +1,6 @@
+import { RemoteParameters } from '@gemeentenijmegen/cross-region-parameters';
 import { Duration, Token } from 'aws-cdk-lib';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
@@ -13,6 +15,7 @@ import { Construct } from 'constructs';
 import { VtbConfiguration } from '../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
+import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
 
@@ -32,6 +35,7 @@ export class VtbService extends Construct {
   private readonly logs: LogGroup;
   private readonly props: VtbServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
+  private readonly distribution: SubdomainCloudfront;
   private readonly databaseCredentials: ISecret;
   private readonly superuserCredentials: ISecret;
   private readonly secretKey: ISecret;
@@ -41,6 +45,13 @@ export class VtbService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+    this.distribution = new SubdomainCloudfront(this, 'subdomain-cloudfront', {
+      certificate: this.certificate(),
+      hostedZone: this.props.hostedzone,
+      loadbalancer: this.props.service.loadbalancer.alb,
+      subdomain: this.props.serviceConfiguration.subdomain,
+    });
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.superuserCredentials = new SecretParameter(this, 'superuser-credentials', {
@@ -227,5 +238,15 @@ export class VtbService extends Construct {
     this.databaseCredentials.grantRead(role);
     this.superuserCredentials.grantRead(role);
     this.secretKey.grantRead(role);
+  }
+
+  private certificate() {
+    const parameters = new RemoteParameters(this, 'params', {
+      path: `${Statics.ssmWildcardCertificatePath}/`,
+      region: 'us-east-1',
+      timeout: Duration.seconds(10),
+    });
+    const certificateArn = parameters.get(Statics.ssmWildcardCertificateArn);
+    return Certificate.fromCertificateArn(this, 'cert', certificateArn);
   }
 }
