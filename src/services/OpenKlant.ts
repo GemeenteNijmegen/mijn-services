@@ -155,6 +155,9 @@ export class OpenKlantService extends Construct {
       cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
+
+    this.serviceFactory.allowExecutingCommands(task);
+
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
@@ -230,6 +233,7 @@ export class OpenKlantService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true,
       },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
