@@ -1,5 +1,5 @@
 import { ConfigTable } from '@gemeentenijmegen/config/construct';
-import { RemovalPolicy } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Schedule, ScheduleExpression, ScheduleTargetInput } from 'aws-cdk-lib/aws-scheduler';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-scheduler-targets';
@@ -31,6 +31,8 @@ export class ObjectNotificationService extends Construct {
         IDEMPOTENCY_TABLE_NAME: idemPotencyHashTable.tableName,
         POWERTOOLS_LOG_LEVEL: 'DEBUG',
       },
+      memorySize: 1024,
+      timeout: Duration.minutes(5),
     });
     idemPotencyHashTable.grantReadWriteData(lambda);
 
