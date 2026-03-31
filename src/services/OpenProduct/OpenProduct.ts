@@ -1,7 +1,7 @@
 import { Duration, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
-import { Effect, IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
@@ -170,17 +170,7 @@ export class OpenProductService extends Construct {
     // File system prermissions for ephemeral storage (1st to run)
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, downloadConfiguration, '/tmp', '/app/setup_configuration');
 
-
-    task.addToTaskRolePolicy(new PolicyStatement({
-      actions: [
-        'ssmmessages:CreateControlChannel',
-        'ssmmessages:CreateDataChannel',
-        'ssmmessages:OpenControlChannel',
-        'ssmmessages:OpenDataChannel',
-      ],
-      effect: Effect.ALLOW,
-      resources: ['*'],
-    }));
+    this.serviceFactory.allowExecutingCommands(task);
 
     const service = this.serviceFactory.createService({
       id: 'main',
