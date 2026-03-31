@@ -24,7 +24,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       taskSize: {
         cpu: '512',
         memory: '1024',
-      }
+      },
     },
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.8.0',
@@ -129,7 +129,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       taskSize: {
         cpu: '512',
         memory: '1024',
-      }
+      },
     },
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.8.0',
@@ -221,11 +221,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     databases: Statics.databasesProduction,
     databaseSnapshotRetentionDays: 35,
     openklant: {
-      image: 'maykinmedia/open-klant:2.5.0',
+      image: 'maykinmedia/open-klant:2.15.0',
       logLevel: 'INFO',
     },
-    // outputManagementComponents: [
-    // ],
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.8.0',
       rabbitMqImage: 'rabbitmq:4.0.5-alpine',
