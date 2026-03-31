@@ -153,6 +153,7 @@ export class OpenKlantService extends Construct {
   setupService() {
     const VOLUME_NAME = 'temp';
     const task = this.serviceFactory.createTaskDefinition('main', {
+      volumes: [{ name: VOLUME_NAME }],
       cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
