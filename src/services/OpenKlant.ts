@@ -3,7 +3,7 @@ import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { EcsTask } from 'aws-cdk-lib/aws-events-targets';
-import { IRole } from 'aws-cdk-lib/aws-iam';
+import { Effect, IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
@@ -156,7 +156,17 @@ export class OpenKlantService extends Construct {
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
 
-    this.serviceFactory.allowExecutingCommands(task);
+    task.addToTaskRolePolicy(new PolicyStatement({
+      actions: [
+        'ssmmessages:CreateControlChannel',
+        'ssmmessages:CreateDataChannel',
+        'ssmmessages:OpenControlChannel',
+        'ssmmessages:OpenDataChannel',
+      ],
+      effect: Effect.ALLOW,
+      resources: ['*'],
+    }));
+
 
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.image),
@@ -201,6 +211,7 @@ export class OpenKlantService extends Construct {
       cpu: this.props.serviceConfiguration.celeryTaskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.celeryTaskSize?.memory ?? '512',
     });
+
 
     // Enable exec
     this.serviceFactory.allowExecutingCommands(task);
