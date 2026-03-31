@@ -24,6 +24,7 @@ import { OpenNotificatiesService } from './services/OpenNotificaties';
 import { OpenProductService } from './services/OpenProduct/OpenProduct';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
+import { VtbService } from './services/VTB';
 import { Statics } from './Statics';
 
 interface MainStackProps extends StackProps, Configurable { }
@@ -85,6 +86,7 @@ export class MainStack extends Stack {
     this.openProductServices(containerPlatform);
     this.gzacFrontendService(containerPlatform); // As this runs on the root /* it should be lowest in priority (accp only)
     this.corsaZgwServices(containerPlatform);
+    this.vtbServices(containerPlatform);
     this.helloWorldService(containerPlatform);
   }
 
@@ -111,7 +113,7 @@ export class MainStack extends Stack {
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 8080,
+        port: 8000,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
     });
@@ -390,6 +392,32 @@ export class MainStack extends Stack {
       },
       openProductConfiguration: this.configuration.openProductServices,
       openConfigStore: this.openConfigStore,
+    });
+  }
+
+  private vtbServices(platform: ContainerPlatform) {
+    if (!this.configuration.vtbServices?.length) {
+      console.warn('No VTB configuration provided. Skipping creation of VTB services!');
+      return;
+    }
+    this.configuration.vtbServices.forEach((vtb, index) => {
+      new VtbService(this, vtb.cdkId, {
+        hostedzone: this.hostedzone,
+        key: this.key,
+        cache: this.cache,
+        cacheDatabaseIndex: 14 + index * 2,
+        cacheDatabaseIndexCelery: 15 + index * 2,
+        alternativeDomainNames: this.configuration.alternativeDomainNames,
+        serviceConfiguration: vtb,
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
+          port: 8000,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+      });
     });
   }
 

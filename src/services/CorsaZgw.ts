@@ -124,7 +124,6 @@ export class CorsaZgwService extends Construct {
     this.setupService();
   }
 
-
   private getEnvironmentSecrets(): Record<string, Secret> {
     return {
       DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
