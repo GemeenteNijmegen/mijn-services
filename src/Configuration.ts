@@ -21,6 +21,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       image: 'maykinmedia/open-klant:2.15.0',
       logLevel: 'DEBUG',
       debug: true,
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      }
     },
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.8.0',
