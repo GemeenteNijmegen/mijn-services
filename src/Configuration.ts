@@ -49,22 +49,6 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
-    // keyCloackService: {
-    //   image: 'quay.io/keycloak/keycloak:24.0.1',
-    //   logLevel: 'DEBUG',
-    //   debug: true,
-    // },
-    // gzacService: {
-    //   backendImage: 'ritense/gzac-backend:12.6.0',
-    //   frontendImage: 'ritense/gzac-frontend:12.6.0',
-    //   logLevel: 'DEBUG',
-    //   debug: true,
-    // },
-    // gzacFrontendService: {
-    //   image: 'ritense/gzac-frontend:12.6.0',
-    //   logLevel: 'DEBUG',
-    //   debug: true,
-    // },
     openProductServices: {
       image: 'maykinmedia/open-product:1.5.0',
       logLevel: 'DEBUG',
