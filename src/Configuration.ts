@@ -24,7 +24,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       taskSize: {
         cpu: '512',
         memory: '1024',
-      }
+      },
     },
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.8.0',
@@ -129,7 +129,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       taskSize: {
         cpu: '512',
         memory: '1024',
-      }
+      },
     },
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.8.0',
