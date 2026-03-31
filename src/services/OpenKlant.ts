@@ -151,6 +151,7 @@ export class OpenKlantService extends Construct {
   }
 
   setupService() {
+    const VOLUME_NAME = 'temp';
     const task = this.serviceFactory.createTaskDefinition('main', {
       cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
@@ -167,8 +168,7 @@ export class OpenKlantService extends Construct {
       resources: ['*'],
     }));
 
-
-    task.addContainer('main', {
+    const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
         command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
@@ -191,6 +191,9 @@ export class OpenKlantService extends Construct {
       }),
     });
 
+    // Filesystem write access - initialization container
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
+
     const service = this.serviceFactory.createService({
       id: 'main',
       task: task,
@@ -211,7 +214,6 @@ export class OpenKlantService extends Construct {
       cpu: this.props.serviceConfiguration.celeryTaskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.celeryTaskSize?.memory ?? '512',
     });
-
 
     // Enable exec
     this.serviceFactory.allowExecutingCommands(task);
