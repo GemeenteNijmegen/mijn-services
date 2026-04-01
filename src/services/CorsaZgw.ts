@@ -4,7 +4,7 @@ import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
-import { Effect, IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
@@ -124,7 +124,6 @@ export class CorsaZgwService extends Construct {
     this.setupService();
   }
 
-
   private getEnvironmentSecrets(): Record<string, Secret> {
     return {
       DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
@@ -223,16 +222,8 @@ export class CorsaZgwService extends Construct {
     // this.queue.queue.grantConsumeMessages(task.taskRole);
 
     // Allow execute commands using ECS console
-    task.addToTaskRolePolicy(new PolicyStatement({
-      actions: [
-        'ssmmessages:CreateControlChannel',
-        'ssmmessages:CreateDataChannel',
-        'ssmmessages:OpenControlChannel',
-        'ssmmessages:OpenDataChannel',
-      ],
-      effect: Effect.ALLOW,
-      resources: ['*'],
-    }));
+    this.serviceFactory.allowExecutingCommands(task);
+
 
     // Configuration container
     const initContainer = task.addContainer('setup', {
@@ -302,16 +293,8 @@ export class CorsaZgwService extends Construct {
     });
 
     // Allow execute commands using ECS console
-    task.addToTaskRolePolicy(new PolicyStatement({
-      actions: [
-        'ssmmessages:CreateControlChannel',
-        'ssmmessages:CreateDataChannel',
-        'ssmmessages:OpenControlChannel',
-        'ssmmessages:OpenDataChannel',
-      ],
-      effect: Effect.ALLOW,
-      resources: ['*'],
-    }));
+    this.serviceFactory.allowExecutingCommands(task);
+
 
     // Configuration container
     const initContainer = task.addContainer('setup', {

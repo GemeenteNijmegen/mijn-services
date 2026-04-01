@@ -125,6 +125,12 @@ export interface Configuration {
   corsaZgwService?: CorsaZgwServiceConfiguration;
 
   /**
+   * List of VTB (open-vtb) service instances to deploy.
+   * Each instance gets its own database and subdomain.
+   */
+  vtbServices?: VtbConfiguration[];
+
+  /**
    * When true deploys a hello world service
    * @default false
    */
@@ -484,4 +490,32 @@ export interface CorsaZgwServiceConfiguration extends MainTaskSizeConfiguration 
    * @default latest
    */
   imageTag?: string;
+}
+
+export interface VtbConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+  /**
+   * CDK construct id, must be unique across all VTB instances.
+   */
+  cdkId: string;
+  /**
+   * Docker image to use (e.g. 'maykinmedia/open-vtb:1.0.0').
+   */
+  image: string;
+  /**
+   * Subdomain to expose this instance on (e.g. 'vtb-gemeente-a').
+   * The full domain will be <subdomain>.<hostedzone>.
+   */
+  subdomain: string;
+  /**
+   * Database name for this instance. Must be unique and listed in the databases array.
+   */
+  databaseName: string;
+  /**
+   * Log level for the container.
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging.
+   */
+  debug?: boolean;
 }
