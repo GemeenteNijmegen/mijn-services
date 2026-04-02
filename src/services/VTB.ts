@@ -35,6 +35,7 @@ export class VtbService extends Construct {
   private readonly serviceFactory: EcsServiceFactory;
   private readonly distribution: SubdomainCloudfront;
   private readonly databaseCredentials: ISecret;
+  private readonly databaseUserCredentials: ISecret;
   private readonly superuserCredentials: ISecret;
   private readonly secretKey: ISecret;
 
@@ -51,7 +52,10 @@ export class VtbService extends Construct {
       subdomain: this.props.serviceConfiguration.subdomain,
     });
 
-    this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
+    this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials); // Old style
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(this.props.serviceConfiguration.databaseName)
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName); // New style
+
     this.superuserCredentials = new SecretParameter(this, 'superuser-credentials', {
       description: `VTB superuser credentials for instance ${id}`,
       secretName: Statics.vtbCredentialsSecretName(id),
@@ -112,6 +116,8 @@ export class VtbService extends Construct {
     return {
       DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+      DB_PASSWORD_2: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+      DB_USER_2: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
       DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.superuserCredentials, 'username'),
       DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.superuserCredentials, 'password'),
