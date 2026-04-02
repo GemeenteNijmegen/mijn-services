@@ -5,6 +5,7 @@ import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { Configurable } from './ConfigurationInterfaces';
+import { BastionHost } from './constructs/BastionHost';
 import { Database } from './constructs/Database';
 import { CreateDatabasesFunction } from './custom-resources/create-databases/create-databases-function';
 import { AdditionalDatabase } from './custom-resources/database/AdditionalDatabase';
@@ -40,6 +41,13 @@ export class DatabaseStack extends Stack {
       // With user
       this.createRequiredDatabasesIfNotExistentSecuredWithOwnCredentials(props.configuration.databases);
     }
+
+
+    // Create a bastion host for accessing our RDS instance
+    // Note to use this use -ep rights to start the instance and connect using AWS sessions manager
+    this.setupBastionHost([
+      this.database,
+    ]);
 
   }
 
@@ -115,6 +123,13 @@ export class DatabaseStack extends Stack {
         removalPolicy: RemovalPolicy.RETAIN,
       });
     }
+  }
+
+  private setupBastionHost(databases: Database[]) {
+    new BastionHost(this, 'bastion-host', {
+      vpc: this.vpc.vpc,
+      databases: databases.map(db => db.db),
+    });
   }
 
 }

@@ -53,7 +53,7 @@ export class VtbService extends Construct {
     });
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials); // Old style
-    const databaseUserCredentialsName = Statics.databaseCredentialsName(this.props.serviceConfiguration.databaseName)
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(this.props.serviceConfiguration.databaseName);
     this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName); // New style
 
     this.superuserCredentials = new SecretParameter(this, 'superuser-credentials', {
