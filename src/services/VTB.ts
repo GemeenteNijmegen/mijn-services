@@ -226,6 +226,7 @@ export class VtbService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
+    this.databaseUserCredentials.grantRead(role);
     this.superuserCredentials.grantRead(role);
     this.secretKey.grantRead(role);
   }
