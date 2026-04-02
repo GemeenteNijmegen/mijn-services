@@ -52,9 +52,12 @@ export class VtbService extends Construct {
       subdomain: this.props.serviceConfiguration.subdomain,
     });
 
+    // DB that has a individual user for this service (new style)
+    const newDatabaseName = `${this.props.serviceConfiguration.databaseName}-database`;
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
+
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials); // Old style
-    const databaseUserCredentialsName = Statics.databaseCredentialsName(this.props.serviceConfiguration.databaseName);
-    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName); // New style
 
     this.superuserCredentials = new SecretParameter(this, 'superuser-credentials', {
       description: `VTB superuser credentials for instance ${id}`,
