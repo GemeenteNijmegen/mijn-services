@@ -338,7 +338,7 @@ export class CorsaZgwService extends Construct {
       task: task,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,  // Used to gain access to the Laravel CLI in the container for management of DB etc.
+        enableExecuteCommand: true, // Used to gain access to the Laravel CLI in the container for management of DB etc.
       },
     });
     this.setupConnectivity('corsa-zgw-worker', service.connections.securityGroups);

@@ -153,7 +153,7 @@ export class VtbService extends Construct {
       domain: this.props.serviceConfiguration.subdomain + '.' + this.props.hostedzone.zoneName,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,  // Used to call src/manage.py (see open-vtb docs).
+        enableExecuteCommand: true, // Used to call src/manage.py (see open-vtb docs).
       },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
