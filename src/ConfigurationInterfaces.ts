@@ -138,11 +138,6 @@ export interface Configuration {
 
   ObjectNotificationServices?: ObjectNotificationServiceConfiguration[];
 
-  /**
-   * Deploy a bastion host for DB management
-   * @default false
-   */
-  deployBastionHost?: boolean;
 }
 
 export interface ObjectNotificationServiceConfiguration {

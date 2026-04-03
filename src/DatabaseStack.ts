@@ -1,11 +1,10 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
-import { CustomResource, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
-import { Port, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { CfnOutput, CustomResource, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { Configurable } from './ConfigurationInterfaces';
-import { BastionHost } from './constructs/BastionHost';
 import { Database } from './constructs/Database';
 import { CreateDatabasesFunction } from './custom-resources/create-databases/create-databases-function';
 import { AdditionalDatabase } from './custom-resources/database/AdditionalDatabase';
@@ -43,14 +42,7 @@ export class DatabaseStack extends Stack {
     }
 
 
-    // Create a bastion host for accessing our RDS instance
-    // Note to use this use -ep rights to start the instance and connect using AWS sessions manager
-    if (props.configuration.deployBastionHost) {
-      this.setupBastionHost([
-        this.database,
-      ]);
-    }
-
+    this.setupDatabaseManagementSecurityGroup();
   }
 
   /**
@@ -127,11 +119,22 @@ export class DatabaseStack extends Stack {
     }
   }
 
-  private setupBastionHost(databases: Database[]) {
-    new BastionHost(this, 'bastion-host', {
+  private setupDatabaseManagementSecurityGroup() {
+    // Create a security group
+    const databaseManagementSecurityGroup = new SecurityGroup(this, 'database-management-sg', {
+      securityGroupName: 'database-management',
+      description: 'Allow database management tools to connect to the database',
       vpc: this.vpc.vpc,
-      databases: databases.map(db => db.db),
+    });
+
+    // Allow it to connect to the database
+    this.database.db.connections.allowFrom(databaseManagementSecurityGroup, Port.tcp(5432));
+
+    // Output it for good mesures. We need to find this in case of emergency as well.
+    new CfnOutput(this, 'databaseManagementSecurityGroupId', {
+      value: databaseManagementSecurityGroup.securityGroupId,
     });
   }
+
 
 }
