@@ -45,9 +45,11 @@ export class DatabaseStack extends Stack {
 
     // Create a bastion host for accessing our RDS instance
     // Note to use this use -ep rights to start the instance and connect using AWS sessions manager
-    this.setupBastionHost([
-      this.database,
-    ]);
+    if (props.configuration.deployBastionHost) {
+      this.setupBastionHost([
+        this.database,
+      ]);
+    }
 
   }
 
