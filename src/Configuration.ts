@@ -10,6 +10,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesDev,
     criticality: new Criticality('low'),
+    deployBastionHost: true,
     cnameRecords: {
       _b528d6157c2d9a369bf7d7812881d466:
         '_189b6977b0d0141d6cbb01e0ba1386e6.djqtsrsxkq.acm-validations.aws.',
@@ -207,6 +208,12 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         },
       },
     ],
+    ObjectNotificationServices: [
+      {
+        configKey: 'esfTaak',
+        scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+      },
+    ],
   },
   main: {
     branch: 'main',
@@ -259,6 +266,12 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         memory: '1024',
       },
     },
+    ObjectNotificationServices: [
+      {
+        configKey: 'esfTaak',
+        scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+      },
+    ],
   },
 };
 

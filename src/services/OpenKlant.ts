@@ -150,7 +150,7 @@ export class OpenKlantService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Used to call src/manage.py (see open-klant docs).
       },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
@@ -196,7 +196,7 @@ export class OpenKlantService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Used to call src/manage.py (see open-klant docs).
       },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);

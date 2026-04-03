@@ -178,7 +178,7 @@ export class OpenProductService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Used to call src/manage.py (see open-product docs).
       },
       volumeMounts: {
         fileSystemRoot: '/openproduct',
