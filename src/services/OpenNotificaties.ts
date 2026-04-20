@@ -52,7 +52,7 @@ export class OpenNotificatiesService extends Construct {
     this.logs = this.logGroup();
 
     // DB that has a individual user for this service (new style)
-    const newDatabaseName = `${Statics.databaseObjects}-database`;
+    const newDatabaseName = `${Statics.databaseOpenNotificaties}-database`;
     const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
     this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
 
@@ -87,10 +87,8 @@ export class OpenNotificatiesService extends Construct {
     const rabbitMqHost = `${OpenNotificatiesService.RABBIT_MQ_NAME}.${this.props.service.namespace.namespaceName}`;
     const rabbitMqBrokerUrl = `amqp://guest:guest@${rabbitMqHost}:${OpenNotificatiesService.RABBIT_MQ_PORT}//`;
 
-    return {
+    const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'nrc.conf.docker',
-      DB_NAME: Statics.databaseOpenNotificaties,
-      DB_NAME_NEW: Statics.databaseOpenNotificaties + '-database',
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
@@ -137,18 +135,21 @@ export class OpenNotificatiesService extends Construct {
 
 
       LOG_NOTIFICATIONS_IN_DB: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.persitNotifications, false),
-
-
     };
+
+    if (this.props.openNotificationsConfiguration.useNewDatabase == true) {
+      env['DB_NAME_OLD'] = Statics.databaseOpenNotificaties;
+      env['DB_NAME'] = Statics.databaseOpenNotificaties + '-database';
+    } else {
+      env['DB_NAME'] = Statics.databaseOpenNotificaties;
+      env['DB_NAME_NEW'] = Statics.databaseOpenNotificaties + '-database';
+    }
+
+    return env;
   }
 
   private getSecretConfiguration() {
-    const secrets = {
-      DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
-      DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-      DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
-      DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
-
+    let secrets = {
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
@@ -164,9 +165,26 @@ export class OpenNotificatiesService extends Construct {
       NOTIF_OPENZAAK_SECRET: Secret.fromSecretsManager(this.clientCredentialsNotificationsZaak, 'secret'),
       OPENZAAK_NOTIF_CLIENT_ID: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'username'),
       OPENZAAK_NOTIF_SECRET: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'secret'),
+    } as Record<string, Secret>;
 
+    if (this.props.openNotificationsConfiguration.useNewDatabase === true) {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    } else {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    }
 
-    };
     return secrets;
   }
 

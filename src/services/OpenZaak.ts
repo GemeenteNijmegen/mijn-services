@@ -48,7 +48,7 @@ export class OpenZaakService extends Construct {
     this.logs = this.logGroup();
 
     // DB that has a individual user for this service (new style)
-    const newDatabaseName = `${Statics.databaseObjects}-database`;
+    const newDatabaseName = `${Statics.databaseOpenZaak}-database`;
     const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
     this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
 
@@ -75,10 +75,8 @@ export class OpenZaakService extends Construct {
     const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
-    return {
+    const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'openzaak.conf.docker',
-      DB_NAME: Statics.databaseOpenZaak,
-      DB_NAME_NEW: Statics.databaseOpenZaak + '-database',
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
@@ -121,15 +119,20 @@ export class OpenZaakService extends Construct {
       DEMO_CLIENT_ID: 'demo-client',
       DEMO_SECRET: 'demo-secret',
     };
+
+    if (this.props.openZaakConfiguration.useNewDatabase == true) {
+      env['DB_NAME_OLD'] = Statics.databaseOpenZaak;
+      env['DB_NAME'] = Statics.databaseOpenZaak + '-database';
+    } else {
+      env['DB_NAME'] = Statics.databaseOpenZaak;
+      env['DB_NAME_NEW'] = Statics.databaseOpenZaak + '-database';
+    }
+
+    return env;
   }
 
   private getSecretConfiguration() {
-    const secrets = {
-      DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
-      DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-      DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
-      DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
-
+    let secrets = {
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
@@ -145,8 +148,26 @@ export class OpenZaakService extends Construct {
       NOTIF_OPENZAAK_SECRET: Secret.fromSecretsManager(this.clientCredentialsNotificationsZaak, 'secret'),
       OPENZAAK_NOTIF_CLIENT_ID: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'username'),
       OPENZAAK_NOTIF_SECRET: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'secret'),
+    } as Record<string, Secret>;
 
-    };
+    if (this.props.openZaakConfiguration.useNewDatabase === true) {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    } else {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    }
+
     return secrets;
   }
 
@@ -303,6 +324,7 @@ export class OpenZaakService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
+    this.databaseUserCredentials.grantRead(role);
     this.openZaakCredentials.grantRead(role);
     this.secretKey.grantRead(role);
   }

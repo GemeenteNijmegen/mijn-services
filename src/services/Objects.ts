@@ -70,10 +70,8 @@ export class ObjectsService extends Construct {
     const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
-    return {
+    const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'objects.conf.docker',
-      DB_NAME: Statics.databaseObjects,
-      DB_NAME_NEW: Statics.databaseObjects + '-database',
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*', // TODO make stricter at some point
@@ -102,17 +100,21 @@ export class ObjectsService extends Construct {
 
       // Disable OpenTelemetry (not used by this platform)
       OTEL_SDK_DISABLED: 'True',
-
     };
+
+    if (this.props.serviceConfiguration.useNewDatabase == true) {
+      env['DB_NAME_OLD'] = Statics.databaseObjects;
+      env['DB_NAME'] = Statics.databaseObjects + '-database';
+    } else {
+      env['DB_NAME'] = Statics.databaseObjects;
+      env['DB_NAME_NEW'] = Statics.databaseObjects + '-database';
+    }
+
+    return env;
   }
 
   private getSecretConfiguration() {
-    const secrets = {
-      DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
-      DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-      DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
-      DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
-
+    let secrets = {
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
@@ -120,8 +122,26 @@ export class ObjectsService extends Construct {
       DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.superuserCredentials, 'username'),
       DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.superuserCredentials, 'password'),
       DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.superuserCredentials, 'email'),
+    } as Record<string, Secret>;
 
-    };
+    if (this.props.serviceConfiguration.useNewDatabase === true) {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    } else {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    }
+
     return secrets;
   }
 
@@ -254,6 +274,7 @@ export class ObjectsService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
+    this.databaseUserCredentials.grantRead(role);
     this.superuserCredentials.grantRead(role);
     this.secretKey.grantRead(role);
   }

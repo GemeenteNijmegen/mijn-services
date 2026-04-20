@@ -163,7 +163,7 @@ export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, Celer
   debug?: boolean;
 }
 
-export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -187,7 +187,7 @@ export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration
   persitNotifications?: boolean;
 }
 
-export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -439,7 +439,7 @@ export interface GZACConfiguration {
   debug?: boolean;
 }
 
-export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Open Product imagetag
    */

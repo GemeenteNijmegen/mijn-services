@@ -69,10 +69,9 @@ export class ObjecttypesService extends Construct {
     const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
-    return {
+    const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'objecttypes.conf.docker',
-      DB_NAME: Statics.databaseObjecttypes,
-      DB_NAME_NEW: Statics.databaseObjecttypes + '-database',
+
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
@@ -102,6 +101,16 @@ export class ObjecttypesService extends Construct {
       // Disable OpenTelemetry (not used by this platform)
       OTEL_SDK_DISABLED: 'True',
     };
+
+    if (this.props.serviceConfiguration.useNewDatabase == true) {
+      env['DB_NAME_OLD'] = Statics.databaseObjecttypes;
+      env['DB_NAME'] = Statics.databaseObjecttypes + '-database';
+    } else {
+      env['DB_NAME'] = Statics.databaseObjecttypes;
+      env['DB_NAME_NEW'] = Statics.databaseObjecttypes + '-database';
+    }
+
+    return env;
   }
 
   private getSecretConfiguration() {
