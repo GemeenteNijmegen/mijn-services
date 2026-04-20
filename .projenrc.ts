@@ -4,14 +4,12 @@ const project = new GemeenteNijmegenCdkApp({
   defaultReleaseBranch: 'main',
   name: 'mijn-services',
   projenrcTs: true,
-  // releaseWorkflowEnv: {
-  //   VER_ID_GH_TOKEN: '${{ secrets.VER_ID_GH_TOKEN }}',
-  // },
-  // buildWorkflowOptions: {
-  //   env: {
-  //     VER_ID_GH_TOKEN: '${{ secrets.VER_ID_GH_TOKEN }}',
-  //   },
-  // },
+  depsUpgradeOptions: {
+    workflowOptions: {
+      branches: ['development'],
+      labels: ['auto-merge'],
+    },
+  },
   devDeps: [
     '@types/pg',
     '@types/jsonwebtoken',
@@ -52,6 +50,9 @@ const project = new GemeenteNijmegenCdkApp({
       isolatedModules: true,
     },
   },
+  gitignore: [
+    'typen-beheer',
+  ],
 });
 
 /**

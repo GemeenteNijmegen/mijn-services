@@ -57,6 +57,7 @@ export interface AdditionalDatabaseProps {
    * The removal policy
    */
   readonly removalPolicy?: RemovalPolicy;
+
 }
 
 export class AdditionalDatabase extends Construct {

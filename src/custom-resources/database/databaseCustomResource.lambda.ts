@@ -243,7 +243,7 @@ async function dropUser(client: postgres.Client, username: string): Promise<void
  * Adjust the regex if your naming convention requires hyphens or other characters.
  */
 function sanitizeIdentifier(value: string): string {
-  if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+  if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
     throw new Error(`Invalid identifier: '${value}'. Only alphanumeric characters and underscores are allowed.`);
   }
   return value;
