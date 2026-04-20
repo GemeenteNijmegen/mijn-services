@@ -103,11 +103,11 @@ export class ObjectsService extends Construct {
     };
 
     if (this.props.serviceConfiguration.useNewDatabase == true) {
-      env['DB_NAME_OLD'] = Statics.databaseObjects;
-      env['DB_NAME'] = Statics.databaseObjects + '-database';
+      env.DB_NAME_OLD = Statics.databaseObjects;
+      env.DB_NAME = Statics.databaseObjects + '-database';
     } else {
-      env['DB_NAME'] = Statics.databaseObjects;
-      env['DB_NAME_NEW'] = Statics.databaseObjects + '-database';
+      env.DB_NAME = Statics.databaseObjects;
+      env.DB_NAME_NEW = Statics.databaseObjects + '-database';
     }
 
     return env;

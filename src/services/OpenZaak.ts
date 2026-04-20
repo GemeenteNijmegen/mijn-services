@@ -121,11 +121,11 @@ export class OpenZaakService extends Construct {
     };
 
     if (this.props.openZaakConfiguration.useNewDatabase == true) {
-      env['DB_NAME_OLD'] = Statics.databaseOpenZaak;
-      env['DB_NAME'] = Statics.databaseOpenZaak + '-database';
+      env.DB_NAME_OLD = Statics.databaseOpenZaak;
+      env.DB_NAME = Statics.databaseOpenZaak + '-database';
     } else {
-      env['DB_NAME'] = Statics.databaseOpenZaak;
-      env['DB_NAME_NEW'] = Statics.databaseOpenZaak + '-database';
+      env.DB_NAME = Statics.databaseOpenZaak;
+      env.DB_NAME_NEW = Statics.databaseOpenZaak + '-database';
     }
 
     return env;

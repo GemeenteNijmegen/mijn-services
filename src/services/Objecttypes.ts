@@ -103,11 +103,11 @@ export class ObjecttypesService extends Construct {
     };
 
     if (this.props.serviceConfiguration.useNewDatabase == true) {
-      env['DB_NAME_OLD'] = Statics.databaseObjecttypes;
-      env['DB_NAME'] = Statics.databaseObjecttypes + '-database';
+      env.DB_NAME_OLD = Statics.databaseObjecttypes;
+      env.DB_NAME = Statics.databaseObjecttypes + '-database';
     } else {
-      env['DB_NAME'] = Statics.databaseObjecttypes;
-      env['DB_NAME_NEW'] = Statics.databaseObjecttypes + '-database';
+      env.DB_NAME = Statics.databaseObjecttypes;
+      env.DB_NAME_NEW = Statics.databaseObjecttypes + '-database';
     }
 
     return env;
@@ -133,7 +133,7 @@ export class ObjecttypesService extends Construct {
         DB_USER_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
         DB_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
         DB_USER: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
-      }
+      };
     } else {
       secrets = {
         ...secrets,
@@ -141,7 +141,7 @@ export class ObjecttypesService extends Construct {
         DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
         DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
         DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
-      }
+      };
     }
 
     return secrets;

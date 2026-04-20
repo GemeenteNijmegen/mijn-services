@@ -97,11 +97,11 @@ export class OpenProductService extends Construct {
     };
 
     if (this.props.openProductConfiguration.useNewDatabase == true) {
-      env['DB_NAME_OLD'] = Statics.databaseOpenProduct;
-      env['DB_NAME'] = Statics.databaseOpenProduct + '-database';
+      env.DB_NAME_OLD = Statics.databaseOpenProduct;
+      env.DB_NAME = Statics.databaseOpenProduct + '-database';
     } else {
-      env['DB_NAME'] = Statics.databaseOpenProduct;
-      env['DB_NAME_NEW'] = Statics.databaseOpenProduct + '-database';
+      env.DB_NAME = Statics.databaseOpenProduct;
+      env.DB_NAME_NEW = Statics.databaseOpenProduct + '-database';
     }
 
     return env;

@@ -138,11 +138,11 @@ export class OpenNotificatiesService extends Construct {
     };
 
     if (this.props.openNotificationsConfiguration.useNewDatabase == true) {
-      env['DB_NAME_OLD'] = Statics.databaseOpenNotificaties;
-      env['DB_NAME'] = Statics.databaseOpenNotificaties + '-database';
+      env.DB_NAME_OLD = Statics.databaseOpenNotificaties;
+      env.DB_NAME = Statics.databaseOpenNotificaties + '-database';
     } else {
-      env['DB_NAME'] = Statics.databaseOpenNotificaties;
-      env['DB_NAME_NEW'] = Statics.databaseOpenNotificaties + '-database';
+      env.DB_NAME = Statics.databaseOpenNotificaties;
+      env.DB_NAME_NEW = Statics.databaseOpenNotificaties + '-database';
     }
 
     return env;

@@ -481,7 +481,7 @@ export interface DatabaseMigrationToggle {
    * Use the new database + credentials when this flag is true
    * @default - false
    */
-  useNewDatabase?: boolean
+  useNewDatabase?: boolean;
 }
 
 
