@@ -50,6 +50,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
       useNewDatabase: true,
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
     openProductServices: {
       image: 'maykinmedia/open-product:1.5.0',
