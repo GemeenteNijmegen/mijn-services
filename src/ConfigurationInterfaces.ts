@@ -210,7 +210,7 @@ export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, Celery
   apiVersion: string;
 }
 
-export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration {
+export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -226,7 +226,7 @@ export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration {
   debug?: boolean;
 }
 
-export interface ObjectsConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+export interface ObjectsConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -474,6 +474,14 @@ export interface CeleryTaskSizeConfiguration {
     cpu: string;
     memory: string;
   };
+}
+
+export interface DatabaseMigrationToggle {
+  /**
+   * Use the new database + credentials when this flag is true
+   * @default - false
+   */
+  useNewDatabase?: boolean
 }
 
 
