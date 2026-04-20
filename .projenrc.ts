@@ -8,7 +8,7 @@ const project = new GemeenteNijmegenCdkApp({
     workflowOptions: {
       branches: ['development'],
       labels: ['auto-merge'],
-    }
+    },
   },
   devDeps: [
     '@types/pg',
@@ -51,8 +51,8 @@ const project = new GemeenteNijmegenCdkApp({
     },
   },
   gitignore: [
-    'typen-beheer'
-  ]
+    'typen-beheer',
+  ],
 });
 
 /**

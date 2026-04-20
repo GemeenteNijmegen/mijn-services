@@ -231,6 +231,7 @@ export class OpenProductService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
+        enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
       volumeMounts: {
         fileSystemRoot: '/openproduct',
