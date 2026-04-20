@@ -224,7 +224,6 @@ export class CorsaZgwService extends Construct {
     // Allow execute commands using ECS console
     this.serviceFactory.allowExecutingCommands(task);
 
-
     // Configuration container
     const initContainer = task.addContainer('setup', {
       image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
