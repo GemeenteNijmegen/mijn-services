@@ -94,6 +94,9 @@ export class OpenProductService extends Construct {
 
       // Conectivity
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
+
+      // Disable OpenTelemetry (not used by this platform)
+      OTEL_SDK_DISABLED: 'True',
     };
 
     if (this.props.openProductConfiguration.useNewDatabase == true) {
