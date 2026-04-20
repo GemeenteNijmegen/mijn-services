@@ -161,6 +161,7 @@ export class ObjectsService extends Construct {
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    this.serviceFactory.allowExecutingCommands(task);
     return service;
   }
 
@@ -209,6 +210,7 @@ export class ObjectsService extends Construct {
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    this.serviceFactory.allowExecutingCommands(task);
   }
 
   private logGroup() {

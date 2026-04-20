@@ -197,7 +197,7 @@ export class OpenZaakService extends Construct {
         },
       },
     });
-
+    this.serviceFactory.allowExecutingCommands(task);
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
@@ -252,6 +252,8 @@ export class OpenZaakService extends Construct {
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    this.serviceFactory.allowExecutingCommands(task);
+
   }
 
   private logGroup() {

@@ -244,6 +244,8 @@ export class OpenNotificatiesService extends Construct {
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    this.serviceFactory.allowExecutingCommands(task);
+
     return service;
   }
 

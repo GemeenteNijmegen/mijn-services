@@ -243,6 +243,8 @@ export class OpenProductService extends Construct {
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    this.serviceFactory.allowExecutingCommands(task);
+
   }
   private setupConnectivity(id: string, serviceSecurityGroups: ISecurityGroup[]) {
 
