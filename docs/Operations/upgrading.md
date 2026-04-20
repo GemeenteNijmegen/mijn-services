@@ -28,7 +28,7 @@ Checken of de container nog goed werkt.
 
 
 ## Open-objecten
-Momenteel: 3.0.0 
+Momenteel: 3.0.0
 Latest: 4.0.0
 
 Letop: Na 4.0.0 wordten objecten en objecttypes niet meer apart gedraaied maar in een applicatie.

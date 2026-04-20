@@ -39,6 +39,7 @@ export class OpenNotificatiesService extends Construct {
   private readonly props: OpenNotificatiesServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
+  private readonly databaseUserCredentials: ISecret;
   private readonly openNotificatiesCredentials: ISecret;
   private readonly clientCredentialsNotificationsZaak: ISecret;
   private readonly clientCredentialsZaakNotifications: ISecret;
@@ -49,6 +50,12 @@ export class OpenNotificatiesService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+    // DB that has a individual user for this service (new style)
+    const newDatabaseName = `${Statics.databaseObjects}-database`;
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
+
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.openNotificatiesCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenNotificatiesCredentials);
@@ -83,6 +90,7 @@ export class OpenNotificatiesService extends Construct {
     return {
       DJANGO_SETTINGS_MODULE: 'nrc.conf.docker',
       DB_NAME: Statics.databaseOpenNotificaties,
+      DB_NAME_NEW: Statics.databaseOpenNotificaties + '-database',
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
@@ -138,6 +146,8 @@ export class OpenNotificatiesService extends Construct {
     const secrets = {
       DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+      DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+      DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
 
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),

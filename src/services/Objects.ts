@@ -35,6 +35,7 @@ export class ObjectsService extends Construct {
   private readonly props: ObjectsServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
+  private readonly databaseUserCredentials: ISecret;
   private readonly superuserCredentials: ISecret;
   private readonly secretKey: ISecret;
 
@@ -43,6 +44,12 @@ export class ObjectsService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+    // DB that has a individual user for this service (new style)
+    const newDatabaseName = `${Statics.databaseObjects}-database`;
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
+
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.superuserCredentials = SecretParameter.fromSecretNameV2(this, 'superuser-credentials', Statics._ssmObjectsCredentials);
@@ -66,6 +73,7 @@ export class ObjectsService extends Construct {
     return {
       DJANGO_SETTINGS_MODULE: 'objects.conf.docker',
       DB_NAME: Statics.databaseObjects,
+      DB_NAME_NEW: Statics.databaseObjects + '-database',
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*', // TODO make stricter at some point
@@ -92,6 +100,9 @@ export class ObjectsService extends Construct {
       CORS_ALLOW_ALL_ORIGINS: 'True', // TODO make strickter at some point
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
 
+      // Disable OpenTelemetry (not used by this platform)
+      OTEL_SDK_DISABLED: 'True',
+
     };
   }
 
@@ -99,6 +110,8 @@ export class ObjectsService extends Construct {
     const secrets = {
       DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+      DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+      DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
 
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),

@@ -35,6 +35,7 @@ export class ObjecttypesService extends Construct {
   private readonly props: ObjecttypesServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
+  private readonly databaseUserCredentials: ISecret;
   private readonly superuserCredetials: ISecret;
   private readonly secretKey: ISecret;
 
@@ -43,6 +44,12 @@ export class ObjecttypesService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+    // DB that has a individual user for this service (new style)
+    const newDatabaseName = `${Statics.databaseObjecttypes}-database`;
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
+
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.superuserCredetials = SecretParameter.fromSecretNameV2(this, 'superuser-credentials', Statics._ssmObjecttypesCredentials);
@@ -65,6 +72,7 @@ export class ObjecttypesService extends Construct {
     return {
       DJANGO_SETTINGS_MODULE: 'objecttypes.conf.docker',
       DB_NAME: Statics.databaseObjecttypes,
+      DB_NAME_NEW: Statics.databaseObjecttypes + '-database',
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
@@ -91,6 +99,8 @@ export class ObjecttypesService extends Construct {
       CORS_ALLOW_ALL_ORIGINS: 'True',
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
 
+      // Disable OpenTelemetry (not used by this platform)
+      OTEL_SDK_DISABLED: 'True',
     };
   }
 
@@ -98,6 +108,8 @@ export class ObjecttypesService extends Construct {
     const secrets = {
       DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+      DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+      DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
 
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
