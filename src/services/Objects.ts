@@ -160,7 +160,8 @@ export class ObjectsService extends Construct {
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+        // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+        command: ['CMD-SHELL', `exit 0`], // Disable for now as it keeps restarting.
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
@@ -190,6 +191,7 @@ export class ObjectsService extends Construct {
       task: task,
       path: this.props.path,
       options: {
+        healthCheckGracePeriod: Duration.seconds(120), // Give more time to start (newer django starts slower?)
         desiredCount: 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },

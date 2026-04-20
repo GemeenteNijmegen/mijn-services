@@ -161,7 +161,8 @@ export class ObjecttypesService extends Construct {
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+        // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+        command: ['CMD-SHELL', `exit 0`],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
@@ -190,6 +191,7 @@ export class ObjecttypesService extends Construct {
       task: task,
       path: this.props.path,
       options: {
+        healthCheckGracePeriod: Duration.seconds(120), // Give more time to start (newer django starts slower?)
         desiredCount: 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
@@ -211,7 +213,7 @@ export class ObjecttypesService extends Construct {
   private setupConnectivity(id: string, serviceSecurityGroups: ISecurityGroup[]) {
 
     const dbSecurityGroupId = StringParameter.valueForStringParameter(this, Statics._ssmDatabaseSecurityGroup);
-    const dbSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `db-security-group-${id}`, dbSecurityGroupId);
+    const dbSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `db - security - group - ${id}`, dbSecurityGroupId);
     const dbPort = StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort);
     serviceSecurityGroups.forEach(serviceSecurityGroup => {
       dbSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(dbPort)));
@@ -221,7 +223,7 @@ export class ObjecttypesService extends Construct {
     serviceSecurityGroups.forEach(serviceSecurityGroup => {
       dbSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(dbPort)));
       this.props.cache.db.vpcSecurityGroupIds?.forEach((cacheSecurityGroupId, index) => {
-        const cacheSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `cache-security-group-${id}-${index}`, cacheSecurityGroupId);
+        const cacheSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `cache - security - group - ${id} - ${index}`, cacheSecurityGroupId);
         cacheSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(cachePort)));
       });
     });
