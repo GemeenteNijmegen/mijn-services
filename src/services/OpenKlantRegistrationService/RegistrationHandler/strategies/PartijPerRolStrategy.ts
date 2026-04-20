@@ -42,7 +42,11 @@ export class PartijPerRolStrategy implements IRegistrationStrategy {
     try {
       rol = await this.configuration.zakenApi.getRol(rolUrl);
     } catch (error) {
-      logger.info('Failed to get role, this is probably fine.');
+      let message = '';
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      logger.info('Failed to get role, this is probably fine.', message);
       return;
     }
 

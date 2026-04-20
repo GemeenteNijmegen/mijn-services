@@ -186,7 +186,7 @@ export class OpenZaakService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
       apiVersionHeaderValue: this.props.openZaakConfiguration.apiVersion,
       volumeMounts: {
@@ -240,7 +240,7 @@ export class OpenZaakService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
       volumeMounts: {
         fileSystemRoot: '/openzaak',

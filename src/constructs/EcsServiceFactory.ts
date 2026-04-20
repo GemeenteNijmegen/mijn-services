@@ -173,6 +173,23 @@ export class EcsServiceFactory {
   }
 
   /**
+   * Allows ECS Exec commands in containers, note this should be enabled on service level as well.
+   * @param task the task to allow exec to
+   */
+  allowExecutingCommands(task: TaskDefinition) {
+    task.addToTaskRolePolicy(new PolicyStatement({
+      actions: [
+        'ssmmessages:CreateControlChannel',
+        'ssmmessages:CreateDataChannel',
+        'ssmmessages:OpenControlChannel',
+        'ssmmessages:OpenDataChannel',
+      ],
+      effect: Effect.ALLOW,
+      resources: ['*'],
+    }));
+  }
+
+  /**
    * This adds a cloudwatch alarm for unresponsive services. Health checks should catch this, but they're not yet stable enough.
    *
    * The service will stop reporting statistics to cloudwatch, this catches missing data for CPUUtilization and will alarm based on that.

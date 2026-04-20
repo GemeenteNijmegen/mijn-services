@@ -1,4 +1,6 @@
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
+import { Duration } from 'aws-cdk-lib';
+import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
 import { Configuration } from './ConfigurationInterfaces';
 import { Statics } from './Statics';
 
@@ -16,9 +18,13 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     databases: Statics.databasesAcceptance,
     databaseSnapshotRetentionDays: 0,
     openklant: {
-      image: 'maykinmedia/open-klant:2.5.0',
+      image: 'maykinmedia/open-klant:2.15.0',
       logLevel: 'DEBUG',
       debug: true,
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.8.0',
@@ -43,32 +49,30 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
     },
-    // keyCloackService: {
-    //   image: 'quay.io/keycloak/keycloak:24.0.1',
-    //   logLevel: 'DEBUG',
-    //   debug: true,
-    // },
-    // gzacService: {
-    //   backendImage: 'ritense/gzac-backend:12.6.0',
-    //   frontendImage: 'ritense/gzac-frontend:12.6.0',
-    //   logLevel: 'DEBUG',
-    //   debug: true,
-    // },
-    // gzacFrontendService: {
-    //   image: 'ritense/gzac-frontend:12.6.0',
-    //   logLevel: 'DEBUG',
-    //   debug: true,
-    // },
     openProductServices: {
-      image: 'maykinmedia/open-product:1.3.0',
+      image: 'maykinmedia/open-product:1.5.0',
       logLevel: 'DEBUG',
       debug: true,
     },
     corsaZgwService: {
       logLevel: 'DEBUG',
       debug: true,
-      imageTag: '97a274e513d72897acc95e5fa50085eb76ba994d',
+      imageTag: '1c0b54e2d2f22988d6a891e389b093c103873beb',
     },
+    vtbServices: [
+      {
+        cdkId: 'vtb-dev',
+        image: 'maykinmedia/open-vtb:latest',
+        subdomain: 'vtb-dev',
+        databaseName: 'vtb-dev',
+        logLevel: 'DEBUG',
+        debug: true,
+        taskSize: {
+          cpu: '512',
+          memory: '1024',
+        },
+      },
+    ],
     outputManagementComponents: [
       {
         cdkId: 'local-omc',
@@ -98,6 +102,12 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       },
     ],
     helloWorlService: true,
+    ObjectNotificationServices: [
+      {
+        configKey: 'esfTaak',
+        scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+      },
+    ],
   },
   acceptance: {
     branch: 'acceptance',
@@ -113,9 +123,13 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     databases: Statics.databasesAcceptance,
     databaseSnapshotRetentionDays: 10,
     openklant: {
-      image: 'maykinmedia/open-klant:2.5.0',
+      image: 'maykinmedia/open-klant:2.15.0',
       logLevel: 'DEBUG',
       debug: true,
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.8.0',
@@ -193,6 +207,12 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         },
       },
     ],
+    ObjectNotificationServices: [
+      {
+        configKey: 'esfTaak',
+        scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+      },
+    ],
   },
   main: {
     branch: 'main',
@@ -207,11 +227,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     databases: Statics.databasesProduction,
     databaseSnapshotRetentionDays: 35,
     openklant: {
-      image: 'maykinmedia/open-klant:2.5.0',
+      image: 'maykinmedia/open-klant:2.15.0',
       logLevel: 'INFO',
     },
-    // outputManagementComponents: [
-    // ],
     openNotificaties: {
       image: 'openzaak/open-notificaties:1.8.0',
       rabbitMqImage: 'rabbitmq:4.0.5-alpine',
@@ -247,6 +265,12 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         memory: '1024',
       },
     },
+    ObjectNotificationServices: [
+      {
+        configKey: 'esfTaak',
+        scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+      },
+    ],
   },
 };
 

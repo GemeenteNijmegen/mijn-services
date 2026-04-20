@@ -7,6 +7,10 @@ The current goals are expiremental. It will only be deployed on acc.
 - https://github.com/maykinmedia/open-product/blob/master/CHANGELOG.rst
 
 
+## Loading UPL / UPN
+In the container
+`python src/manage.py load_upl --url https://standaarden.overheid.nl/owms/oquery/UPL-actueel.csv`
+
 ## Setup configuration
 
 To setup the configuration:
@@ -23,3 +27,20 @@ Maybe we should set env:
 ``
 
 See https://github.com/maykinmedia/open-product/blob/master/docker-compose.yml#L60
+
+
+I think we can run the configuration by doing: `src/manage.py setup_configuration --yaml-file /app/setup_configuration/configuration.yaml`
+
+
+Misschien moeten we hier ook nog wat mee: `src/manage.py migrate`
+
+
+21:49 - Upgrade naar 1.4.0 is geslaagd, migratie script hierboven wordt automatisch uitgevoerd bij starten.
+
+
+09:34 - Found this url https://open-product.readthedocs.io/en/latest/installation/config/openproduct_config_cli.html#installation-configuration-cli
+
+
+09:37 - Het lijkt erop dat al vanaf 1.1.0 het setup configuration cli commando gebruikt kan worden. https://github.com/maykinmedia/open-product/blob/master/CHANGELOG.rst#110-09-05-2025
+```
+

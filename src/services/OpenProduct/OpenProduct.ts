@@ -14,7 +14,6 @@ import { OpenConfigurationStore } from '../../constructs/OpenConfigurationStore'
 import { CacheDatabase } from '../../constructs/Redis';
 import { Statics } from '../../Statics';
 import { Utils } from '../../Utils';
-import { ServiceInfraUtils } from '../ServiceInfraUtils';
 
 export interface OpenProductServiceProps {
   cache: CacheDatabase;
@@ -73,7 +72,7 @@ export class OpenProductService extends Construct {
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'True',
-      UWSGI_PORT: this.props.service.port.toString(),
+      // UWSGI_PORT: this.props.service.port.toString(), // MD: this breakes UWSGI aparently now?
 
       LOG_LEVEL: this.props.openProductConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openProductConfiguration.debug, false),
@@ -102,8 +101,6 @@ export class OpenProductService extends Construct {
       //   DEMO_CONFIG_ENABLE: 'False',
       //   DEMO_CLIENT_ID: 'demo-client',
       //   DEMO_SECRET: 'demo-secret',
-
-      OPEN_CONFIG_STORE_BUCKET: this.props.openConfigStore.bucket.bucketName,
     };
   }
 
@@ -135,18 +132,18 @@ export class OpenProductService extends Construct {
     const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
       volumes: [{ name: VOLUME_NAME }],
-      cpu: this.props.openProductConfiguration.taskSize?.cpu ?? '256',
-      memoryMiB: this.props.openProductConfiguration.taskSize?.memory ?? '512',
+      cpu: this.props.openProductConfiguration.taskSize?.cpu ?? '512',
+      memoryMiB: this.props.openProductConfiguration.taskSize?.memory ?? '1024',
     });
 
     // Main service container (3th to run)
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
-      healthCheck: {
-        command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(30),
-      },
+      // healthCheck: {
+      //   command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
+      //   interval: Duration.seconds(10),
+      //   startPeriod: Duration.seconds(30),
+      // },
       portMappings: [
         {
           containerPort: this.props.service.port,
@@ -168,10 +165,12 @@ export class OpenProductService extends Construct {
     const configLocation = `s3://${this.props.openConfigStore.bucket.bucketName}/open-product`;
     const configTarget = '/app/setup_configuration';
     const downloadConfiguration = this.serviceFactory.downloadConfiguration(task, this.logs, container, configLocation, configTarget);
+    this.serviceFactory.attachEphemeralStorage(downloadConfiguration, VOLUME_NAME, '/app/setup_configuration');
 
     // File system prermissions for ephemeral storage (1st to run)
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, downloadConfiguration, '/tmp', '/app/setup_configuration');
 
+    this.serviceFactory.allowExecutingCommands(task);
 
     const service = this.serviceFactory.createService({
       id: 'main',
@@ -179,7 +178,7 @@ export class OpenProductService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Used to call src/manage.py (see open-product docs).
       },
       volumeMounts: {
         fileSystemRoot: '/openproduct',
@@ -190,7 +189,7 @@ export class OpenProductService extends Construct {
       },
     });
 
-    this.props.openConfigStore.grantReadConfig(service.taskDefinition.executionRole!, 'open-product');
+    this.props.openConfigStore.grantReadConfig(service.taskDefinition.taskRole!, 'open-product');
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
@@ -232,7 +231,7 @@ export class OpenProductService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
       volumeMounts: {
         fileSystemRoot: '/openproduct',

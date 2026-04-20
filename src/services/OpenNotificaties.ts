@@ -239,7 +239,7 @@ export class OpenNotificatiesService extends Construct {
       path: this.props.path,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
@@ -283,7 +283,7 @@ export class OpenNotificatiesService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);

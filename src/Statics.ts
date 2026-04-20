@@ -47,6 +47,7 @@ export class Statics {
   static readonly databaseGZAC = 'gzac'; // GZAC Static
   static readonly databaseOpenProduct = 'open-product';
   static readonly databaseCorsaZgwDevService = 'corsa-zgw-dev';
+  static readonly databaseVtbPrefix = 'vtb';
 
   // MARK: Vulservice
   static readonly ssmHaalCentraalBRPBaseUrl = `/${Statics.projectName}/api/haalcentraalbrp/baseurl`;
@@ -80,6 +81,7 @@ export class Statics {
     Statics.databaseGZAC, // GZAC
     Statics.databaseOpenProduct,
     Statics.databaseCorsaZgwDevService,
+    'vtb-dev', // VTB dev instance
   ];
 
   // MARK: Environments
@@ -103,6 +105,14 @@ export class Statics {
     region: 'eu-central-1',
   };
 
+
+  // MARK: Object notifier
+  static readonly ssmObjectNotifierObjectsBaseUrl = `/${Statics.projectName}/objectnotifier/objectsbaseurl`;
+  static readonly ssmObjectNotifierObjectsToken = `/${Statics.projectName}/objectnotifier/objectstoken`;
+  static readonly ssmObjectNotifierNotifyBaseUrl = `/${Statics.projectName}/objectnotifier/notifybaseurl`;
+  static readonly ssmObjectNotifierNotifyIssuer = `/${Statics.projectName}/objectnotifier/notifyissuer`;
+  static readonly ssmObjectNotifierNotifyToken = `/${Statics.projectName}/objectnotifier/notifytoken`;
+
   /**
    * GZAC Statics
    * Placed separately to make (re)moving easier
@@ -112,5 +122,13 @@ export class Statics {
 
 
   static readonly sessionTimeoutDefaultSeconds = 12 * 3600;
+
+  static vtbCredentialsSecretName(instanceId: string) {
+    return `/${Statics.projectName}/internal/vtb/${instanceId}/credentials`;
+  }
+
+  static databaseCredentialsName(dbName: string) {
+    return `/${Statics.projectName}/internal/database/${dbName}/credentials`;
+  }
 
 }

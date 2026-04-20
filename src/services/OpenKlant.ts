@@ -71,7 +71,7 @@ export class OpenKlantService extends Construct {
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'True',
-      UWSGI_PORT: this.props.service.port.toString(),
+      //UWSGI_PORT: this.props.service.port.toString(),
 
       LOG_LEVEL: this.props.logLevel,
       LOG_REQUESTS: 'True',
@@ -86,6 +86,8 @@ export class OpenKlantService extends Construct {
 
 
       CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
+
+      OTEL_SDK_DISABLED: 'True',
 
     };
   }
@@ -106,13 +108,17 @@ export class OpenKlantService extends Construct {
     return secrets;
   }
 
-
   setupService() {
+    const VOLUME_NAME = 'temp';
     const task = this.serviceFactory.createTaskDefinition('main', {
+      volumes: [{ name: VOLUME_NAME }],
       cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
-    task.addContainer('main', {
+
+    this.serviceFactory.allowExecutingCommands(task);
+
+    const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.image),
       healthCheck: {
         command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
@@ -126,7 +132,7 @@ export class OpenKlantService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Otherwise exec wont work...
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -135,13 +141,16 @@ export class OpenKlantService extends Construct {
       }),
     });
 
+    // Filesystem write access - initialization container
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
+
     const service = this.serviceFactory.createService({
       id: 'main',
       task: task,
       path: this.props.path,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Used to call src/manage.py (see open-klant docs).
       },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
@@ -155,6 +164,9 @@ export class OpenKlantService extends Construct {
       cpu: this.props.serviceConfiguration.celeryTaskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.celeryTaskSize?.memory ?? '512',
     });
+
+    // Enable exec
+    this.serviceFactory.allowExecutingCommands(task);
 
     // Setup celery container
     const container = task.addContainer('celery', {
@@ -184,11 +196,12 @@ export class OpenKlantService extends Construct {
       id: 'celery',
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Used to call src/manage.py (see open-klant docs).
       },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+
   }
 
   private logGroup() {

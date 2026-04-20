@@ -24,6 +24,7 @@ import { OpenNotificatiesService } from './services/OpenNotificaties';
 import { OpenProductService } from './services/OpenProduct/OpenProduct';
 import { OpenZaakService } from './services/OpenZaak';
 import { OMCService } from './services/OutputManagementComponent';
+import { VtbService } from './services/VTB';
 import { Statics } from './Statics';
 
 interface MainStackProps extends StackProps, Configurable { }
@@ -65,7 +66,7 @@ export class MainStack extends Stack {
       domains.push(...props.configuration.alternativeDomainNames);
     }
 
-    const platform = new ContainerPlatform(this, 'containers', {
+    const containerPlatform = new ContainerPlatform(this, 'containers', {
       vpc: this.vpc.vpc,
       hostedZone: this.hostedzone,
       domains,
@@ -73,19 +74,20 @@ export class MainStack extends Stack {
     });
 
     // Note: The order of which services are created here affects the loadbalancer priority...
-    this.openKlantRegistrationServices(platform); // Should be higher in priority than open-klant
-    this.openKlantService(platform);
-    this.openNotificatiesServices(platform);
-    this.openZaakServices(platform);
-    this.outputManagementComponent(platform);
-    this.objecttypesService(platform);
-    this.objectsService(platform);
-    this.keyCloakService(platform);
-    this.gzacService(platform);
-    this.openProductServices(platform);
-    this.gzacFrontendService(platform); // As this runs on the root /* it should be lowest in priority (accp only)
-    this.corsaZgwServices(platform);
-    this.helloWorldService(platform);
+    this.openKlantRegistrationServices(containerPlatform); // Should be higher in priority than open-klant
+    this.openKlantService(containerPlatform);
+    this.openNotificatiesServices(containerPlatform);
+    this.openZaakServices(containerPlatform);
+    this.outputManagementComponent(containerPlatform);
+    this.objecttypesService(containerPlatform);
+    this.objectsService(containerPlatform);
+    this.keyCloakService(containerPlatform);
+    this.gzacService(containerPlatform);
+    this.openProductServices(containerPlatform);
+    this.gzacFrontendService(containerPlatform); // As this runs on the root /* it should be lowest in priority (accp only)
+    this.corsaZgwServices(containerPlatform);
+    this.vtbServices(containerPlatform);
+    this.helloWorldService(containerPlatform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
@@ -111,7 +113,7 @@ export class MainStack extends Stack {
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 8080,
+        port: 8000,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
     });
@@ -385,11 +387,37 @@ export class MainStack extends Stack {
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 8080,
+        port: 8000,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       openProductConfiguration: this.configuration.openProductServices,
       openConfigStore: this.openConfigStore,
+    });
+  }
+
+  private vtbServices(platform: ContainerPlatform) {
+    if (!this.configuration.vtbServices?.length) {
+      console.warn('No VTB configuration provided. Skipping creation of VTB services!');
+      return;
+    }
+    this.configuration.vtbServices.forEach((vtb, index) => {
+      new VtbService(this, vtb.cdkId, {
+        hostedzone: this.hostedzone,
+        key: this.key,
+        cache: this.cache,
+        cacheDatabaseIndex: 14 + index * 2,
+        cacheDatabaseIndexCelery: 15 + index * 2,
+        alternativeDomainNames: this.configuration.alternativeDomainNames,
+        serviceConfiguration: vtb,
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
+          port: 8000,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+      });
     });
   }
 

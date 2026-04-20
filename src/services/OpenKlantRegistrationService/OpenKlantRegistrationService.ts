@@ -10,10 +10,10 @@ import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenKlantRegistrationServiceConfiguration } from '../../ConfigurationInterfaces';
-import { ServiceLoadBalancer } from '../../constructs/LoadBalancer';
-import { Statics } from '../../Statics';
 import { ReceiverFunction } from './NotificationReceiver/receiver-function';
 import { RegistrationHandlerFunction } from './RegistrationHandler/registration-handler-function';
+import { ServiceLoadBalancer } from '../../constructs/LoadBalancer';
+import { Statics } from '../../Statics';
 
 export interface OpenKlantRegistrationServiceProps {
   openKlantRegistrationServiceConfiguration: OpenKlantRegistrationServiceConfiguration;

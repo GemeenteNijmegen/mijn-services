@@ -6,7 +6,7 @@ export async function describeSecurityGroup(name: any) {
     Filters: [
       {
         Name: 'group-name',
-        Values: ['CloudFront-VPCOrigins-Service-SG'],
+        Values: [name],
       },
     ],
   });

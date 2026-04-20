@@ -30,6 +30,7 @@ jspm_packages/
 *.tgz
 .yarn-integrity
 .cache
+typen-beheer
 test-reports/junit.xml
 test/__snapshots__/*
 .env
@@ -44,7 +45,7 @@ junit.xml
 /dist/changelog.md
 /dist/version.txt
 !/.github/workflows/release.yml
-!/.github/workflows/upgrade-acceptance.yml
+!/.github/workflows/upgrade-development.yml
 !/.github/pull_request_template.md
 !/test/
 !/tsconfig.json
@@ -58,11 +59,13 @@ junit.xml
 /cdk.out/
 .cdk.staging/
 .parcel-cache/
-!/src/custom-resources/create-database-per-user/create-database-per-user-function.ts
 !/src/custom-resources/create-databases/create-databases-function.ts
+!/src/custom-resources/database/databaseCustomResource-function.ts
 !/src/custom-resources/securitygroupByName/securitygroupByName-function.ts
+!/src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler-function.ts
 !/src/services/OpenKlantRegistrationService/NotificationReceiver/receiver-function.ts
 !/src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler-function.ts
 !/.github/workflows/emergency.yml
 !/.github/workflows/auto-merge.yml
+!/.nvmrc
 !/.projenrc.ts

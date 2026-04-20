@@ -1,5 +1,6 @@
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Environment } from 'aws-cdk-lib';
+import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
 
 /**
  * Adds a configuration field to another interface
@@ -124,12 +125,27 @@ export interface Configuration {
   corsaZgwService?: CorsaZgwServiceConfiguration;
 
   /**
+   * List of VTB (open-vtb) service instances to deploy.
+   * Each instance gets its own database and subdomain.
+   */
+  vtbServices?: VtbConfiguration[];
+
+  /**
    * When true deploys a hello world service
    * @default false
    */
   helloWorlService?: boolean;
 
+  ObjectNotificationServices?: ObjectNotificationServiceConfiguration[];
+
 }
+
+export interface ObjectNotificationServiceConfiguration {
+  /** A string parseable as cron string by the eventbridge scheduler */
+  scheduleExpression: ScheduleExpression;
+  configKey: string;
+}
+
 
 export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
   /**
@@ -474,4 +490,32 @@ export interface CorsaZgwServiceConfiguration extends MainTaskSizeConfiguration 
    * @default latest
    */
   imageTag?: string;
+}
+
+export interface VtbConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+  /**
+   * CDK construct id, must be unique across all VTB instances.
+   */
+  cdkId: string;
+  /**
+   * Docker image to use (e.g. 'maykinmedia/open-vtb:1.0.0').
+   */
+  image: string;
+  /**
+   * Subdomain to expose this instance on (e.g. 'vtb-gemeente-a').
+   * The full domain will be <subdomain>.<hostedzone>.
+   */
+  subdomain: string;
+  /**
+   * Database name for this instance. Must be unique and listed in the databases array.
+   */
+  databaseName: string;
+  /**
+   * Log level for the container.
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging.
+   */
+  debug?: boolean;
 }
