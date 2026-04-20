@@ -49,6 +49,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       image: 'maykinmedia/objects-api:3.0.0',
       logLevel: 'DEBUG',
       debug: true,
+      useNewDatabase: true,
     },
     openProductServices: {
       image: 'maykinmedia/open-product:1.5.0',
