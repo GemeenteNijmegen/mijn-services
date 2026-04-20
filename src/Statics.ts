@@ -127,4 +127,8 @@ export class Statics {
     return `/${Statics.projectName}/internal/vtb/${instanceId}/credentials`;
   }
 
+  static databaseCredentialsName(dbName: string) {
+    return `/${Statics.projectName}/internal/database/${dbName}/credentials`;
+  }
+
 }

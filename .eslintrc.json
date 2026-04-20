@@ -153,8 +153,8 @@
         "devDependencies": [
           "**/test/**",
           "**/build-tools/**",
-          "src/custom-resources/create-database-per-user/create-database-per-user.lambda.ts",
           "src/custom-resources/create-databases/create-databases.lambda.ts",
+          "src/custom-resources/database/databaseCustomResource.lambda.ts",
           "src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts",
           "src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts",
           "src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts",

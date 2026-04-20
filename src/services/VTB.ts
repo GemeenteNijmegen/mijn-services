@@ -35,6 +35,7 @@ export class VtbService extends Construct {
   private readonly serviceFactory: EcsServiceFactory;
   private readonly distribution: SubdomainCloudfront;
   private readonly databaseCredentials: ISecret;
+  private readonly databaseUserCredentials: ISecret;
   private readonly superuserCredentials: ISecret;
   private readonly secretKey: ISecret;
 
@@ -51,7 +52,13 @@ export class VtbService extends Construct {
       subdomain: this.props.serviceConfiguration.subdomain,
     });
 
-    this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
+    // DB that has a individual user for this service (new style)
+    const newDatabaseName = `${this.props.serviceConfiguration.databaseName}-database`;
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
+
+    this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials); // Old style
+
     this.superuserCredentials = new SecretParameter(this, 'superuser-credentials', {
       description: `VTB superuser credentials for instance ${id}`,
       secretName: Statics.vtbCredentialsSecretName(id),
@@ -75,7 +82,7 @@ export class VtbService extends Construct {
 
   private getEnvironmentConfiguration() {
     const cacheHost = this.props.cache.db.attrRedisEndpointAddress + ':' + this.props.cache.db.attrRedisEndpointPort + '/';
-    const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
+    const trustedDomains = [...(this.props.alternativeDomainNames ?? [])];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
     return {
@@ -112,6 +119,8 @@ export class VtbService extends Construct {
     return {
       DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
       DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+      DB_PASSWORD_2: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+      DB_USER_2: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
       DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.superuserCredentials, 'username'),
       DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.superuserCredentials, 'password'),
@@ -153,7 +162,7 @@ export class VtbService extends Construct {
       domain: this.props.serviceConfiguration.subdomain + '.' + this.props.hostedzone.zoneName,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Used to call src/manage.py (see open-vtb docs).
       },
     });
     this.setupConnectivity('main', service.connections.securityGroups);
@@ -220,6 +229,7 @@ export class VtbService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
+    this.databaseUserCredentials.grantRead(role);
     this.superuserCredentials.grantRead(role);
     this.secretKey.grantRead(role);
   }

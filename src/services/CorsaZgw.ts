@@ -224,7 +224,6 @@ export class CorsaZgwService extends Construct {
     // Allow execute commands using ECS console
     this.serviceFactory.allowExecutingCommands(task);
 
-
     // Configuration container
     const initContainer = task.addContainer('setup', {
       image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
@@ -274,7 +273,7 @@ export class CorsaZgwService extends Construct {
       domain: `${CorsaZgwService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Used to gain access to the Laravel CLI in the container for management of DB etc.
       },
       // healthCheckPath: '/health', // TODO Not configurabel yet while using subdomain (this is the correct path though)
     });
@@ -338,7 +337,7 @@ export class CorsaZgwService extends Construct {
       task: task,
       options: {
         desiredCount: 1,
-        enableExecuteCommand: true,
+        enableExecuteCommand: true, // Used to gain access to the Laravel CLI in the container for management of DB etc.
       },
     });
     this.setupConnectivity('corsa-zgw-worker', service.connections.securityGroups);

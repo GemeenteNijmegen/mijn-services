@@ -207,6 +207,12 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         },
       },
     ],
+    ObjectNotificationServices: [
+      {
+        configKey: 'esfTaak',
+        scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+      },
+    ],
   },
   main: {
     branch: 'main',
@@ -259,6 +265,12 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         memory: '1024',
       },
     },
+    // ObjectNotificationServices: [
+    //   {
+    //     configKey: 'esfTaak',
+    //     scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+    //   },
+    // ],
   },
 };
 
