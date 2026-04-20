@@ -40,7 +40,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       apiVersion: '1.3.1',
     },
     objecttypesService: {
-      image: 'maykinmedia/objecttypes-api:3.6.0',
+      image: 'maykinmedia/objecttypes-api:3.4.2',
       logLevel: 'DEBUG',
       debug: true,
       useNewDatabase: true,
