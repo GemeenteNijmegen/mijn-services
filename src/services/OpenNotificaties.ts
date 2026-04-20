@@ -178,7 +178,7 @@ export class OpenNotificatiesService extends Construct {
         streamPrefix: 'rabbit-mq',
         logGroup: this.logs,
       }),
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       portMappings: [{
         containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
       }],
@@ -229,7 +229,7 @@ export class OpenNotificatiesService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -278,7 +278,7 @@ export class OpenNotificatiesService extends Construct {
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -315,7 +315,7 @@ export class OpenNotificatiesService extends Construct {
         command: ['CMD-SHELL', 'celery', 'inspect', 'ping', '--app', 'nrc'],
         interval: Duration.seconds(10),
       },
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({

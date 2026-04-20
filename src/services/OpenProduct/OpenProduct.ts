@@ -220,7 +220,7 @@ export class OpenProductService extends Construct {
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({

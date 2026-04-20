@@ -145,7 +145,7 @@ export class VtbService extends Construct {
         startPeriod: Duration.seconds(30),
       },
       portMappings: [{ containerPort: this.props.service.port, hostPort: this.props.service.port, protocol: Protocol.TCP }],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({ streamPrefix: 'main', logGroup: this.logs }),
@@ -168,41 +168,6 @@ export class VtbService extends Construct {
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
-  }
-
-  private setupCeleryService() {
-    const VOLUME_NAME = 'temp';
-    const WRITABLE_DIRS = ['/tmp', '/app/tmp', '/app/log'];
-    const task = this.serviceFactory.createTaskDefinition('celery', {
-      volumes: [{ name: VOLUME_NAME }],
-      cpu: this.props.serviceConfiguration.celeryTaskSize?.cpu ?? '256',
-      memoryMiB: this.props.serviceConfiguration.celeryTaskSize?.memory ?? '512',
-    });
-
-    const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
-      healthCheck: {
-        command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(60),
-      },
-      readonlyRootFilesystem: true,
-      secrets: this.getSecretConfiguration(),
-      environment: this.getEnvironmentConfiguration(),
-      logging: new AwsLogDriver({ streamPrefix: 'celery', logGroup: this.logs }),
-      command: ['/celery_worker.sh'],
-    });
-    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, ...WRITABLE_DIRS);
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, ...WRITABLE_DIRS);
-
-    const service = this.serviceFactory.createService({
-      task,
-      path: undefined,
-      id: 'celery',
-      options: { desiredCount: 0 },
-    });
-    this.setupConnectivity('celery', service.connections.securityGroups);
-    this.allowAccessToSecrets(service.taskDefinition.executionRole!);
   }
 
   private logGroup() {
