@@ -255,7 +255,10 @@ export class CorsaZgwService extends Construct {
         logGroup: this.logs,
       }),
       secrets: this.getEnvironmentSecrets(),
-      environment: this.getEnvironmentVariables(),
+      environment: {
+        ...this.getEnvironmentVariables(),
+        RUN_SCHEDULER: 'true', // Only run the corn in the main service container
+      }
     });
 
     // Main service container
