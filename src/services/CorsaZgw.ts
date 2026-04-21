@@ -155,6 +155,11 @@ export class CorsaZgwService extends Construct {
       ESB_CA_CERT: Secret.fromSsmParameter(this.corsaMtlsCaBundle),
       ZAAKDMS_URL: Secret.fromSsmParameter(this.corsaEndpoint),
 
+
+      // Slack webhook
+      SLACK_WEBHOOK_URL: Secret.fromSsmParameter(this.slackWebhookUrl),
+      SLACK_WEBHOOK_CHANNEL: Secret.fromSsmParameter(this.slackWebhookUrl),
+
     };
   }
 
@@ -203,9 +208,6 @@ export class CorsaZgwService extends Construct {
       REDIS_PORT: this.props.redis.db.attrRedisEndpointPort,
       REDIS_DB: this.props.cacheChannel.toString(),
       QUEUE_CONNECTION: 'redis',
-
-      SLACK_WEBHOOK_URL: this.slackWebhookUrl.stringValue,
-      SLACK_WEBHOOK_CHANNEL: this.slackWebhookUrl.stringValue,
 
       // Notifications scheduler settings (defaults)
       // NOTIFICATION_BATCH_TIMEOUT: '60',
