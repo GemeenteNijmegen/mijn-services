@@ -63,7 +63,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     corsaZgwService: {
       logLevel: 'DEBUG',
       debug: true,
-      imageTag: '00a3e7ceb4979a9b2cd13f0963e560142fcd1ad5',
+      imageTag: '409e5b493edee2008f9650d4ec0967c29d456689',
     },
     vtbServices: [
       {
