@@ -178,6 +178,11 @@ export class CorsaZgwService extends Construct {
       LOG_DEPRECATIONS_CHANNEL: 'null',
       LOG_LEVEL: this.props.serviceConfiguration.logLevel.toLocaleLowerCase(),
 
+
+      // ZaakDMS logging
+      ZAAKDMS_LOG_CHANNEL: 'stderr',
+      ZAAKDMS_LOG_LEVEL: this.props.serviceConfiguration.logLevel.toLocaleLowerCase(),
+
       // Cache store
       CACHE_STORE: 'file',
 
