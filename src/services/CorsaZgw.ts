@@ -58,6 +58,8 @@ export class CorsaZgwService extends Construct {
   private readonly corsaEndpoint: StringParameter;
   private readonly openZaakCatalogusUrl: StringParameter;
   private readonly openZaakUrl: StringParameter;
+  private readonly slackWebhookUrl: StringParameter;
+  private readonly slackWebhookChannel: StringParameter;
 
   constructor(scope: Construct, id: string, props: CorsaZgwProps) {
     super(scope, id);
@@ -97,6 +99,15 @@ export class CorsaZgwService extends Construct {
     this.corsaEndpoint = new StringParameter(this, 'corsa-endpoint', {
       stringValue: '-',
       description: 'Corsa-ZGW Corsa - endpoint',
+    });
+
+    this.slackWebhookUrl = new StringParameter(this, 'slack-webhook-url', {
+      stringValue: '-',
+      description: 'Corsa-ZGW Corsa - Slack webhook url',
+    });
+    this.slackWebhookChannel = new StringParameter(this, 'slack-webhook-channel', {
+      stringValue: '-',
+      description: 'Corsa-ZGW Corsa - Slack webhook channel (must include #)',
     });
 
     this.credentialsForConnectingToOpenZaak = new SecretParameter(this, 'open-zaak', {
@@ -193,6 +204,8 @@ export class CorsaZgwService extends Construct {
       REDIS_DB: this.props.cacheChannel.toString(),
       QUEUE_CONNECTION: 'redis',
 
+      SLACK_WEBHOOK_URL: this.slackWebhookUrl.stringValue,
+      SLACK_WEBHOOK_CHANNEL: this.slackWebhookUrl.stringValue,
 
       // Notifications scheduler settings (defaults)
       // NOTIFICATION_BATCH_TIMEOUT: '60',
