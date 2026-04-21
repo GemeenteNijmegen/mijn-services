@@ -255,10 +255,7 @@ export class CorsaZgwService extends Construct {
         logGroup: this.logs,
       }),
       secrets: this.getEnvironmentSecrets(),
-      environment: {
-        ...this.getEnvironmentVariables(),
-        RUN_SCHEDULER: 'true', // Only run the corn in the main service container
-      }
+      environment: this.getEnvironmentVariables(),
     });
 
     // Main service container
@@ -278,7 +275,10 @@ export class CorsaZgwService extends Construct {
       ],
       readonlyRootFilesystem: false, // TODO make this true for security reasons
       secrets: this.getEnvironmentSecrets(),
-      environment: this.getEnvironmentVariables(),
+      environment: {
+        ...this.getEnvironmentVariables(),
+        RUN_SCHEDULER: 'true', // Only run the corn in the main service container
+      },
       essential: true,
       logging: new AwsLogDriver({
         streamPrefix: 'corsa-zgw',
