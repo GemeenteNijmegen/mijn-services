@@ -66,3 +66,20 @@ Deze negeer ik nu omdat:
 - What is spatial_ref_sys used for? It's a lookup table that's part of the PostGIS standard. It stores coordinate reference systems (CRS) — also called spatial reference systems. Deze error kunnen we dus negeren in RDS omdat dit wordt aangemaakt door de postgis extentie en niet wordt geimporteerd in de DB.
 
 
+# Fase 2 - Importeren objecttypen defenities
+Draai in de objecten API het commando:
+`python src/manage.py import_objecttypes <objecttypen-service-name>`
+Waar de naam de naam is van de service configuratie voor de objecttypen api in de objects applicatie.
+
+
+# Fase 3 - Upgraden open-objecten
+Nu alles geimporteerd is in 3.6.0 gaan we de objecten api zelf upgraden.
+Nu worden de objecttypen gebruik die we in fase 2 hebben geimporteerd.
+
+In de Configuration.ts doe de volgende aanpassing:
+```diff
+- image: 'maykinmedia/objects-api:3.6.0'
++ image: 'maykinmedia/open-object:4.0.0'
+```
+
+De image is dus verplaatst en objecttypen en objecten zijn samengevoegd tot open-object.
