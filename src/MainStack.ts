@@ -214,7 +214,7 @@ export class MainStack extends Stack {
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 8080,
+        port: 8000, // Note: we cannot set the port due the startup script in the default container.
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.objecttypesService,
@@ -242,7 +242,7 @@ export class MainStack extends Stack {
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 8080,
+        port: 8000, // Note: we cannot set the port due the startup script in the default container.
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.objectsService,
