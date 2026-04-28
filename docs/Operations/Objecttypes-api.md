@@ -14,8 +14,14 @@ Release notes waar we iets mee moeten
 - 3.6.0 - Command om objecttypes te importeren - https://open-object.readthedocs.io/en/latest/manual/migration.html#objecttype-migration Verplichte versie upgrade!
 - 4.0.0 - Removes external objecttypes support!
 
-## Database migratie
+## Fase 1 - Database migratie
+We hebben databases aangemaakt die een unique user hebben. Niet de admin user. Die worden in CDK aangemaakt, deze stap is het migreren van de originele database naar deze nieuwe database.
+Dit betekent dus:
+- Dump van DB maken
+- Dump in nieuwe DB inladen
+- Credentials en db-naam aanpassen in task definition
 
+### Objecttypes API
 ```bash
 sudo dnf remove postgresql15
 sudo dnf install postgresql17
@@ -25,7 +31,18 @@ psql -h $ENDPOINT -U mijn_services -d objecttypes-database -c "CREATE EXTENSION 
 pg_restore -h $ENDPOINT -U mijn_services -d objecttypes-database --no-owner --role=objecttypes-database -F c objecttypes.dump
 ```
 
-## Starten op nieuwe DB
+### Objects API
+```bash
+sudo dnf remove postgresql15
+sudo dnf install postgresql17
+export ENDPOINT=mijn-services-database-st-databasedbinstance7bee76-i7gobfwu9mrz.cby22yowugui.eu-central-1.rds.amazonaws.com
+pg_dump -h $ENDPOINT -U mijn_services -d objects -Fc -f objects.dump
+psql -h $ENDPOINT -U mijn_services -d objects-database -c "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;"
+pg_restore -h $ENDPOINT -U mijn_services -d objects-database --no-owner --role=objects-database -F c objects.dump
+```
+
+
+### Starten op nieuwe DB
 Handmatig aanpassen DB_*_NEW env vars in task defintion om te testen.
 - DB_NAME -> DB_NAME_OLD
 - DB_NAME_NEW -> DB_NAME
@@ -38,18 +55,6 @@ Updaten service naar laatste taskdefinition ID & valideren of de service start
 Ik heb een feature flag geimplementeerd om de DB_NAME, DB_USER en DB_PASSWORD env vars te toggelen tussen de oude en nieuwe DB. Dit zorgt ervoor dat de change met secrets overal uitgerold kan worden en we per omgeving en per service kunnen toggelen waar nodig. 
 
 Deze is omgezet nu, de service draait op de nieuwe DB.
-
-
-
-## Objects API
-```bash
-sudo dnf remove postgresql15
-sudo dnf install postgresql17
-export ENDPOINT=mijn-services-database-st-databasedbinstance7bee76-i7gobfwu9mrz.cby22yowugui.eu-central-1.rds.amazonaws.com
-pg_dump -h $ENDPOINT -U mijn_services -d objects -Fc -f objects.dump
-psql -h $ENDPOINT -U mijn_services -d objects-database -c "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;"
-pg_restore -h $ENDPOINT -U mijn_services -d objects-database --no-owner --role=objects-database -F c objects.dump
-```
 
 ### Error on spatial_ref_sys:
 Ik zie de error:
@@ -66,13 +71,37 @@ Deze negeer ik nu omdat:
 - What is spatial_ref_sys used for? It's a lookup table that's part of the PostGIS standard. It stores coordinate reference systems (CRS) — also called spatial reference systems. Deze error kunnen we dus negeren in RDS omdat dit wordt aangemaakt door de postgis extentie en niet wordt geimporteerd in de DB.
 
 
-# Fase 2 - Importeren objecttypen defenities
+
+
+# Fase 2 - Upgraden containers
+Nu de DB gemigreerd is kunnen we de upgrades uitvoeren
+
+## Objecten API
+In de Configuration.ts doe de volgende aanpassing en rol uit.
+```diff
+- image: 'maykinmedia/objecttypes-api:3.0.0'
++ image: 'maykinmedia/objecttypes-api:3.6.0'
+```
+
+## Objecttypen API
+In de Configuration.ts doe de volgende aanpassing en rol uit.
+```diff
+- image: 'maykinmedia/objecttypes-api:3.0.0'
++ image: 'maykinmedia/objecttypes-api:3.4.2'
+```
+
+
+
+
+# Fase 3 - Importeren objecttypen defenities
 Draai in de objecten API het commando:
 `python src/manage.py import_objecttypes <objecttypen-service-name>`
 Waar de naam de naam is van de service configuratie voor de objecttypen api in de objects applicatie.
 
 
-# Fase 3 - Upgraden open-objecten
+
+
+# Fase 3 - Upgraden naar open-object (objects-api + objecttypen-api in een)
 Nu alles geimporteerd is in 3.6.0 gaan we de objecten api zelf upgraden.
 Nu worden de objecttypen gebruik die we in fase 2 hebben geimporteerd.
 
@@ -83,3 +112,13 @@ In de Configuration.ts doe de volgende aanpassing:
 ```
 
 De image is dus verplaatst en objecttypen en objecten zijn samengevoegd tot open-object.
+
+Na deze upgrade is de objecttypes-api niet meer nodig en zijn we op de laatste versie.
+
+
+
+
+## TODOs
+TODO: Healthcehck grace period op 5 minuten zetten, dan kan de migratie rustig doorlopen voor de container wordt afgeschoten
+TODO: Kijken naar hard coded API-Version header in cloudfront
+TODO: Uitzoeken SITE_DOMAIN environment variable nodig voor starten main conainer

@@ -84,7 +84,9 @@ export class OpenZaakService extends Construct {
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'True',
-      UWSGI_PORT: this.props.service.port.toString(),
+
+      // UWSGI_PORT: this.props.service.port.toString(), // Contiainer fails to start when we set a port (wsgi stuff in struct mode).
+      // The default port however 8080, so we can safely remove this envvar.
 
       LOG_LEVEL: this.props.openZaakConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),

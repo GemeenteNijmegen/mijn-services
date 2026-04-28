@@ -226,7 +226,7 @@ export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration, Dat
   debug?: boolean;
 }
 
-export interface ObjectsConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
+export interface ObjectsConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle, EnvironmentReference {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -482,6 +482,14 @@ export interface DatabaseMigrationToggle {
    * @default - false
    */
   useNewDatabase?: boolean;
+}
+
+
+export interface EnvironmentReference {
+  /**
+   * Environment variables for this services
+   */
+  environment?: Record<string, string>;
 }
 
 
