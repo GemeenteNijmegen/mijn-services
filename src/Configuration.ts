@@ -38,6 +38,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
       apiVersion: '1.3.1',
+      celeryTaskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
     objecttypesService: {
       image: 'maykinmedia/objecttypes-api:3.4.2',
