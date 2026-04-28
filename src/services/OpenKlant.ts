@@ -25,6 +25,7 @@ export interface OpenKlantServiceProps {
   alternativeDomainNames?: string[];
   key: Key;
   serviceConfiguration: OpenKlantConfiguration;
+  dockerhubCredentials?: ISecret;
 }
 
 export class OpenKlantService extends Construct {
@@ -128,7 +129,9 @@ export class OpenKlantService extends Construct {
     this.serviceFactory.allowExecutingCommands(task);
 
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.image),
+      image: ContainerImage.fromRegistry(this.props.image, {
+        credentials: this.props.dockerhubCredentials
+      }),
       healthCheck: {
         command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         interval: Duration.seconds(10),
@@ -179,7 +182,9 @@ export class OpenKlantService extends Construct {
 
     // Setup celery container
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.image),
+      image: ContainerImage.fromRegistry(this.props.image, {
+        credentials: this.props.dockerhubCredentials
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),

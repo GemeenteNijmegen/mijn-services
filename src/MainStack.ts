@@ -3,6 +3,7 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { ISecret, Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { Configurable, Configuration } from './ConfigurationInterfaces';
@@ -40,6 +41,8 @@ export class MainStack extends Stack {
   private readonly cache: CacheDatabase;
   private readonly key: Key;
   private readonly openConfigStore: OpenConfigurationStore;
+  private readonly dockerhubCredentials: ISecret;
+
   constructor(scope: Construct, id: string, props: MainStackProps) {
     super(scope, id, props);
     this.configuration = props.configuration;
@@ -49,6 +52,7 @@ export class MainStack extends Stack {
     this.key = this.setupGeneralEncryptionKey();
     this.hostedzone = this.importHostedzone();
     this.vpc = new GemeenteNijmegenVpc(this, 'vpc');
+    this.dockerhubCredentials = this.setupDockerhubCredentials();
 
     this.cache = new CacheDatabase(this, 'cache-database', {
       vpc: this.vpc.vpc,
@@ -107,6 +111,7 @@ export class MainStack extends Stack {
       logLevel: this.configuration.openklant.logLevel,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
       serviceConfiguration: this.configuration.openklant,
+      dockerhubCredentials: this.dockerhubCredentials,
       path: 'open-klant',
       service: {
         cluster: platform.cluster,
@@ -248,6 +253,7 @@ export class MainStack extends Stack {
       serviceConfiguration: this.configuration.objectsService,
     });
   }
+
   private keyCloakService(platform: ContainerPlatform) {
     if (!this.configuration.keyCloackService) {
       console.warn(
@@ -449,6 +455,19 @@ export class MainStack extends Stack {
         this,
         Statics.ssmAccountRootHostedZoneName,
       ),
+    });
+  }
+
+  private setupDockerhubCredentials() {
+    return new Secret(this, 'dockerhub-credentials', {
+      description: "mijn-services dockerhub credentials",
+      generateSecretString: {
+        secretStringTemplate: JSON.stringify({
+          username: 'username',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmDockerhubCredentials
     });
   }
 
