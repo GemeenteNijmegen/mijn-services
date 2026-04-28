@@ -72,6 +72,10 @@ export class ObjectsService extends Construct {
     trustedDomains.push(this.props.hostedzone.zoneName);
 
     const env: Record<string, string> = {
+
+      // Add env vars from service config
+      ...this.props.serviceConfiguration.environment,
+
       DJANGO_SETTINGS_MODULE: 'objects.conf.docker',
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
