@@ -50,6 +50,9 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
       useNewDatabase: true,
+      environment: {
+        SITE_DOMAIN: 'https://mijn-services-dev.csp-nijmegen.nl/objects',
+      },
       taskSize: {
         cpu: '512',
         memory: '1024',
