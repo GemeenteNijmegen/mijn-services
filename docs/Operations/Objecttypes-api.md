@@ -116,9 +116,3 @@ De image is dus verplaatst en objecttypen en objecten zijn samengevoegd tot open
 Na deze upgrade is de objecttypes-api niet meer nodig en zijn we op de laatste versie.
 
 
-
-
-## TODOs
-TODO: Healthcehck grace period op 5 minuten zetten, dan kan de migratie rustig doorlopen voor de container wordt afgeschoten
-TODO: Kijken naar hard coded API-Version header in cloudfront
-TODO: Uitzoeken SITE_DOMAIN environment variable nodig voor starten main conainer
