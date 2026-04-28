@@ -66,6 +66,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       image: 'maykinmedia/open-product:1.5.0',
       logLevel: 'DEBUG',
       debug: true,
+      celeryTaskSize: {
+        memory: '1024',
+        cpu: '512',
+      }
     },
     corsaZgwService: {
       logLevel: 'DEBUG',
