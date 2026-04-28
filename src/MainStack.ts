@@ -138,6 +138,7 @@ export class MainStack extends Stack {
       cacheDatabaseIndex: 3,
       cacheDatabaseIndexCelery: 4,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
+      dockerhubCredentials: this.dockerhubCredentials,
       path: 'open-notificaties',
       service: {
         cluster: platform.cluster,
@@ -165,6 +166,7 @@ export class MainStack extends Stack {
       cacheDatabaseIndex: 5,
       cacheDatabaseIndexCelery: 6,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
+      dockerhubCredentials: this.dockerhubCredentials,
       path: 'open-zaak',
       service: {
         cluster: platform.cluster,
@@ -187,6 +189,7 @@ export class MainStack extends Stack {
       new OMCService(this, omc.cdkId, {
         omcConfiguration: omc,
         key: this.key,
+        dockerhubCredentials: this.dockerhubCredentials,
         service: {
           cluster: platform.cluster,
           link: platform.vpcLink,
@@ -388,6 +391,7 @@ export class MainStack extends Stack {
       cacheDatabaseIndex: 11,
       cacheDatabaseIndexCelery: 12,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
+      dockerhubCredentials: this.dockerhubCredentials,
       path: 'open-product',
       service: {
         cluster: platform.cluster,
@@ -415,6 +419,8 @@ export class MainStack extends Stack {
         cacheDatabaseIndex: 14 + index * 2,
         cacheDatabaseIndexCelery: 15 + index * 2,
         alternativeDomainNames: this.configuration.alternativeDomainNames,
+        dockerhubCredentials: this.dockerhubCredentials,
+
         serviceConfiguration: vtb,
         service: {
           cluster: platform.cluster,

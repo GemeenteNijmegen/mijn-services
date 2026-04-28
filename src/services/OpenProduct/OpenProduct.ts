@@ -26,6 +26,7 @@ export interface OpenProductServiceProps {
   key: Key;
   openProductConfiguration: OpenProductServicesConfiguration;
   openConfigStore: OpenConfigurationStore;
+  readonly dockerhubCredentials: ISecret;
 }
 
 export class OpenProductService extends Construct {
@@ -157,7 +158,9 @@ export class OpenProductService extends Construct {
 
     // Main service container (3th to run)
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       // healthCheck: {
       //   command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
       //   interval: Duration.seconds(10),
@@ -224,7 +227,9 @@ export class OpenProductService extends Construct {
     });
 
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),

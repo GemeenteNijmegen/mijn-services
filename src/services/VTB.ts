@@ -26,6 +26,7 @@ export interface VtbServiceProps {
   readonly alternativeDomainNames?: string[];
   readonly key: Key;
   readonly serviceConfiguration: VtbConfiguration;
+  readonly dockerhubCredentials: ISecret;
 }
 
 export class VtbService extends Construct {
@@ -137,7 +138,9 @@ export class VtbService extends Construct {
     });
 
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         command: ['CMD-SHELL', 'exit 0'],

@@ -25,6 +25,7 @@ export interface OpenZaakServiceProps {
   alternativeDomainNames?: string[];
   key: Key;
   openZaakConfiguration: OpenZaakConfiguration;
+  readonly dockerhubCredentials: ISecret;
 }
 
 export class OpenZaakService extends Construct {
@@ -187,7 +188,9 @@ export class OpenZaakService extends Construct {
 
     // 3th Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
         // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
@@ -247,7 +250,9 @@ export class OpenZaakService extends Construct {
     });
 
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
