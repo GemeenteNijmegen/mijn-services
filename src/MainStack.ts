@@ -461,14 +461,14 @@ export class MainStack extends Stack {
 
   private setupDockerhubCredentials() {
     return new Secret(this, 'dockerhub-credentials', {
-      description: "mijn-services dockerhub credentials",
+      description: 'mijn-services dockerhub credentials',
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
           username: 'username',
         }),
         generateStringKey: 'password',
       },
-      secretName: Statics._ssmDockerhubCredentials
+      secretName: Statics._ssmDockerhubCredentials,
     });
   }
 
