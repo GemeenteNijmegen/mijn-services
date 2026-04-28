@@ -27,6 +27,7 @@ export interface ObjectsServiceProps {
    */
   readonly serviceConfiguration: ObjectsConfiguration;
   readonly key: Key;
+  readonly dockerhubCredentials: ISecret;
 }
 
 export class ObjectsService extends Construct {
@@ -158,7 +159,9 @@ export class ObjectsService extends Construct {
 
     // Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         command: ['CMD-SHELL', 'exit 0'], // Disable for now as it keeps restarting.
@@ -217,7 +220,9 @@ export class ObjectsService extends Construct {
     });
 
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),

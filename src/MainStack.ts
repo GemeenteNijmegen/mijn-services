@@ -240,6 +240,7 @@ export class MainStack extends Stack {
       cacheDatabaseIndex: 9,
       cacheDatabaseIndexCelery: 10,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
+      dockerhubCredentials: this.dockerhubCredentials,
       path: 'objects',
       service: {
 
