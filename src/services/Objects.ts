@@ -97,6 +97,7 @@ export class ObjectsService extends Construct {
       SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // Celery
+      CELERY_BROKER_URL: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
       CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
       CELERY_LOGLEVEL: this.props.serviceConfiguration.logLevel,
       CELERY_WORKER_CONCURRENCY: '4',
