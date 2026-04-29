@@ -69,7 +69,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       celeryTaskSize: {
         memory: '1024',
         cpu: '512',
-      }
+      },
     },
     corsaZgwService: {
       logLevel: 'DEBUG',
