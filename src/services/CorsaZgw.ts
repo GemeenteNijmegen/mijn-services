@@ -58,6 +58,8 @@ export class CorsaZgwService extends Construct {
   private readonly corsaEndpoint: StringParameter;
   private readonly openZaakCatalogusUrl: StringParameter;
   private readonly openZaakUrl: StringParameter;
+  private readonly slackWebhookUrl: StringParameter;
+  private readonly slackWebhookChannel: StringParameter;
 
   constructor(scope: Construct, id: string, props: CorsaZgwProps) {
     super(scope, id);
@@ -97,6 +99,15 @@ export class CorsaZgwService extends Construct {
     this.corsaEndpoint = new StringParameter(this, 'corsa-endpoint', {
       stringValue: '-',
       description: 'Corsa-ZGW Corsa - endpoint',
+    });
+
+    this.slackWebhookUrl = new StringParameter(this, 'slack-webhook-url', {
+      stringValue: '-',
+      description: 'Corsa-ZGW Corsa - Slack webhook url',
+    });
+    this.slackWebhookChannel = new StringParameter(this, 'slack-webhook-channel', {
+      stringValue: '-',
+      description: 'Corsa-ZGW Corsa - Slack webhook channel (must include #)',
     });
 
     this.credentialsForConnectingToOpenZaak = new SecretParameter(this, 'open-zaak', {
@@ -144,6 +155,11 @@ export class CorsaZgwService extends Construct {
       ESB_CA_CERT: Secret.fromSsmParameter(this.corsaMtlsCaBundle),
       ZAAKDMS_URL: Secret.fromSsmParameter(this.corsaEndpoint),
 
+
+      // Slack webhook
+      SLACK_WEBHOOK_URL: Secret.fromSsmParameter(this.slackWebhookUrl),
+      SLACK_WEBHOOK_CHANNEL: Secret.fromSsmParameter(this.slackWebhookUrl),
+
     };
   }
 
@@ -178,6 +194,11 @@ export class CorsaZgwService extends Construct {
       LOG_DEPRECATIONS_CHANNEL: 'null',
       LOG_LEVEL: this.props.serviceConfiguration.logLevel.toLocaleLowerCase(),
 
+
+      // ZaakDMS logging
+      ZAAKDMS_LOG_CHANNEL: 'stderr',
+      ZAAKDMS_LOG_LEVEL: this.props.serviceConfiguration.logLevel.toLocaleLowerCase(),
+
       // Cache store
       CACHE_STORE: 'file',
 
@@ -187,7 +208,6 @@ export class CorsaZgwService extends Construct {
       REDIS_PORT: this.props.redis.db.attrRedisEndpointPort,
       REDIS_DB: this.props.cacheChannel.toString(),
       QUEUE_CONNECTION: 'redis',
-
 
       // Notifications scheduler settings (defaults)
       // NOTIFICATION_BATCH_TIMEOUT: '60',
@@ -255,7 +275,10 @@ export class CorsaZgwService extends Construct {
       ],
       readonlyRootFilesystem: false, // TODO make this true for security reasons
       secrets: this.getEnvironmentSecrets(),
-      environment: this.getEnvironmentVariables(),
+      environment: {
+        ...this.getEnvironmentVariables(),
+        RUN_SCHEDULER: 'true', // Only run the corn in the main service container
+      },
       essential: true,
       logging: new AwsLogDriver({
         streamPrefix: 'corsa-zgw',

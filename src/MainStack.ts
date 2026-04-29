@@ -3,6 +3,7 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { ISecret, Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { Configurable, Configuration } from './ConfigurationInterfaces';
@@ -40,6 +41,8 @@ export class MainStack extends Stack {
   private readonly cache: CacheDatabase;
   private readonly key: Key;
   private readonly openConfigStore: OpenConfigurationStore;
+  private readonly dockerhubCredentials: ISecret;
+
   constructor(scope: Construct, id: string, props: MainStackProps) {
     super(scope, id, props);
     this.configuration = props.configuration;
@@ -49,6 +52,7 @@ export class MainStack extends Stack {
     this.key = this.setupGeneralEncryptionKey();
     this.hostedzone = this.importHostedzone();
     this.vpc = new GemeenteNijmegenVpc(this, 'vpc');
+    this.dockerhubCredentials = this.setupDockerhubCredentials();
 
     this.cache = new CacheDatabase(this, 'cache-database', {
       vpc: this.vpc.vpc,
@@ -107,6 +111,7 @@ export class MainStack extends Stack {
       logLevel: this.configuration.openklant.logLevel,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
       serviceConfiguration: this.configuration.openklant,
+      dockerhubCredentials: this.dockerhubCredentials,
       path: 'open-klant',
       service: {
         cluster: platform.cluster,
@@ -133,13 +138,14 @@ export class MainStack extends Stack {
       cacheDatabaseIndex: 3,
       cacheDatabaseIndexCelery: 4,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
+      dockerhubCredentials: this.dockerhubCredentials,
       path: 'open-notificaties',
       service: {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 8080,
+        port: 8000,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       openNotificationsConfiguration: this.configuration.openNotificaties,
@@ -160,13 +166,14 @@ export class MainStack extends Stack {
       cacheDatabaseIndex: 5,
       cacheDatabaseIndexCelery: 6,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
+      dockerhubCredentials: this.dockerhubCredentials,
       path: 'open-zaak',
       service: {
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 8080,
+        port: 8000,
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       openZaakConfiguration: this.configuration.openZaak,
@@ -182,6 +189,7 @@ export class MainStack extends Stack {
       new OMCService(this, omc.cdkId, {
         omcConfiguration: omc,
         key: this.key,
+        dockerhubCredentials: this.dockerhubCredentials,
         service: {
           cluster: platform.cluster,
           link: platform.vpcLink,
@@ -214,7 +222,7 @@ export class MainStack extends Stack {
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 8080,
+        port: 8000, // Note: we cannot set the port due the startup script in the default container.
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.objecttypesService,
@@ -235,6 +243,7 @@ export class MainStack extends Stack {
       cacheDatabaseIndex: 9,
       cacheDatabaseIndexCelery: 10,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
+      dockerhubCredentials: this.dockerhubCredentials,
       path: 'objects',
       service: {
 
@@ -242,12 +251,13 @@ export class MainStack extends Stack {
         link: platform.vpcLink,
         namespace: platform.namespace,
         loadbalancer: platform.loadBalancer,
-        port: 8080,
+        port: 8000, // Note: we cannot set the port due the startup script in the default container.
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.objectsService,
     });
   }
+
   private keyCloakService(platform: ContainerPlatform) {
     if (!this.configuration.keyCloackService) {
       console.warn(
@@ -381,6 +391,7 @@ export class MainStack extends Stack {
       cacheDatabaseIndex: 11,
       cacheDatabaseIndexCelery: 12,
       alternativeDomainNames: this.configuration.alternativeDomainNames,
+      dockerhubCredentials: this.dockerhubCredentials,
       path: 'open-product',
       service: {
         cluster: platform.cluster,
@@ -408,6 +419,8 @@ export class MainStack extends Stack {
         cacheDatabaseIndex: 14 + index * 2,
         cacheDatabaseIndexCelery: 15 + index * 2,
         alternativeDomainNames: this.configuration.alternativeDomainNames,
+        dockerhubCredentials: this.dockerhubCredentials,
+
         serviceConfiguration: vtb,
         service: {
           cluster: platform.cluster,
@@ -449,6 +462,19 @@ export class MainStack extends Stack {
         this,
         Statics.ssmAccountRootHostedZoneName,
       ),
+    });
+  }
+
+  private setupDockerhubCredentials() {
+    return new Secret(this, 'dockerhub-credentials', {
+      description: 'mijn-services dockerhub credentials',
+      generateSecretString: {
+        secretStringTemplate: JSON.stringify({
+          username: 'username',
+        }),
+        generateStringKey: 'password',
+      },
+      secretName: Statics._ssmDockerhubCredentials,
     });
   }
 

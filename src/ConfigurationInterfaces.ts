@@ -163,7 +163,7 @@ export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, Celer
   debug?: boolean;
 }
 
-export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -187,7 +187,7 @@ export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration
   persitNotifications?: boolean;
 }
 
-export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -210,7 +210,7 @@ export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, Celery
   apiVersion: string;
 }
 
-export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration {
+export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -226,7 +226,7 @@ export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration {
   debug?: boolean;
 }
 
-export interface ObjectsConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+export interface ObjectsConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle, EnvironmentReference {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -439,7 +439,7 @@ export interface GZACConfiguration {
   debug?: boolean;
 }
 
-export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
+export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Open Product imagetag
    */
@@ -474,6 +474,22 @@ export interface CeleryTaskSizeConfiguration {
     cpu: string;
     memory: string;
   };
+}
+
+export interface DatabaseMigrationToggle {
+  /**
+   * Use the new database + credentials when this flag is true
+   * @default - false
+   */
+  useNewDatabase?: boolean;
+}
+
+
+export interface EnvironmentReference {
+  /**
+   * Environment variables for this services
+   */
+  environment?: Record<string, string>;
 }
 
 

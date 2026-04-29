@@ -25,6 +25,7 @@ export interface OpenZaakServiceProps {
   alternativeDomainNames?: string[];
   key: Key;
   openZaakConfiguration: OpenZaakConfiguration;
+  readonly dockerhubCredentials: ISecret;
 }
 
 export class OpenZaakService extends Construct {
@@ -33,6 +34,7 @@ export class OpenZaakService extends Construct {
   private readonly props: OpenZaakServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
+  private readonly databaseUserCredentials: ISecret;
   private readonly openZaakCredentials: ISecret;
   private readonly secretKey: ISecret;
   private readonly clientCredentialsNotificationsZaak: ISecret;
@@ -45,6 +47,12 @@ export class OpenZaakService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+    // DB that has a individual user for this service (new style)
+    const newDatabaseName = `${Statics.databaseOpenZaak}-database`;
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
+
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.openZaakCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenZaakCredentials);
@@ -68,9 +76,8 @@ export class OpenZaakService extends Construct {
     const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
-    return {
+    const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'openzaak.conf.docker',
-      DB_NAME: Statics.databaseOpenZaak,
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
@@ -78,7 +85,9 @@ export class OpenZaakService extends Construct {
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'True',
-      UWSGI_PORT: this.props.service.port.toString(),
+
+      // UWSGI_PORT: this.props.service.port.toString(), // Contiainer fails to start when we set a port (wsgi stuff in struct mode).
+      // The default port however 8080, so we can safely remove this envvar.
 
       LOG_LEVEL: this.props.openZaakConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
@@ -113,13 +122,20 @@ export class OpenZaakService extends Construct {
       DEMO_CLIENT_ID: 'demo-client',
       DEMO_SECRET: 'demo-secret',
     };
+
+    if (this.props.openZaakConfiguration.useNewDatabase == true) {
+      env.DB_NAME_OLD = Statics.databaseOpenZaak;
+      env.DB_NAME = Statics.databaseOpenZaak + '-database';
+    } else {
+      env.DB_NAME = Statics.databaseOpenZaak;
+      env.DB_NAME_NEW = Statics.databaseOpenZaak + '-database';
+    }
+
+    return env;
   }
 
   private getSecretConfiguration() {
-    const secrets = {
-      DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
-      DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-
+    let secrets = {
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
@@ -135,8 +151,26 @@ export class OpenZaakService extends Construct {
       NOTIF_OPENZAAK_SECRET: Secret.fromSecretsManager(this.clientCredentialsNotificationsZaak, 'secret'),
       OPENZAAK_NOTIF_CLIENT_ID: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'username'),
       OPENZAAK_NOTIF_SECRET: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'secret'),
+    } as Record<string, Secret>;
 
-    };
+    if (this.props.openZaakConfiguration.useNewDatabase === true) {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    } else {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    }
+
     return secrets;
   }
 
@@ -154,7 +188,9 @@ export class OpenZaakService extends Construct {
 
     // 3th Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
         // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
@@ -214,13 +250,16 @@ export class OpenZaakService extends Construct {
     });
 
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
-        command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
+        // command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
+        command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -293,6 +332,7 @@ export class OpenZaakService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
+    this.databaseUserCredentials.grantRead(role);
     this.openZaakCredentials.grantRead(role);
     this.secretKey.grantRead(role);
   }

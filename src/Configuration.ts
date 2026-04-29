@@ -38,26 +38,43 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
       apiVersion: '1.3.1',
+      celeryTaskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
     objecttypesService: {
-      image: 'maykinmedia/objecttypes-api:3.0.0',
+      image: 'maykinmedia/objecttypes-api:3.4.2',
       logLevel: 'DEBUG',
       debug: true,
+      useNewDatabase: true,
     },
     objectsService: {
-      image: 'maykinmedia/objects-api:3.0.0',
+      image: 'maykinmedia/open-object:4.0.0',
       logLevel: 'DEBUG',
       debug: true,
+      useNewDatabase: true,
+      environment: {
+        SITE_DOMAIN: 'https://mijn-services-dev.csp-nijmegen.nl/objects',
+      },
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
     openProductServices: {
       image: 'maykinmedia/open-product:1.5.0',
       logLevel: 'DEBUG',
       debug: true,
+      celeryTaskSize: {
+        memory: '1024',
+        cpu: '512',
+      },
     },
     corsaZgwService: {
       logLevel: 'DEBUG',
       debug: true,
-      imageTag: '1c0b54e2d2f22988d6a891e389b093c103873beb',
+      imageTag: 'af7cb9eda590f975323ef6b7479d08758ca46cf1',
     },
     vtbServices: [
       {
