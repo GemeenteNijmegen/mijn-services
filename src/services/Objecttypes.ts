@@ -213,7 +213,7 @@ export class ObjecttypesService extends Construct {
   private setupConnectivity(id: string, serviceSecurityGroups: ISecurityGroup[]) {
 
     const dbSecurityGroupId = StringParameter.valueForStringParameter(this, Statics._ssmDatabaseSecurityGroup);
-    const dbSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `db - security - group - ${id}`, dbSecurityGroupId);
+    const dbSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `db-security-group-${id}`, dbSecurityGroupId);
     const dbPort = StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort);
     serviceSecurityGroups.forEach(serviceSecurityGroup => {
       dbSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(dbPort)));
@@ -223,7 +223,7 @@ export class ObjecttypesService extends Construct {
     serviceSecurityGroups.forEach(serviceSecurityGroup => {
       dbSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(dbPort)));
       this.props.cache.db.vpcSecurityGroupIds?.forEach((cacheSecurityGroupId, index) => {
-        const cacheSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `cache - security - group - ${id} - ${index}`, cacheSecurityGroupId);
+        const cacheSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `cache-security-group-${id}-${index}`, cacheSecurityGroupId);
         cacheSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(cachePort)));
       });
     });
