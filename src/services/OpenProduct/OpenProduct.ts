@@ -4,7 +4,7 @@ import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { HealthCheck, IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
