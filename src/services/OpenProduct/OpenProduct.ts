@@ -4,7 +4,7 @@ import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { HealthCheck, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -233,8 +233,9 @@ export class OpenProductService extends Construct {
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         // command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'], // TODO enable after upgrading to latest
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(60),
+        interval: Duration.seconds(30),
+        startPeriod: Duration.seconds(300),
+        retries: 10,
       },
       readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
