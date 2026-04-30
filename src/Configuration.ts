@@ -9,6 +9,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     branch: 'development',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesDev,
+    useDockerhubCredentials: true,
     criticality: new Criticality('low'),
     cnameRecords: {
       _b528d6157c2d9a369bf7d7812881d466:
@@ -130,6 +131,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     branch: 'acceptance',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesAccp,
+    useDockerhubCredentials: true,
     criticality: new Criticality('medium'),
     alternativeDomainNames: ['mijn-services.accp.nijmegen.nl'],
     cnameRecords: {
@@ -235,6 +237,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     branch: 'main',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
+    useDockerhubCredentials: false, // TODO enable after secret is configured in prod.
     criticality: new Criticality('high'),
     alternativeDomainNames: ['mijn-services.nijmegen.nl'],
     cnameRecords: {

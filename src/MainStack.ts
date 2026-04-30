@@ -52,7 +52,12 @@ export class MainStack extends Stack {
     this.key = this.setupGeneralEncryptionKey();
     this.hostedzone = this.importHostedzone();
     this.vpc = new GemeenteNijmegenVpc(this, 'vpc');
-    this.dockerhubCredentials = this.setupDockerhubCredentials();
+
+    // Only set global when we want to actually use the credentials
+    const dockerhub = this.setupDockerhubCredentials();
+    if (props.configuration.useDockerhubCredentials) {
+      this.dockerhubCredentials = dockerhub;
+    }
 
     this.cache = new CacheDatabase(this, 'cache-database', {
       vpc: this.vpc.vpc,

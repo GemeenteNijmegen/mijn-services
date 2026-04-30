@@ -138,6 +138,13 @@ export interface Configuration {
 
   ObjectNotificationServices?: ObjectNotificationServiceConfiguration[];
 
+
+  /**
+   * Credentials are always created, this toggles if they are used
+   * @default false
+   */
+  useDockerhubCredentials?: boolean;
+
 }
 
 export interface ObjectNotificationServiceConfiguration {
