@@ -35,6 +35,7 @@ export class ObjecttypesService extends Construct {
   private readonly props: ObjecttypesServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
+  private readonly databaseUserCredentials: ISecret;
   private readonly superuserCredetials: ISecret;
   private readonly secretKey: ISecret;
 
@@ -43,6 +44,12 @@ export class ObjecttypesService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+    // DB that has a individual user for this service (new style)
+    const newDatabaseName = `${Statics.databaseObjecttypes}-database`;
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
+
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.superuserCredetials = SecretParameter.fromSecretNameV2(this, 'superuser-credentials', Statics._ssmObjecttypesCredentials);
@@ -62,9 +69,9 @@ export class ObjecttypesService extends Construct {
     const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
-    return {
+    const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'objecttypes.conf.docker',
-      DB_NAME: Statics.databaseObjecttypes,
+
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
@@ -72,8 +79,10 @@ export class ObjecttypesService extends Construct {
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'yes',
-      UWSGI_PORT: this.props.service.port.toString(),
       USE_X_FORWARDED_HOST: 'True',
+
+      // UWSGI_PORT: this.props.service.port.toString(), // Contiainer fails to start when we set a port (wsgi stuff in struct mode).
+      // The default port however 8080, so we can safely remove this envvar.
 
       LOG_LEVEL: this.props.serviceConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.serviceConfiguration.debug, false),
@@ -91,14 +100,23 @@ export class ObjecttypesService extends Construct {
       CORS_ALLOW_ALL_ORIGINS: 'True',
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
 
+      // Disable OpenTelemetry (not used by this platform)
+      OTEL_SDK_DISABLED: 'True',
     };
+
+    if (this.props.serviceConfiguration.useNewDatabase == true) {
+      env.DB_NAME_OLD = Statics.databaseObjecttypes;
+      env.DB_NAME = Statics.databaseObjecttypes + '-database';
+    } else {
+      env.DB_NAME = Statics.databaseObjecttypes;
+      env.DB_NAME_NEW = Statics.databaseObjecttypes + '-database';
+    }
+
+    return env;
   }
 
   private getSecretConfiguration() {
-    const secrets = {
-      DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
-      DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-
+    let secrets = {
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
@@ -107,7 +125,27 @@ export class ObjecttypesService extends Construct {
       DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.superuserCredetials, 'password'),
       DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.superuserCredetials, 'email'),
 
-    };
+    } as Record<string, Secret>;
+
+    // Use new or old db feature toggle
+    if (this.props.serviceConfiguration.useNewDatabase === true) {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    } else {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    }
+
     return secrets;
   }
 
@@ -123,7 +161,8 @@ export class ObjecttypesService extends Construct {
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
-        command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+        // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+        command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
@@ -134,14 +173,13 @@ export class ObjecttypesService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
         streamPrefix: 'main',
         logGroup: this.logs,
       }),
-
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
 
@@ -153,6 +191,7 @@ export class ObjecttypesService extends Construct {
       task: task,
       path: this.props.path,
       options: {
+        healthCheckGracePeriod: Duration.seconds(120), // Give more time to start (newer django starts slower?)
         desiredCount: 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },

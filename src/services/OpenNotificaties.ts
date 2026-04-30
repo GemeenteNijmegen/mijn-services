@@ -28,6 +28,7 @@ export interface OpenNotificatiesServiceProps {
    */
   readonly openNotificationsConfiguration: OpenNotificatiesConfiguration;
   readonly key: Key;
+  readonly dockerhubCredentials: ISecret;
 }
 
 export class OpenNotificatiesService extends Construct {
@@ -39,6 +40,7 @@ export class OpenNotificatiesService extends Construct {
   private readonly props: OpenNotificatiesServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
+  private readonly databaseUserCredentials: ISecret;
   private readonly openNotificatiesCredentials: ISecret;
   private readonly clientCredentialsNotificationsZaak: ISecret;
   private readonly clientCredentialsZaakNotifications: ISecret;
@@ -49,6 +51,12 @@ export class OpenNotificatiesService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+    // DB that has a individual user for this service (new style)
+    const newDatabaseName = `${Statics.databaseOpenNotificaties}-database`;
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
+
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.openNotificatiesCredentials = SecretParameter.fromSecretNameV2(this, 'open-klant-credentials', Statics._ssmOpenNotificatiesCredentials);
@@ -80,9 +88,8 @@ export class OpenNotificatiesService extends Construct {
     const rabbitMqHost = `${OpenNotificatiesService.RABBIT_MQ_NAME}.${this.props.service.namespace.namespaceName}`;
     const rabbitMqBrokerUrl = `amqp://guest:guest@${rabbitMqHost}:${OpenNotificatiesService.RABBIT_MQ_PORT}//`;
 
-    return {
+    const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'nrc.conf.docker',
-      DB_NAME: Statics.databaseOpenNotificaties,
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
@@ -90,8 +97,10 @@ export class OpenNotificatiesService extends Construct {
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'yes',
-      UWSGI_PORT: this.props.service.port.toString(),
       USE_X_FORWARDED_HOST: 'True',
+
+      // UWSGI_PORT: this.props.service.port.toString(), // Contiainer fails to start when we set a port (wsgi stuff in struct mode).
+      // The default port however 8080, so we can safely remove this envvar.
 
       LOG_LEVEL: this.props.openNotificationsConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.debug, false),
@@ -129,16 +138,21 @@ export class OpenNotificatiesService extends Construct {
 
 
       LOG_NOTIFICATIONS_IN_DB: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.persitNotifications, false),
-
-
     };
+
+    if (this.props.openNotificationsConfiguration.useNewDatabase == true) {
+      env.DB_NAME_OLD = Statics.databaseOpenNotificaties;
+      env.DB_NAME = Statics.databaseOpenNotificaties + '-database';
+    } else {
+      env.DB_NAME = Statics.databaseOpenNotificaties;
+      env.DB_NAME_NEW = Statics.databaseOpenNotificaties + '-database';
+    }
+
+    return env;
   }
 
   private getSecretConfiguration() {
-    const secrets = {
-      DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
-      DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-
+    let secrets = {
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
@@ -154,21 +168,40 @@ export class OpenNotificatiesService extends Construct {
       NOTIF_OPENZAAK_SECRET: Secret.fromSecretsManager(this.clientCredentialsNotificationsZaak, 'secret'),
       OPENZAAK_NOTIF_CLIENT_ID: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'username'),
       OPENZAAK_NOTIF_SECRET: Secret.fromSecretsManager(this.clientCredentialsZaakNotifications, 'secret'),
+    } as Record<string, Secret>;
 
+    if (this.props.openNotificationsConfiguration.useNewDatabase === true) {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    } else {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    }
 
-    };
     return secrets;
   }
 
   private setupRabbitMqService() {
     const task = this.serviceFactory.createTaskDefinition('rabbit-mq');
     task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.rabbitMqImage),
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.rabbitMqImage, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       logging: new AwsLogDriver({
         streamPrefix: 'rabbit-mq',
         logGroup: this.logs,
       }),
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       portMappings: [{
         containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
       }],
@@ -206,7 +239,9 @@ export class OpenNotificatiesService extends Construct {
 
     // Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         interval: Duration.seconds(10),
@@ -219,7 +254,7 @@ export class OpenNotificatiesService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -262,13 +297,15 @@ export class OpenNotificatiesService extends Construct {
       memoryMiB: this.props.openNotificationsConfiguration.celeryTaskSize?.memory ?? '512',
     });
     const celeryContainer = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -300,12 +337,14 @@ export class OpenNotificatiesService extends Construct {
     });
 
     const beat = task.addContainer('beat', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery', 'inspect', 'ping', '--app', 'nrc'],
         interval: Duration.seconds(10),
       },
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({

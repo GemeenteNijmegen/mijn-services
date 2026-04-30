@@ -26,6 +26,7 @@ export interface OpenProductServiceProps {
   key: Key;
   openProductConfiguration: OpenProductServicesConfiguration;
   openConfigStore: OpenConfigurationStore;
+  readonly dockerhubCredentials: ISecret;
 }
 
 export class OpenProductService extends Construct {
@@ -34,6 +35,7 @@ export class OpenProductService extends Construct {
   private readonly props: OpenProductServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
+  private readonly databaseUserCredentials: ISecret;
   private readonly openProductCredentials: ISecret;
   private readonly secretKey: ISecret;
 
@@ -42,6 +44,11 @@ export class OpenProductService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+    // DB that has a individual user for this service (new style)
+    const newDatabaseName = `${Statics.databaseOpenProduct}-database`;
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.openProductCredentials = SecretParameter.fromSecretNameV2(this, 'open-product-credentials', Statics._ssmOpenProductCredentials);
@@ -62,9 +69,8 @@ export class OpenProductService extends Construct {
     const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
-    return {
+    const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'openproduct.conf.docker',
-      DB_NAME: Statics.databaseOpenProduct,
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
@@ -90,25 +96,23 @@ export class OpenProductService extends Construct {
       // Conectivity
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
 
-      // Open notificaties specific stuff
-      //   SENDFILE_BACKEND: 'django_sendfile.backends.simple', // Django backend to download files
-      //   OPENPRODUCT_DOMAIN: trustedDomains[0],
-      //   OPENPRODUCT_ORGANIZATION: Statics.organization,
-      //   NOTIF_API_ROOT: `https://${trustedDomains[0]}/open-notificaties/api/v1/`, // TODO remove hardcoded path
-      //   OPENZAAK_NOTIF_CONFIG_ENABLE: 'True', // Enable the configuration setup for connecting to open-notificaties
-
-      // Somehow this is required aswell...
-      //   DEMO_CONFIG_ENABLE: 'False',
-      //   DEMO_CLIENT_ID: 'demo-client',
-      //   DEMO_SECRET: 'demo-secret',
+      // Disable OpenTelemetry (not used by this platform)
+      OTEL_SDK_DISABLED: 'True',
     };
+
+    if (this.props.openProductConfiguration.useNewDatabase == true) {
+      env.DB_NAME_OLD = Statics.databaseOpenProduct;
+      env.DB_NAME = Statics.databaseOpenProduct + '-database';
+    } else {
+      env.DB_NAME = Statics.databaseOpenProduct;
+      env.DB_NAME_NEW = Statics.databaseOpenProduct + '-database';
+    }
+
+    return env;
   }
 
   private getSecretConfiguration() {
-    const secrets = {
-      DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
-      DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-
+    let secrets = {
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
@@ -116,10 +120,26 @@ export class OpenProductService extends Construct {
       DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openProductCredentials, 'username'),
       DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.openProductCredentials, 'password'),
       DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openProductCredentials, 'email'),
-      // OPENPRODUCT_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.openProductCredentials, 'username'),
-      // OPENPRODUCT_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.openProductCredentials, 'email'),
+    } as Record<string, Secret>;
 
-    };
+    if (this.props.openProductConfiguration.useNewDatabase === true) {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    } else {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    }
+
     return secrets;
   }
 
@@ -138,7 +158,9 @@ export class OpenProductService extends Construct {
 
     // Main service container (3th to run)
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       // healthCheck: {
       //   command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
       //   interval: Duration.seconds(10),
@@ -205,13 +227,18 @@ export class OpenProductService extends Construct {
     });
 
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(60),
+        // command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'], // TODO enable after upgrading to latest
+        interval: Duration.seconds(60),
+        timeout: Duration.seconds(59),
+        startPeriod: Duration.seconds(100),
+        retries: 10,
       },
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -272,6 +299,7 @@ export class OpenProductService extends Construct {
   }
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
+    this.databaseUserCredentials.grantRead(role);
     this.openProductCredentials.grantRead(role);
     this.secretKey.grantRead(role);
   }

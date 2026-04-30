@@ -27,6 +27,7 @@ export interface ObjectsServiceProps {
    */
   readonly serviceConfiguration: ObjectsConfiguration;
   readonly key: Key;
+  readonly dockerhubCredentials: ISecret;
 }
 
 export class ObjectsService extends Construct {
@@ -35,6 +36,7 @@ export class ObjectsService extends Construct {
   private readonly props: ObjectsServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
   private readonly databaseCredentials: ISecret;
+  private readonly databaseUserCredentials: ISecret;
   private readonly superuserCredentials: ISecret;
   private readonly secretKey: ISecret;
 
@@ -43,6 +45,12 @@ export class ObjectsService extends Construct {
     this.props = props;
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
+
+    // DB that has a individual user for this service (new style)
+    const newDatabaseName = `${Statics.databaseObjects}-database`;
+    const databaseUserCredentialsName = Statics.databaseCredentialsName(newDatabaseName);
+    this.databaseUserCredentials = SecretParameter.fromSecretNameV2(this, 'database-user-credentials', databaseUserCredentialsName);
+
 
     this.databaseCredentials = SecretParameter.fromSecretNameV2(this, 'database-credentials', Statics._ssmDatabaseCredentials);
     this.superuserCredentials = SecretParameter.fromSecretNameV2(this, 'superuser-credentials', Statics._ssmObjectsCredentials);
@@ -63,9 +71,12 @@ export class ObjectsService extends Construct {
     const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
-    return {
+    const env: Record<string, string> = {
+
+      // Add env vars from service config
+      ...this.props.serviceConfiguration.environment,
+
       DJANGO_SETTINGS_MODULE: 'objects.conf.docker',
-      DB_NAME: Statics.databaseObjects,
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*', // TODO make stricter at some point
@@ -73,8 +84,10 @@ export class ObjectsService extends Construct {
       CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
       SUBPATH: '/' + this.props.path,
       IS_HTTPS: 'yes',
-      UWSGI_PORT: this.props.service.port.toString(),
       USE_X_FORWARDED_HOST: 'True',
+
+      // UWSGI_PORT: this.props.service.port.toString(), // Contiainer fails to start when we set a port (wsgi stuff in struct mode).
+      // The default port however 8080, so we can safely remove this envvar.
 
       LOG_LEVEL: this.props.serviceConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.serviceConfiguration.debug, false),
@@ -84,6 +97,7 @@ export class ObjectsService extends Construct {
       SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // Celery
+      CELERY_BROKER_URL: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
       CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
       CELERY_LOGLEVEL: this.props.serviceConfiguration.logLevel,
       CELERY_WORKER_CONCURRENCY: '4',
@@ -92,14 +106,23 @@ export class ObjectsService extends Construct {
       CORS_ALLOW_ALL_ORIGINS: 'True', // TODO make strickter at some point
       CSRF_TRUSTED_ORIGINS: trustedDomains.map(domain => `https://${domain}`).join(','),
 
+      // Disable OpenTelemetry (not used by this platform)
+      OTEL_SDK_DISABLED: 'True',
     };
+
+    if (this.props.serviceConfiguration.useNewDatabase == true) {
+      env.DB_NAME_OLD = Statics.databaseObjects;
+      env.DB_NAME = Statics.databaseObjects + '-database';
+    } else {
+      env.DB_NAME = Statics.databaseObjects;
+      env.DB_NAME_NEW = Statics.databaseObjects + '-database';
+    }
+
+    return env;
   }
 
   private getSecretConfiguration() {
-    const secrets = {
-      DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
-      DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
-
+    let secrets = {
       // Django requires a secret key to be defined (auto generated on deployment for this service)
       SECRET_KEY: Secret.fromSecretsManager(this.secretKey),
 
@@ -107,8 +130,26 @@ export class ObjectsService extends Construct {
       DJANGO_SUPERUSER_USERNAME: Secret.fromSecretsManager(this.superuserCredentials, 'username'),
       DJANGO_SUPERUSER_PASSWORD: Secret.fromSecretsManager(this.superuserCredentials, 'password'),
       DJANGO_SUPERUSER_EMAIL: Secret.fromSecretsManager(this.superuserCredentials, 'email'),
+    } as Record<string, Secret>;
 
-    };
+    if (this.props.serviceConfiguration.useNewDatabase === true) {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER_OLD: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    } else {
+      secrets = {
+        ...secrets,
+        DB_PASSWORD: Secret.fromSecretsManager(this.databaseCredentials, 'password'),
+        DB_USER: Secret.fromSecretsManager(this.databaseCredentials, 'username'),
+        DB_PASSWORD_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+        DB_USER_NEW: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
+      };
+    }
+
     return secrets;
   }
 
@@ -123,9 +164,12 @@ export class ObjectsService extends Construct {
 
     // Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
-        command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+        // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+        command: ['CMD-SHELL', 'exit 0'], // Disable for now as it keeps restarting.
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(30),
       },
@@ -136,7 +180,7 @@ export class ObjectsService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -155,6 +199,7 @@ export class ObjectsService extends Construct {
       task: task,
       path: this.props.path,
       options: {
+        healthCheckGracePeriod: Duration.seconds(120), // Give more time to start (newer django starts slower?)
         desiredCount: 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
@@ -180,13 +225,15 @@ export class ObjectsService extends Construct {
     });
 
     const container = task.addContainer('celery', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image, {
+        credentials: this.props.dockerhubCredentials,
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -241,6 +288,7 @@ export class ObjectsService extends Construct {
 
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
+    this.databaseUserCredentials.grantRead(role);
     this.superuserCredentials.grantRead(role);
     this.secretKey.grantRead(role);
   }

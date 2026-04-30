@@ -9,6 +9,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     branch: 'development',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesDev,
+    useDockerhubCredentials: true,
     criticality: new Criticality('low'),
     cnameRecords: {
       _b528d6157c2d9a369bf7d7812881d466:
@@ -38,26 +39,43 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
       apiVersion: '1.3.1',
+      celeryTaskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
     objecttypesService: {
-      image: 'maykinmedia/objecttypes-api:3.0.0',
+      image: 'maykinmedia/objecttypes-api:3.4.2',
       logLevel: 'DEBUG',
       debug: true,
+      useNewDatabase: true,
     },
     objectsService: {
-      image: 'maykinmedia/objects-api:3.0.0',
+      image: 'maykinmedia/open-object:4.0.0',
       logLevel: 'DEBUG',
       debug: true,
+      useNewDatabase: true,
+      environment: {
+        SITE_DOMAIN: 'https://mijn-services-dev.csp-nijmegen.nl/objects',
+      },
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
     openProductServices: {
       image: 'maykinmedia/open-product:1.5.0',
       logLevel: 'DEBUG',
       debug: true,
+      celeryTaskSize: {
+        memory: '1024',
+        cpu: '512',
+      },
     },
     corsaZgwService: {
       logLevel: 'DEBUG',
       debug: true,
-      imageTag: '1c0b54e2d2f22988d6a891e389b093c103873beb',
+      imageTag: 'af7cb9eda590f975323ef6b7479d08758ca46cf1',
     },
     vtbServices: [
       {
@@ -113,6 +131,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     branch: 'acceptance',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesAccp,
+    useDockerhubCredentials: true,
     criticality: new Criticality('medium'),
     alternativeDomainNames: ['mijn-services.accp.nijmegen.nl'],
     cnameRecords: {
@@ -218,6 +237,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     branch: 'main',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
+    useDockerhubCredentials: false, // TODO enable after secret is configured in prod.
     criticality: new Criticality('high'),
     alternativeDomainNames: ['mijn-services.nijmegen.nl'],
     cnameRecords: {
