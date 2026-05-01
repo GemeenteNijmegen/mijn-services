@@ -237,7 +237,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
     branch: 'main',
     buildEnvironment: Statics.gnBuildEnvironment,
     deploymentEnvironment: Statics.gnMijnServicesProd,
-    useDockerhubCredentials: false, // TODO enable after secret is configured in prod.
+    useDockerhubCredentials: true,
     criticality: new Criticality('high'),
     alternativeDomainNames: ['mijn-services.nijmegen.nl'],
     cnameRecords: {
