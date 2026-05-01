@@ -43,6 +43,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         cpu: '512',
         memory: '1024',
       },
+      useNewDatabase: true,
     },
     objecttypesService: {
       image: 'maykinmedia/objecttypes-api:3.4.2',
