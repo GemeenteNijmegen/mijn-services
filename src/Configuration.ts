@@ -35,7 +35,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       persitNotifications: true,
     },
     openZaak: {
-      image: 'openzaak/open-zaak:1.28.0',
+      image: 'openzaak/open-zaak:1.23.0',
       logLevel: 'DEBUG',
       debug: true,
       apiVersion: '1.3.1',
