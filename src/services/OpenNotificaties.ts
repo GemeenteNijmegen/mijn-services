@@ -208,10 +208,13 @@ export class OpenNotificatiesService extends Construct {
         containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
       }],
       secrets: {},
-      environment: {}, // TODO figgure out if we need any settings?
-      // healthCheck: { // TODO Running this health check before rabbitmq is fully started will prevent the container from starting
-      //   command: ['rabbitmq-diagnostics', '-q', 'check_port_connectivity'],
-      // },
+      environment: {
+        RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit consumer_timeout 36000000", // Required as of version 1.12.0 of open-notifications
+      },
+      healthCheck: {
+        command: ['rabbitmq-diagnostics', '-q', 'check_port_connectivity'],
+        startPeriod: Duration.seconds(60),
+      },
     });
     const service = this.serviceFactory.createService({
       task,
@@ -244,11 +247,11 @@ export class OpenNotificatiesService extends Construct {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image, {
         credentials: this.props.dockerhubCredentials,
       }),
-      healthCheck: {
-        command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(30),
-      },
+      // healthCheck: { // Rely on ALB health check
+      //   command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+      //   interval: Duration.seconds(10),
+      //   startPeriod: Duration.seconds(30),
+      // },
       portMappings: [
         {
           containerPort: this.props.service.port,
@@ -275,6 +278,7 @@ export class OpenNotificatiesService extends Construct {
       task: task,
       path: this.props.path,
       options: {
+        healthCheckGracePeriod: Duration.seconds(150),
         desiredCount: 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },

@@ -33,6 +33,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
       persitNotifications: true,
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
     openZaak: {
       image: 'openzaak/open-zaak:1.28.0',
