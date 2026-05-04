@@ -136,6 +136,8 @@ export class OpenNotificatiesService extends Construct {
       // OPENZAAK_NOTIF_CONFIG_ENABLE: 'True',
       // NOTIFICATION_RETRY_CONFIG_ENABLE: 'False',
 
+      OTEL_SDK_DISABLED: 'true',
+
 
       LOG_NOTIFICATIONS_IN_DB: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.persitNotifications, false),
     };

@@ -121,6 +121,8 @@ export class OpenZaakService extends Construct {
       DEMO_CONFIG_ENABLE: 'False',
       DEMO_CLIENT_ID: 'demo-client',
       DEMO_SECRET: 'demo-secret',
+
+      OTEL_SDK_DISABLED: 'true',
     };
 
     if (this.props.openZaakConfiguration.useNewDatabase == true) {
