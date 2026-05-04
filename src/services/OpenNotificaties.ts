@@ -222,7 +222,7 @@ export class OpenNotificatiesService extends Construct {
         RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit consumer_timeout 36000000", // Required as of version 1.12.0 of open-notifications
       },
       healthCheck: {
-        command: ['rabbitmq-diagnostics', '-q', 'check_port_connectivity'],
+        command: ['CMD-SHELL', 'nc -z localhost 5672 || exit 1'], // Very simple tcp connectivity check without rabbit mq stuff.
         startPeriod: Duration.seconds(60),
       },
     });
