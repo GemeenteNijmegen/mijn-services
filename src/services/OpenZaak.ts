@@ -195,7 +195,7 @@ export class OpenZaakService extends Construct {
         command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
         // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
         interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(30),
+        startPeriod: Duration.seconds(100),
       },
       portMappings: [
         {
@@ -221,6 +221,7 @@ export class OpenZaakService extends Construct {
       task: task,
       path: this.props.path,
       options: {
+        healthCheckGracePeriod: Duration.seconds(150),
         desiredCount: 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },

@@ -43,6 +43,10 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         cpu: '512',
         memory: '1024',
       },
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
       useNewDatabase: true,
     },
     objecttypesService: {
