@@ -194,6 +194,14 @@ export class OpenNotificatiesService extends Construct {
   }
 
   private setupRabbitMqService() {
+
+    const erlangSecretForRabbitMq = new SecretParameter(this, 'rabbit-mq-secret', {
+      description: 'Random secret for erlang (rabbitmq)',
+      generateSecretString: {
+        excludePunctuation: true,
+      },
+    });
+
     const task = this.serviceFactory.createTaskDefinition('rabbit-mq');
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.rabbitMqImage, {
@@ -207,7 +215,9 @@ export class OpenNotificatiesService extends Construct {
       portMappings: [{
         containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
       }],
-      secrets: {},
+      secrets: {
+        RABBITMQ_ERLANG_COOKIE: Secret.fromSecretsManager(erlangSecretForRabbitMq),
+      },
       environment: {
         RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit consumer_timeout 36000000", // Required as of version 1.12.0 of open-notifications
       },
