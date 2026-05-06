@@ -87,6 +87,11 @@ export class OpenNotificatiesService extends Construct {
 
     const rabbitMqHost = `${OpenNotificatiesService.RABBIT_MQ_NAME}.${this.props.service.namespace.namespaceName}`;
     const rabbitMqBrokerUrl = `amqp://guest:guest@${rabbitMqHost}:${OpenNotificatiesService.RABBIT_MQ_PORT}//`;
+    const redisBrokerUrl = 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery;
+
+    // Very temporarely: remove after upgrading!
+    const isLatestVersion = this.props.openNotificationsConfiguration.image.endsWith('1.16.0');
+
 
     const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'nrc.conf.docker',
@@ -110,11 +115,11 @@ export class OpenNotificatiesService extends Construct {
       SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // Celery
-      CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
+      CELERY_BROKER_URL: isLatestVersion ? redisBrokerUrl : rabbitMqBrokerUrl,
+      CELERY_RESULT_BACKEND: redisBrokerUrl,
       CELERY_LOGLEVEL: this.props.openNotificationsConfiguration.logLevel,
       CELERY_WORKER_CONCURRENCY: '4',
       RABBITMQ_HOST: rabbitMqHost,
-      CELERY_BROKER_URL: rabbitMqBrokerUrl,
 
       // Conectivity
       CORS_ALLOW_ALL_ORIGINS: 'True',
