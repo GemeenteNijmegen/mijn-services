@@ -21,6 +21,7 @@ Latest versie: 1.16.0
 
 ## Stap 1 - DB migratie
 - Checken of de additional database resource lambda ooit heeft gedraait en de db bestaat
+- Zie [https://github.com/GemeenteNijmegen/devops/blob/master/docs/AWS/database-recovery-migration.md](database-migration) docs voor migratie via cloudshell.
 - Cloudshell in VPC aanmaken.
 - Commandos draaien (zie hieronder)
 - DB toggle omzetten bij uitrollen
