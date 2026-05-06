@@ -33,6 +33,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       logLevel: 'DEBUG',
       debug: true,
       persitNotifications: true,
+      useNewDatabase: true,
       taskSize: {
         cpu: '512',
         memory: '1024',
