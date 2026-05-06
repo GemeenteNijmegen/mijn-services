@@ -187,8 +187,9 @@ export class OpenKlantService extends Construct {
       }),
       healthCheck: {
         command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(60),
+        interval: Duration.seconds(25),
+        timeout: Duration.seconds(20),
+        startPeriod: Duration.seconds(100),
       },
       readonlyRootFilesystem: false, // Required for ECS Exec
       secrets: this.getSecretConfiguration(),

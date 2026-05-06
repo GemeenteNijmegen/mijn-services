@@ -28,14 +28,19 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       },
     },
     openNotificaties: {
-      image: 'openzaak/open-notificaties:1.8.0',
+      image: 'openzaak/open-notificaties:1.16.0',
       rabbitMqImage: 'rabbitmq:4.0.5-alpine',
       logLevel: 'DEBUG',
       debug: true,
       persitNotifications: true,
+      useNewDatabase: true,
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
     },
     openZaak: {
-      image: 'openzaak/open-zaak:1.17.0',
+      image: 'openzaak/open-zaak:1.28.0',
       logLevel: 'DEBUG',
       debug: true,
       apiVersion: '1.3.1',
@@ -43,6 +48,11 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
         cpu: '512',
         memory: '1024',
       },
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
+      useNewDatabase: true,
     },
     objecttypesService: {
       image: 'maykinmedia/objecttypes-api:3.4.2',
