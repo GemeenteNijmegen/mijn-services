@@ -25,15 +25,5 @@ Scripts draaien als dat nodig is.
 Checken of de container nog goed werkt.
 
 
-## Open-notificaties
-- 1.10.0 - Requires postgres > 14 - we zitten op 17.5
-- 1.12.0 - RabbitMQ configuratie update nodig: consumer_timeout
-- 1.14.0 - OIDC + CloudEvents + OpenTelemetry wijziging in config nodig.
-
-Denk dat we in een keer kunnen upgraden
-Afhankelijkheden om te testen na upgraden:
-- Objecten API (voor inzending)
-- Open-Zaak (voor authorisatie component)
-
-Verder hebben we open-notificaties nog niet gekoppeld met onze mijn-services componenten.
-
+## Vervolg
+- Elke service heeft zijn eigen upgrade documentje zie andere documenten in deze map.

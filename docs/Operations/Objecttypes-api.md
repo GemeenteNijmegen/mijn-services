@@ -10,13 +10,18 @@ Letop: Na 4.0.0 wordten objecten en objecttypes niet meer apart gedraaied maar i
 Release notes waar we iets mee moeten
 - 3.0.4 - django upgrade requires postgress > 14 (we zitten op 17.5)
 - 3.4.0 - Version contains a migration - Long running migration -> Ik voorzie container start problemen (of we moeten via Celery deze upgrade uitrollen, die kan lang draaien.)
-- 3.5.0 - open telemetry moeten we even uitzetten in de config + OIDC wijziging, dit ging in open-klant goed zonder problemen.
+- 3.5.0 - open telemetry is uitgezet in de config + er moet een OIDC wijziging worden gedaan, dit ging in open-klant goed zonder problemen. ->
 - 3.6.0 - Command om objecttypes te importeren - https://open-object.readthedocs.io/en/latest/manual/migration.html#objecttype-migration Verplichte versie upgrade!
 - 4.0.0 - Removes external objecttypes support!
 
 ## Fase 1 - Database migratie
 We hebben databases aangemaakt die een unique user hebben. Niet de admin user. Die worden in CDK aangemaakt, deze stap is het migreren van de originele database naar deze nieuwe database.
 Dit betekent dus:
+- Checken of de additional database resource lambda ooit heeft gedraait en de db bestaat
+- Cloudshell in VPC aanmaken.
+- Commandos draaien (zie hieronder)
+
+Zie [https://github.com/GemeenteNijmegen/devops/blob/master/docs/AWS/database-recovery-migration.md](database-migration) docs voor migratie via cloudshell.
 - Dump van DB maken
 - Dump in nieuwe DB inladen
 - Credentials en db-naam aanpassen in task definition
