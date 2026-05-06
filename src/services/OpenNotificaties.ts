@@ -87,6 +87,11 @@ export class OpenNotificatiesService extends Construct {
 
     const rabbitMqHost = `${OpenNotificatiesService.RABBIT_MQ_NAME}.${this.props.service.namespace.namespaceName}`;
     const rabbitMqBrokerUrl = `amqp://guest:guest@${rabbitMqHost}:${OpenNotificatiesService.RABBIT_MQ_PORT}//`;
+    const redisBrokerUrl = 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery;
+
+    // Very temporarely: remove after upgrading!
+    const isLatestVersion = this.props.openNotificationsConfiguration.image.endsWith('1.16.0');
+
 
     const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'nrc.conf.docker',
@@ -110,11 +115,11 @@ export class OpenNotificatiesService extends Construct {
       SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // Celery
-      CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
+      CELERY_BROKER_URL: isLatestVersion ? redisBrokerUrl : rabbitMqBrokerUrl,
+      CELERY_RESULT_BACKEND: redisBrokerUrl,
       CELERY_LOGLEVEL: this.props.openNotificationsConfiguration.logLevel,
       CELERY_WORKER_CONCURRENCY: '4',
       RABBITMQ_HOST: rabbitMqHost,
-      CELERY_BROKER_URL: rabbitMqBrokerUrl,
 
       // Conectivity
       CORS_ALLOW_ALL_ORIGINS: 'True',
@@ -135,6 +140,8 @@ export class OpenNotificatiesService extends Construct {
       // AUTHORIZATION_CONFIG_ENABLE: 'True',
       // OPENZAAK_NOTIF_CONFIG_ENABLE: 'True',
       // NOTIFICATION_RETRY_CONFIG_ENABLE: 'False',
+
+      OTEL_SDK_DISABLED: 'true',
 
 
       LOG_NOTIFICATIONS_IN_DB: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.persitNotifications, false),
@@ -192,6 +199,14 @@ export class OpenNotificatiesService extends Construct {
   }
 
   private setupRabbitMqService() {
+
+    const erlangSecretForRabbitMq = new SecretParameter(this, 'rabbit-mq-secret', {
+      description: 'Random secret for erlang (rabbitmq)',
+      generateSecretString: {
+        excludePunctuation: true,
+      },
+    });
+
     const task = this.serviceFactory.createTaskDefinition('rabbit-mq');
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.rabbitMqImage, {
@@ -205,11 +220,16 @@ export class OpenNotificatiesService extends Construct {
       portMappings: [{
         containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
       }],
-      secrets: {},
-      environment: {}, // TODO figgure out if we need any settings?
-      // healthCheck: { // TODO Running this health check before rabbitmq is fully started will prevent the container from starting
-      //   command: ['rabbitmq-diagnostics', '-q', 'check_port_connectivity'],
-      // },
+      secrets: {
+        RABBITMQ_ERLANG_COOKIE: Secret.fromSecretsManager(erlangSecretForRabbitMq),
+      },
+      environment: {
+        RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: '-rabbit consumer_timeout 36000000', // Required as of version 1.12.0 of open-notifications
+      },
+      healthCheck: {
+        command: ['CMD-SHELL', 'nc -z localhost 5672 || exit 1'], // Very simple tcp connectivity check without rabbit mq stuff.
+        startPeriod: Duration.seconds(60),
+      },
     });
     const service = this.serviceFactory.createService({
       task,
@@ -242,11 +262,11 @@ export class OpenNotificatiesService extends Construct {
       image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.image, {
         credentials: this.props.dockerhubCredentials,
       }),
-      healthCheck: {
-        command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(30),
-      },
+      // healthCheck: { // Rely on ALB health check
+      //   command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
+      //   interval: Duration.seconds(10),
+      //   startPeriod: Duration.seconds(30),
+      // },
       portMappings: [
         {
           containerPort: this.props.service.port,
@@ -273,6 +293,7 @@ export class OpenNotificatiesService extends Construct {
       task: task,
       path: this.props.path,
       options: {
+        healthCheckGracePeriod: Duration.seconds(150),
         desiredCount: 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },

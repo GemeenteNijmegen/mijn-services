@@ -13,7 +13,6 @@ import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServ
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
-import { ServiceInfraUtils } from './ServiceInfraUtils';
 
 export interface OpenZaakServiceProps {
   cache: CacheDatabase;
@@ -121,6 +120,8 @@ export class OpenZaakService extends Construct {
       DEMO_CONFIG_ENABLE: 'False',
       DEMO_CLIENT_ID: 'demo-client',
       DEMO_SECRET: 'demo-secret',
+
+      OTEL_SDK_DISABLED: 'true',
     };
 
     if (this.props.openZaakConfiguration.useNewDatabase == true) {
@@ -191,12 +192,11 @@ export class OpenZaakService extends Construct {
       image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image, {
         credentials: this.props.dockerhubCredentials,
       }),
-      healthCheck: {
-        command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
-        // command: ['CMD-SHELL', `python -c "import requests; x = requests.get('http://localhost:${this.props.service.port}/'); exit(x.status_code != 200)" >> /proc/1/fd/1`],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(30),
-      },
+      // healthCheck: { // Disabled as we have ALB health checks
+      //   command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
+      //   interval: Duration.seconds(10),
+      //   startPeriod: Duration.seconds(100),
+      // },
       portMappings: [
         {
           containerPort: this.props.service.port,
@@ -221,6 +221,7 @@ export class OpenZaakService extends Construct {
       task: task,
       path: this.props.path,
       options: {
+        healthCheckGracePeriod: Duration.seconds(150),
         desiredCount: 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
