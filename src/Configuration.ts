@@ -174,14 +174,19 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       apiVersion: '1.3.1',
     },
     objecttypesService: {
-      image: 'maykinmedia/objecttypes-api:3.0.0',
+      image: 'maykinmedia/objecttypes-api:3.4.2',
       logLevel: 'DEBUG',
       debug: true,
+      useNewDatabase: true,
     },
     objectsService: {
-      image: 'maykinmedia/objects-api:3.0.0',
+      image: 'maykinmedia/objects-api:3.6.0',
       logLevel: 'DEBUG',
       debug: true,
+      useNewDatabase: true,
+      environment: {
+        SITE_DOMAIN: 'https://mijn-services.accp.nijmegen.nl/objects',
+      },
       taskSize: {
         cpu: '1024', // 1vCPU
         memory: '2048', // 2GB
