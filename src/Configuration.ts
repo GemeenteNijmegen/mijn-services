@@ -66,7 +66,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       debug: true,
       useNewDatabase: true,
       environment: {
-        SITE_DOMAIN: 'https://mijn-services.accp.nijmegen.nl/objects',
+        SITE_DOMAIN: 'https://mijn-services-dev.csp-nijmegen.nl/objects',
       },
       taskSize: {
         cpu: '512',
@@ -185,7 +185,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       debug: true,
       useNewDatabase: true,
       environment: {
-        SITE_DOMAIN: 'https://mijn-services-dev.csp-nijmegen.nl/objects',
+        SITE_DOMAIN: 'https://mijn-services.accp.nijmegen.nl/objects',
       },
       taskSize: {
         cpu: '1024', // 1vCPU
