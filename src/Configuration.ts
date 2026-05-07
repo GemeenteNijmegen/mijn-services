@@ -180,7 +180,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       useNewDatabase: true,
     },
     objectsService: {
-      image: 'maykinmedia/open-object:3.6.0',
+      image: 'maykinmedia/objects-api:3.6.0',
       logLevel: 'DEBUG',
       debug: true,
       useNewDatabase: true,
