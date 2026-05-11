@@ -77,6 +77,12 @@ export class OMCService extends Construct {
       description: `API key for OMC (${id}) to authenticate at objecttypen API (tasks)`,
       secretName: ssmObjecttypenApiKey,
     });
+    // OMC Postguard API key
+    const ssmOmcPostguardApiKey = `/${Statics.projectName}/omc/${id}/postguard/api-key`;
+    const omcPostguardApiKey = new Secret(this, 'postguard-api-key', {
+      description: `API key for OMC (${id}) to authenticate at Postguard API (tasks)`,
+      secretName: ssmOmcPostguardApiKey,
+    });
 
     return {
       openklant: openKlantApiKey,
@@ -85,6 +91,7 @@ export class OMCService extends Construct {
       zgwJwt: zgwJwtSecret,
       objectenApiKey,
       objecttypenApiKey,
+      omcPostguardApiKey,
     };
   }
 
@@ -148,6 +155,12 @@ export class OMCService extends Construct {
       // Environment settings
       DEBUG: this.props.omcConfiguration.debug ? 'true' : 'false',
       ASPNETCORE_ENVIRONMENT: this.props.omcConfiguration.mode,
+
+      //Dev fieldlab extra vars
+      OMC_ACTOR_ID: '2b2feba0-558b-41ff-ae64-4ca52136e95e',
+      POSTGUARD_API_PKGURL: 'https://pkg.postguard.eu',
+      POSTGUARD_API_CRYPTIFYURL: 'https://storage.postguard.eu',
+      POSTGUARD_TEMPLATEID_SENDPOSTGUARDPDF: '72cab3a8-2f4b-43e9-8eae-d673fa390349',
     };
   }
 
@@ -164,6 +177,8 @@ export class OMCService extends Construct {
       // API keys for ZGW(ish) components
       ZGW_AUTH_KEY_OBJECTEN: EcsSecret.fromSecretsManager(this.configurationParameters.objectenApiKey),
       ZGW_AUTH_KEY_OBJECTTYPEN: EcsSecret.fromSecretsManager(this.configurationParameters.objecttypenApiKey),
+
+      POSTGUARD_API_KEY: EcsSecret.fromSecretsManager(this.configurationParameters.omcPostguardApiKey),
 
     };
     return secrets;
