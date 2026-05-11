@@ -157,7 +157,7 @@ export class OMCService extends Construct {
       ASPNETCORE_ENVIRONMENT: this.props.omcConfiguration.mode,
 
       //Dev fieldlab extra vars
-      OMC_ACTOR_ID: '2b2feba0-558b-41ff-ae64-4ca52136e95e',
+      OMC_ACTOR_ID: '2b2feba0-558b-41ff-ae64-4ca52136e95e', // Deit is gewoon een random uuid om omc te laten starten, moet een uuid uit open klant zijn straks
       POSTGUARD_API_PKGURL: 'https://pkg.postguard.eu',
       POSTGUARD_API_CRYPTIFYURL: 'https://storage.postguard.eu',
       POSTGUARD_TEMPLATEID_SENDPOSTGUARDPDF: '72cab3a8-2f4b-43e9-8eae-d673fa390349',
@@ -179,7 +179,6 @@ export class OMCService extends Construct {
       ZGW_AUTH_KEY_OBJECTTYPEN: EcsSecret.fromSecretsManager(this.configurationParameters.objecttypenApiKey),
 
       POSTGUARD_API_KEY: EcsSecret.fromSecretsManager(this.configurationParameters.omcPostguardApiKey),
-
     };
     return secrets;
   }
