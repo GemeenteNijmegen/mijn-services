@@ -105,7 +105,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
       {
         cdkId: 'local-omc',
         path: 'local-omc', // Without /
-        image: 'worthnl/notifynl-omc:1.15.8',
+        image: 'worthnl/notifynl-omc:1.18.0-dev141',
         debug: true,
         mode: 'Development',
         openKlantUrl: 'mijn-services.dev.nijmegen.nl/open-klant/klantinteracties/api/v1',
