@@ -127,6 +127,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           taskAssignedEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
           taskAssignedSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
         },
+        usePostguardFlag: true,
       },
     ],
     helloWorlService: true,
@@ -239,6 +240,7 @@ const EnvironmentConfigurations: { [key: string]: Configuration } = {
           taskAssignedEmail: 'e2915eea-de25-48f5-8292-879d369060fa',
           taskAssignedSms: 'b17f8f7a-6992-466d-8248-3f1c077610ce',
         },
+        usePostguardFlag: true,
       },
     ],
     ObjectNotificationServices: [

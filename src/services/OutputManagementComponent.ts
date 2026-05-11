@@ -97,7 +97,7 @@ export class OMCService extends Construct {
 
   private getEnvironmentConfiguration() {
 
-    return {
+    let config = {
 
       OMC_CONTEXT_PATH: '/' + this.props.omcConfiguration.path,
 
@@ -155,17 +155,34 @@ export class OMCService extends Construct {
       // Environment settings
       DEBUG: this.props.omcConfiguration.debug ? 'true' : 'false',
       ASPNETCORE_ENVIRONMENT: this.props.omcConfiguration.mode,
-
-      //Dev fieldlab extra vars
-      OMC_ACTOR_ID: '2b2feba0-558b-41ff-ae64-4ca52136e95e', // Deit is gewoon een random uuid om omc te laten starten, moet een uuid uit open klant zijn straks
-      POSTGUARD_API_PKGURL: 'https://pkg.postguard.eu',
-      POSTGUARD_API_CRYPTIFYURL: 'https://storage.postguard.eu',
-      POSTGUARD_TEMPLATEID_SENDPOSTGUARDPDF: '72cab3a8-2f4b-43e9-8eae-d673fa390349',
     };
+    config = this.addPostguardFlaggedConfig(config);
+    return config;
+  }
+
+  /**
+   * Append postguard fields to config. Demo for fieldlab 2026-05-11.
+   *
+   * @param config the existing config, will be returned as is or merged with
+   * Postguard fields
+   * @returns the config
+   */
+  private addPostguardFlaggedConfig(config: any) {
+    if (this.props.omcConfiguration.usePostguardFlag) {
+      return {
+        ...config,
+        //Dev fieldlab extra vars
+        OMC_ACTOR_ID: '2b2feba0-558b-41ff-ae64-4ca52136e95e', // Deit is gewoon een random uuid om omc te laten starten, moet een uuid uit open klant zijn straks
+        POSTGUARD_API_PKGURL: 'https://pkg.postguard.eu',
+        POSTGUARD_API_CRYPTIFYURL: 'https://storage.postguard.eu',
+        POSTGUARD_TEMPLATEID_SENDPOSTGUARDPDF: '72cab3a8-2f4b-43e9-8eae-d673fa390349',
+      };
+    }
+    return config;
   }
 
   private getSecretConfiguration() {
-    const secrets = {
+    let secrets = {
       OMC_AUTH_JWT_SECRET: EcsSecret.fromSecretsManager(this.configurationParameters.omcJwt),
       ZGW_AUTH_JWT_SECRET: EcsSecret.fromSecretsManager(this.configurationParameters.zgwJwt),
 
@@ -177,9 +194,14 @@ export class OMCService extends Construct {
       // API keys for ZGW(ish) components
       ZGW_AUTH_KEY_OBJECTEN: EcsSecret.fromSecretsManager(this.configurationParameters.objectenApiKey),
       ZGW_AUTH_KEY_OBJECTTYPEN: EcsSecret.fromSecretsManager(this.configurationParameters.objecttypenApiKey),
+    } as any;
 
-      POSTGUARD_API_KEY: EcsSecret.fromSecretsManager(this.configurationParameters.omcPostguardApiKey),
-    };
+    if (this.props.omcConfiguration.usePostguardFlag) {
+      secrets = {
+        ...secrets,
+        POSTGUARD_API_KEY: EcsSecret.fromSecretsManager(this.configurationParameters.omcPostguardApiKey),
+      };
+    }
     return secrets;
   }
 

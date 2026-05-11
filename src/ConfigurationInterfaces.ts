@@ -334,6 +334,8 @@ export interface OutputManagementComponentConfiguration {
     taskAssignedSms?: string;
     messsageSms?: string;
   };
+
+  usePostguardFlag?: boolean; //Fieldlab 11-5 flag: Postguard demo
 }
 
 export interface OpenKlantRegistrationServiceConfiguration {
