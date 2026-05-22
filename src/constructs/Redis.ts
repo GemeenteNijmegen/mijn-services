@@ -1,5 +1,5 @@
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { CfnCacheCluster, CfnParameterGroup, CfnSubnetGroup } from 'aws-cdk-lib/aws-elasticache';
+import { CfnCacheCluster, CfnSubnetGroup } from 'aws-cdk-lib/aws-elasticache';
 import { Construct } from 'constructs';
 
 export interface CacheDatabaseProps {
@@ -26,14 +26,13 @@ export class CacheDatabase extends Construct {
       description: 'Subnet group for redis',
     });
 
-    // 1. Create a custom parameter group with increased databases
-    const parameterGroup = new CfnParameterGroup(this, 'redis-parameters', {
-      cacheParameterGroupFamily: 'redis7',  // match your Redis version
-      description: 'Custom param group with more databases',
-      properties: {
-        databases: '32',  // default is 16, increase as needed
-      },
-    });
+    // const parameterGroup = new CfnParameterGroup(this, 'redis-parameters', {
+    //   cacheParameterGroupFamily: 'redis7',  // match your Redis version
+    //   description: 'Custom param group with more databases',
+    //   properties: {
+    //     databases: '32',  // default is 16, increase as needed
+    //   },
+    // });
 
     const db = new CfnCacheCluster(this, 'redis-cluster', {
       autoMinorVersionUpgrade: true,
@@ -43,7 +42,8 @@ export class CacheDatabase extends Construct {
       cacheSubnetGroupName: redisSubnetGroup.ref,
       vpcSecurityGroupIds: [redisSecurityGroup.securityGroupId],
       snapshotRetentionLimit: 5,
-      cacheParameterGroupName: parameterGroup.ref,
+      // cacheParameterGroupName: parameterGroup.ref, // TODO figure out how to do this
+      // Results in error: The parameter databases has a different value in the requested parameter group than the current parameter group. This parameter value cannot be changed for a cache cluster
     });
 
     this.db = db;
