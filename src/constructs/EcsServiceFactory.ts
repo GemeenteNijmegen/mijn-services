@@ -89,7 +89,7 @@ export interface CreateEcsServiceOptions {
   apiVersionHeaderValue?: string;
 
   /**
-   * Set to true when using subdomain based alb rules.
+   * Set to subdomain when using subdomain based alb rules.
    * @default - no subdomain is set
    */
   domain?: string;

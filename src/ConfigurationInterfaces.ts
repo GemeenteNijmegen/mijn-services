@@ -217,6 +217,21 @@ export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, Celery
   apiVersion: string;
 }
 
+export interface OpenZaakConfigurationV2 extends OpenZaakConfiguration {
+  /**
+   * Name of the database to use
+   */
+  databaseName: string;
+  /**
+   * Subdomain to expose this open-zaak on
+   */
+  subdomain: string;
+  /**
+   * A human readable identifier used to register this open-zaak (cdk and descriptions)
+   */
+  id: string;
+}
+
 export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Docker image to use.

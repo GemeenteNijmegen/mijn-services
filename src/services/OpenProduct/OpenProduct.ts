@@ -10,7 +10,6 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenProductServicesConfiguration } from '../../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../../constructs/EcsServiceFactory';
-import { OpenConfigurationStore } from '../../constructs/OpenConfigurationStore';
 import { CacheDatabase } from '../../constructs/Redis';
 import { Statics } from '../../Statics';
 import { Utils } from '../../Utils';
@@ -25,7 +24,6 @@ export interface OpenProductServiceProps {
   alternativeDomainNames?: string[];
   key: Key;
   openProductConfiguration: OpenProductServicesConfiguration;
-  openConfigStore: OpenConfigurationStore;
   readonly dockerhubCredentials: ISecret;
 }
 
@@ -183,14 +181,8 @@ export class OpenProductService extends Construct {
     });
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/setup_configuration');
 
-    // Download configuration (2nd to run)
-    const configLocation = `s3://${this.props.openConfigStore.bucket.bucketName}/open-product`;
-    const configTarget = '/app/setup_configuration';
-    const downloadConfiguration = this.serviceFactory.downloadConfiguration(task, this.logs, container, configLocation, configTarget);
-    this.serviceFactory.attachEphemeralStorage(downloadConfiguration, VOLUME_NAME, '/app/setup_configuration');
-
     // File system prermissions for ephemeral storage (1st to run)
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, downloadConfiguration, '/tmp', '/app/setup_configuration');
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/setup_configuration');
 
     this.serviceFactory.allowExecutingCommands(task);
 
@@ -211,7 +203,6 @@ export class OpenProductService extends Construct {
       },
     });
 
-    this.props.openConfigStore.grantReadConfig(service.taskDefinition.taskRole!, 'open-product');
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
