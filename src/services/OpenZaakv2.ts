@@ -1,5 +1,5 @@
 import { Duration, Token } from 'aws-cdk-lib';
-import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { Key } from 'aws-cdk-lib/aws-kms';
@@ -24,6 +24,7 @@ export interface OpenZaakv2ServiceProps {
   cacheDatabaseIndexCelery: number;
   service: EcsServiceFactoryProps;
   hostedzone: IHostedZone;
+  certificate: ICertificate;
   key: Key;
   openZaakConfiguration: OpenZaakConfigurationV2;
   readonly dockerhubCredentials: ISecret;
@@ -271,10 +272,9 @@ export class OpenZaakv2Service extends Construct {
   }
 
   private setupCloudFrontSubdomain() {
-    const certArn = StringParameter.valueForStringParameter(this, Statics.ssmWildcardCertificateArn);
-    const cert = Certificate.fromCertificateArn(this, 'cert', certArn);
+
     new SubdomainCloudfront(this, 'subdomain', {
-      certificate: cert,
+      certificate: this.props.certificate,
       hostedZone: this.props.hostedzone,
       loadbalancer: this.props.service.loadbalancer.alb,
       subdomain: this.props.openZaakConfiguration.subdomain,

@@ -1,10 +1,12 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Duration, Stack, StackProps } from 'aws-cdk-lib';
+import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
 import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
@@ -41,6 +43,8 @@ export class MainStack extends Stack {
   private readonly cache: CacheDatabase;
   private readonly key: Key;
   private readonly dockerhubCredentials: ISecret;
+
+  private wildcardCertificate: ICertificate;
 
   constructor(scope: Construct, id: string, props: MainStackProps) {
     super(scope, id, props);
@@ -210,6 +214,7 @@ export class MainStack extends Stack {
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
         openZaakConfiguration: openZaakConfig,
+        certificate: this.certificate(),
       });
     }
 
@@ -545,6 +550,24 @@ export class MainStack extends Stack {
 
     return key;
   }
+
+  /**
+   * Get the certificate ARN from parameter store in us-east-1
+   * @returns string Certificate ARN
+   */
+  private certificate() {
+    if (!this.wildcardCertificate) {
+      const parameters = new RemoteParameters(this, 'params', {
+        path: `${Statics.ssmWildcardCertificatePath}/`,
+        region: 'us-east-1',
+        timeout: Duration.seconds(10),
+      });
+      const certificateArn = parameters.get(Statics.ssmWildcardCertificateArn);
+      this.wildcardCertificate = Certificate.fromCertificateArn(this, 'cert', certificateArn);
+    }
+    return this.wildcardCertificate;
+  }
+
 }
 
 
