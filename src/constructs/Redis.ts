@@ -1,5 +1,5 @@
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { CfnCacheCluster, CfnSubnetGroup } from 'aws-cdk-lib/aws-elasticache';
+import { CfnCacheCluster, CfnParameterGroup, CfnSubnetGroup } from 'aws-cdk-lib/aws-elasticache';
 import { Construct } from 'constructs';
 
 export interface CacheDatabaseProps {
@@ -26,6 +26,15 @@ export class CacheDatabase extends Construct {
       description: 'Subnet group for redis',
     });
 
+    // 1. Create a custom parameter group with increased databases
+    const parameterGroup = new CfnParameterGroup(this, 'redis-parameters', {
+      cacheParameterGroupFamily: 'redis7',  // match your Redis version
+      description: 'Custom param group with more databases',
+      properties: {
+        databases: '32',  // default is 16, increase as needed
+      },
+    });
+
     const db = new CfnCacheCluster(this, 'redis-cluster', {
       autoMinorVersionUpgrade: true,
       cacheNodeType: 'cache.t4g.micro',
@@ -34,6 +43,7 @@ export class CacheDatabase extends Construct {
       cacheSubnetGroupName: redisSubnetGroup.ref,
       vpcSecurityGroupIds: [redisSecurityGroup.securityGroupId],
       snapshotRetentionLimit: 5,
+      cacheParameterGroupName: parameterGroup.ref,
     });
 
     this.db = db;
