@@ -23,6 +23,7 @@ import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationSe
 import { OpenNotificatiesService } from './services/OpenNotificaties';
 import { OpenProductService } from './services/OpenProduct/OpenProduct';
 import { OpenZaakService } from './services/OpenZaak';
+import { OpenZaakv2Service } from './services/OpenZaakv2';
 import { OMCService } from './services/OutputManagementComponent';
 import { VtbService } from './services/VTB';
 import { Statics } from './Statics';
@@ -82,7 +83,7 @@ export class MainStack extends Stack {
     this.openKlantRegistrationServices(containerPlatform); // Should be higher in priority than open-klant
     this.openKlantService(containerPlatform);
     this.openNotificatiesServices(containerPlatform);
-    this.openZaakServices(containerPlatform);
+    this.openZaakService(containerPlatform);
     this.outputManagementComponent(containerPlatform);
     this.objecttypesService(containerPlatform);
     this.objectsService(containerPlatform);
@@ -93,6 +94,9 @@ export class MainStack extends Stack {
     this.corsaZgwServices(containerPlatform);
     this.vtbServices(containerPlatform);
     this.helloWorldService(containerPlatform);
+
+    // New style
+    this.openZaakServices(containerPlatform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
@@ -153,7 +157,7 @@ export class MainStack extends Stack {
     });
   }
 
-  private openZaakServices(platform: ContainerPlatform) {
+  private openZaakService(platform: ContainerPlatform) {
     if (!this.configuration.openZaak) {
       console.warn(
         'No open-zaak configuration provided. Skipping creation of open zaak service!',
@@ -179,6 +183,36 @@ export class MainStack extends Stack {
       },
       openZaakConfiguration: this.configuration.openZaak,
     });
+  }
+
+  private openZaakServices(platform: ContainerPlatform) {
+    if (!this.configuration.openZaakServices) {
+      console.warn(
+        'No open-zaak configurations provided. Skipping creation of open zaak services!',
+      );
+      return;
+    }
+
+    for (const openZaakConfig of this.configuration.openZaakServices) {
+      new OpenZaakv2Service(this, openZaakConfig.id, {
+        hostedzone: this.hostedzone,
+        key: this.key,
+        cache: this.cache,
+        cacheDatabaseIndex: 5,
+        cacheDatabaseIndexCelery: 6,
+        dockerhubCredentials: this.dockerhubCredentials,
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
+          port: 8000, // Ignored by new service
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+        openZaakConfiguration: openZaakConfig,
+      });
+    }
+
   }
 
   private outputManagementComponent(platform: ContainerPlatform) {

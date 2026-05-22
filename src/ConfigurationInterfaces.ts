@@ -89,6 +89,11 @@ export interface Configuration {
   openZaak?: OpenZaakConfiguration;
 
   /**
+   * Configuration for open zeken services
+   */
+  openZaakServices?: OpenZaakConfigurationV2[];
+
+  /**
    * Configurations for OMCs
    */
   outputManagementComponents?: OutputManagementComponentConfiguration[];
