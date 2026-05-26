@@ -230,7 +230,7 @@ export class OpenZaakv2Service extends Construct {
       generateSecretString: {
         excludePunctuation: true,
         secretStringTemplate: JSON.stringify({
-          username: 'mijn_services',
+          username: this.props.openZaakConfiguration.databaseName,
         }),
         generateStringKey: 'password',
       },
