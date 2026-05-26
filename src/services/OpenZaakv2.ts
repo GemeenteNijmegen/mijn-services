@@ -157,7 +157,7 @@ export class OpenZaakv2Service extends Construct {
     const service = this.serviceFactory.createService({
       id: this.props.openZaakConfiguration.id + '-main',
       task: task,
-      domain: this.props.openZaakConfiguration.subdomain,
+      domain: `${this.props.openZaakConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
       options: {
         healthCheckGracePeriod: Duration.seconds(150),
         desiredCount: 1,
