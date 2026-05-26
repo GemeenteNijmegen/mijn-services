@@ -26,6 +26,14 @@ export class CacheDatabase extends Construct {
       description: 'Subnet group for redis',
     });
 
+    // const parameterGroup = new CfnParameterGroup(this, 'redis-parameters', {
+    //   cacheParameterGroupFamily: 'redis7',  // match your Redis version
+    //   description: 'Custom param group with more databases',
+    //   properties: {
+    //     databases: '32',  // default is 16, increase as needed
+    //   },
+    // });
+
     const db = new CfnCacheCluster(this, 'redis-cluster', {
       autoMinorVersionUpgrade: true,
       cacheNodeType: 'cache.t4g.micro',
@@ -34,6 +42,8 @@ export class CacheDatabase extends Construct {
       cacheSubnetGroupName: redisSubnetGroup.ref,
       vpcSecurityGroupIds: [redisSecurityGroup.securityGroupId],
       snapshotRetentionLimit: 5,
+      // cacheParameterGroupName: parameterGroup.ref, // TODO figure out how to do this
+      // Results in error: The parameter databases has a different value in the requested parameter group than the current parameter group. This parameter value cannot be changed for a cache cluster
     });
 
     this.db = db;

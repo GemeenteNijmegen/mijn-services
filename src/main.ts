@@ -1,6 +1,6 @@
 import { App } from 'aws-cdk-lib';
 import * as Dotenv from 'dotenv';
-import { getEnvironmentConfiguration } from './Configuration';
+import { getEnvironmentConfiguration } from './configuration/Configuration';
 import { PipelineStack } from './PipelineStack';
 
 Dotenv.config();

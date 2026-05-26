@@ -89,6 +89,11 @@ export interface Configuration {
   openZaak?: OpenZaakConfiguration;
 
   /**
+   * Configuration for open zeken services
+   */
+  openZaakServices?: OpenZaakConfigurationV2[];
+
+  /**
    * Configurations for OMCs
    */
   outputManagementComponents?: OutputManagementComponentConfiguration[];
@@ -217,6 +222,21 @@ export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, Celery
   apiVersion: string;
 }
 
+export interface OpenZaakConfigurationV2 extends OpenZaakConfiguration {
+  /**
+   * Name of the database to use
+   */
+  databaseName: string;
+  /**
+   * Subdomain to expose this open-zaak on
+   */
+  subdomain: string;
+  /**
+   * A human readable identifier used to register this open-zaak (cdk and descriptions)
+   */
+  id: string;
+}
+
 export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration, DatabaseMigrationToggle {
   /**
    * Docker image to use.
@@ -334,6 +354,8 @@ export interface OutputManagementComponentConfiguration {
     taskAssignedSms?: string;
     messsageSms?: string;
   };
+
+  usePostguardFlag?: boolean; //Fieldlab 11-5 flag: Postguard demo
 }
 
 export interface OpenKlantRegistrationServiceConfiguration {

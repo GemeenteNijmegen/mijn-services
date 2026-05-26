@@ -1,16 +1,17 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Duration, Stack, StackProps } from 'aws-cdk-lib';
+import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
 import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { EcrRepository } from './constructs/EcrRepository';
-import { OpenConfigurationStore } from './constructs/OpenConfigurationStore';
 import { CacheDatabase } from './constructs/Redis';
 import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
@@ -24,6 +25,7 @@ import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationSe
 import { OpenNotificatiesService } from './services/OpenNotificaties';
 import { OpenProductService } from './services/OpenProduct/OpenProduct';
 import { OpenZaakService } from './services/OpenZaak';
+import { OpenZaakv2Service } from './services/OpenZaakv2';
 import { OMCService } from './services/OutputManagementComponent';
 import { VtbService } from './services/VTB';
 import { Statics } from './Statics';
@@ -40,14 +42,13 @@ export class MainStack extends Stack {
   private readonly vpc: GemeenteNijmegenVpc;
   private readonly cache: CacheDatabase;
   private readonly key: Key;
-  private readonly openConfigStore: OpenConfigurationStore;
   private readonly dockerhubCredentials: ISecret;
+
+  private wildcardCertificate: ICertificate;
 
   constructor(scope: Construct, id: string, props: MainStackProps) {
     super(scope, id, props);
     this.configuration = props.configuration;
-
-    this.openConfigStore = new OpenConfigurationStore(this, 'open-config', { configuration: props.configuration });
 
     this.key = this.setupGeneralEncryptionKey();
     this.hostedzone = this.importHostedzone();
@@ -86,7 +87,7 @@ export class MainStack extends Stack {
     this.openKlantRegistrationServices(containerPlatform); // Should be higher in priority than open-klant
     this.openKlantService(containerPlatform);
     this.openNotificatiesServices(containerPlatform);
-    this.openZaakServices(containerPlatform);
+    this.openZaakService(containerPlatform);
     this.outputManagementComponent(containerPlatform);
     this.objecttypesService(containerPlatform);
     this.objectsService(containerPlatform);
@@ -97,6 +98,9 @@ export class MainStack extends Stack {
     this.corsaZgwServices(containerPlatform);
     this.vtbServices(containerPlatform);
     this.helloWorldService(containerPlatform);
+
+    // New style
+    this.openZaakServices(containerPlatform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
@@ -157,7 +161,7 @@ export class MainStack extends Stack {
     });
   }
 
-  private openZaakServices(platform: ContainerPlatform) {
+  private openZaakService(platform: ContainerPlatform) {
     if (!this.configuration.openZaak) {
       console.warn(
         'No open-zaak configuration provided. Skipping creation of open zaak service!',
@@ -183,6 +187,37 @@ export class MainStack extends Stack {
       },
       openZaakConfiguration: this.configuration.openZaak,
     });
+  }
+
+  private openZaakServices(platform: ContainerPlatform) {
+    if (!this.configuration.openZaakServices) {
+      console.warn(
+        'No open-zaak configurations provided. Skipping creation of open zaak services!',
+      );
+      return;
+    }
+
+    for (const openZaakConfig of this.configuration.openZaakServices) {
+      new OpenZaakv2Service(this, openZaakConfig.id, {
+        hostedzone: this.hostedzone,
+        key: this.key,
+        cache: this.cache,
+        cacheDatabaseIndex: 5,
+        cacheDatabaseIndexCelery: 6,
+        dockerhubCredentials: this.dockerhubCredentials,
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
+          port: 8000, // Ignored by new service
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+        openZaakConfiguration: openZaakConfig,
+        certificate: this.certificate(),
+      });
+    }
+
   }
 
   private outputManagementComponent(platform: ContainerPlatform) {
@@ -407,7 +442,6 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       openProductConfiguration: this.configuration.openProductServices,
-      openConfigStore: this.openConfigStore,
     });
   }
 
@@ -516,6 +550,24 @@ export class MainStack extends Stack {
 
     return key;
   }
+
+  /**
+   * Get the certificate ARN from parameter store in us-east-1
+   * @returns string Certificate ARN
+   */
+  private certificate() {
+    if (!this.wildcardCertificate) {
+      const parameters = new RemoteParameters(this, 'params', {
+        path: `${Statics.ssmWildcardCertificatePath}/`,
+        region: 'us-east-1',
+        timeout: Duration.seconds(10),
+      });
+      const certificateArn = parameters.get(Statics.ssmWildcardCertificateArn);
+      this.wildcardCertificate = Certificate.fromCertificateArn(this, 'cert', certificateArn);
+    }
+    return this.wildcardCertificate;
+  }
+
 }
 
 
