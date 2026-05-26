@@ -234,7 +234,7 @@ export class OpenZaakv2Service extends Construct {
         }),
         generateStringKey: 'password',
       },
-      secretName: Statics._ssmDatabaseCredentials,
+      secretName: Statics.databaseCredentialsName(this.props.openZaakConfiguration.databaseName),
     });
 
     // Import the RDS instance
