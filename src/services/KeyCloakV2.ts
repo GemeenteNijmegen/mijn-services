@@ -1,4 +1,4 @@
-import { Duration, Token } from 'aws-cdk-lib';
+import { Token } from 'aws-cdk-lib';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
@@ -85,11 +85,11 @@ export class KeyCloakServiceV2 extends Construct {
 
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
-      healthCheck: {
-        command: ['CMD-SHELL', 'curl --head -fsS http://localhost:9000/health/ready || exit 1'],
-        interval: Duration.seconds(10),
-        startPeriod: Duration.seconds(30),
-      },
+      // healthCheck: {
+      //   command: ['CMD-SHELL', 'curl --head -fsS http://localhost:9000/health/ready || exit 1'],
+      //   interval: Duration.seconds(10),
+      //   startPeriod: Duration.seconds(30),
+      // },
       command: ['start-dev'],
       portMappings: [
         {
