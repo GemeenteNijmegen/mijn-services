@@ -18,6 +18,7 @@ import { GZACService } from './services/GZAC';
 import { GZACFrontendService } from './services/GZACFrontend';
 import { HelloWorldService } from './services/HelloWorld';
 import { KeyCloakService } from './services/KeyCloak';
+import { KeyCloakServiceV2 } from './services/KeyCloakV2';
 import { ObjectsService } from './services/Objects';
 import { ObjecttypesService } from './services/Objecttypes';
 import { OpenKlantService } from './services/OpenKlant';
@@ -322,6 +323,32 @@ export class MainStack extends Stack {
       serviceConfiguration: this.configuration.keyCloackService,
     });
   }
+
+  private keyCloakServices(platform: ContainerPlatform) {
+    if (!this.configuration.keyCloackServices) {
+      console.warn(
+        'No keycloak configurations provided. Skipping creation of keycloak services!',
+      );
+      return;
+    }
+    for (const keycloak of this.configuration.keyCloackServices) {
+      new KeyCloakServiceV2(this, keycloak.id, {
+        hostedzone: this.hostedzone,
+        key: this.key,
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
+          port: 8080,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+        serviceConfiguration: keycloak,
+      });
+    }
+
+  }
+
 
   private gzacFrontendService(platform: ContainerPlatform) {
     if (!this.configuration.gzacFrontendService) {

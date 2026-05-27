@@ -119,6 +119,11 @@ export interface Configuration {
   keyCloackService?: KeyCloakConfiguration;
 
   /**
+   * Configuration for Keycloack services
+   */
+  keyCloackServices?: KeyCloakConfigurationV2[];
+
+  /**
    * Config for services meant for acc only right now
    */
   gzacService?: GZACConfiguration;
@@ -430,6 +435,22 @@ export interface KeyCloakConfiguration {
    */
   debug?: boolean;
 }
+
+export interface KeyCloakConfigurationV2 extends KeyCloakConfiguration {
+  /**
+   * Name of the db to be created (should be unique for this project)
+   */
+  databaseName: string;
+  /**
+   * CDK ID
+   */
+  id: string;
+  /**
+   * Subdomain to expose this keycloak on.
+   */
+  subdomain: string;
+}
+
 
 export interface GZACFrontendConfiguration {
   /**

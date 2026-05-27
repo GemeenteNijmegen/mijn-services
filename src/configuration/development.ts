@@ -153,4 +153,14 @@ export const development: Configuration = {
       scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
     },
   ],
+  keyCloackServices: [
+    {
+      databaseName: 'mijn-services-keycloak',
+      id: 'mijn-services-keycloak',
+      image: 'quay.io/keycloak/keycloak:24.0.1',
+      logLevel: 'DEBUG',
+      subdomain: 'keycloak',
+      debug: true,
+    },
+  ],
 };
