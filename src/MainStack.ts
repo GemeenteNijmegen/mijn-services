@@ -344,6 +344,7 @@ export class MainStack extends Stack {
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
         serviceConfiguration: keycloak,
+        certificate: this.certificate(),
       });
     }
 

@@ -10,14 +10,17 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { KeyCloakConfigurationV2 } from '../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
+import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { AdditionalDatabase } from '../custom-resources/database/AdditionalDatabase';
 import { Statics } from '../Statics';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 
 interface KeyCloakServiceV2Props {
   readonly service: EcsServiceFactoryProps;
   readonly hostedzone: IHostedZone;
   readonly serviceConfiguration: KeyCloakConfigurationV2;
   readonly key: Key;
+  readonly certificate: ICertificate;
 }
 
 export class KeyCloakServiceV2 extends Construct {
@@ -172,6 +175,16 @@ export class KeyCloakServiceV2 extends Construct {
       dbUserCredentialsSecret: this.databaseUserCredentials,
       instance: dbInstance,
       vpc: this.props.service.cluster.vpc,
+    });
+  }
+
+  private setupCloudFrontSubdomain() {
+
+    new SubdomainCloudfront(this, 'subdomain', {
+      certificate: this.props.certificate,
+      hostedZone: this.props.hostedzone,
+      loadbalancer: this.props.service.loadbalancer.alb,
+      subdomain: this.props.serviceConfiguration.subdomain,
     });
   }
 
