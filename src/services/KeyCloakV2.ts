@@ -45,6 +45,7 @@ export class KeyCloakServiceV2 extends Construct {
 
     this.setupDatabase();
     this.setupService();
+    this.setupCloudFrontSubdomain();
   }
 
   private getEnvironmentConfiguration() {
