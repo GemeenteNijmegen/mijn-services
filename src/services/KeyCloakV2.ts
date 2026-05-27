@@ -1,4 +1,5 @@
 import { Duration, Token } from 'aws-cdk-lib';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { Key } from 'aws-cdk-lib/aws-kms';
@@ -13,7 +14,6 @@ import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServ
 import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { AdditionalDatabase } from '../custom-resources/database/AdditionalDatabase';
 import { Statics } from '../Statics';
-import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 
 interface KeyCloakServiceV2Props {
   readonly service: EcsServiceFactoryProps;
@@ -108,7 +108,7 @@ export class KeyCloakServiceV2 extends Construct {
     });
 
     const service = this.serviceFactory.createService({
-      id: 'main',
+      id: this.props.serviceConfiguration.id,
       task: task,
       domain: `${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
       options: {

@@ -102,6 +102,7 @@ export class MainStack extends Stack {
 
     // New style
     this.openZaakServices(containerPlatform);
+    this.keyCloakServices(containerPlatform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
