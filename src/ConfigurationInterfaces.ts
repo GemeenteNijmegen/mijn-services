@@ -449,6 +449,10 @@ export interface KeyCloakConfigurationV2 extends KeyCloakConfiguration {
    * Subdomain to expose this keycloak on.
    */
   subdomain: string;
+  /**
+   * Loadbalancer priorty
+   */
+  loadbalancerPriority: number;
 }
 
 

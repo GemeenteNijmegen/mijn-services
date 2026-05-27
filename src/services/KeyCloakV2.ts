@@ -110,6 +110,7 @@ export class KeyCloakServiceV2 extends Construct {
     const service = this.serviceFactory.createService({
       id: this.props.serviceConfiguration.id,
       task: task,
+      healthCheckPath: '/health/ready',
       domain: `${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
       options: {
         desiredCount: 1,

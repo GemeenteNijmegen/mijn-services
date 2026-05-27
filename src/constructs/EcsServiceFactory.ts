@@ -58,7 +58,6 @@ export interface CreateEcsServiceOptions {
    */
   healthCheckPath?: string;
 
-
   /**
    * Provide the root path bool to expose the service on the main domain
    * (bla.com/)
@@ -161,7 +160,16 @@ export class EcsServiceFactory {
     }
 
     if (options.domain) {
-      this.props.loadbalancer.attachECSService(service, options.domain, undefined, undefined, true, options.id); // TODO make healthcheck configurabel
+      // TODO we should definetly redefine this function.
+      this.props.loadbalancer.attachECSService(
+        service,
+        options.domain,
+        undefined,
+        undefined,
+        true,
+        options.id,
+        options.healthCheckPath
+      );
     }
 
     if (options.volumeMounts) {
@@ -269,7 +277,7 @@ export class EcsServiceFactory {
     task: TaskDefinition,
     logs: LogGroup,
     runBeforeContainer:
-    ContainerDefinition,
+      ContainerDefinition,
     configLocation: string,
     configTarget: string,
   ) {
