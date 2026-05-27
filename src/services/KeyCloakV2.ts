@@ -52,7 +52,7 @@ export class KeyCloakServiceV2 extends Construct {
     const databasePort = StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort);
 
     return {
-      KC_DB: this.props.serviceConfiguration.databaseName,
+      KC_DB: 'postgres', // Database driver
       KC_DB_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${this.props.serviceConfiguration.databaseName}`,
       KC_FEATURES: 'token-exchange,admin-fine-grained-authz',
       KC_PROXY_HEADERS: 'forwarded',
@@ -104,7 +104,6 @@ export class KeyCloakServiceV2 extends Construct {
         streamPrefix: 'main',
         logGroup: this.logs,
       }),
-
     });
 
     const service = this.serviceFactory.createService({
