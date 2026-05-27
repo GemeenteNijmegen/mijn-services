@@ -56,9 +56,9 @@ export class KeyCloakServiceV2 extends Construct {
       KC_DB: 'postgres', // Database driver
       KC_DB_URL: `jdbc:postgresql://${databaseHostname}:${databasePort}/${this.props.serviceConfiguration.databaseName}`,
       KC_FEATURES: 'token-exchange,admin-fine-grained-authz',
-      KC_PROXY_HEADERS: 'forwarded',
+      KC_PROXY_HEADERS: 'xforwarded',
       KC_HTTP_ENABLED: 'true',
-      KC_HOSTNAME: `${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
+      KC_HOSTNAME: `https://${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
       KC_HEALTH_ENABLED: 'true',
       KC_LOG_LEVEL: this.props.serviceConfiguration.logLevel,
     };
