@@ -157,7 +157,7 @@ export const development: Configuration = {
     {
       databaseName: 'mijn-services-keycloak',
       id: 'mijn-services-keycloak',
-      image: 'quay.io/keycloak/keycloak:24.0.1',
+      image: 'quay.io/keycloak/keycloak:26.6.2',
       logLevel: 'DEBUG',
       subdomain: 'keycloak',
       debug: true,
