@@ -1,16 +1,18 @@
-import { Token } from 'aws-cdk-lib';
+import { Duration, Token } from 'aws-cdk-lib';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, Compatibility, ContainerImage, FargateService, Protocol, Secret, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { DatabaseInstance } from 'aws-cdk-lib/aws-rds';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
+import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { KeyCloakConfigurationV2 } from '../ConfigurationInterfaces';
-import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
+import { EcsServiceFactoryProps, ECSServiceUtils } from '../constructs/EcsServiceFactory';
 import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { AdditionalDatabase } from '../custom-resources/database/AdditionalDatabase';
 import { Statics } from '../Statics';
@@ -29,7 +31,6 @@ export class KeyCloakServiceV2 extends Construct {
 
   private readonly logs: LogGroup;
   private readonly props: KeyCloakServiceV2Props;
-  private readonly serviceFactory: EcsServiceFactory;
 
   private databaseUserCredentials: ISecret;
   private readonly keyCloakAdminCredentials: ISecret;
@@ -38,7 +39,6 @@ export class KeyCloakServiceV2 extends Construct {
   constructor(scope: Construct, id: string, props: KeyCloakServiceV2Props) {
     super(scope, id);
     this.props = props;
-    this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
     this.keyCloakAdminCredentials = this.keycloakAdminCredentials();
@@ -77,19 +77,17 @@ export class KeyCloakServiceV2 extends Construct {
 
   private setupService() {
     const VOLUME_NAME = 'tmp';
-    const task = this.serviceFactory.createTaskDefinition('main', {
-      volumes: [{ name: VOLUME_NAME }],
+
+    // Task definition with container
+    const task = new TaskDefinition(this, 'main-task', {
       cpu: '512',
       memoryMiB: '1024',
+      compatibility: Compatibility.FARGATE,
+      volumes: [{ name: VOLUME_NAME }],
     });
 
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
-      // healthCheck: {
-      //   command: ['CMD-SHELL', 'curl --head -fsS http://localhost:9000/health/ready || exit 1'],
-      //   interval: Duration.seconds(10),
-      //   startPeriod: Duration.seconds(30),
-      // },
       command: ['start-dev'],
       portMappings: [
         {
@@ -106,19 +104,46 @@ export class KeyCloakServiceV2 extends Construct {
         logGroup: this.logs,
       }),
     });
+    ECSServiceUtils.allowExecutingCommands(task);
 
-    const service = this.serviceFactory.createService({
-      id: this.props.serviceConfiguration.id,
-      task: task,
-      healthCheckPath: '/health/ready',
-      domain: `${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
-      options: {
-        desiredCount: 1,
-        enableExecuteCommand: true,
+
+    // Setup the service
+    const service = new FargateService(this, `${this.props.serviceConfiguration.id}-service`, {
+      cluster: this.props.service.cluster,
+      taskDefinition: task,
+      cloudMapOptions: { // Expose for intercontainer communication
+        cloudMapNamespace: this.props.service.namespace,
+        containerPort: KeyCloakServiceV2.PORT,
+        dnsRecordType: DnsRecordType.SRV,
+        dnsTtl: Duration.seconds(60),
       },
+      desiredCount: 1,
+      enableExecuteCommand: true,
     });
-    this.serviceFactory.allowExecutingCommands(task);
     this.setupConnectivity('main', service.connections.securityGroups);
+
+
+    // Attach to loadbalancer
+    const fqdomain = `${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`;
+    this.props.service.loadbalancer.listener.addTargets(this.props.serviceConfiguration.id, {
+      conditions: [ListenerCondition.hostHeaders([fqdomain])],
+      healthCheck: {
+        enabled: true,
+        path: '/health/ready',
+        healthyHttpCodes: '200',
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 6,
+        timeout: Duration.seconds(10),
+        interval: Duration.seconds(15),
+        protocol: AlbProtocol.HTTP,
+      },
+      port: 80,
+      targets: [service],
+      priority: this.props.serviceConfiguration.loadbalancerPriority,
+      deregistrationDelay: Duration.minutes(1),
+    });
+
+
     return service;
   }
 
@@ -203,7 +228,6 @@ export class KeyCloakServiceV2 extends Construct {
     serviceSecurityGroups.forEach(serviceSecurityGroup => {
       dbSecurityGroup.connections.allowFrom(serviceSecurityGroup, Port.tcp(Token.asNumber(dbPort)));
     });
-
   }
 
 

@@ -16,8 +16,8 @@ interface LoadBalancerProps extends StackProps {
 }
 
 export class ServiceLoadBalancer extends Construct {
-  public alb: ApplicationLoadBalancer;
-  private listener: ApplicationListener;
+  public readonly alb: ApplicationLoadBalancer;
+  public readonly listener: ApplicationListener;
   private priority: number = 2;
   constructor(scope: Construct, id: string, private readonly props: LoadBalancerProps) {
     super(scope, id);

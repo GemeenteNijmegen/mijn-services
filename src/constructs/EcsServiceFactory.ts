@@ -168,7 +168,7 @@ export class EcsServiceFactory {
         undefined,
         true,
         options.id,
-        options.healthCheckPath
+        options.healthCheckPath,
       );
     }
 
@@ -181,22 +181,6 @@ export class EcsServiceFactory {
     return service;
   }
 
-  /**
-   * Allows ECS Exec commands in containers, note this should be enabled on service level as well.
-   * @param task the task to allow exec to
-   */
-  allowExecutingCommands(task: TaskDefinition) {
-    task.addToTaskRolePolicy(new PolicyStatement({
-      actions: [
-        'ssmmessages:CreateControlChannel',
-        'ssmmessages:CreateDataChannel',
-        'ssmmessages:OpenControlChannel',
-        'ssmmessages:OpenDataChannel',
-      ],
-      effect: Effect.ALLOW,
-      resources: ['*'],
-    }));
-  }
 
   /**
    * This adds a cloudwatch alarm for unresponsive services. Health checks should catch this, but they're not yet stable enough.
@@ -277,7 +261,7 @@ export class EcsServiceFactory {
     task: TaskDefinition,
     logs: LogGroup,
     runBeforeContainer:
-      ContainerDefinition,
+    ContainerDefinition,
     configLocation: string,
     configTarget: string,
   ) {
@@ -398,4 +382,24 @@ export class EcsServiceFactory {
 
   }
 
+}
+
+
+export class ECSServiceUtils {
+  /**
+   * Allows ECS Exec commands in containers, note this should be enabled on service level as well.
+   * @param task the task to allow exec to
+   */
+  static allowExecutingCommands(task: TaskDefinition) {
+    task.addToTaskRolePolicy(new PolicyStatement({
+      actions: [
+        'ssmmessages:CreateControlChannel',
+        'ssmmessages:CreateDataChannel',
+        'ssmmessages:OpenControlChannel',
+        'ssmmessages:OpenDataChannel',
+      ],
+      effect: Effect.ALLOW,
+      resources: ['*'],
+    }));
+  }
 }

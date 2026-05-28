@@ -9,7 +9,7 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenZaakConfiguration } from '../ConfigurationInterfaces';
-import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps, ECSServiceUtils } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
@@ -192,11 +192,6 @@ export class OpenZaakService extends Construct {
       image: ContainerImage.fromRegistry(this.props.openZaakConfiguration.image, {
         credentials: this.props.dockerhubCredentials,
       }),
-      // healthCheck: { // Disabled as we have ALB health checks
-      //   command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
-      //   interval: Duration.seconds(10),
-      //   startPeriod: Duration.seconds(100),
-      // },
       portMappings: [
         {
           containerPort: this.props.service.port,
@@ -234,7 +229,7 @@ export class OpenZaakService extends Construct {
         },
       },
     });
-    this.serviceFactory.allowExecutingCommands(task);
+    ECSServiceUtils.allowExecutingCommands(task);
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
@@ -292,7 +287,7 @@ export class OpenZaakService extends Construct {
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
-    this.serviceFactory.allowExecutingCommands(task);
+    ECSServiceUtils.allowExecutingCommands(task);
 
   }
 

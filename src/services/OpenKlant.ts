@@ -9,7 +9,7 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenKlantConfiguration } from '../ConfigurationInterfaces';
-import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps, ECSServiceUtils } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
 
@@ -126,7 +126,7 @@ export class OpenKlantService extends Construct {
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
 
-    this.serviceFactory.allowExecutingCommands(task);
+    ECSServiceUtils.allowExecutingCommands(task);
 
     const container = task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.image, {
@@ -178,7 +178,7 @@ export class OpenKlantService extends Construct {
     });
 
     // Enable exec
-    this.serviceFactory.allowExecutingCommands(task);
+    ECSServiceUtils.allowExecutingCommands(task);
 
     // Setup celery container
     const container = task.addContainer('celery', {

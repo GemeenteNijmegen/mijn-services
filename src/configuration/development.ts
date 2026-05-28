@@ -161,6 +161,7 @@ export const development: Configuration = {
       logLevel: 'DEBUG',
       subdomain: 'keycloak',
       debug: true,
+      loadbalancerPriority: 50,
     },
   ],
 };
