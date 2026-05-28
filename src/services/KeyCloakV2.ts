@@ -119,6 +119,7 @@ export class KeyCloakServiceV2 extends Construct {
       },
       desiredCount: 1,
       enableExecuteCommand: true,
+      healthCheckGracePeriod: Duration.seconds(120), // Give time to start
     });
     this.setupConnectivity('main', service.connections.securityGroups);
 
