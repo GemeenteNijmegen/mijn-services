@@ -1,4 +1,5 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
+import { RemoteParameters } from '@gemeentenijmegen/cross-region-parameters';
 import { Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
@@ -6,7 +7,6 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { HostedZone, IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { RemoteParameters } from 'cdk-remote-stack';
 import { Construct } from 'constructs';
 import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
