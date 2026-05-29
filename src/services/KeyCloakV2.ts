@@ -61,6 +61,8 @@ export class KeyCloakServiceV2 extends Construct {
       KC_HOSTNAME: `https://${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
       KC_HEALTH_ENABLED: 'true',
       KC_LOG_LEVEL: this.props.serviceConfiguration.logLevel,
+      KC_HOSTNAME_STRICT: 'true',
+      KC_METRICS_ENABLED: 'true',
     };
   }
 
@@ -88,7 +90,7 @@ export class KeyCloakServiceV2 extends Construct {
 
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
-      command: ['start-dev'],
+      command: ['start'],
       portMappings: [
         {
           containerPort: KeyCloakServiceV2.PORT,
@@ -96,7 +98,7 @@ export class KeyCloakServiceV2 extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: false, // Required for ECS Exec
+      readonlyRootFilesystem: true,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
