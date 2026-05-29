@@ -98,7 +98,7 @@ export class KeyCloakServiceV2 extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false,
       secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
