@@ -12,6 +12,7 @@ import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { EcrRepository } from './constructs/EcrRepository';
+import { OperatingHourEnforcer } from './constructs/operating-hours/OperatingHourEnforcer';
 import { CacheDatabase } from './constructs/Redis';
 import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
@@ -83,6 +84,14 @@ export class MainStack extends Stack {
       domains,
       configuration: this.configuration,
     });
+
+    if (props.configuration.containerOperationalHours) {
+      new OperatingHourEnforcer(this, 'operating-hours', {
+        cluster: containerPlatform.cluster,
+        operatingHours: props.configuration.containerOperationalHours,
+      });
+    }
+
 
     // Note: The order of which services are created here affects the loadbalancer priority...
     this.openKlantRegistrationServices(containerPlatform); // Should be higher in priority than open-klant

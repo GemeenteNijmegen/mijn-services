@@ -1,6 +1,7 @@
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Environment } from 'aws-cdk-lib';
 import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
+import { OperatingHours } from './constructs/operating-hours/OperatingHourEnforcer';
 
 /**
  * Adds a configuration field to another interface
@@ -50,6 +51,12 @@ export interface Configuration {
    * E.g. for certificates.
    */
   cnameRecords?: Record<string, string>;
+
+
+  /**
+   * Container operational hours
+   */
+  containerOperationalHours?: OperatingHours;
 
   /**
    * A list of databases that is created for
