@@ -26,6 +26,14 @@
     "strictPropertyInitialization": false,
     "stripInternal": true,
     "target": "ES2022",
+    "types": [
+      "aws-lambda",
+      "jest",
+      "jsonwebtoken",
+      "node",
+      "pg",
+      "aws-lambda"
+    ],
     "moduleResolution": "nodenext",
     "typeRoots": [
       "./node_modules/@types"

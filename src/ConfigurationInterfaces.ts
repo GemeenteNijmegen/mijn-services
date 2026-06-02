@@ -1,6 +1,7 @@
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Environment } from 'aws-cdk-lib';
 import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
+import { OperatingHours } from './constructs/operating-hours/OperatingHourEnforcer';
 
 /**
  * Adds a configuration field to another interface
@@ -50,6 +51,12 @@ export interface Configuration {
    * E.g. for certificates.
    */
   cnameRecords?: Record<string, string>;
+
+
+  /**
+   * Container operational hours
+   */
+  containerOperationalHours?: OperatingHours;
 
   /**
    * A list of databases that is created for
@@ -117,6 +124,11 @@ export interface Configuration {
    * GZAC Keycloak
    */
   keyCloackService?: KeyCloakConfiguration;
+
+  /**
+   * Configuration for Keycloack services
+   */
+  keyCloackServices?: KeyCloakConfigurationV2[];
 
   /**
    * Config for services meant for acc only right now
@@ -430,6 +442,26 @@ export interface KeyCloakConfiguration {
    */
   debug?: boolean;
 }
+
+export interface KeyCloakConfigurationV2 extends KeyCloakConfiguration {
+  /**
+   * Name of the db to be created (should be unique for this project)
+   */
+  databaseName: string;
+  /**
+   * CDK ID
+   */
+  id: string;
+  /**
+   * Subdomain to expose this keycloak on.
+   */
+  subdomain: string;
+  /**
+   * Loadbalancer priorty
+   */
+  loadbalancerPriority: number;
+}
+
 
 export interface GZACFrontendConfiguration {
   /**

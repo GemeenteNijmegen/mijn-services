@@ -17,6 +17,10 @@ export const development: Configuration = {
   createTransferServer: false,
   databases: Statics.databasesAcceptance,
   databaseSnapshotRetentionDays: 0,
+  containerOperationalHours: {
+    startHour: 7,
+    endHour: 20,
+  },
   openklant: {
     image: 'maykinmedia/open-klant:2.15.0',
     logLevel: 'DEBUG',
@@ -151,6 +155,17 @@ export const development: Configuration = {
     {
       configKey: 'esfTaak',
       scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+    },
+  ],
+  keyCloackServices: [
+    {
+      databaseName: 'mijn-services-keycloak',
+      id: 'mijn-services-keycloak',
+      image: 'quay.io/keycloak/keycloak:26.6.2',
+      logLevel: 'DEBUG',
+      subdomain: 'keycloak',
+      debug: true,
+      loadbalancerPriority: 50,
     },
   ],
 };

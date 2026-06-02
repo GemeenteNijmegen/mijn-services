@@ -1,0 +1,70 @@
+meta {
+  name: object (POST)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrlObjects}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Crs: EPSG:4326
+}
+
+body:json {
+  {
+    "uuid": "{{objectGuid}}",
+    "type": "{{baseUrlObjecttypes}}/{{objectTypeGuid}}",
+    "record": {
+      "typeVersion": 7,
+      "startAt": "{{today}}",
+      "data": {
+        "soort": "formtaak",
+        "titel": "Statusformulier <test format 6>",
+        "status": "open",
+        "eigenaar": "nijmegen",
+        "formtaak": {
+          "data": {
+            "email": "me@example.com",
+            "inkhef": "NEE",
+            "telefoon": "0612345678",
+            "clientnummer": "12345",
+            "dossiernummer": "12345",
+            "periodenummer": "202606",
+            "regelingnummer": "0",
+            "termijnvanordedatum": "2026-05-13 00:00:00"
+          },
+          "formulier": {
+            "soort": "url",
+            "value": "https://formulier.accp.nijmegen.nl/statusformulier?initial_data_reference={{objectGuid}}"
+          }
+        },
+        "verloopdatum": "2026-06-01 00:00:00",
+        "identificatie": {
+          "type": "bsn",
+          "value": "900222670"
+        },
+        "verwerker_taak_id": "client_task"
+      }
+    }
+  }
+}
+
+vars:pre-request {
+  objectTypeGuid: 6df21057-e07c-4909-8933-d70b79cfd15e
+  today: 
+  objectGuid: 
+}
+
+script:pre-request {
+  bru.setVar("today", new Date().toISOString().substr(0, 'YYYY-MM-DD'.length))
+  bru.setVar("objectGuid", bru.interpolate("{{$guid}}"))
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

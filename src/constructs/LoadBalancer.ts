@@ -16,8 +16,8 @@ interface LoadBalancerProps extends StackProps {
 }
 
 export class ServiceLoadBalancer extends Construct {
-  public alb: ApplicationLoadBalancer;
-  private listener: ApplicationListener;
+  public readonly alb: ApplicationLoadBalancer;
+  public readonly listener: ApplicationListener;
   private priority: number = 2;
   constructor(scope: Construct, id: string, private readonly props: LoadBalancerProps) {
     super(scope, id);
@@ -91,10 +91,11 @@ export class ServiceLoadBalancer extends Construct {
     props?: AddApplicationTargetsProps,
     routeBySubdomain?: boolean,
     targetGroupId?: string,
+    healthCheckPath?: string,
   ) {
     const defaultHealthCheck = {
       enabled: true,
-      path: '/',
+      path: healthCheckPath ?? '/',
       healthyHttpCodes: '200',
       healthyThresholdCount: 2,
       unhealthyThresholdCount: 6,
@@ -120,6 +121,7 @@ export class ServiceLoadBalancer extends Construct {
     this.listener.addTargets(`${targetGroupId ?? pathOrSubdomain}-target`, { ...listenerProps, ...props });
     this.priority += 1;
   }
+
 
   attachLambda(lambda: Function, path: string, priority?: number, props?: AddApplicationTargetsProps) {
     const listenerProps: AddApplicationTargetsProps = {

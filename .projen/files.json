@@ -17,6 +17,7 @@
     ".projen/tasks.json",
     "cdk.json",
     "LICENSE",
+    "src/constructs/operating-hours/operatingHoursEnforcer-function.ts",
     "src/custom-resources/create-databases/create-databases-function.ts",
     "src/custom-resources/database/databaseCustomResource-function.ts",
     "src/custom-resources/securitygroupByName/securitygroupByName-function.ts",

@@ -72,12 +72,11 @@
     },
     {
       "name": "jest-junit",
-      "version": "^16",
+      "version": "^17",
       "type": "build"
     },
     {
       "name": "projen",
-      "version": "0.98.29",
       "type": "build"
     },
     {
@@ -114,6 +113,10 @@
     },
     {
       "name": "@aws-sdk/client-ec2",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-ecs",
       "type": "runtime"
     },
     {
@@ -167,7 +170,7 @@
     },
     {
       "name": "constructs",
-      "version": "^10.0.5",
+      "version": "^10.5.1",
       "type": "runtime"
     },
     {
