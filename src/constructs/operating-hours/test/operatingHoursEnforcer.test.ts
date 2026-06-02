@@ -89,7 +89,7 @@ describe('isWithinOperatingHours', () => {
 
 describe('handler – stop path', () => {
   beforeEach(() => {
-    jest.spyOn(Date.prototype, 'getUTCHours').mockReturnValue(22); // outside 8–18
+    jest.spyOn(Date.prototype, 'getHours').mockReturnValue(22); // outside 8–18
   });
 
   it('saves desired counts and scales all running services to 0', async () => {
@@ -191,7 +191,7 @@ describe('handler – stop path', () => {
 
 describe('handler – start path', () => {
   beforeEach(() => {
-    jest.spyOn(Date.prototype, 'getUTCHours').mockReturnValue(10); // inside 8–18
+    jest.spyOn(Date.prototype, 'getHours').mockReturnValue(10); // inside 8–18
   });
 
   it('restores desired counts from DynamoDB and deletes the saved records', async () => {
