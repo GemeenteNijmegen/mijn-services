@@ -17,6 +17,10 @@ export const development: Configuration = {
   createTransferServer: false,
   databases: Statics.databasesAcceptance,
   databaseSnapshotRetentionDays: 0,
+  containerOperationalHours: {
+    startHour: 7,
+    endHour: 20,
+  },
   openklant: {
     image: 'maykinmedia/open-klant:2.15.0',
     logLevel: 'DEBUG',
