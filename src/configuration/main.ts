@@ -1,8 +1,8 @@
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
+import { Duration } from 'aws-cdk-lib';
+import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
 import { Configuration } from '../ConfigurationInterfaces';
 import { Statics } from '../Statics';
-import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
-import { Duration } from 'aws-cdk-lib';
 
 export const main: Configuration = {
   branch: 'main',
