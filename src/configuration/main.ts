@@ -1,6 +1,8 @@
 import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Configuration } from '../ConfigurationInterfaces';
 import { Statics } from '../Statics';
+import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
+import { Duration } from 'aws-cdk-lib';
 
 export const main: Configuration = {
   branch: 'main',
@@ -54,10 +56,10 @@ export const main: Configuration = {
       memory: '1024',
     },
   },
-  // ObjectNotificationServices: [
-  //   {
-  //     configKey: 'esfTaak',
-  //     scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
-  //   },
-  // ],
+  ObjectNotificationServices: [
+    {
+      configKey: 'esfTaak',
+      scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
+    },
+  ],
 };
