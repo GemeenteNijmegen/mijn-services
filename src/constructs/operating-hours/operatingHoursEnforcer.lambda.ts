@@ -20,10 +20,10 @@ export async function handler(): Promise<void> {
   const startHour = parseInt(process.env.START_HOUR!);
   const endHour = parseInt(process.env.END_HOUR!);
 
-  const currentHour = new Date().getUTCHours();
-  const within = isWithinOperatingHours(currentHour, startHour, endHour);
+  const currentLocalHour = new Date().getHours(); // Local time!
+  const within = isWithinOperatingHours(currentLocalHour, startHour, endHour);
 
-  console.log(JSON.stringify({ clusterArn, currentHour, startHour, endHour, within }));
+  console.log(JSON.stringify({ clusterArn, currentHour: currentLocalHour, startHour, endHour, within }));
 
   if (within) {
     await startServices(clusterArn, tableName);
