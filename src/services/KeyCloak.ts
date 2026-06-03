@@ -94,8 +94,6 @@ export class KeyCloakService extends Construct {
       memoryMiB: '1024',
     });
 
-    // Main service container
-    // const container =
     task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
@@ -120,10 +118,6 @@ export class KeyCloakService extends Construct {
       }),
 
     });
-    // this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
-
-    // 1st Filesystem write access - initialization container
-    // this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
 
     const service = this.serviceFactory.createService({
       id: 'main',
@@ -138,49 +132,6 @@ export class KeyCloakService extends Construct {
     return service;
   }
 
-  //   private setupConfigurationService() {
-  //     const VOLUME_NAME = 'tmp';
-  //     const task = this.serviceFactory.createTaskDefinition('setup', {
-  //       volumes: [{ name: VOLUME_NAME }],
-  //     });
-
-  //     // Configuration container
-  //     const initContainer = task.addContainer('setup', {
-  //       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
-  //       command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'], // See django docs
-  //       readonlyRootFilesystem: true,
-  //       essential: true,
-  //       logging: new AwsLogDriver({
-  //         streamPrefix: 'setup',
-  //         logGroup: this.logs,
-  //       }),
-  //       secrets: this.getSecretConfiguration(),
-  //       environment: this.getEnvironmentConfiguration(),
-  //     });
-  //     this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/log', '/app/setup_configuration');
-
-  //     // Filesystem write access - initialization container
-  //     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/log', '/app/setup_configuration');
-
-  //     // Scheduel a task in the past (so we can run it manually)
-  //     const rule = new Rule(this, 'schedule-setup', {
-  //       schedule: Schedule.cron({
-  //         year: '2020',
-  //       }),
-  //       description: 'Rule to run setup configuration for KeyCloak-api (manually)',
-  //     });
-  //     const ecsTask = new EcsTask({
-  //       cluster: this.props.service.cluster,
-  //       taskDefinition: task,
-  //     });
-  //     rule.addTarget(ecsTask);
-
-  //     // Setup connectivity
-  //     this.setupConnectivity('setup', ecsTask.securityGroups ?? []);
-  //     this.allowAccessToSecrets(task.executionRole!);
-  //   }
-
-
   private logGroup() {
     return new LogGroup(this, 'logs', {
       retention: RetentionDays.ONE_MONTH,
@@ -189,7 +140,6 @@ export class KeyCloakService extends Construct {
   }
 
   private setupConnectivity(id: string, serviceSecurityGroups: ISecurityGroup[]) {
-
     const dbSecurityGroupId = StringParameter.valueForStringParameter(this, Statics._ssmDatabaseSecurityGroup);
     const dbSecurityGroup = SecurityGroup.fromSecurityGroupId(this, `db-security-group-${id}`, dbSecurityGroupId);
     const dbPort = StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort);
@@ -202,8 +152,6 @@ export class KeyCloakService extends Construct {
   private allowAccessToSecrets(role: IRole) {
     this.databaseCredentials.grantRead(role);
     this.keyCloakAdminCredentials.grantRead(role);
-
   }
-
 
 }

@@ -12,12 +12,14 @@ import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
 import { EcrRepository } from './constructs/EcrRepository';
+import { OperatingHourEnforcer } from './constructs/operating-hours/OperatingHourEnforcer';
 import { CacheDatabase } from './constructs/Redis';
 import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
 import { GZACFrontendService } from './services/GZACFrontend';
 import { HelloWorldService } from './services/HelloWorld';
 import { KeyCloakService } from './services/KeyCloak';
+import { KeyCloakServiceV2 } from './services/KeyCloakV2';
 import { ObjectsService } from './services/Objects';
 import { ObjecttypesService } from './services/Objecttypes';
 import { OpenKlantService } from './services/OpenKlant';
@@ -83,6 +85,14 @@ export class MainStack extends Stack {
       configuration: this.configuration,
     });
 
+    if (props.configuration.containerOperationalHours) {
+      new OperatingHourEnforcer(this, 'operating-hours', {
+        cluster: containerPlatform.cluster,
+        operatingHours: props.configuration.containerOperationalHours,
+      });
+    }
+
+
     // Note: The order of which services are created here affects the loadbalancer priority...
     this.openKlantRegistrationServices(containerPlatform); // Should be higher in priority than open-klant
     this.openKlantService(containerPlatform);
@@ -101,6 +111,7 @@ export class MainStack extends Stack {
 
     // New style
     this.openZaakServices(containerPlatform);
+    this.keyCloakServices(containerPlatform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
@@ -322,6 +333,33 @@ export class MainStack extends Stack {
       serviceConfiguration: this.configuration.keyCloackService,
     });
   }
+
+  private keyCloakServices(platform: ContainerPlatform) {
+    if (!this.configuration.keyCloackServices) {
+      console.warn(
+        'No keycloak configurations provided. Skipping creation of keycloak services!',
+      );
+      return;
+    }
+    for (const keycloak of this.configuration.keyCloackServices) {
+      new KeyCloakServiceV2(this, keycloak.id, {
+        hostedzone: this.hostedzone,
+        key: this.key,
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
+          port: 8080,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+        serviceConfiguration: keycloak,
+        certificate: this.certificate(),
+      });
+    }
+
+  }
+
 
   private gzacFrontendService(platform: ContainerPlatform) {
     if (!this.configuration.gzacFrontendService) {

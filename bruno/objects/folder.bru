@@ -4,5 +4,11 @@ meta {
 }
 
 auth {
-  mode: inherit
+  mode: apikey
+}
+
+auth:apikey {
+  key: Authorization
+  value: token {{objectsToken}}
+  placement: header
 }

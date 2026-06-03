@@ -1,0 +1,44 @@
+meta {
+  name: object
+  type: http
+  seq: 1
+}
+
+patch {
+  url: {{baseUrl}}l/objects/api/v2/objects/c2bdb635-49bc-4476-86bc-9b56fad7e01f
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "record": {
+      "typeVersion": 7,
+      "data": {
+        "formtaak": {
+          "verzonden_data": {
+            "email": "me@example.com",
+            "telefoon": "12345678",
+            "inkomstengewijzigd": "nee",
+            "woonsituatiegewijzigd": "nee",
+            "vakantiegewijzigd": "nee",
+            "studiegewijzigd": "nee",
+            "vrijwilligerswerkgewijzigd": "nee",
+            "vermogengewijzigd": "nee",
+            "pdf": "https://example.com",
+            "attachments": [],
+            "formulierreferentie": "AB-CDEFGH",
+            "toelichtingingevuld": "nee"
+          }
+        },
+        "status": "afgerond"
+      },
+      "startAt": "2026-05-07"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

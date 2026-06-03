@@ -58,7 +58,6 @@ export interface CreateEcsServiceOptions {
    */
   healthCheckPath?: string;
 
-
   /**
    * Provide the root path bool to expose the service on the main domain
    * (bla.com/)
@@ -161,7 +160,16 @@ export class EcsServiceFactory {
     }
 
     if (options.domain) {
-      this.props.loadbalancer.attachECSService(service, options.domain, undefined, undefined, true, options.id); // TODO make healthcheck configurabel
+      // TODO we should definetly redefine this function.
+      this.props.loadbalancer.attachECSService(
+        service,
+        options.domain,
+        undefined,
+        undefined,
+        true,
+        options.id,
+        options.healthCheckPath,
+      );
     }
 
     if (options.volumeMounts) {
@@ -173,22 +181,6 @@ export class EcsServiceFactory {
     return service;
   }
 
-  /**
-   * Allows ECS Exec commands in containers, note this should be enabled on service level as well.
-   * @param task the task to allow exec to
-   */
-  allowExecutingCommands(task: TaskDefinition) {
-    task.addToTaskRolePolicy(new PolicyStatement({
-      actions: [
-        'ssmmessages:CreateControlChannel',
-        'ssmmessages:CreateDataChannel',
-        'ssmmessages:OpenControlChannel',
-        'ssmmessages:OpenDataChannel',
-      ],
-      effect: Effect.ALLOW,
-      resources: ['*'],
-    }));
-  }
 
   /**
    * This adds a cloudwatch alarm for unresponsive services. Health checks should catch this, but they're not yet stable enough.
@@ -390,4 +382,24 @@ export class EcsServiceFactory {
 
   }
 
+}
+
+
+export class ECSServiceUtils {
+  /**
+   * Allows ECS Exec commands in containers, note this should be enabled on service level as well.
+   * @param task the task to allow exec to
+   */
+  static allowExecutingCommands(task: TaskDefinition) {
+    task.addToTaskRolePolicy(new PolicyStatement({
+      actions: [
+        'ssmmessages:CreateControlChannel',
+        'ssmmessages:CreateDataChannel',
+        'ssmmessages:OpenControlChannel',
+        'ssmmessages:OpenDataChannel',
+      ],
+      effect: Effect.ALLOW,
+      resources: ['*'],
+    }));
+  }
 }

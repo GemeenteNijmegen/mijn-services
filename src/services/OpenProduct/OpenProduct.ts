@@ -9,7 +9,7 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenProductServicesConfiguration } from '../../ConfigurationInterfaces';
-import { EcsServiceFactory, EcsServiceFactoryProps } from '../../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps, ECSServiceUtils } from '../../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../../constructs/Redis';
 import { Statics } from '../../Statics';
 import { Utils } from '../../Utils';
@@ -159,11 +159,6 @@ export class OpenProductService extends Construct {
       image: ContainerImage.fromRegistry(this.props.openProductConfiguration.image, {
         credentials: this.props.dockerhubCredentials,
       }),
-      // healthCheck: {
-      //   command: ['CMD-SHELL', ServiceInfraUtils.frontendHealthCheck(this.props.service.port)],
-      //   interval: Duration.seconds(10),
-      //   startPeriod: Duration.seconds(30),
-      // },
       portMappings: [
         {
           containerPort: this.props.service.port,
@@ -184,7 +179,7 @@ export class OpenProductService extends Construct {
     // File system prermissions for ephemeral storage (1st to run)
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/setup_configuration');
 
-    this.serviceFactory.allowExecutingCommands(task);
+    ECSServiceUtils.allowExecutingCommands(task);
 
     const service = this.serviceFactory.createService({
       id: 'main',
@@ -261,7 +256,7 @@ export class OpenProductService extends Construct {
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
-    this.serviceFactory.allowExecutingCommands(task);
+    ECSServiceUtils.allowExecutingCommands(task);
 
   }
   private setupConnectivity(id: string, serviceSecurityGroups: ISecurityGroup[]) {

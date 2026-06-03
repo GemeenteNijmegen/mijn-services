@@ -9,7 +9,7 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { ObjecttypesConfiguration } from '../ConfigurationInterfaces';
-import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps, ECSServiceUtils } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
@@ -198,7 +198,7 @@ export class ObjecttypesService extends Construct {
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
-    this.serviceFactory.allowExecutingCommands(task);
+    ECSServiceUtils.allowExecutingCommands(task);
 
     return service;
   }

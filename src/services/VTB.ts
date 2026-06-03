@@ -11,7 +11,7 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { VtbConfiguration } from '../ConfigurationInterfaces';
-import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps, ECSServiceUtils } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { Statics } from '../Statics';
@@ -156,7 +156,7 @@ export class VtbService extends Construct {
     this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
 
-    this.serviceFactory.allowExecutingCommands(task);
+    ECSServiceUtils.allowExecutingCommands(task);
 
     const service = this.serviceFactory.createService({
       id: 'main',

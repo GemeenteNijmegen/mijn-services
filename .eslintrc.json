@@ -153,6 +153,7 @@
         "devDependencies": [
           "**/test/**",
           "**/build-tools/**",
+          "src/constructs/operating-hours/operatingHoursEnforcer.lambda.ts",
           "src/custom-resources/create-databases/create-databases.lambda.ts",
           "src/custom-resources/database/databaseCustomResource.lambda.ts",
           "src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts",

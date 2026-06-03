@@ -11,7 +11,7 @@ import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanag
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenZaakConfigurationV2 } from '../ConfigurationInterfaces';
-import { EcsServiceFactory, EcsServiceFactoryProps } from '../constructs/EcsServiceFactory';
+import { EcsServiceFactory, EcsServiceFactoryProps, ECSServiceUtils } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
 import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { AdditionalDatabase } from '../custom-resources/database/AdditionalDatabase';
@@ -164,7 +164,7 @@ export class OpenZaakv2Service extends Construct {
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
     });
-    this.serviceFactory.allowExecutingCommands(task);
+    ECSServiceUtils.allowExecutingCommands(task);
     this.setupConnectivity('main', service.connections.securityGroups);
     this.filesBucket.grantReadWrite(task.taskRole!);
     return service;
@@ -208,7 +208,7 @@ export class OpenZaakv2Service extends Construct {
       },
     });
     this.setupConnectivity('celery', service.connections.securityGroups);
-    this.serviceFactory.allowExecutingCommands(task);
+    ECSServiceUtils.allowExecutingCommands(task);
     this.filesBucket.grantReadWrite(task.taskRole!);
   }
 

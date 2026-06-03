@@ -1,0 +1,20 @@
+meta {
+  name: Objecttype
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrlObjecttypes}}/{{objectTypeUuid}}
+  body: none
+  auth: inherit
+}
+
+vars:pre-request {
+  objectTypeUuid: 6df21057-e07c-4909-8933-d70b79cfd15e
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
