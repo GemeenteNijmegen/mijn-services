@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2",
-    "@types/aws-lambda": "^8.10.161",
+    "@types/aws-lambda": "^8.10.162",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^18",
@@ -81,7 +81,7 @@
     "@gemeentenijmegen/projen-project-type": "^1.13.0",
     "@gemeentenijmegen/utils": "^0.0.38",
     "@middy/core": "^6.4.5",
-    "@types/aws-lambda": "^8.10.161",
+    "@types/aws-lambda": "^8.10.162",
     "aws-cdk-lib": "^2.1.0",
     "cdk-remote-stack": "^2.1.0",
     "constructs": "^10.5.1",
