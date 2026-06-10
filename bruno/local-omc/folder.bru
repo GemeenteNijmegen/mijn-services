@@ -1,0 +1,61 @@
+meta {
+  name: local-omc
+  seq: 6
+}
+
+auth {
+  mode: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN_OMC}}
+}
+
+script:pre-request {
+  const CryptoJS = require("crypto-js");
+  
+  // Controleer of huidig token nog geldig is
+  const existingToken = bru.getVar("JWT_TOKEN_OMC");
+  const tokenExp = bru.getVar("JWT_TOKEN_OMC_EXP");
+  
+  if (existingToken && tokenExp && Math.floor(Date.now() / 1000) < tokenExp - 60) {
+    // Token is nog geldig, niets te doen
+    return;
+  }
+  
+  // Nieuw token genereren
+  function base64url(source) {
+    var encodedSource = CryptoJS.enc.Base64.stringify(source);
+    encodedSource = encodedSource.replace(/=+$/, "");
+    encodedSource = encodedSource.replace(/\+/g, "-");
+    encodedSource = encodedSource.replace(/\//g, "_");
+    return encodedSource;
+  }
+  
+  var iat = Math.floor(Date.now() / 1000);
+  var exp = iat + 3600;
+  
+  var header = { typ: "JWT", alg: "HS256" };
+  
+  var data = {
+    client_id:           "OMC",
+    user_id:             "OMC",
+    user_representation: "OMC",
+    iss:                 "OMC",  
+    aud:                 "OMC",
+    iat:                 iat,
+  //   nbf:       iat,
+    exp:                 exp
+  };
+  
+  var secret = bru.getEnvVar("omcJwtSecret");
+  
+  var encodedHeader = base64url(CryptoJS.enc.Utf8.parse(JSON.stringify(header)));
+  var encodedData   = base64url(CryptoJS.enc.Utf8.parse(JSON.stringify(data)));
+  
+  var tokenContent  = encodedHeader + "." + encodedData;
+  var signature     = base64url(CryptoJS.HmacSHA256(tokenContent, secret));
+  
+  bru.setVar("JWT_TOKEN_OMC", tokenContent + "." + signature);
+  bru.setVar("JWT_TOKEN_OMC_EXP", exp);
+}

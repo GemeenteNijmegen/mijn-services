@@ -1,0 +1,16 @@
+meta {
+  name: healthcheck
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrlOmc}}/test/notify/healthcheck
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

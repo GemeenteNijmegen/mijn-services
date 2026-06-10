@@ -20,6 +20,7 @@
 /.projen/tasks.json linguist-generated
 /cdk.json linguist-generated
 /LICENSE linguist-generated
+/package-lock.json linguist-generated
 /package.json linguist-generated
 /src/custom-resources/create-databases/create-databases-function.ts linguist-generated
 /src/custom-resources/database/databaseCustomResource-function.ts linguist-generated
@@ -29,4 +30,3 @@
 /src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler-function.ts linguist-generated
 /tsconfig.dev.json linguist-generated
 /tsconfig.json linguist-generated
-/yarn.lock linguist-generated
