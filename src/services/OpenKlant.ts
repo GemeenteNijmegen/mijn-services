@@ -1,17 +1,22 @@
 import { Duration, Token } from 'aws-cdk-lib';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
+import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenKlantConfiguration } from '../ConfigurationInterfaces';
 import { EcsServiceFactory, EcsServiceFactoryProps, ECSServiceUtils } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
+import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { Statics } from '../Statics';
+import { KeyCloakServiceV2 } from './KeyCloakV2';
 
 export interface OpenKlantServiceProps {
   image: string;
@@ -22,13 +27,16 @@ export interface OpenKlantServiceProps {
   service: EcsServiceFactoryProps;
   path: string;
   hostedzone: IHostedZone;
-  alternativeDomainNames?: string[];
   key: Key;
   serviceConfiguration: OpenKlantConfiguration;
   dockerhubCredentials?: ISecret;
+  certificate: ICertificate;
 }
 
 export class OpenKlantService extends Construct {
+
+  private static SUBDOMAIN = 'open-klant';
+
   private readonly logs: LogGroup;
   private readonly props: OpenKlantServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
@@ -64,9 +72,7 @@ export class OpenKlantService extends Construct {
   private getEnvironmentConfiguration() {
 
     const cacheHost = this.props.cache.db.attrRedisEndpointAddress + ':' + this.props.cache.db.attrRedisEndpointPort + '/';
-
-    const trustedOrigins = this.props.alternativeDomainNames?.map(alternative => `https://${alternative}`) ?? [];
-    trustedOrigins.push(`https://${this.props.hostedzone.zoneName}`);
+    const sitedomain = `${OpenKlantService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`;
 
     return {
       DJANGO_SETTINGS_MODULE: 'openklant.conf.docker',
@@ -92,8 +98,9 @@ export class OpenKlantService extends Construct {
       CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
       CELERY_LOGLEVEL: this.props.logLevel,
 
+      SITE_DOMAIN: sitedomain,
 
-      CSRF_TRUSTED_ORIGINS: trustedOrigins.join(','),
+      CSRF_TRUSTED_ORIGINS: sitedomain,
 
       OTEL_SDK_DISABLED: 'True',
 
@@ -119,16 +126,14 @@ export class OpenKlantService extends Construct {
   }
 
   setupService() {
-    const VOLUME_NAME = 'temp';
     const task = this.serviceFactory.createTaskDefinition('main', {
-      volumes: [{ name: VOLUME_NAME }],
       cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
 
     ECSServiceUtils.allowExecutingCommands(task);
 
-    const container = task.addContainer('main', {
+    task.addContainer('main', {
       image: ContainerImage.fromRegistry(this.props.image, {
         credentials: this.props.dockerhubCredentials,
       }),
@@ -153,20 +158,50 @@ export class OpenKlantService extends Construct {
       }),
     });
 
-    // Filesystem write access - initialization container
-    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
-
-    const service = this.serviceFactory.createService({
-      id: 'main',
-      task: task,
-      path: this.props.path,
-      options: {
-        desiredCount: 1,
-        enableExecuteCommand: true, // Used to call src/manage.py (see open-klant docs).
+    // Setup the service
+    const service = new FargateService(this, `main-service`, {
+      cluster: this.props.service.cluster,
+      taskDefinition: task,
+      cloudMapOptions: { // Expose for intercontainer communication
+        cloudMapNamespace: this.props.service.namespace,
+        containerPort: KeyCloakServiceV2.PORT,
+        dnsRecordType: DnsRecordType.SRV,
+        dnsTtl: Duration.seconds(60),
       },
+      desiredCount: 1,
+      enableExecuteCommand: true,
     });
     this.setupConnectivity('main', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+
+    // Attach to loadbalancer
+    const fqdomain = `${OpenKlantService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`;
+    this.props.service.loadbalancer.listener.addTargets('open-klant-main', {
+      conditions: [ListenerCondition.hostHeaders([fqdomain])],
+      healthCheck: {
+        enabled: true,
+        path: '/',
+        healthyHttpCodes: '200',
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 6,
+        timeout: Duration.seconds(10),
+        interval: Duration.seconds(15),
+        protocol: AlbProtocol.HTTP,
+      },
+      port: 80,
+      targets: [service],
+      priority: this.props.serviceConfiguration.loadbalancerPriority,
+      deregistrationDelay: Duration.minutes(1),
+    });
+
+    // Setup subdomain
+    new SubdomainCloudfront(this, 'subdomain', {
+      certificate: this.props.certificate,
+      hostedZone: this.props.hostedzone,
+      loadbalancer: this.props.service.loadbalancer.alb,
+      subdomain: OpenKlantService.SUBDOMAIN,
+    });
+
   }
 
   setupCeleryService() {
