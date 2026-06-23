@@ -174,6 +174,9 @@ export class OpenKlantService extends Construct {
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
 
     // Attach to loadbalancer
+
+    const priority = this.props.service.loadbalancer.getNextPriority();
+
     const fqdomain = `${OpenKlantService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`;
     this.props.service.loadbalancer.listener.addTargets('open-klant-main', {
       conditions: [ListenerCondition.hostHeaders([fqdomain])],
@@ -189,7 +192,7 @@ export class OpenKlantService extends Construct {
       },
       port: this.props.service.port,
       targets: [service],
-      priority: this.props.serviceConfiguration.loadbalancerPriority,
+      priority: priority,
       deregistrationDelay: Duration.minutes(1),
     });
 

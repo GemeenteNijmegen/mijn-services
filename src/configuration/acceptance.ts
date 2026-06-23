@@ -26,7 +26,6 @@ export const acceptance: Configuration = {
       cpu: '512',
       memory: '1024',
     },
-    loadbalancerPriority: 60,
   },
   openNotificaties: {
     image: 'openzaak/open-notificaties:1.8.0',

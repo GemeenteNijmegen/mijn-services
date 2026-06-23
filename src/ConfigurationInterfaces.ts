@@ -185,10 +185,6 @@ export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, Celer
    * Enable debug mode and logging
    */
   debug?: boolean;
-  /**
-   * Priority for the loadbalancer rule
-   */
-  loadbalancerPriority: number;
 }
 
 export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
