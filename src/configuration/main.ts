@@ -20,6 +20,7 @@ export const main: Configuration = {
   openklant: {
     image: 'maykinmedia/open-klant:2.15.0',
     logLevel: 'INFO',
+    loadbalancerPriority: 60,
   },
   openNotificaties: {
     image: 'openzaak/open-notificaties:1.8.0',
