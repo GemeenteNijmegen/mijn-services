@@ -16,7 +16,6 @@ import { EcsServiceFactory, EcsServiceFactoryProps, ECSServiceUtils } from '../c
 import { CacheDatabase } from '../constructs/Redis';
 import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { Statics } from '../Statics';
-import { KeyCloakServiceV2 } from './KeyCloakV2';
 
 export interface OpenKlantServiceProps {
   image: string;
@@ -159,12 +158,12 @@ export class OpenKlantService extends Construct {
     });
 
     // Setup the service
-    const service = new FargateService(this, `main-service`, {
+    const service = new FargateService(this, 'main-service', {
       cluster: this.props.service.cluster,
       taskDefinition: task,
       cloudMapOptions: { // Expose for intercontainer communication
         cloudMapNamespace: this.props.service.namespace,
-        containerPort: KeyCloakServiceV2.PORT,
+        containerPort: this.props.service.port,
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
       },
@@ -188,7 +187,7 @@ export class OpenKlantService extends Construct {
         interval: Duration.seconds(15),
         protocol: AlbProtocol.HTTP,
       },
-      port: 80,
+      port: this.props.service.port,
       targets: [service],
       priority: this.props.serviceConfiguration.loadbalancerPriority,
       deregistrationDelay: Duration.minutes(1),
