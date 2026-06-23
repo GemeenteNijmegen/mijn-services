@@ -99,7 +99,7 @@ export class OpenKlantService extends Construct {
 
       SITE_DOMAIN: sitedomain,
 
-      CSRF_TRUSTED_ORIGINS: sitedomain,
+      CSRF_TRUSTED_ORIGINS: `https://${sitedomain}`,
 
       OTEL_SDK_DISABLED: 'True',
 
