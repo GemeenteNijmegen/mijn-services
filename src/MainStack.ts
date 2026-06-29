@@ -129,9 +129,9 @@ export class MainStack extends Stack {
       cacheDatabaseIndexCelery: 2,
       image: this.configuration.openklant.image,
       logLevel: this.configuration.openklant.logLevel,
-      alternativeDomainNames: this.configuration.alternativeDomainNames,
       serviceConfiguration: this.configuration.openklant,
       dockerhubCredentials: this.dockerhubCredentials,
+      certificate: this.certificate(),
       path: 'open-klant',
       service: {
         cluster: platform.cluster,

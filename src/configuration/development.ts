@@ -57,7 +57,7 @@ export const development: Configuration = {
     },
     useNewDatabase: true,
   },
-  openZaakServices: [{
+  openZaakServices: [{ // TODO carefull we have a overlap in redis channels, we need to make this configurable here as well.
     image: 'openzaak/open-zaak:1.28.1',
     logLevel: 'DEBUG',
     debug: true,
@@ -158,7 +158,7 @@ export const development: Configuration = {
     },
   ],
   keyCloackServices: [
-    {
+    { // TODO add redis session store to keycloak...
       databaseName: 'mijn-services-keycloak',
       id: 'mijn-services-keycloak',
       image: 'quay.io/keycloak/keycloak:26.6.2',
