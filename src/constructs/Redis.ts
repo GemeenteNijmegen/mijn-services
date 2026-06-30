@@ -40,7 +40,11 @@ export class CacheDatabase extends Construct {
       },
     });
 
-    const db = new CfnCacheCluster(this, 'redis-cluster', {
+    // This forces recreation from CDK, updating the number od DBs using a parameterGroup is not allowed by cloudformation.
+    // Error: The parameter databases has a different value in the requested parameter group than the current parameter group. This parameter value cannot be changed for a cache cluster.
+    const newClusterName = props.useCustomRedisParameterGroup ? 'redis-cluster-custom' : 'redis-cluster';
+
+    const db = new CfnCacheCluster(this, newClusterName, {
       autoMinorVersionUpgrade: true,
       cacheNodeType: 'cache.t4g.micro',
       engine: 'redis',
