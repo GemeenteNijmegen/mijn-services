@@ -116,21 +116,23 @@ export const acceptance: Configuration = {
       scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
     },
   ],
-  // openZaakServices: [{ // wait for redis upgrade
-  //   image: 'openzaak/open-zaak:1.29.0',
-  //   logLevel: 'DEBUG',
-  //   debug: true,
-  //   apiVersion: '1.3.1',
-  //   celeryTaskSize: {
-  //     cpu: '512',
-  //     memory: '1024',
-  //   },
-  //   taskSize: {
-  //     cpu: '512',
-  //     memory: '1024',
-  //   },
-  //   databaseName: 'woweb-open-zaak',
-  //   id: 'woweb-open-zaak',
-  //   subdomain: 'woweb-open-zaak',
-  // }],
+  openZaakServices: [{
+    image: 'openzaak/open-zaak:1.29.0',
+    logLevel: 'DEBUG',
+    debug: true,
+    apiVersion: '1.3.1',
+    celeryTaskSize: {
+      cpu: '512',
+      memory: '1024',
+    },
+    taskSize: {
+      cpu: '512',
+      memory: '1024',
+    },
+    databaseName: 'woweb-open-zaak',
+    id: 'woweb-open-zaak',
+    subdomain: 'woweb-open-zaak',
+    redisCacheDatabaseNumber: 17,
+    redisCeleryDatabaseNumber: 18,
+  }],
 };

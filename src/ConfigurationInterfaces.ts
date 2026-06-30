@@ -254,6 +254,14 @@ export interface OpenZaakConfigurationV2 extends OpenZaakConfiguration {
    * A human readable identifier used to register this open-zaak (cdk and descriptions)
    */
   id: string;
+  /**
+   * Redis DB index for caching for this open-zaak instance.
+   */
+  redisCacheDatabaseNumber: number;
+  /**
+   * Redis DB index for celery queue and results for this open-zaak instance.
+   */
+  redisCeleryDatabaseNumber: number;
 }
 
 export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration, DatabaseMigrationToggle {

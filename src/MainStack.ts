@@ -214,8 +214,6 @@ export class MainStack extends Stack {
         hostedzone: this.hostedzone,
         key: this.key,
         cache: this.cache,
-        cacheDatabaseIndex: 5,
-        cacheDatabaseIndexCelery: 6,
         dockerhubCredentials: this.dockerhubCredentials,
         service: {
           cluster: platform.cluster,

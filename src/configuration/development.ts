@@ -74,6 +74,8 @@ export const development: Configuration = {
     databaseName: 'sociaal-domein-open-zaak',
     id: 'sociaal-domein-open-zaak',
     subdomain: 'sociaal-domein-open-zaak',
+    redisCacheDatabaseNumber: 17,
+    redisCeleryDatabaseNumber: 18,
   }],
   objecttypesService: {
     image: 'maykinmedia/objecttypes-api:3.4.2',
