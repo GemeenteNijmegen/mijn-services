@@ -80,6 +80,13 @@ export interface Configuration {
   createTransferServer?: boolean;
 
   /**
+   * When true, deploys a custom Redis parameter group that increases the number of databases from 16 to 112.
+   * Note: changing this on an existing cluster requires replacement.
+   * @default false
+   */
+  useCustomRedisParameterGroup?: boolean;
+
+  /**
    * Configuration for open klant
    */
   openklant?: OpenKlantConfiguration;

@@ -15,6 +15,7 @@ export const development: Configuration = {
       '_189b6977b0d0141d6cbb01e0ba1386e6.djqtsrsxkq.acm-validations.aws.',
   },
   createTransferServer: false,
+  useCustomRedisParameterGroup: true,
   databases: Statics.databasesAcceptance,
   databaseSnapshotRetentionDays: 0,
   containerOperationalHours: {

@@ -64,6 +64,7 @@ export class MainStack extends Stack {
 
     this.cache = new CacheDatabase(this, 'cache-database', {
       vpc: this.vpc.vpc,
+      useCustomRedisParameterGroup: this.configuration.useCustomRedisParameterGroup,
     });
 
     new DnsRecords(this, 'dns', {

@@ -1,5 +1,5 @@
 import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { CfnCacheCluster, CfnSubnetGroup } from 'aws-cdk-lib/aws-elasticache';
+import { CfnCacheCluster, CfnParameterGroup, CfnSubnetGroup } from 'aws-cdk-lib/aws-elasticache';
 import { Construct } from 'constructs';
 
 export interface CacheDatabaseProps {
@@ -7,6 +7,12 @@ export interface CacheDatabaseProps {
    * The VPC to place the redis instance in.
    */
   vpc: IVpc;
+  /**
+   * When true, deploys a custom parameter group that increases the number of databases from 16 to 112.
+   * Note: changing this on an existing cluster requires replacement.
+   * @default false
+   */
+  useCustomRedisParameterGroup?: boolean;
 }
 
 export class CacheDatabase extends Construct {
@@ -26,13 +32,13 @@ export class CacheDatabase extends Construct {
       description: 'Subnet group for redis',
     });
 
-    // const parameterGroup = new CfnParameterGroup(this, 'redis-parameters', {
-    //   cacheParameterGroupFamily: 'redis7',  // match your Redis version
-    //   description: 'Custom param group with more databases',
-    //   properties: {
-    //     databases: '32',  // default is 16, increase as needed
-    //   },
-    // });
+    const parameterGroup = new CfnParameterGroup(this, 'redis-parameters', {
+      cacheParameterGroupFamily: 'redis7',  // match your Redis version
+      description: 'Custom param group with more databases',
+      properties: {
+        databases: '112',  // default is 16, increase to 112 update requires replacement
+      },
+    });
 
     const db = new CfnCacheCluster(this, 'redis-cluster', {
       autoMinorVersionUpgrade: true,
@@ -42,8 +48,7 @@ export class CacheDatabase extends Construct {
       cacheSubnetGroupName: redisSubnetGroup.ref,
       vpcSecurityGroupIds: [redisSecurityGroup.securityGroupId],
       snapshotRetentionLimit: 5,
-      // cacheParameterGroupName: parameterGroup.ref, // TODO figure out how to do this
-      // Results in error: The parameter databases has a different value in the requested parameter group than the current parameter group. This parameter value cannot be changed for a cache cluster
+      cacheParameterGroupName: props.useCustomRedisParameterGroup ? parameterGroup.ref : undefined,
     });
 
     this.db = db;

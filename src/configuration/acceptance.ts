@@ -16,6 +16,7 @@ export const acceptance: Configuration = {
     '_22e7332b63fd18e078cd3715738d18d9.cf': '_e5d28e1bd0ff65a32fd6ff0c794963a5.xlfgrmvvlj.acm-validations.aws.', //cf.mijn-services-accp.csp-nijmegen.nl
   },
   createTransferServer: false,
+  useCustomRedisParameterGroup: true,
   databases: Statics.databasesAcceptance,
   databaseSnapshotRetentionDays: 10,
   openklant: {
@@ -34,7 +35,7 @@ export const acceptance: Configuration = {
     debug: true,
     persitNotifications: true,
   },
-  openZaak: {
+  openZaak: { // Only used for formulieren. See openZaakServices for how to deploy muliple open-zaak services.
     image: 'openzaak/open-zaak:1.17.0',
     logLevel: 'DEBUG',
     debug: true,
@@ -115,4 +116,21 @@ export const acceptance: Configuration = {
       scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
     },
   ],
+  // openZaakServices: [{ // wait for redis upgrade
+  //   image: 'openzaak/open-zaak:1.29.0',
+  //   logLevel: 'DEBUG',
+  //   debug: true,
+  //   apiVersion: '1.3.1',
+  //   celeryTaskSize: {
+  //     cpu: '512',
+  //     memory: '1024',
+  //   },
+  //   taskSize: {
+  //     cpu: '512',
+  //     memory: '1024',
+  //   },
+  //   databaseName: 'woweb-open-zaak',
+  //   id: 'woweb-open-zaak',
+  //   subdomain: 'woweb-open-zaak',
+  // }],
 };
