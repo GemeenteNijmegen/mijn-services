@@ -47,7 +47,7 @@ export const acceptance: Configuration = {
     useNewDatabase: true,
   },
   objectsService: {
-    image: 'maykinmedia/objects-api:3.6.1',
+    image: 'maykinmedia/open-object:4.1.0',
     logLevel: 'DEBUG',
     debug: true,
     useNewDatabase: true,
