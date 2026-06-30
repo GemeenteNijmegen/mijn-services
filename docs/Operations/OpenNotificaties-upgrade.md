@@ -27,7 +27,7 @@ Latest versie: 1.16.0
 - DB toggle omzetten bij uitrollen
 
 ```bash
-sudo dnf remove postgresql15 -y && sudo dnf install postgresql17 -y
+sudo dnf remove postgresql16 -y && sudo dnf install postgresql17 -y
 export ENDPOINT=mijn-services-database-st-databasedbinstance7bee76-i7gobfwu9mrz.cby22yowugui.eu-central-1.rds.amazonaws.com
 pg_dump -h $ENDPOINT -U mijn_services -d open-notificaties -Fc -f open-notificaties.dump
 psql -h $ENDPOINT -U mijn_services -d open-notificaties-database -c "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;"

@@ -28,7 +28,7 @@ Zie [https://github.com/GemeenteNijmegen/devops/blob/master/docs/AWS/database-re
 
 ### Objecttypes API
 ```bash
-sudo dnf remove postgresql15
+sudo dnf remove postgresql16
 sudo dnf install postgresql17
 export ENDPOINT=mijn-services-database-st-databasedbinstance7bee76-i7gobfwu9mrz.cby22yowugui.eu-central-1.rds.amazonaws.com
 pg_dump -h $ENDPOINT -U mijn_services -d objecttypes -Fc -f objecttypes.dump
@@ -38,7 +38,7 @@ pg_restore -h $ENDPOINT -U mijn_services -d objecttypes-database --no-owner --ro
 
 ### Objects API
 ```bash
-sudo dnf remove postgresql15
+sudo dnf remove postgresql16
 sudo dnf install postgresql17
 export ENDPOINT=mijn-services-database-st-databasedbinstance7bee76-i7gobfwu9mrz.cby22yowugui.eu-central-1.rds.amazonaws.com
 pg_dump -h $ENDPOINT -U mijn_services -d objects -Fc -f objects.dump
