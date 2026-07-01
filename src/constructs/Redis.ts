@@ -33,10 +33,10 @@ export class CacheDatabase extends Construct {
     });
 
     const parameterGroup = new CfnParameterGroup(this, 'redis-parameters', {
-      cacheParameterGroupFamily: 'redis7',  // match your Redis version
+      cacheParameterGroupFamily: 'redis7', // match your Redis version
       description: 'Custom param group with more databases',
       properties: {
-        databases: '112',  // default is 16, increase to 112 update requires replacement
+        databases: '112', // default is 16, increase to 112 update requires replacement
       },
     });
 

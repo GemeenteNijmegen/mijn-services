@@ -1,14 +1,19 @@
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
-import { AwsLogDriver, ContainerImage, Protocol } from 'aws-cdk-lib/aws-ecs';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { AwsLogDriver, ContainerImage, FargateService, Protocol } from 'aws-cdk-lib/aws-ecs';
+import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
+import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 import { GZACFrontendConfiguration } from '../ConfigurationInterfaces';
 import {
   EcsServiceFactory,
   EcsServiceFactoryProps,
+  ECSServiceUtils,
 } from '../constructs/EcsServiceFactory';
+import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 
 
 interface GZACServiceProps {
@@ -21,9 +26,13 @@ interface GZACServiceProps {
    */
   readonly serviceConfiguration: GZACFrontendConfiguration;
   readonly key: Key;
+  readonly certificate: ICertificate;
 }
 
 export class GZACFrontendService extends Construct {
+
+  static readonly SUBDOMAIN = 'gzac';
+
   private readonly logs: LogGroup;
   private readonly props: GZACServiceProps;
   private readonly serviceFactory: EcsServiceFactory;
@@ -34,7 +43,6 @@ export class GZACFrontendService extends Construct {
     this.serviceFactory = new EcsServiceFactory(this, props.service);
     this.logs = this.logGroup();
 
-    // this.setupConfigurationService();
     const service = this.setupService();
     service.applyRemovalPolicy(RemovalPolicy.DESTROY);
   }
@@ -70,7 +78,6 @@ export class GZACFrontendService extends Construct {
     });
 
     // Main service container
-    // const container =
     task.addContainer('gzac-frontend', {
       image: ContainerImage.fromAsset('./src/containers/gzac-frontend'),
       healthCheck: {
@@ -85,7 +92,7 @@ export class GZACFrontendService extends Construct {
           protocol: Protocol.TCP,
         },
       ],
-      readonlyRootFilesystem: false,
+      readonlyRootFilesystem: false, // Needed for ECS exec
       // secrets: this.getSecretConfiguration(),
       environment: this.getEnvironmentConfiguration(),
       logging: new AwsLogDriver({
@@ -94,63 +101,55 @@ export class GZACFrontendService extends Construct {
       }),
     });
 
-    // this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, '/tmp', '/app/log');
-
-    // 1st Filesystem write access - initialization container
-    // this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, '/tmp', '/app/log');
-
-    const service = this.serviceFactory.createService({
-      id: 'gzac-frontend',
-      task: task,
-      isRootPath: true,
-      options: {
-        desiredCount: 1,
+    // Setup the service
+    const service = new FargateService(this, 'gzac-frontend-service', {
+      cluster: this.props.service.cluster,
+      taskDefinition: task,
+      cloudMapOptions: { // Expose for intercontainer communication
+        cloudMapNamespace: this.props.service.namespace,
+        containerPort: this.props.service.port,
+        dnsRecordType: DnsRecordType.SRV,
+        dnsTtl: Duration.seconds(60),
       },
+      desiredCount: 1,
+      enableExecuteCommand: true,
+      healthCheckGracePeriod: Duration.seconds(120), // Give time to start
     });
+
+
+    // Attach to loadbalancer
+    let fqdomain = `${GZACFrontendService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`;
+    if (this.props.alternativeDomainNames && this.props.alternativeDomainNames.length > 0) {
+      fqdomain = `${GZACFrontendService.SUBDOMAIN}.${this.props.alternativeDomainNames[0]}`;
+    }
+    this.props.service.loadbalancer.listener.addTargets('gzac-frontend', {
+      conditions: [ListenerCondition.hostHeaders([fqdomain])],
+      healthCheck: {
+        enabled: true,
+        path: '/health/ready',
+        healthyHttpCodes: '200',
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 6,
+        timeout: Duration.seconds(10),
+        interval: Duration.seconds(15),
+        protocol: AlbProtocol.HTTP,
+      },
+      port: 80,
+      targets: [service],
+      priority: this.props.serviceConfiguration.loadbalancerPriority,
+      deregistrationDelay: Duration.minutes(1),
+    });
+    ECSServiceUtils.allowExecutingCommands(task);
+
+    new SubdomainCloudfront(this, 'subdomain', {
+      certificate: this.props.certificate,
+      hostedZone: this.props.hostedzone,
+      loadbalancer: this.props.service.loadbalancer.alb,
+      subdomain: GZACFrontendService.SUBDOMAIN,
+    });
+
     return service;
   }
-
-  //   private setupConfigurationService() {
-  //     const VOLUME_NAME = 'tmp';
-  //     const task = this.serviceFactory.createTaskDefinition('setup', {
-  //       volumes: [{ name: VOLUME_NAME }],
-  //     });
-
-  //     // Configuration container
-  //     const initContainer = task.addContainer('setup', {
-  //       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
-  //       command: ['python', 'src/manage.py', 'createsuperuser', '--no-input', '--skip-checks'], // See django docs
-  //       readonlyRootFilesystem: true,
-  //       essential: true,
-  //       logging: new AwsLogDriver({
-  //         streamPrefix: 'setup',
-  //         logGroup: this.logs,
-  //       }),
-  //       secrets: this.getSecretConfiguration(),
-  //       environment: this.getEnvironmentConfiguration(),
-  //     });
-  //     this.serviceFactory.attachEphemeralStorage(initContainer, VOLUME_NAME, '/tmp', '/app/log', '/app/setup_configuration');
-
-  //     // Filesystem write access - initialization container
-  //     this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, initContainer, '/tmp', '/app/log', '/app/setup_configuration');
-
-  //     // Scheduel a task in the past (so we can run it manually)
-  //     const rule = new Rule(this, 'schedule-setup', {
-  //       schedule: Schedule.cron({
-  //         year: '2020',
-  //       }),
-  //       description: 'Rule to run setup configuration for KeyCloak-api (manually)',
-  //     });
-  //     const ecsTask = new EcsTask({
-  //       cluster: this.props.service.cluster,
-  //       taskDefinition: task,
-  //     });
-  //     rule.addTarget(ecsTask);
-
-  //     // Setup connectivity
-  //     this.setupConnectivity('setup', ecsTask.securityGroups ?? []);
-  //     this.allowAccessToSecrets(task.executionRole!);
-  //   }
 
   private logGroup() {
     return new LogGroup(this, 'logs', {
