@@ -64,6 +64,7 @@ export class MainStack extends Stack {
 
     this.cache = new CacheDatabase(this, 'cache-database', {
       vpc: this.vpc.vpc,
+      useCustomRedisParameterGroup: this.configuration.useCustomRedisParameterGroup,
     });
 
     new DnsRecords(this, 'dns', {
@@ -213,8 +214,6 @@ export class MainStack extends Stack {
         hostedzone: this.hostedzone,
         key: this.key,
         cache: this.cache,
-        cacheDatabaseIndex: 5,
-        cacheDatabaseIndexCelery: 6,
         dockerhubCredentials: this.dockerhubCredentials,
         service: {
           cluster: platform.cluster,

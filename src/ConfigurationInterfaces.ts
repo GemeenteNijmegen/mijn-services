@@ -80,6 +80,13 @@ export interface Configuration {
   createTransferServer?: boolean;
 
   /**
+   * When true, deploys a custom Redis parameter group that increases the number of databases from 16 to 112.
+   * Note: changing this on an existing cluster requires replacement.
+   * @default false
+   */
+  useCustomRedisParameterGroup?: boolean;
+
+  /**
    * Configuration for open klant
    */
   openklant?: OpenKlantConfiguration;
@@ -247,6 +254,14 @@ export interface OpenZaakConfigurationV2 extends OpenZaakConfiguration {
    * A human readable identifier used to register this open-zaak (cdk and descriptions)
    */
   id: string;
+  /**
+   * Redis DB index for caching for this open-zaak instance.
+   */
+  redisCacheDatabaseNumber: number;
+  /**
+   * Redis DB index for celery queue and results for this open-zaak instance.
+   */
+  redisCeleryDatabaseNumber: number;
 }
 
 export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration, DatabaseMigrationToggle {

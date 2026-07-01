@@ -20,8 +20,6 @@ import { Utils } from '../Utils';
 
 export interface OpenZaakv2ServiceProps {
   cache: CacheDatabase;
-  cacheDatabaseIndex: number;
-  cacheDatabaseIndexCelery: number;
   service: EcsServiceFactoryProps;
   hostedzone: IHostedZone;
   certificate: ICertificate;
@@ -77,8 +75,8 @@ export class OpenZaakv2Service extends Construct {
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
-      CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
-      CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
+      CACHE_DEFAULT: cacheHost + this.props.openZaakConfiguration.redisCacheDatabaseNumber,
+      CACHE_AXES: cacheHost + this.props.openZaakConfiguration.redisCacheDatabaseNumber,
       IS_HTTPS: 'True',
       LOG_LEVEL: this.props.openZaakConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
@@ -89,8 +87,8 @@ export class OpenZaakv2Service extends Construct {
       CSRF_TRUSTED_ORIGINS: `https://${siteDomain}`,
 
       // Celery
-      CELERY_BROKER_URL: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
-      CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
+      CELERY_BROKER_URL: 'redis://' + cacheHost + this.props.openZaakConfiguration.redisCeleryDatabaseNumber,
+      CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.openZaakConfiguration.redisCeleryDatabaseNumber,
       CELERY_LOGLEVEL: this.props.openZaakConfiguration.logLevel,
       CELERY_WORKER_CONCURRENCY: '4',
 
