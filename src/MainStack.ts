@@ -225,7 +225,21 @@ export class MainStack extends Stack {
         },
         openZaakConfiguration: openZaakConfig,
         certificate: this.certificate(),
-        alternativeDomainNames: this.configuration.alternativeDomainNames,
+        // alternativeDomainNames: this.configuration.alternativeDomainNames,
+        // We deliberately reference this subdomain directly via the AWS-hostedzone
+        // *.mijn-services-accp.csp-nijmegen.nl instead of mijn-services.accp.nijmegen.nl.
+        //
+        // Reason: mijn-services.accp.nijmegen.nl is only a single CNAME pointing
+        // into the AWS hosted zone.A CNAME does not cover subdomains of itself -
+        // e.g. abc.mijn-services.accp.nijmegen.nl is NOT automatically resolved
+        // just because mijn-services.accp.nijmegen.nl is. Each subdomain would
+        // require its own explicit CNAME in corporate DNS, or the corporate zone
+        // would need to delegate(NS records) to a Route53 hosted zone.
+        //
+        // Decision: for now, use the csp-nijmegen.nl AWS zone names directly
+        // (e.g. abc.mijn-services-accp.csp-nijmegen.nl) to avoid the extra DNS
+        // delegation work. Revisit if/when we need the nijmegen.nl-branded
+        // hostnames for these subdomains.
       });
     }
 
