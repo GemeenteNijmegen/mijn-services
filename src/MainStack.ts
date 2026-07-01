@@ -225,6 +225,7 @@ export class MainStack extends Stack {
         },
         openZaakConfiguration: openZaakConfig,
         certificate: this.certificate(),
+        alternativeDomainNames: this.configuration.alternativeDomainNames,
       });
     }
 
@@ -371,7 +372,6 @@ export class MainStack extends Stack {
       alternativeDomainNames: this.configuration.alternativeDomainNames,
       path: 'gzac-ui',
       service: {
-
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
@@ -380,6 +380,7 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.gzacFrontendService,
+      certificate: this.certificate(),
     });
   }
 

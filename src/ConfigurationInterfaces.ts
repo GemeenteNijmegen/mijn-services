@@ -262,6 +262,10 @@ export interface OpenZaakConfigurationV2 extends OpenZaakConfiguration {
    * Redis DB index for celery queue and results for this open-zaak instance.
    */
   redisCeleryDatabaseNumber: number;
+  /**
+   * Loadblancer rule priority number (should be unique for all rules)
+   */
+  loadbalancerPriority: number;
 }
 
 export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration, DatabaseMigrationToggle {
@@ -492,6 +496,10 @@ export interface GZACFrontendConfiguration {
    * Enable debug mode and logging
    */
   debug?: boolean;
+  /**
+   * Loadbalancer rule prio.
+   */
+  loadbalancerPriority: number;
 }
 
 export interface GZACConfiguration {

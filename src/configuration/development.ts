@@ -76,6 +76,7 @@ export const development: Configuration = {
     subdomain: 'sociaal-domein-open-zaak',
     redisCacheDatabaseNumber: 17,
     redisCeleryDatabaseNumber: 18,
+    loadbalancerPriority: 60,
   }],
   objecttypesService: {
     image: 'maykinmedia/objecttypes-api:3.4.2',
