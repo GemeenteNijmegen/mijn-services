@@ -1,5 +1,13 @@
 {
   "version": "1",
   "name": "Mijn Services",
-  "type": "collection"
+  "type": "collection",
+  "scripts": {
+    "moduleWhitelist": [
+      "jsonwebtoken"
+    ],
+    "filesystemAccess": {
+      "allow": true
+    }
+  }
 }
