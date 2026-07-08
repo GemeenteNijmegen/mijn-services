@@ -43,12 +43,12 @@ export const main: Configuration = {
     },
   },
   objecttypesService: {
-    image: 'maykinmedia/objecttypes-api:3.4.2',
+    image: 'maykinmedia/objecttypes-api:3.0.0',
     logLevel: 'INFO',
     debug: false,
   },
   objectsService: {
-    image: 'maykinmedia/objects-api:4.1.0',
+    image: 'maykinmedia/objects-api:3.0.0',
     logLevel: 'INFO',
     debug: false,
     taskSize: {
