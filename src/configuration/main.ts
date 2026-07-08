@@ -51,6 +51,7 @@ export const main: Configuration = {
     image: 'maykinmedia/objects-api:3.0.0',
     logLevel: 'INFO',
     debug: false,
+    useNewDatabase: true,
     taskSize: {
       cpu: '512',
       memory: '1024',
