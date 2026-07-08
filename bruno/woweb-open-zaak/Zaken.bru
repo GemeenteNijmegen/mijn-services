@@ -1,0 +1,16 @@
+meta {
+  name: Zaken
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{wowebOpenZaak}}/zaken/api/v1/zaken
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
