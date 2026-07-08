@@ -134,4 +134,8 @@ export class ServiceLoadBalancer extends Construct {
     this.listener.addTargets(`${path}-target`, { ...listenerProps, ...props });
     this.priority += 1;
   }
+
+  getNextPriority() {
+    return this.priority++;
+  }
 }

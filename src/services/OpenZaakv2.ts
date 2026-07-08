@@ -2,12 +2,14 @@ import { Duration, Token } from 'aws-cdk-lib';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { DatabaseInstance } from 'aws-cdk-lib/aws-rds';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
+import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenZaakConfigurationV2 } from '../ConfigurationInterfaces';
@@ -20,14 +22,13 @@ import { Utils } from '../Utils';
 
 export interface OpenZaakv2ServiceProps {
   cache: CacheDatabase;
-  cacheDatabaseIndex: number;
-  cacheDatabaseIndexCelery: number;
   service: EcsServiceFactoryProps;
   hostedzone: IHostedZone;
   certificate: ICertificate;
   key: Key;
   openZaakConfiguration: OpenZaakConfigurationV2;
   readonly dockerhubCredentials: ISecret;
+  readonly alternativeDomainNames?: string[];
 }
 
 export class OpenZaakv2Service extends Construct {
@@ -77,8 +78,8 @@ export class OpenZaakv2Service extends Construct {
       DB_HOST: StringParameter.valueForStringParameter(this, Statics._ssmDatabaseHostname),
       DB_PORT: StringParameter.valueForStringParameter(this, Statics._ssmDatabasePort),
       ALLOWED_HOSTS: '*',
-      CACHE_DEFAULT: cacheHost + this.props.cacheDatabaseIndex,
-      CACHE_AXES: cacheHost + this.props.cacheDatabaseIndex,
+      CACHE_DEFAULT: cacheHost + this.props.openZaakConfiguration.redisCacheDatabaseNumber,
+      CACHE_AXES: cacheHost + this.props.openZaakConfiguration.redisCacheDatabaseNumber,
       IS_HTTPS: 'True',
       LOG_LEVEL: this.props.openZaakConfiguration.logLevel,
       LOG_REQUESTS: Utils.toPythonBooleanString(this.props.openZaakConfiguration.debug, false),
@@ -89,8 +90,8 @@ export class OpenZaakv2Service extends Construct {
       CSRF_TRUSTED_ORIGINS: `https://${siteDomain}`,
 
       // Celery
-      CELERY_BROKER_URL: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
-      CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery,
+      CELERY_BROKER_URL: 'redis://' + cacheHost + this.props.openZaakConfiguration.redisCeleryDatabaseNumber,
+      CELERY_RESULT_BACKEND: 'redis://' + cacheHost + this.props.openZaakConfiguration.redisCeleryDatabaseNumber,
       CELERY_LOGLEVEL: this.props.openZaakConfiguration.logLevel,
       CELERY_WORKER_CONCURRENCY: '4',
 
@@ -153,16 +154,42 @@ export class OpenZaakv2Service extends Construct {
       }),
     });
 
-
-    const service = this.serviceFactory.createService({
-      id: this.props.openZaakConfiguration.id + '-main',
-      task: task,
-      domain: `${this.props.openZaakConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
-      options: {
-        healthCheckGracePeriod: Duration.seconds(150),
-        desiredCount: 1,
-        enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
+    // Setup the service
+    const service = new FargateService(this, `${this.props.openZaakConfiguration.id}-service`, {
+      cluster: this.props.service.cluster,
+      taskDefinition: task,
+      cloudMapOptions: { // Expose for intercontainer communication
+        cloudMapNamespace: this.props.service.namespace,
+        containerPort: OpenZaakv2Service.PORT,
+        dnsRecordType: DnsRecordType.SRV,
+        dnsTtl: Duration.seconds(60),
       },
+      desiredCount: 1,
+      enableExecuteCommand: true,
+      healthCheckGracePeriod: Duration.seconds(120), // Give time to start
+    });
+
+    // Attach to loadbalancer
+    let fqdomain = `${this.props.openZaakConfiguration.subdomain}.${this.props.hostedzone.zoneName}`;
+    if (this.props.alternativeDomainNames && this.props.alternativeDomainNames.length > 0) {
+      fqdomain = `${this.props.openZaakConfiguration.subdomain}.${this.props.alternativeDomainNames[0]}`;
+    }
+    this.props.service.loadbalancer.listener.addTargets(this.props.openZaakConfiguration.id, {
+      conditions: [ListenerCondition.hostHeaders([fqdomain])],
+      healthCheck: {
+        enabled: true,
+        path: '/',
+        healthyHttpCodes: '200',
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 6,
+        timeout: Duration.seconds(10),
+        interval: Duration.seconds(15),
+        protocol: AlbProtocol.HTTP,
+      },
+      port: 80,
+      targets: [service],
+      priority: this.props.openZaakConfiguration.loadbalancerPriority,
+      deregistrationDelay: Duration.minutes(1),
     });
     ECSServiceUtils.allowExecutingCommands(task);
     this.setupConnectivity('main', service.connections.securityGroups);

@@ -64,6 +64,7 @@ export class MainStack extends Stack {
 
     this.cache = new CacheDatabase(this, 'cache-database', {
       vpc: this.vpc.vpc,
+      useCustomRedisParameterGroup: this.configuration.useCustomRedisParameterGroup,
     });
 
     new DnsRecords(this, 'dns', {
@@ -129,9 +130,9 @@ export class MainStack extends Stack {
       cacheDatabaseIndexCelery: 2,
       image: this.configuration.openklant.image,
       logLevel: this.configuration.openklant.logLevel,
-      alternativeDomainNames: this.configuration.alternativeDomainNames,
       serviceConfiguration: this.configuration.openklant,
       dockerhubCredentials: this.dockerhubCredentials,
+      certificate: this.certificate(),
       path: 'open-klant',
       service: {
         cluster: platform.cluster,
@@ -213,8 +214,6 @@ export class MainStack extends Stack {
         hostedzone: this.hostedzone,
         key: this.key,
         cache: this.cache,
-        cacheDatabaseIndex: 5,
-        cacheDatabaseIndexCelery: 6,
         dockerhubCredentials: this.dockerhubCredentials,
         service: {
           cluster: platform.cluster,
@@ -226,6 +225,21 @@ export class MainStack extends Stack {
         },
         openZaakConfiguration: openZaakConfig,
         certificate: this.certificate(),
+        // alternativeDomainNames: this.configuration.alternativeDomainNames,
+        // We deliberately reference this subdomain directly via the AWS-hostedzone
+        // *.mijn-services-accp.csp-nijmegen.nl instead of mijn-services.accp.nijmegen.nl.
+        //
+        // Reason: mijn-services.accp.nijmegen.nl is only a single CNAME pointing
+        // into the AWS hosted zone.A CNAME does not cover subdomains of itself -
+        // e.g. abc.mijn-services.accp.nijmegen.nl is NOT automatically resolved
+        // just because mijn-services.accp.nijmegen.nl is. Each subdomain would
+        // require its own explicit CNAME in corporate DNS, or the corporate zone
+        // would need to delegate(NS records) to a Route53 hosted zone.
+        //
+        // Decision: for now, use the csp-nijmegen.nl AWS zone names directly
+        // (e.g. abc.mijn-services-accp.csp-nijmegen.nl) to avoid the extra DNS
+        // delegation work. Revisit if/when we need the nijmegen.nl-branded
+        // hostnames for these subdomains.
       });
     }
 
@@ -372,7 +386,6 @@ export class MainStack extends Stack {
       alternativeDomainNames: this.configuration.alternativeDomainNames,
       path: 'gzac-ui',
       service: {
-
         cluster: platform.cluster,
         link: platform.vpcLink,
         namespace: platform.namespace,
@@ -381,6 +394,7 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.gzacFrontendService,
+      certificate: this.certificate(),
     });
   }
 

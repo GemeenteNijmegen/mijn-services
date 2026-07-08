@@ -15,6 +15,7 @@ export const development: Configuration = {
       '_189b6977b0d0141d6cbb01e0ba1386e6.djqtsrsxkq.acm-validations.aws.',
   },
   createTransferServer: false,
+  useCustomRedisParameterGroup: true,
   databases: Statics.databasesAcceptance,
   databaseSnapshotRetentionDays: 0,
   containerOperationalHours: {
@@ -57,7 +58,7 @@ export const development: Configuration = {
     },
     useNewDatabase: true,
   },
-  openZaakServices: [{
+  openZaakServices: [{ // TODO carefull we have a overlap in redis channels, we need to make this configurable here as well.
     image: 'openzaak/open-zaak:1.28.1',
     logLevel: 'DEBUG',
     debug: true,
@@ -73,6 +74,9 @@ export const development: Configuration = {
     databaseName: 'sociaal-domein-open-zaak',
     id: 'sociaal-domein-open-zaak',
     subdomain: 'sociaal-domein-open-zaak',
+    redisCacheDatabaseNumber: 17,
+    redisCeleryDatabaseNumber: 18,
+    loadbalancerPriority: 60,
   }],
   objecttypesService: {
     image: 'maykinmedia/objecttypes-api:3.4.2',
@@ -158,7 +162,7 @@ export const development: Configuration = {
     },
   ],
   keyCloackServices: [
-    {
+    { // TODO add redis session store to keycloak...
       databaseName: 'mijn-services-keycloak',
       id: 'mijn-services-keycloak',
       image: 'quay.io/keycloak/keycloak:26.6.2',

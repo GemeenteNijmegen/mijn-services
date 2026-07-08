@@ -20,7 +20,7 @@ export async function handler(): Promise<void> {
   const startHour = parseInt(process.env.START_HOUR!);
   const endHour = parseInt(process.env.END_HOUR!);
 
-  const currentLocalHour = new Date().getHours(); // Local time!
+  const currentLocalHour = getLocalHour('Europe/Amsterdam'); // e.g. 14
   const within = isWithinOperatingHours(currentLocalHour, startHour, endHour);
 
   console.log(JSON.stringify({ clusterArn, currentHour: currentLocalHour, startHour, endHour, within }));
@@ -165,4 +165,17 @@ async function deleteSavedCount(tableName: string, clusterArn: string, serviceAr
       serviceArn: { S: serviceArn },
     },
   }));
+}
+
+
+export function getLocalHour(timezone: string): number {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    hour: 'numeric',
+    hour12: false,
+  });
+
+  const hour = parseInt(formatter.format(new Date()), 10);
+  // 'en-US' with hour12:false returns 24 for midnight — normalize it
+  return hour === 24 ? 0 : hour;
 }

@@ -11,7 +11,7 @@ import {
   UpdateServiceCommand,
 } from '@aws-sdk/client-ecs';
 import { mockClient } from 'aws-sdk-client-mock';
-import { handler, isWithinOperatingHours } from '../operatingHoursEnforcer.lambda';
+import { getLocalHour, handler, isWithinOperatingHours } from '../operatingHoursEnforcer.lambda';
 
 const ecsMock = mockClient(ECSClient);
 const dynamoMock = mockClient(DynamoDBClient);
@@ -84,13 +84,67 @@ describe('isWithinOperatingHours', () => {
 });
 
 // ---------------------------------------------------------------------------
+// getLocalHour
+// ---------------------------------------------------------------------------
+
+describe('getLocalHour', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('returns the correct hour for UTC', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-15T14:30:00Z'));
+    expect(getLocalHour('UTC')).toBe(14);
+  });
+
+  it('returns the correct hour for Europe/Amsterdam in winter (UTC+1)', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-15T14:00:00Z'));
+    expect(getLocalHour('Europe/Amsterdam')).toBe(15);
+  });
+
+  it('returns the correct hour for Europe/Amsterdam in summer (UTC+2)', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-07-15T14:00:00Z'));
+    expect(getLocalHour('Europe/Amsterdam')).toBe(16);
+  });
+
+  it('returns 0 for midnight in the given timezone', () => {
+    jest.useFakeTimers();
+    // Europe/Amsterdam is UTC+1 in winter; 23:00 UTC = 00:00 local
+    jest.setSystemTime(new Date('2024-01-15T23:00:00Z'));
+    expect(getLocalHour('Europe/Amsterdam')).toBe(0);
+  });
+
+  it('returns 23 for 23:00 in the given timezone', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-15T22:00:00Z'));
+    expect(getLocalHour('Europe/Amsterdam')).toBe(23);
+  });
+
+  it('returns the correct hour for a negative UTC offset (America/New_York in winter, UTC-5)', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-15T20:00:00Z'));
+    expect(getLocalHour('America/New_York')).toBe(15);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // handler — stop path (outside operating hours)
 // ---------------------------------------------------------------------------
 
 describe('handler – stop path', () => {
+
   beforeEach(() => {
-    jest.spyOn(Date.prototype, 'getHours').mockReturnValue(22); // outside 8–18
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-15T21:00:00Z')); // 22:00 Amsterdam (outside 8–18)
   });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
 
   it('saves desired counts and scales all running services to 0', async () => {
     dynamoMock.on(QueryCommand).resolves({ Items: [] });
@@ -191,7 +245,12 @@ describe('handler – stop path', () => {
 
 describe('handler – start path', () => {
   beforeEach(() => {
-    jest.spyOn(Date.prototype, 'getHours').mockReturnValue(10); // inside 8–18
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-15T09:00:00Z')); // 10:00 Amsterdam (inside 8–18)
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('restores desired counts from DynamoDB and deletes the saved records', async () => {

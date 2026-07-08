@@ -1,0 +1,56 @@
+meta {
+  name: woweb-open-zaak
+  seq: 6
+}
+
+headers {
+  Accept-Crs: EPSG:4326
+  Content-Crs: EPSG:4326
+}
+
+auth {
+  mode: none
+}
+
+vars:pre-request {
+  WOWEB_CLIENT_SECRET: {{wowebOpenZaakClientSecret}}
+  WOWEB_CLIENT_ID: {{wowebOpenZaakClientId}}
+}
+
+script:pre-request {
+  const jwt = require("jsonwebtoken");
+  
+  // Read env vars
+  const secret = bru.getEnvVar("wowebOpenZaakClientSecret");
+  const userId = bru.getEnvVar("wowebOpenZaakClientId");
+  
+  
+  // Safety check
+  if (!secret) {
+    throw new Error("wowebOpenZaakClientSecret environment variable is missing.");
+  }
+  
+  // Build payload
+  const payload = {
+    sub: userId,
+    iss: userId,
+    client_id: userId,
+    user_id: userId,
+  };
+  
+  // Build signing options
+  const options = {
+    algorithm: "HS256",    // Choose your signing algorithm
+    expiresIn: "15m",      // Token expiration time
+  };
+  
+  // Sign token
+  const token = jwt.sign(payload, secret, options);
+  
+  // Attach header for the current request
+  req.setHeader("Authorization", `Bearer ${token}`);
+  
+  // For debugging: see the generated token in the console
+  console.log("Generated JWT is attached as Bearer token in Authorization header:", token);
+  
+}

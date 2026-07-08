@@ -16,6 +16,7 @@ export const acceptance: Configuration = {
     '_22e7332b63fd18e078cd3715738d18d9.cf': '_e5d28e1bd0ff65a32fd6ff0c794963a5.xlfgrmvvlj.acm-validations.aws.', //cf.mijn-services-accp.csp-nijmegen.nl
   },
   createTransferServer: false,
+  useCustomRedisParameterGroup: true,
   databases: Statics.databasesAcceptance,
   databaseSnapshotRetentionDays: 10,
   openklant: {
@@ -34,7 +35,7 @@ export const acceptance: Configuration = {
     debug: true,
     persitNotifications: true,
   },
-  openZaak: {
+  openZaak: { // Only used for formulieren. See openZaakServices for how to deploy muliple open-zaak services.
     image: 'openzaak/open-zaak:1.17.0',
     logLevel: 'DEBUG',
     debug: true,
@@ -47,7 +48,7 @@ export const acceptance: Configuration = {
     useNewDatabase: true,
   },
   objectsService: {
-    image: 'maykinmedia/objects-api:3.6.1',
+    image: 'maykinmedia/open-object:4.1.0',
     logLevel: 'DEBUG',
     debug: true,
     useNewDatabase: true,
@@ -70,11 +71,14 @@ export const acceptance: Configuration = {
     logLevel: 'DEBUG',
     debug: true,
   },
-  gzacFrontendService: {
-    image: 'ritense/gzac-frontend:12.6.0',
-    logLevel: 'DEBUG',
-    debug: true,
-  },
+  // Disabled for now, its in the way of testing other things as this runs on root path.
+  // Service has been converted to subdomain however this has never been deployed.
+  // gzacFrontendService: {
+  //   image: 'ritense/gzac-frontend:12.6.0',
+  //   logLevel: 'DEBUG',
+  //   debug: true,
+  //   loadbalancerPriority: 70
+  // },
   openProductServices: {
     image: 'maykinmedia/open-product:1.2.0',
     logLevel: 'DEBUG',
@@ -115,4 +119,24 @@ export const acceptance: Configuration = {
       scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
     },
   ],
+  openZaakServices: [{
+    image: 'openzaak/open-zaak:1.29.0',
+    logLevel: 'DEBUG',
+    debug: true,
+    apiVersion: '1.3.1',
+    celeryTaskSize: {
+      cpu: '512',
+      memory: '1024',
+    },
+    taskSize: {
+      cpu: '512',
+      memory: '1024',
+    },
+    databaseName: 'woweb-open-zaak',
+    id: 'woweb-open-zaak',
+    subdomain: 'woweb-open-zaak',
+    redisCacheDatabaseNumber: 17,
+    redisCeleryDatabaseNumber: 18,
+    loadbalancerPriority: 50,
+  }],
 };
