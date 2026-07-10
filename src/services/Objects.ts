@@ -1,6 +1,6 @@
-import { Duration, Token } from 'aws-cdk-lib';
-import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { CfnOutput, Duration, Fn, Token } from 'aws-cdk-lib';
+import { ISecurityGroup, Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { AwsLogDriver, ContainerImage, FargateService, Protocol, Secret, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -61,8 +61,9 @@ export class ObjectsService extends Construct {
       },
     });
 
-    this.setupService();
-    this.setupCeleryService();
+    const mainService = this.setupService();
+    const celeryService = this.setupCeleryService();
+    this.setupMigrationTask(mainService, celeryService);
   }
 
   private getEnvironmentConfiguration() {
@@ -258,6 +259,108 @@ export class ObjectsService extends Construct {
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     ECSServiceUtils.allowExecutingCommands(task);
+    return service;
+  }
+
+  /**
+   * Standalone, CDK-owned migration task definition. Runs `manage.py migrate`
+   * off the load balancer (no ECS Service, no ALB, no target group), to be
+   * invoked with `aws ecs run-task` by the `src/django-migrate` runner during a
+   * maintenance window.
+   *
+   * Only created when `migrationImage` is configured, so it can be pinned to the
+   * new version independently of the running service. Emits the values the
+   * runner's `.env` needs as stack outputs.
+   */
+  private setupMigrationTask(mainService: FargateService, celeryService: FargateService) {
+    const migrationImage = this.props.serviceConfiguration.migrationImage;
+    if (!migrationImage) {
+      return;
+    }
+
+    const VOLUME_NAME = 'tmp';
+    const CONTAINER_NAME = 'migrate';
+    const WRITABLE_DIRS = ['/tmp', '/app/log'];
+
+    const task = this.serviceFactory.createTaskDefinition('migrate', {
+      family: `${Statics.projectName}-objects-migrate`,
+      volumes: [{ name: VOLUME_NAME }],
+      cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
+      memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
+    });
+
+    const container = task.addContainer(CONTAINER_NAME, {
+      image: ContainerImage.fromRegistry(migrationImage, {
+        credentials: this.props.dockerhubCredentials,
+      }),
+      command: ['python', 'src/manage.py', 'migrate', '--noinput'],
+      readonlyRootFilesystem: false,
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
+      logging: new AwsLogDriver({
+        streamPrefix: 'migrate',
+        logGroup: this.logs,
+      }),
+    });
+    this.serviceFactory.attachEphemeralStorage(container, VOLUME_NAME, ...WRITABLE_DIRS);
+    this.serviceFactory.setupWritableVolume(VOLUME_NAME, task, this.logs, container, ...WRITABLE_DIRS);
+
+    // No ECS Service is created, so no security group exists yet. Create one and
+    // wire it to the database + cache exactly like the running service's SG, so
+    // the operator can hand it to `run-task`.
+    const migrationSecurityGroup = new SecurityGroup(this, 'migrate-security-group', {
+      vpc: this.props.service.cluster.vpc,
+      description: 'Objects standalone migration task',
+      allowAllOutbound: true,
+    });
+    this.setupConnectivity('migrate', [migrationSecurityGroup]);
+
+    this.allowAccessToSecrets(task.executionRole!);
+    ECSServiceUtils.allowExecutingCommands(task);
+
+    this.migrationTaskOutputs(task, CONTAINER_NAME, migrationSecurityGroup, [mainService, celeryService]);
+  }
+
+  /**
+   * Emit everything the `src/django-migrate` runner's `.env` needs, so the
+   * operator does not have to hunt through the console. See
+   * `src/django-migrate/.env.example`.
+   */
+  private migrationTaskOutputs(task: TaskDefinition, containerName: string, securityGroup: ISecurityGroup, services: FargateService[]) {
+    const subnetIds = this.props.service.cluster.vpc.selectSubnets({
+      subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+    }).subnetIds;
+
+    new CfnOutput(this, 'migrate-cluster', {
+      value: this.props.service.cluster.clusterName,
+      description: 'django-migrate ECS_CLUSTER',
+    });
+    // Every service sharing the schema must be scaled to 0 before migrating.
+    new CfnOutput(this, 'migrate-services', {
+      value: services.map(service => service.serviceName).join(','),
+      description: 'django-migrate ECS_SERVICE (comma-separated, scale all to 0)',
+    });
+    // ARN includes the exact family:revision to pin as MIGRATION_TASK_DEFINITION.
+    new CfnOutput(this, 'migrate-taskdefinition', {
+      value: task.taskDefinitionArn,
+      description: 'django-migrate MIGRATION_TASK_DEFINITION (family:revision)',
+    });
+    new CfnOutput(this, 'migrate-container', {
+      value: containerName,
+      description: 'django-migrate MIGRATION_CONTAINER_NAME',
+    });
+    new CfnOutput(this, 'migrate-subnets', {
+      value: Fn.join(',', subnetIds),
+      description: 'django-migrate SUBNETS',
+    });
+    new CfnOutput(this, 'migrate-security-groups', {
+      value: securityGroup.securityGroupId,
+      description: 'django-migrate SECURITY_GROUPS',
+    });
+    new CfnOutput(this, 'migrate-log-group', {
+      value: this.logs.logGroupName,
+      description: 'CloudWatch log group for the migration task',
+    });
   }
 
   private logGroup() {
