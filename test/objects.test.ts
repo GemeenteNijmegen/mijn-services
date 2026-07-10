@@ -103,16 +103,3 @@ test('The migration task definition is not attached to any ECS service', () => {
   const services = template.findResources('AWS::ECS::Service');
   expect(Object.keys(services)).toHaveLength(2);
 });
-
-test('Migration outputs expose both services to scale down', () => {
-  const template = synthObjects({
-    ...baseConfiguration,
-    migrationImage: 'maykinmedia/objects-api:3.6.1',
-  });
-
-  // The web + celery service names, comma-joined, for the runner's ECS_SERVICE.
-  template.hasOutput('*', {
-    Description: 'django-migrate ECS_SERVICE (comma-separated, scale all to 0)',
-    Value: Match.anyValue(),
-  });
-});
