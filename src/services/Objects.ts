@@ -1,6 +1,6 @@
 import { CfnOutput, Duration, Fn, Token } from 'aws-cdk-lib';
 import { ISecurityGroup, Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerImage, FargateService, Protocol, Secret, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, Protocol, Secret, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -61,9 +61,9 @@ export class ObjectsService extends Construct {
       },
     });
 
-    const mainService = this.setupService();
-    const celeryService = this.setupCeleryService();
-    this.setupMigrationTask(mainService, celeryService);
+    this.setupService();
+    this.setupCeleryService();
+    this.setupMigrationTask();
   }
 
   private getEnvironmentConfiguration() {
@@ -259,7 +259,6 @@ export class ObjectsService extends Construct {
     this.setupConnectivity('celery', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     ECSServiceUtils.allowExecutingCommands(task);
-    return service;
   }
 
   /**
@@ -272,7 +271,7 @@ export class ObjectsService extends Construct {
    * new version independently of the running service. Emits the values the
    * runner's `.env` needs as stack outputs.
    */
-  private setupMigrationTask(mainService: FargateService, celeryService: FargateService) {
+  private setupMigrationTask() {
     const migrationImage = this.props.serviceConfiguration.migrationImage;
     if (!migrationImage) {
       return;
@@ -318,7 +317,7 @@ export class ObjectsService extends Construct {
     this.allowAccessToSecrets(task.executionRole!);
     ECSServiceUtils.allowExecutingCommands(task);
 
-    this.migrationTaskOutputs(task, CONTAINER_NAME, migrationSecurityGroup, [mainService, celeryService]);
+    this.migrationTaskOutputs(task, CONTAINER_NAME, migrationSecurityGroup);
   }
 
   /**
@@ -326,7 +325,7 @@ export class ObjectsService extends Construct {
    * operator does not have to hunt through the console. See
    * `src/django-migrate/.env.example`.
    */
-  private migrationTaskOutputs(task: TaskDefinition, containerName: string, securityGroup: ISecurityGroup, services: FargateService[]) {
+  private migrationTaskOutputs(task: TaskDefinition, containerName: string, securityGroup: ISecurityGroup) {
     const subnetIds = this.props.service.cluster.vpc.selectSubnets({
       subnetType: SubnetType.PRIVATE_WITH_EGRESS,
     }).subnetIds;
@@ -334,11 +333,6 @@ export class ObjectsService extends Construct {
     new CfnOutput(this, 'migrate-cluster', {
       value: this.props.service.cluster.clusterName,
       description: 'django-migrate ECS_CLUSTER',
-    });
-    // Every service sharing the schema must be scaled to 0 before migrating.
-    new CfnOutput(this, 'migrate-services', {
-      value: services.map(service => service.serviceName).join(','),
-      description: 'django-migrate ECS_SERVICE (comma-separated, scale all to 0)',
     });
     // ARN includes the exact family:revision to pin as MIGRATION_TASK_DEFINITION.
     new CfnOutput(this, 'migrate-taskdefinition', {
