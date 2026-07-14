@@ -283,7 +283,7 @@ export class OpenNotificatiesService extends Construct {
       path: this.props.path,
       options: {
         healthCheckGracePeriod: Duration.seconds(150),
-        desiredCount: 1,
+        desiredCount: this.props.openNotificationsConfiguration.taskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
     });
@@ -331,7 +331,7 @@ export class OpenNotificatiesService extends Construct {
       path: undefined, // Not exposed service
       id: 'celery',
       options: {
-        desiredCount: 1,
+        desiredCount: this.props.openNotificationsConfiguration.celeryTaskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
     });
@@ -372,7 +372,7 @@ export class OpenNotificatiesService extends Construct {
       path: undefined, // Not exposed service
       id: 'celery-beat',
       options: {
-        desiredCount: 1,
+        desiredCount: this.props.openNotificationsConfiguration.celeryTaskSize?.desiredTaskCount ?? 1,
       },
     });
     this.setupConnectivity('celery-beat', service.connections.securityGroups);

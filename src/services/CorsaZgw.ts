@@ -295,7 +295,7 @@ export class CorsaZgwService extends Construct {
       task: task,
       domain: `${CorsaZgwService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`,
       options: {
-        desiredCount: 1,
+        desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Used to gain access to the Laravel CLI in the container for management of DB etc.
       },
       // healthCheckPath: '/health', // TODO Not configurabel yet while using subdomain (this is the correct path though)
@@ -359,7 +359,7 @@ export class CorsaZgwService extends Construct {
       id: 'corsa-zgw-worker',
       task: task,
       options: {
-        desiredCount: 1,
+        desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Used to gain access to the Laravel CLI in the container for management of DB etc.
       },
     });
