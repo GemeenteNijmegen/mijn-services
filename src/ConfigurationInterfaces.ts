@@ -558,6 +558,11 @@ export interface MainTaskSizeConfiguration {
   taskSize?: {
     cpu: string;
     memory: string;
+    /**
+     * Set the desired task count
+     * @default 1
+     */
+    desiredTaskCount?: number;
   };
 }
 
@@ -565,10 +570,15 @@ export interface CeleryTaskSizeConfiguration {
   /**
    * Configure the task size for the celery service
    * @default - cdk defaults
-   */
+  */
   celeryTaskSize?: {
     cpu: string;
     memory: string;
+    /**
+     * Set the desired task count
+     * @default 1
+     */
+    desiredTaskCount?: number;
   };
 }
 

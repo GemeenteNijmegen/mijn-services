@@ -164,7 +164,7 @@ export class OpenZaakv2Service extends Construct {
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
       },
-      desiredCount: 1,
+      desiredCount: this.props.openZaakConfiguration.taskSize?.desiredTaskCount ?? 1,
       enableExecuteCommand: true,
       healthCheckGracePeriod: Duration.seconds(120), // Give time to start
     });
@@ -230,7 +230,7 @@ export class OpenZaakv2Service extends Construct {
       domain: undefined, // Not exposed service
       id: 'celery',
       options: {
-        desiredCount: 1,
+        desiredCount: this.props.openZaakConfiguration.celeryTaskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
     });

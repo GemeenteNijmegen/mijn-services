@@ -217,7 +217,7 @@ export class OpenZaakService extends Construct {
       path: this.props.path,
       options: {
         healthCheckGracePeriod: Duration.seconds(150),
-        desiredCount: 1,
+        desiredCount: this.props.openZaakConfiguration.taskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
       apiVersionHeaderValue: this.props.openZaakConfiguration.apiVersion,
@@ -274,7 +274,7 @@ export class OpenZaakService extends Construct {
       path: undefined, // Not exposed service
       id: 'celery',
       options: {
-        desiredCount: 1,
+        desiredCount: this.props.openZaakConfiguration.celeryTaskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
       volumeMounts: {

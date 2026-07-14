@@ -186,7 +186,7 @@ export class OpenProductService extends Construct {
       task: task,
       path: this.props.path,
       options: {
-        desiredCount: 1,
+        desiredCount: this.props.openProductConfiguration.taskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Used to call src/manage.py (see open-product docs).
       },
       volumeMounts: {
@@ -243,7 +243,7 @@ export class OpenProductService extends Construct {
       path: undefined, // Not exposed service
       id: 'celery',
       options: {
-        desiredCount: 1,
+        desiredCount: this.props.openProductConfiguration.celeryTaskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
       volumeMounts: {

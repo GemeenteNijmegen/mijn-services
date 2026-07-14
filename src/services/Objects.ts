@@ -201,7 +201,7 @@ export class ObjectsService extends Construct {
       path: this.props.path,
       options: {
         healthCheckGracePeriod: Duration.seconds(120), // Give more time to start (newer django starts slower?)
-        desiredCount: 1,
+        desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Needed to run commands for upgrading container and running migration scripts.
       },
     });
