@@ -52,6 +52,7 @@ export const main: Configuration = {
     migrationImage: 'maykinmedia/open-object:3.6.1',
     logLevel: 'INFO',
     debug: false,
+    useNewDatabase: true,
     taskSize: {
       cpu: '512',
       memory: '1024',
