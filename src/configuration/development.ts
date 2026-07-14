@@ -86,7 +86,7 @@ export const development: Configuration = {
   },
   objectsService: {
     image: 'maykinmedia/open-object:4.0.0',
-    migrationImage: 'maykinmedia/open-object:4.0.0',
+    migrationImage: 'maykinmedia/open-object:4.1.0',
     logLevel: 'DEBUG',
     debug: true,
     useNewDatabase: true,
