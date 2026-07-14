@@ -2,12 +2,12 @@
 
 ## Dag 1. Database migratie
 
-- OpenForms token uitzetten
-- Uitzetten services
-- Drop & opnieuw aanmaken objects-database via lambda (na gefaalde upgrade).
-- Scripts hieronder uitvoeren
-- CDK deployment met nieuwe DB flag voor open-objecten
-- OpenForms token fixen
+OpenForms token uitzetten
+Uitzetten services
+Drop & opnieuw aanmaken objects-database via lambda (na gefaalde upgrade).
+Scripts hieronder uitvoeren
+CDK deployment met nieuwe DB flag voor open-objecten
+OpenForms token fixen
 
 ```bash
 sudo dnf remove postgresql16
@@ -19,15 +19,12 @@ pg_restore -h $ENDPOINT -U mijn_services -d objects-database --no-owner --role=o
 ```
 
 ## Dag 2. Upgrade naar 3.6.1
+- Dubbelcheck of migratie-task 3.6.1 is.
 - Token OpenForms vervangen
-- Handmatig nieuwe taskdefinition aanmaken met 3.6.1 ipv 3.0.0
-- Service uitzetten (celery en web)
+- Service uitzetten (celery en web) via CDK: Desired tasks op 0
 - Dump database maken en in S3 zetten.
-- Taak starten (handmatig) met override commando `sleep,infinity` (comma moet daar staan).
-- `python src/manage.py migrate` draaien
-- Handmatig ECS services aanpassen (celery & web) naar nieuwe taskdefinitions
-- Desired task count ophogen naar 1
-- Deployment vanuit CDK met nieuwe versie nummers om de boel weer consistent te maken.
+- migratietaak draaien: ```bash src/django-migrate/run-objects-migrate.sh``` en dan ```bash src/django-migrate/run-objects-migrate.sh run```
+- Deploy van 3.6.1 voor normale task. met desiredtasks weer naar 1
 - Token OpenForms fixen als alles weer werkt
 
 Getest:
