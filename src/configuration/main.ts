@@ -48,7 +48,7 @@ export const main: Configuration = {
     debug: false,
   },
   objectsService: {
-    image: 'maykinmedia/objects-api:3.6.1',
+    image: 'maykinmedia/open-object:4.1.0',
     migrationImage: 'maykinmedia/open-object:4.1.0',
     logLevel: 'INFO',
     debug: false,
@@ -62,6 +62,9 @@ export const main: Configuration = {
       cpu: '256',
       memory: '512',
       desiredTaskCount: 0,
+    },
+    environment: {
+      SITE_DOMAIN: 'https://mijn-services.nijmegen.nl/objects',
     },
   },
   ObjectNotificationServices: [
