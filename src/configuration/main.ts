@@ -49,7 +49,7 @@ export const main: Configuration = {
   },
   objectsService: {
     image: 'maykinmedia/objects-api:3.6.1',
-    migrationImage: 'maykinmedia/objects-api:3.6.1',
+    migrationImage: 'maykinmedia/open-object:4.1.0',
     logLevel: 'INFO',
     debug: false,
     useNewDatabase: true,
