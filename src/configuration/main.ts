@@ -58,6 +58,11 @@ export const main: Configuration = {
       memory: '1024',
       desiredTaskCount: 0,
     },
+    celeryTaskSize: {
+      cpu: '256',
+      memory: '512',
+      desiredTaskCount: 0,
+    }
   },
   ObjectNotificationServices: [
     {
