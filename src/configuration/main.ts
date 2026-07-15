@@ -49,19 +49,19 @@ export const main: Configuration = {
   },
   objectsService: {
     image: 'maykinmedia/objects-api:3.6.1',
-    migrationImage: 'maykinmedia/objects-api:3.6.1',
+    migrationImage: 'maykinmedia/objects-api:4.1.0',
     logLevel: 'INFO',
     debug: false,
     useNewDatabase: true,
     taskSize: {
       cpu: '512',
       memory: '1024',
-      desiredTaskCount: 1,
+      desiredTaskCount: 0,
     },
     celeryTaskSize: {
       cpu: '256',
       memory: '512',
-      desiredTaskCount: 1,
+      desiredTaskCount: 0,
     },
   },
   ObjectNotificationServices: [
