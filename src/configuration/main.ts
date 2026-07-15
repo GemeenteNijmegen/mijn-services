@@ -62,7 +62,7 @@ export const main: Configuration = {
       cpu: '256',
       memory: '512',
       desiredTaskCount: 0,
-    }
+    },
   },
   ObjectNotificationServices: [
     {
