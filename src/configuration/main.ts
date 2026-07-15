@@ -48,7 +48,7 @@ export const main: Configuration = {
     debug: false,
   },
   objectsService: {
-    image: 'maykinmedia/objects-api:3.6.1',
+    image: 'maykinmedia/open-object:4.1.0',
     migrationImage: 'maykinmedia/open-object:4.1.0',
     logLevel: 'INFO',
     debug: false,
