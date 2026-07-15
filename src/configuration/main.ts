@@ -56,6 +56,7 @@ export const main: Configuration = {
     taskSize: {
       cpu: '512',
       memory: '1024',
+      desiredTaskCount: 0,
     },
   },
   ObjectNotificationServices: [
