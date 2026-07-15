@@ -42,11 +42,6 @@ export const main: Configuration = {
       memory: '2048',
     },
   },
-  objecttypesService: {
-    image: 'maykinmedia/objecttypes-api:3.0.0',
-    logLevel: 'INFO',
-    debug: false,
-  },
   objectsService: {
     image: 'maykinmedia/open-object:4.1.0',
     migrationImage: 'maykinmedia/open-object:4.1.0',
