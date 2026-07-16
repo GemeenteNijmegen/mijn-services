@@ -118,11 +118,6 @@ export interface Configuration {
   openKlantRegistrationServices?: OpenKlantRegistrationServiceConfiguration[];
 
   /**
-   * Configuration for objecttypes service
-   */
-  objecttypesService?: ObjecttypesConfiguration;
-
-  /**
    * Configuration for objects service
    */
   objectsService?: ObjectsConfiguration;
@@ -267,23 +262,6 @@ export interface OpenZaakConfigurationV2 extends OpenZaakConfiguration {
    */
   loadbalancerPriority: number;
 }
-
-export interface ObjecttypesConfiguration extends MainTaskSizeConfiguration, DatabaseMigrationToggle {
-  /**
-   * Docker image to use.
-   * Usually includes the version number.
-   */
-  image: string;
-  /**
-   * Log level for the container
-   */
-  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
-  /**
-   * Enable debug mode and logging
-   */
-  debug?: boolean;
-}
-
 export interface ObjectsConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle, EnvironmentReference {
   /**
    * Docker image to use.
