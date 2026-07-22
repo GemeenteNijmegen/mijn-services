@@ -1,0 +1,28 @@
+meta {
+  name: ESFTaak by status + periode
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrlObjects}}?type={{baseUrl}/objecttypes/6df21057-e07c-4909-8933-d70b79cfd15e&data_attr=formtaak__data__periodenummer__exact__{{periode}}&data_attr=status__exact__{{status}}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  type: {{baseUrl}/objecttypes/6df21057-e07c-4909-8933-d70b79cfd15e
+  data_attr: formtaak__data__periodenummer__exact__{{periode}}
+  data_attr: status__exact__{{status}}
+}
+
+headers {
+  Accept: application/json
+  Accept-Crs: EPSG:4326
+  Authorization: Token {{token}}
+}
+
+vars:pre-request {
+  periode: 202608
+  status: verwerkt
+}
