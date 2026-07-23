@@ -21,7 +21,6 @@ import { HelloWorldService } from './services/HelloWorld';
 import { KeyCloakService } from './services/KeyCloak';
 import { KeyCloakServiceV2 } from './services/KeyCloakV2';
 import { ObjectsService } from './services/Objects';
-import { ObjecttypesService } from './services/Objecttypes';
 import { OpenKlantService } from './services/OpenKlant';
 import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationService/OpenKlantRegistrationService';
 import { OpenNotificatiesService } from './services/OpenNotificaties';
@@ -100,7 +99,6 @@ export class MainStack extends Stack {
     this.openNotificatiesServices(containerPlatform);
     this.openZaakService(containerPlatform);
     this.outputManagementComponent(containerPlatform);
-    this.objecttypesService(containerPlatform);
     this.objectsService(containerPlatform);
     this.keyCloakService(containerPlatform);
     this.gzacService(containerPlatform);
@@ -265,33 +263,6 @@ export class MainStack extends Stack {
         },
       });
     }
-  }
-
-  private objecttypesService(platform: ContainerPlatform) {
-    if (!this.configuration.objecttypesService) {
-      console.warn(
-        'No objecttypes configuration provided. Skipping creation of objecttypes service!',
-      );
-      return;
-    }
-    new ObjecttypesService(this, 'objecttypes', {
-      hostedzone: this.hostedzone,
-      key: this.key,
-      cache: this.cache,
-      cacheDatabaseIndex: 7,
-      cacheDatabaseIndexCelery: 8,
-      alternativeDomainNames: this.configuration.alternativeDomainNames,
-      path: 'objecttypes',
-      service: {
-        cluster: platform.cluster,
-        link: platform.vpcLink,
-        namespace: platform.namespace,
-        loadbalancer: platform.loadBalancer,
-        port: 8000, // Note: we cannot set the port due the startup script in the default container.
-        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
-      },
-      serviceConfiguration: this.configuration.objecttypesService,
-    });
   }
 
   private objectsService(platform: ContainerPlatform) {

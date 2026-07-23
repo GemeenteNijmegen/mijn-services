@@ -167,7 +167,7 @@ export class OpenKlantService extends Construct {
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
       },
-      desiredCount: 1,
+      desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
       enableExecuteCommand: true,
     });
     this.setupConnectivity('main', service.connections.securityGroups);
@@ -247,7 +247,7 @@ export class OpenKlantService extends Construct {
       path: undefined, // Not exposed service
       id: 'celery',
       options: {
-        desiredCount: 1,
+        desiredCount: this.props.serviceConfiguration.celeryTaskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Used to call src/manage.py (see open-klant docs).
       },
     });

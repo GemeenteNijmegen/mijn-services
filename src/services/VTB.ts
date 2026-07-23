@@ -164,7 +164,7 @@ export class VtbService extends Construct {
       path: undefined,
       domain: this.props.serviceConfiguration.subdomain + '.' + this.props.hostedzone.zoneName,
       options: {
-        desiredCount: 1,
+        desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
         enableExecuteCommand: true, // Used to call src/manage.py (see open-vtb docs).
       },
     });

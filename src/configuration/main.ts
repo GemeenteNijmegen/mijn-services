@@ -42,19 +42,24 @@ export const main: Configuration = {
       memory: '2048',
     },
   },
-  objecttypesService: {
-    image: 'maykinmedia/objecttypes-api:3.0.0',
-    logLevel: 'INFO',
-    debug: false,
-  },
   objectsService: {
-    image: 'maykinmedia/objects-api:3.0.0',
-    migrationImage: 'maykinmedia/objects-api:3.6.1',
+    image: 'maykinmedia/open-object:4.1.0',
+    migrationImage: 'maykinmedia/open-object:4.1.0',
     logLevel: 'INFO',
     debug: false,
+    useNewDatabase: true,
     taskSize: {
       cpu: '512',
       memory: '1024',
+      desiredTaskCount: 0,
+    },
+    celeryTaskSize: {
+      cpu: '256',
+      memory: '512',
+      desiredTaskCount: 0,
+    },
+    environment: {
+      SITE_DOMAIN: 'https://mijn-services.nijmegen.nl/objects',
     },
   },
   ObjectNotificationServices: [
