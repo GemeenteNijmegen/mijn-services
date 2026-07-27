@@ -11,6 +11,7 @@ export const main: Configuration = {
   useDockerhubCredentials: true,
   criticality: new Criticality('high'),
   alternativeDomainNames: ['mijn-services.nijmegen.nl'],
+  useCustomRedisParameterGroup: true,
   cnameRecords: {
     '_762e893c9ea81e57b34ab11ed543256d': '_1c518863d978cddd100e65875b7c1136.djqtsrsxkq.acm-validations.aws.',
     '_b1b085f6b7bb12e30a7deaa16d9137e9.cf': '_8ea358006b327389c8e5c4e02e60bbfd.xlfgrmvvlj.acm-validations.aws.',
