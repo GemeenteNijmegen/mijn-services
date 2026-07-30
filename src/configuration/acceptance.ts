@@ -41,12 +41,6 @@ export const acceptance: Configuration = {
     debug: true,
     apiVersion: '1.3.1',
   },
-  objecttypesService: {
-    image: 'maykinmedia/objecttypes-api:3.4.2',
-    logLevel: 'DEBUG',
-    debug: true,
-    useNewDatabase: true,
-  },
   objectsService: {
     image: 'maykinmedia/open-object:4.1.0',
     migrationImage: 'maykinmedia/open-object:4.1.0',

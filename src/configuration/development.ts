@@ -78,12 +78,6 @@ export const development: Configuration = {
     redisCeleryDatabaseNumber: 18,
     loadbalancerPriority: 60,
   }],
-  objecttypesService: {
-    image: 'maykinmedia/objecttypes-api:3.4.2',
-    logLevel: 'DEBUG',
-    debug: true,
-    useNewDatabase: true,
-  },
   objectsService: {
     image: 'maykinmedia/open-object:4.1.0',
     migrationImage: 'maykinmedia/open-object:4.1.0',
@@ -155,7 +149,6 @@ export const development: Configuration = {
       usePostguardFlag: true,
     },
   ],
-  helloWorlService: true,
   ObjectNotificationServices: [
     {
       configKey: 'esfTaak',

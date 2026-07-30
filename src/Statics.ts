@@ -25,7 +25,6 @@ export class Statics {
   static readonly _ssmClientCredentialsZaakNotifications = `/${Statics.projectName}/internal/open-notificaties/client/credentials/zaak-notifications`;
   static readonly _ssmClientCredentialsNotificationsZaak = `/${Statics.projectName}/internal/open-notificaties/client/credentials/notifications-zaak`;
   static readonly _ssmOpenZaakCredentials = `/${Statics.projectName}/internal/open-zaak/credentials`;
-  static readonly _ssmObjecttypesCredentials = `/${Statics.projectName}/internal/objecttypes/credentials`;
   static readonly _ssmObjectsCredentials = `/${Statics.projectName}/internal/objects/credentials`;
   static readonly _ssmOpenProductCredentials = `/${Statics.projectName}/internal/open-product/credentials`;
   static readonly _ssmDatabaseArn = `/${Statics.projectName}/internal/database/arn`;
@@ -42,7 +41,6 @@ export class Statics {
   static readonly databaseOpenKlant = 'open-klant';
   static readonly databaseOpenNotificaties = 'open-notificaties';
   static readonly databaseOpenZaak = 'open-zaak';
-  static readonly databaseObjecttypes = 'objecttypes';
   static readonly databaseObjects = 'objects';
   static readonly databaseKeyCloak = 'keycloak'; // GZAC Static
   static readonly databaseGZAC = 'gzac'; // GZAC Static
@@ -63,7 +61,6 @@ export class Statics {
     Statics.databaseOpenKlant,
     Statics.databaseOpenNotificaties,
     Statics.databaseOpenZaak,
-    Statics.databaseObjecttypes,
     Statics.databaseObjects,
   ];
 
@@ -76,7 +73,6 @@ export class Statics {
     Statics.databaseOpenKlant,
     Statics.databaseOpenNotificaties,
     Statics.databaseOpenZaak,
-    Statics.databaseObjecttypes,
     Statics.databaseObjects,
     Statics.databaseKeyCloak, // GZAC
     Statics.databaseGZAC, // GZAC
