@@ -156,7 +156,7 @@ export const development: Configuration = {
     },
   ],
   keyCloackServices: [
-    { // TODO add redis session store to keycloak...
+    {
       databaseName: 'mijn-services-keycloak',
       id: 'mijn-services-keycloak',
       image: 'quay.io/keycloak/keycloak:26.6.2',

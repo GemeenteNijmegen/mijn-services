@@ -25,6 +25,13 @@ interface KeyCloakServiceV2Props {
   readonly certificate: ICertificate;
 }
 
+/**
+ * Note: Keycloak has no built-in Redis session backend. It replicates sessions via
+ * embedded Infinispan/JGroups clustering instead, which is why setupService() registers
+ * the ECS service under a CloudMap SRV record (used for JGroups DNS_PING discovery). A
+ * Redis-backed session store would require an unofficial third-party SPI, so we're not
+ * pursuing it for now.
+ */
 export class KeyCloakServiceV2 extends Construct {
 
   static readonly PORT = 8080;
