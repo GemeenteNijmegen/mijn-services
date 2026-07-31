@@ -140,8 +140,8 @@ export class KeyCloakServiceV2 extends Construct {
       conditions: [ListenerCondition.hostHeaders([fqdomain])],
       healthCheck: {
         enabled: true,
-        path: '/health/ready',
-        healthyHttpCodes: '200',
+        path: '/admin/master/console/',
+        healthyHttpCodes: '200,302',
         healthyThresholdCount: 2,
         unhealthyThresholdCount: 6,
         timeout: Duration.seconds(10),
