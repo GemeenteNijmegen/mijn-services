@@ -134,4 +134,15 @@ export const acceptance: Configuration = {
     redisCeleryDatabaseNumber: 18,
     loadbalancerPriority: 50,
   }],
+  keyCloackServices: [
+    {
+      databaseName: 'mijn-services-keycloak',
+      id: 'mijn-services-keycloak',
+      image: 'quay.io/keycloak/keycloak:26.7.0',
+      logLevel: 'INFO',
+      subdomain: 'keycloak',
+      debug: true,
+      loadbalancerPriority: 60,
+    },
+  ],
 };
