@@ -70,6 +70,7 @@ export class KeyCloakServiceV2 extends Construct {
       KC_LOG_LEVEL: this.props.serviceConfiguration.logLevel,
       KC_HOSTNAME_STRICT: 'true',
       KC_METRICS_ENABLED: 'true',
+      KC_HTTP_MANAGEMENT_HEALTH_ENABLED: 'false', // Expose health checks on normal http port (public)
     };
   }
 
