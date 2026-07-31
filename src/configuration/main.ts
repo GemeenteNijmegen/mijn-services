@@ -69,4 +69,15 @@ export const main: Configuration = {
       scheduleExpression: ScheduleExpression.rate(Duration.days(1)),
     },
   ],
+  keyCloackServices: [
+    {
+      databaseName: 'mijn-services-keycloak',
+      id: 'mijn-services-keycloak',
+      image: 'quay.io/keycloak/keycloak:26.7.0',
+      logLevel: 'INFO',
+      subdomain: 'keycloak',
+      debug: true,
+      loadbalancerPriority: 50,
+    },
+  ],
 };
