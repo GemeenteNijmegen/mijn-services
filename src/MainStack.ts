@@ -17,7 +17,6 @@ import { CacheDatabase } from './constructs/Redis';
 import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
 import { GZACFrontendService } from './services/GZACFrontend';
-import { HelloWorldService } from './services/HelloWorld';
 import { KeyCloakService } from './services/KeyCloak';
 import { KeyCloakServiceV2 } from './services/KeyCloakV2';
 import { ObjectsService } from './services/Objects';
@@ -106,7 +105,6 @@ export class MainStack extends Stack {
     this.gzacFrontendService(containerPlatform); // As this runs on the root /* it should be lowest in priority (accp only)
     this.corsaZgwServices(containerPlatform);
     this.vtbServices(containerPlatform);
-    this.helloWorldService(containerPlatform);
 
     // New style
     this.openZaakServices(containerPlatform);
@@ -493,24 +491,6 @@ export class MainStack extends Stack {
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
       });
-    });
-  }
-
-  private helloWorldService(platform: ContainerPlatform) {
-    if (!this.configuration.helloWorlService) {
-      return;
-    }
-
-    new HelloWorldService(this, 'hello-world', {
-      hostedzone: this.hostedzone,
-      service: {
-        cluster: platform.cluster,
-        link: platform.vpcLink,
-        namespace: platform.namespace,
-        loadbalancer: platform.loadBalancer,
-        port: 8080,
-        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
-      },
     });
   }
 

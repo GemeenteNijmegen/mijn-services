@@ -144,5 +144,5 @@ export const acceptance: Configuration = {
       debug: true,
       loadbalancerPriority: 60,
     },
-  ]
+  ],
 };
