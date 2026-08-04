@@ -156,11 +156,11 @@ export const development: Configuration = {
     },
   ],
   keyCloackServices: [
-    { // TODO add redis session store to keycloak...
+    {
       databaseName: 'mijn-services-keycloak',
       id: 'mijn-services-keycloak',
-      image: 'quay.io/keycloak/keycloak:26.6.2',
-      logLevel: 'DEBUG',
+      image: 'quay.io/keycloak/keycloak:26.7.0',
+      logLevel: 'INFO',
       subdomain: 'keycloak',
       debug: true,
       loadbalancerPriority: 50,

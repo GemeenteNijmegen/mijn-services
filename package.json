@@ -1,5 +1,8 @@
 {
   "name": "mijn-services",
+  "bin": {
+    "django-migrate": "bin/django-migrate"
+  },
   "scripts": {
     "build": "projen build",
     "bump": "projen bump",

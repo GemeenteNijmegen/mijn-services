@@ -42,7 +42,6 @@ export class Statics {
   static readonly databaseOpenNotificaties = 'open-notificaties';
   static readonly databaseOpenZaak = 'open-zaak';
   static readonly databaseObjects = 'objects';
-  static readonly databaseKeyCloak = 'keycloak'; // GZAC Static
   static readonly databaseGZAC = 'gzac'; // GZAC Static
   static readonly databaseOpenProduct = 'open-product';
   static readonly databaseCorsaZgwDevService = 'corsa-zgw-dev';
@@ -74,7 +73,6 @@ export class Statics {
     Statics.databaseOpenNotificaties,
     Statics.databaseOpenZaak,
     Statics.databaseObjects,
-    Statics.databaseKeyCloak, // GZAC
     Statics.databaseGZAC, // GZAC
     Statics.databaseOpenProduct,
     Statics.databaseCorsaZgwDevService,
@@ -114,7 +112,6 @@ export class Statics {
    * GZAC Statics
    * Placed separately to make (re)moving easier
    */
-  static readonly _ssmGZACKeyCloakAdminCredentials = `/${Statics.projectName}/internal/gzac/keycloak/admin/credentials`;
   static readonly _ssmGZACBackendM2MCredentials = `/${Statics.projectName}/internal/gzac/backend/m2m/credentials`;
 
 

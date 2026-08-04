@@ -55,11 +55,6 @@ export const acceptance: Configuration = {
       memory: '2048', // 2GB
     },
   },
-  keyCloackService: {
-    image: 'quay.io/keycloak/keycloak:24.0.1',
-    logLevel: 'DEBUG',
-    debug: true,
-  },
   gzacService: {
     backendImage: 'ritense/gzac-backend:12.6.0',
     frontendImage: 'ritense/gzac-frontend:12.6.0',
@@ -134,4 +129,15 @@ export const acceptance: Configuration = {
     redisCeleryDatabaseNumber: 18,
     loadbalancerPriority: 50,
   }],
+  keyCloackServices: [
+    {
+      databaseName: 'mijn-services-keycloak',
+      id: 'mijn-services-keycloak',
+      image: 'quay.io/keycloak/keycloak:26.7.0',
+      logLevel: 'INFO',
+      subdomain: 'keycloak',
+      debug: true,
+      loadbalancerPriority: 60,
+    },
+  ],
 };
