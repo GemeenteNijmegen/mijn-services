@@ -121,11 +121,6 @@ export interface Configuration {
    * Configuration for objects service
    */
   objectsService?: ObjectsConfiguration;
-  /**
-   * Configuration for Keycloack service
-   * GZAC Keycloak
-   */
-  keyCloackService?: KeyCloakConfiguration;
 
   /**
    * Configuration for Keycloack services
@@ -436,11 +431,11 @@ export interface OpenKlantRegistrationServiceConfiguration {
   catalogiWhitelist?: string[];
 }
 
-export interface KeyCloakConfiguration {
+export interface KeyCloakConfigurationV2 {
   /**
-   * Docker image to use.
-   * Usually includes the version number.
-   */
+ * Docker image to use.
+ * Usually includes the version number.
+ */
   image: string;
   /**
    * Log level for the container
@@ -450,9 +445,6 @@ export interface KeyCloakConfiguration {
    * Enable debug mode and logging
    */
   debug?: boolean;
-}
-
-export interface KeyCloakConfigurationV2 extends KeyCloakConfiguration {
   /**
    * Name of the db to be created (should be unique for this project)
    */
