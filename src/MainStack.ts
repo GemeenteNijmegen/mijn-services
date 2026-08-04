@@ -98,15 +98,15 @@ export class MainStack extends Stack {
     this.openZaakService(containerPlatform);
     this.outputManagementComponent(containerPlatform);
     this.objectsService(containerPlatform);
-    this.gzacService(containerPlatform);
     this.openProductServices(containerPlatform);
-    this.gzacFrontendService(containerPlatform); // As this runs on the root /* it should be lowest in priority (accp only)
     this.corsaZgwServices(containerPlatform);
     this.vtbServices(containerPlatform);
 
-    // New style
+    // New style (oder does not matter anymore)
+    this.gzacServices(containerPlatform);
     this.openZaakServices(containerPlatform);
     this.keyCloakServices(containerPlatform);
+    this.gzacFrontendService(containerPlatform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
@@ -342,7 +342,7 @@ export class MainStack extends Stack {
   }
 
 
-  private gzacService(platform: ContainerPlatform) {
+  private gzacServices(platform: ContainerPlatform) {
     if (!this.configuration.gzacServices) {
       console.warn('no gzac provided. Skipping creation of objects services!');
       return;
@@ -351,8 +351,6 @@ export class MainStack extends Stack {
       new GZACService(this, gzacService.id, {
         hostedzone: this.hostedzone,
         key: this.key,
-        alternativeDomainNames: this.configuration.alternativeDomainNames,
-        path: 'api',
         service: {
           cluster: platform.cluster,
           link: platform.vpcLink,

@@ -174,4 +174,13 @@ export const development: Configuration = {
     debug: true,
     loadbalancerPriority: 70,
   }],
+  gzacServices: [{
+    id: 'gzac-backend-1',
+    subdomain: 'gzac',
+    image: 'ritense/gzac-backend:13.39.0',
+    logLevel: 'DEBUG',
+    debug: true,
+    loadbalancerPriority: 80,
+    databaseName: 'gzac',
+  }],
 };

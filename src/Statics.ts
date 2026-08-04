@@ -108,12 +108,6 @@ export class Statics {
   static readonly ssmObjectNotifierNotifyIssuer = `/${Statics.projectName}/objectnotifier/notifyissuer`;
   static readonly ssmObjectNotifierNotifyToken = `/${Statics.projectName}/objectnotifier/notifytoken`;
 
-  /**
-   * GZAC Statics
-   * Placed separately to make (re)moving easier
-   */
-  static readonly _ssmGZACBackendM2MCredentials = `/${Statics.projectName}/internal/gzac/backend/m2m/credentials`;
-
 
   static readonly sessionTimeoutDefaultSeconds = 12 * 3600;
 

@@ -502,15 +502,14 @@ export interface GZACConfiguration {
    */
   id: string;
   /**
-   * Docker image to use.
-   * Usually includes the version number.
+   * database name (auto created)
    */
-  backendImage: string;
+  databaseName: string;
   /**
    * Docker image to use.
    * Usually includes the version number.
    */
-  frontendImage: string;
+  image: string;
   /**
    * Log level for the container
    */
@@ -519,6 +518,10 @@ export interface GZACConfiguration {
    * Enable debug mode and logging
    */
   debug?: boolean;
+  /**
+   * Loadbalancer rule prio.
+   */
+  loadbalancerPriority: number;
 }
 
 export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
