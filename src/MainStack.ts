@@ -318,51 +318,52 @@ export class MainStack extends Stack {
 
 
   private gzacFrontendService(platform: ContainerPlatform) {
-    if (!this.configuration.gzacFrontendService) {
-      console.warn('no gzac provided. Skipping creation of objects service!');
+    if (!this.configuration.gzacFrontendServices) {
+      console.warn('no gzac provided. Skipping creation of objects services!');
       return;
     }
-    new GZACFrontendService(this, 'gzac-frontend', {
-      hostedzone: this.hostedzone,
-      key: this.key,
-      alternativeDomainNames: this.configuration.alternativeDomainNames,
-      path: 'gzac-ui',
-      service: {
-        cluster: platform.cluster,
-        link: platform.vpcLink,
-        namespace: platform.namespace,
-        loadbalancer: platform.loadBalancer,
-        port: 8080,
-        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
-      },
-      serviceConfiguration: this.configuration.gzacFrontendService,
-      certificate: this.certificate(),
-    });
+    for (const gzacFrontendService of this.configuration.gzacFrontendServices) {
+      new GZACFrontendService(this, gzacFrontendService.id, {
+        hostedzone: this.hostedzone,
+        key: this.key,
+        path: 'gzac-ui',
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
+          port: 8080,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+        serviceConfiguration: gzacFrontendService,
+        certificate: this.certificate(),
+      });
+    }
   }
 
-  private gzacService(platform: ContainerPlatform) {
-    if (!this.configuration.gzacService) {
-      console.warn('no gzac provided. Skipping creation of objects service!');
 
+  private gzacService(platform: ContainerPlatform) {
+    if (!this.configuration.gzacServices) {
+      console.warn('no gzac provided. Skipping creation of objects services!');
       return;
     }
-
-    new GZACService(this, 'gzac', {
-      hostedzone: this.hostedzone,
-      key: this.key,
-      alternativeDomainNames: this.configuration.alternativeDomainNames,
-      path: 'api',
-      service: {
-
-        cluster: platform.cluster,
-        link: platform.vpcLink,
-        namespace: platform.namespace,
-        loadbalancer: platform.loadBalancer,
-        port: 8080,
-        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
-      },
-      serviceConfiguration: this.configuration.gzacService,
-    });
+    for (const gzacService of this.configuration.gzacServices) {
+      new GZACService(this, gzacService.id, {
+        hostedzone: this.hostedzone,
+        key: this.key,
+        alternativeDomainNames: this.configuration.alternativeDomainNames,
+        path: 'api',
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
+          port: 8080,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+        serviceConfiguration: gzacService,
+      });
+    }
   }
 
   private corsaZgwServices(platform: ContainerPlatform) {

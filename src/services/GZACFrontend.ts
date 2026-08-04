@@ -1,11 +1,12 @@
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { AwsLogDriver, ContainerImage, FargateService, Protocol } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, Compatibility, ContainerImage, FargateService, Protocol, Secret, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { GZACFrontendConfiguration } from '../ConfigurationInterfaces';
 import {
@@ -14,13 +15,13 @@ import {
   ECSServiceUtils,
 } from '../constructs/EcsServiceFactory';
 import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
+import { Statics } from '../Statics';
 
 
 interface GZACServiceProps {
   readonly service: EcsServiceFactoryProps;
   readonly path: string;
   readonly hostedzone: IHostedZone;
-  readonly alternativeDomainNames?: string[];
   /**
    * The configuration for the open configuration installation
    */
@@ -31,7 +32,6 @@ interface GZACServiceProps {
 
 export class GZACFrontendService extends Construct {
 
-  static readonly SUBDOMAIN = 'gzac';
 
   private readonly logs: LogGroup;
   private readonly props: GZACServiceProps;
@@ -48,38 +48,43 @@ export class GZACFrontendService extends Construct {
   }
 
   private getEnvironmentConfiguration() {
-    const trustedDomains =
-      this.props.alternativeDomainNames?.map((a) => a) ?? [];
-    trustedDomains.push(this.props.hostedzone.zoneName);
+
+    // Ensure SSM parameters for this service exist
+    const params = this.setupParameters();
+
+    // Compile the domain name this service is running on.
+    const domainName = `https://${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`;
+
     return {
-      API_URI: 'https://mijn-services.accp.nijmegen.nl/api',
-      KEYCLOAK_URL: 'https://mijn-services.accp.nijmegen.nl/keycloak',
-      KEYCLOAK_REALM: 'valtimo',
-      KEYCLOAK_CLIENT_ID: 'valtimo-console',
-      KEYCLOAK_REDIRECT_URI: 'https://mijn-services.accp.nijmegen.nl/keycloak',
-      KEYCLOAK_LOGOUT_REDIRECT_URI: 'https://mijn-services.accp.nijmegen.nl',
-      WHITELISTED_DOMAIN: 'https://mijn-services.accp.nijmegen.nl',
-      ENABLE_CASE_WIDGETS: 'true',
-      ENABLE_TASK_PANEL: 'true',
+      secrets: {
+        API_URI: Secret.fromSsmParameter(params.backendUrl),
+        KEYCLOAK_URL: Secret.fromSsmParameter(params.keycloakUrl),
+        KEYCLOAK_REALM: Secret.fromSsmParameter(params.keycloakRealm),
+        KEYCLOAK_CLIENT_ID: Secret.fromSsmParameter(params.keycloakClientId),
+        KEYCLOAK_REDIRECT_URI: Secret.fromSsmParameter(params.keycloakRedirectUrl),
+        KEYCLOAK_LOGOUT_REDIRECT_URI: Secret.fromSsmParameter(params.keycloakLogoutRedirectUrl),
+      },
+      envionment: {
+        WHITELISTED_DOMAIN: domainName,
+        ENABLE_CASE_WIDGETS: 'true',
+        ENABLE_TASK_PANEL: 'true',
+      },
     };
   }
 
-  // private getSecretConfiguration() {
-  //   const secrets = {};
-  //   return secrets;
-  // }
-
   private setupService() {
-    const VOLUME_NAME = 'tmp';
-    const task = this.serviceFactory.createTaskDefinition('gzac-frontend', {
-      volumes: [{ name: VOLUME_NAME }],
+    const task = new TaskDefinition(this, 'gzac-frontend', {
       cpu: '512',
       memoryMiB: '1024',
+      compatibility: Compatibility.FARGATE,
     });
+
+    const env = this.getEnvironmentConfiguration();
 
     // Main service container
     task.addContainer('gzac-frontend', {
-      image: ContainerImage.fromAsset('./src/containers/gzac-frontend'),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      // image: ContainerImage.fromAsset('./src/containers/gzac-frontend'),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
@@ -93,8 +98,8 @@ export class GZACFrontendService extends Construct {
         },
       ],
       readonlyRootFilesystem: false, // Needed for ECS exec
-      // secrets: this.getSecretConfiguration(),
-      environment: this.getEnvironmentConfiguration(),
+      secrets: env.secrets,
+      environment: env.envionment,
       logging: new AwsLogDriver({
         streamPrefix: 'main',
         logGroup: this.logs,
@@ -118,16 +123,13 @@ export class GZACFrontendService extends Construct {
 
 
     // Attach to loadbalancer
-    let fqdomain = `${GZACFrontendService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`;
-    if (this.props.alternativeDomainNames && this.props.alternativeDomainNames.length > 0) {
-      fqdomain = `${GZACFrontendService.SUBDOMAIN}.${this.props.alternativeDomainNames[0]}`;
-    }
+    let fqdomain = `${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`;
     this.props.service.loadbalancer.listener.addTargets('gzac-frontend', {
       conditions: [ListenerCondition.hostHeaders([fqdomain])],
       healthCheck: {
         enabled: true,
         path: '/',
-        healthyHttpCodes: '200',
+        healthyHttpCodes: '200,302',
         healthyThresholdCount: 2,
         unhealthyThresholdCount: 6,
         timeout: Duration.seconds(10),
@@ -145,7 +147,7 @@ export class GZACFrontendService extends Construct {
       certificate: this.props.certificate,
       hostedZone: this.props.hostedzone,
       loadbalancer: this.props.service.loadbalancer.alb,
-      subdomain: GZACFrontendService.SUBDOMAIN,
+      subdomain: this.props.serviceConfiguration.subdomain,
     });
 
     return service;
@@ -156,6 +158,53 @@ export class GZACFrontendService extends Construct {
       retention: RetentionDays.ONE_MONTH,
       encryptionKey: this.props.key,
     });
+  }
+
+  private setupParameters() {
+    const backendUrl = new StringParameter(this, `${this.props.serviceConfiguration.id}-backend-url`, {
+      stringValue: 'https://gzac-api.mijn-services-xxxx.csp-nijmegen.nl',
+      description: 'URL pointing the gzac backend used by frontend',
+      parameterName: `/${Statics.projectName}/gzac/frontend/api-url`,
+    });
+
+    const keycloakUrl = new StringParameter(this, `${this.props.serviceConfiguration.id}-keycloak-url`, {
+      stringValue: 'https://keycloak.mijn-services-xxxx.csp-nijmegen.nl',
+      description: 'Keycloak URL used by the gzac frontend',
+      parameterName: `/${Statics.projectName}/gzac/frontend/keycloak-url`,
+    });
+
+    const keycloakRealm = new StringParameter(this, `${this.props.serviceConfiguration.id}-keycloak-realm`, {
+      stringValue: 'gzac',
+      description: 'Keycloak realm used by the gzac frontend',
+      parameterName: `/${Statics.projectName}/gzac/frontend/keycloak-realm`,
+    });
+
+    const keycloakClientId = new StringParameter(this, `${this.props.serviceConfiguration.id}-keycloak-client-id`, {
+      stringValue: 'gzac-xxxx',
+      description: 'Keycloak client id used by the gzac frontend',
+      parameterName: `/${Statics.projectName}/gzac/frontend/keycloak-client-id`,
+    });
+
+    const keycloakRedirectUrl = new StringParameter(this, `${this.props.serviceConfiguration.id}-keycloak-redirect-uri`, {
+      stringValue: 'https://keycloak.mijn-services-xxxx.csp-nijmegen.nl',
+      description: 'Keycloak redirect URI used by the gzac frontend',
+      parameterName: `/${Statics.projectName}/gzac/frontend/keycloak-redirect-uri`,
+    });
+
+    const keycloakLogoutRedirectUrl = new StringParameter(this, `${this.props.serviceConfiguration.id}-keycloak-logout-redirect-uri`, {
+      stringValue: 'https://mijn-services-xxxx.csp-nijmegen.nl',
+      description: 'Keycloak logout redirect URI used by the gzac frontend',
+      parameterName: `/${Statics.projectName}/gzac/frontend/keycloak-logout-redirect-uri`,
+    });
+
+    return {
+      backendUrl,
+      keycloakUrl,
+      keycloakRealm,
+      keycloakClientId,
+      keycloakRedirectUrl,
+      keycloakLogoutRedirectUrl,
+    };
   }
 
 }

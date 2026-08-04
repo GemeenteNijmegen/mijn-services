@@ -55,20 +55,6 @@ export const acceptance: Configuration = {
       memory: '2048', // 2GB
     },
   },
-  gzacService: {
-    backendImage: 'ritense/gzac-backend:12.6.0',
-    frontendImage: 'ritense/gzac-frontend:12.6.0',
-    logLevel: 'DEBUG',
-    debug: true,
-  },
-  // Disabled for now, its in the way of testing other things as this runs on root path.
-  // Service has been converted to subdomain however this has never been deployed.
-  // gzacFrontendService: {
-  //   image: 'ritense/gzac-frontend:12.6.0',
-  //   logLevel: 'DEBUG',
-  //   debug: true,
-  //   loadbalancerPriority: 70
-  // },
   openProductServices: {
     image: 'maykinmedia/open-product:1.2.0',
     logLevel: 'DEBUG',

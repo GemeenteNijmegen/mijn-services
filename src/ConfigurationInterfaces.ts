@@ -130,9 +130,9 @@ export interface Configuration {
   /**
    * Config for services meant for acc only right now
    */
-  gzacService?: GZACConfiguration;
+  gzacServices?: GZACConfiguration[];
 
-  gzacFrontendService?: GZACFrontendConfiguration;
+  gzacFrontendServices?: GZACFrontendConfiguration[];
 
   openProductServices?: OpenProductServicesConfiguration;
 
@@ -466,6 +466,14 @@ export interface KeyCloakConfigurationV2 {
 
 export interface GZACFrontendConfiguration {
   /**
+   * CDK ID
+   */
+  id: string;
+  /**
+   * The subdomain to publish this service on.
+   */
+  subdomain: string;
+  /**
    * Docker image to use.
    * Usually includes the version number.
    */
@@ -485,6 +493,14 @@ export interface GZACFrontendConfiguration {
 }
 
 export interface GZACConfiguration {
+  /**
+   * Subdomain to publish this service on
+   */
+  subdomain: string;
+  /**
+   * CDK ID
+   */
+  id: string;
   /**
    * Docker image to use.
    * Usually includes the version number.

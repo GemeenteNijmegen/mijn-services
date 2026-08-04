@@ -166,4 +166,12 @@ export const development: Configuration = {
       loadbalancerPriority: 50,
     },
   ],
+  gzacFrontendServices: [{
+    id: 'gzac-frontend-1',
+    subdomain: 'gzac',
+    image: 'ritense/gzac-frontend:13.39.0',
+    logLevel: 'DEBUG',
+    debug: true,
+    loadbalancerPriority: 70,
+  }],
 };
