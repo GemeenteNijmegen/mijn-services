@@ -70,6 +70,7 @@ export class KeyCloakServiceV2 extends Construct {
       KC_LOG_LEVEL: this.props.serviceConfiguration.logLevel,
       KC_HOSTNAME_STRICT: 'true',
       KC_METRICS_ENABLED: 'true',
+      KC_HTTP_MANAGEMENT_HEALTH_ENABLED: 'false', // Expose health checks on normal http port (public)
     };
   }
 
@@ -139,8 +140,8 @@ export class KeyCloakServiceV2 extends Construct {
       conditions: [ListenerCondition.hostHeaders([fqdomain])],
       healthCheck: {
         enabled: true,
-        path: '/health/ready',
-        healthyHttpCodes: '200',
+        path: '/admin/master/console/',
+        healthyHttpCodes: '200,302',
         healthyThresholdCount: 2,
         unhealthyThresholdCount: 6,
         timeout: Duration.seconds(10),

@@ -17,7 +17,6 @@ import { CacheDatabase } from './constructs/Redis';
 import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
 import { GZACFrontendService } from './services/GZACFrontend';
-import { KeyCloakService } from './services/KeyCloak';
 import { KeyCloakServiceV2 } from './services/KeyCloakV2';
 import { ObjectsService } from './services/Objects';
 import { OpenKlantService } from './services/OpenKlant';
@@ -99,7 +98,6 @@ export class MainStack extends Stack {
     this.openZaakService(containerPlatform);
     this.outputManagementComponent(containerPlatform);
     this.objectsService(containerPlatform);
-    this.keyCloakService(containerPlatform);
     this.gzacService(containerPlatform);
     this.openProductServices(containerPlatform);
     this.gzacFrontendService(containerPlatform); // As this runs on the root /* it should be lowest in priority (accp only)
@@ -289,31 +287,6 @@ export class MainStack extends Stack {
         vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
       },
       serviceConfiguration: this.configuration.objectsService,
-    });
-  }
-
-  private keyCloakService(platform: ContainerPlatform) {
-    if (!this.configuration.keyCloackService) {
-      console.warn(
-        'No keycloak configuration provided. Skipping creation of keycloak service!',
-      );
-      return;
-    }
-    new KeyCloakService(this, 'keycloak', {
-      hostedzone: this.hostedzone,
-      key: this.key,
-      alternativeDomainNames: this.configuration.alternativeDomainNames,
-      path: 'keycloak',
-      service: {
-
-        cluster: platform.cluster,
-        link: platform.vpcLink,
-        namespace: platform.namespace,
-        loadbalancer: platform.loadBalancer,
-        port: 8080,
-        vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
-      },
-      serviceConfiguration: this.configuration.keyCloackService,
     });
   }
 
