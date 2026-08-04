@@ -173,6 +173,11 @@ export const development: Configuration = {
     logLevel: 'DEBUG',
     debug: true,
     loadbalancerPriority: 70,
+    taskSize: {
+      cpu: '512',
+      memory: '1024',
+      desiredTaskCount: 0
+    }
   }],
   gzacServices: [{
     id: 'gzac-backend-1',
@@ -182,5 +187,10 @@ export const development: Configuration = {
     debug: true,
     loadbalancerPriority: 80,
     databaseName: 'gzac',
+    taskSize: {
+      cpu: '512',
+      memory: '1024',
+      desiredTaskCount: 0
+    }
   }],
 };

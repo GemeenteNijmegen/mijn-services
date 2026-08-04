@@ -74,8 +74,8 @@ export class GZACFrontendService extends Construct {
 
   private setupService() {
     const task = new TaskDefinition(this, 'gzac-frontend', {
-      cpu: '512',
-      memoryMiB: '1024',
+      cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '512',
+      memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '1024',
       compatibility: Compatibility.FARGATE,
     });
 
@@ -116,7 +116,7 @@ export class GZACFrontendService extends Construct {
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
       },
-      desiredCount: 1,
+      desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
       enableExecuteCommand: true,
       healthCheckGracePeriod: Duration.seconds(120), // Give time to start
     });

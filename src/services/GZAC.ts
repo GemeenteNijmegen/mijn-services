@@ -84,10 +84,6 @@ export class GZACService extends Construct {
       // VALTIMO_OAUTH_PUBLIC_KEY:
       //   'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB',
 
-      KEYCLOAK_REALM: 'valtimo',
-      KEYCLOAK_AUTH_SERVER_URL:
-        'https://mijn-services.accp.nijmegen.nl/keycloak',
-
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: trustedDomain,
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS: '*',
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDHEADERS: '*',
@@ -96,11 +92,16 @@ export class GZACService extends Construct {
   }
 
   private getSecretConfiguration() {
+
+    const params = this.setupParameters();
+
     const secrets = {
       SPRING_DATASOURCE_USERNAME: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
       SPRING_DATASOURCE_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
       KEYCLOAK_RESOURCE: Secret.fromSecretsManager(this.gzacApiCredentials, 'username'),
       KEYCLOAK_CREDENTIALS_SECRET: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
+      KEYCLOAK_REALM: Secret.fromSsmParameter(params.keycloakRealm),
+      KEYCLOAK_AUTH_SERVER_URL: Secret.fromSsmParameter(params.keycloakUrl),
     };
     return secrets;
   }
@@ -109,8 +110,8 @@ export class GZACService extends Construct {
 
     // Setup task
     const task = new TaskDefinition(this, 'gzac-backend-task', {
-      cpu: '512',
-      memoryMiB: '1024',
+      cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '512',
+      memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '1024',
       compatibility: Compatibility.FARGATE,
     });
 
@@ -149,7 +150,7 @@ export class GZACService extends Construct {
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
       },
-      desiredCount: 1,
+      desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
       enableExecuteCommand: true,
       healthCheckGracePeriod: Duration.seconds(120), // Give time to start
     });
@@ -220,7 +221,7 @@ export class GZACService extends Construct {
         dnsRecordType: DnsRecordType.SRV,
         dnsTtl: Duration.seconds(60),
       },
-      desiredCount: 1,
+      desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
       enableExecuteCommand: false,
       healthCheckGracePeriod: Duration.seconds(120), // Give time to start
     });

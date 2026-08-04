@@ -2,6 +2,7 @@ import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Environment } from 'aws-cdk-lib';
 import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
 import { OperatingHours } from './constructs/operating-hours/OperatingHourEnforcer';
+import { debug } from 'console';
 
 /**
  * Adds a configuration field to another interface
@@ -464,7 +465,7 @@ export interface KeyCloakConfigurationV2 {
 }
 
 
-export interface GZACFrontendConfiguration {
+export interface GZACFrontendConfiguration extends MainTaskSizeConfiguration {
   /**
    * CDK ID
    */
@@ -492,7 +493,7 @@ export interface GZACFrontendConfiguration {
   loadbalancerPriority: number;
 }
 
-export interface GZACConfiguration {
+export interface GZACConfiguration extends MainTaskSizeConfiguration {
   /**
    * Subdomain to publish this service on
    */
