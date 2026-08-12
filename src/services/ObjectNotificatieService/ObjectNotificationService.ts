@@ -1,12 +1,16 @@
+import { Criticality, ErrorMonitoringAlarm } from '@gemeentenijmegen/aws-constructs';
 import { ConfigTable } from '@gemeentenijmegen/config/construct';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
+import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { Function } from 'aws-cdk-lib/aws-lambda';
+import { FilterPattern } from 'aws-cdk-lib/aws-logs';
 import { Schedule, ScheduleExpression, ScheduleTargetInput } from 'aws-cdk-lib/aws-scheduler';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-scheduler-targets';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
-import { NotificationHandlerFunction } from './NotificationHandler/NotificationHandler-function';
 import { Statics } from '../../Statics';
+import { NotificationHandlerFunction } from './NotificationHandler/NotificationHandler-function';
 
 
 interface ObjectNotificationServiceProps {
@@ -21,6 +25,8 @@ export class ObjectNotificationService extends Construct {
     const lambda = this.setupLambda(props);
     const table = this.setupConfig(props, lambda);
     lambda.addEnvironment('APP_CONFIG_TABLENAME', table.tableName);
+
+    this.setupMonitoring(lambda);
   }
 
   private setupLambda(props: ObjectNotificationServiceProps) {
@@ -33,6 +39,7 @@ export class ObjectNotificationService extends Construct {
       },
       memorySize: 1024,
       timeout: Duration.minutes(5),
+      description: 'Object Notification Service handler'
     });
     idemPotencyHashTable.grantReadWriteData(lambda);
 
@@ -105,6 +112,49 @@ export class ObjectNotificationService extends Construct {
       removalPolicy: RemovalPolicy.DESTROY,
     });
     return table;
+  }
+
+  private setupMonitoring(lambda: Function) {
+    new ErrorMonitoringAlarm(this, `${this.node.id}-monitor-errors`, {
+      criticality: 'critical',
+      lambda,
+      errorRateProps: {
+        filterPattern: FilterPattern.anyTerm('ObjectsNotificationServiceFailed'),
+        alarmEvaluationPeriod: Duration.minutes(1),
+        alarmEvaluationPeriods: 1,
+        alarmThreshold: 1,
+      },
+    });
+
+    this.setupNotificationSuccessRateAlarm();
+  }
+
+  /**
+   * Alarms on the `NotificationSuccessRate` custom metric published by the
+   * handler (a 0-1 fraction of notifications that succeeded per run), so we
+   * catch a degraded notify/objects API instead of only whole-invocation crashes.
+   */
+  private setupNotificationSuccessRateAlarm() {
+    const criticality = Criticality.fromString('critical');
+    const metric = new Metric({
+      namespace: 'ObjectNotificationService',
+      metricName: 'NotificationSuccessRate',
+      dimensionsMap: { ObjectsNotificationInstance: this.props.configKey },
+      statistic: 'Average',
+      period: Duration.hours(1),
+    });
+
+    new Alarm(this, `${this.node.id}-monitor-notification-success-rate`, {
+      alarmName: `${this.node.id}-notification-success-rate${criticality.alarmSuffix()}`,
+      alarmDescription: 'Alarms when the average share of successfully sent notifications drops below the evaluation window.',
+      metric,
+      threshold: 0.95, // If 5 percent or more fails.
+      evaluationPeriods: 1,
+      comparisonOperator: ComparisonOperator.LESS_THAN_THRESHOLD,
+      // No notifications sent in a period (e.g. nothing matched the object
+      // filter) should not page anyone - only alarm on an actual low rate.
+      treatMissingData: TreatMissingData.NOT_BREACHING,
+    });
   }
 
 }

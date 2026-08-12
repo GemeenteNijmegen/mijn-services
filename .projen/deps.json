@@ -104,6 +104,10 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-lambda-powertools/metrics",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-lambda-powertools/tracer",
       "type": "runtime"
     },
