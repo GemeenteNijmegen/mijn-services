@@ -130,9 +130,9 @@ export interface Configuration {
   /**
    * Config for services meant for acc only right now
    */
-  gzacService?: GZACConfiguration;
+  gzacServices?: GZACConfiguration[];
 
-  gzacFrontendService?: GZACFrontendConfiguration;
+  gzacFrontendServices?: GZACFrontendConfiguration[];
 
   openProductServices?: OpenProductServicesConfiguration;
 
@@ -464,7 +464,15 @@ export interface KeyCloakConfigurationV2 {
 }
 
 
-export interface GZACFrontendConfiguration {
+export interface GZACFrontendConfiguration extends MainTaskSizeConfiguration {
+  /**
+   * CDK ID
+   */
+  id: string;
+  /**
+   * The subdomain to publish this service on.
+   */
+  subdomain: string;
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -484,17 +492,24 @@ export interface GZACFrontendConfiguration {
   loadbalancerPriority: number;
 }
 
-export interface GZACConfiguration {
+export interface GZACConfiguration extends MainTaskSizeConfiguration {
+  /**
+   * Subdomain to publish this service on
+   */
+  subdomain: string;
+  /**
+   * CDK ID
+   */
+  id: string;
+  /**
+   * database name (auto created)
+   */
+  databaseName: string;
   /**
    * Docker image to use.
    * Usually includes the version number.
    */
-  backendImage: string;
-  /**
-   * Docker image to use.
-   * Usually includes the version number.
-   */
-  frontendImage: string;
+  image: string;
   /**
    * Log level for the container
    */
@@ -503,6 +518,10 @@ export interface GZACConfiguration {
    * Enable debug mode and logging
    */
   debug?: boolean;
+  /**
+   * Loadbalancer rule prio.
+   */
+  loadbalancerPriority: number;
 }
 
 export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {

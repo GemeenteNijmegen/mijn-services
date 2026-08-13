@@ -38,9 +38,6 @@ export class ParameterStack extends Stack {
     this.addOpenZaakParameters();
     this.addHaalCentraalBrpParameters();
     this.addObjectsParameters();
-    // GZAC
-    this.addGZACBackendParameters();
-    // this.addGZACFrontendParameters();
     this.addOpenProductParameters();
     this.addCorsaZgwParameters();
 
@@ -184,24 +181,6 @@ export class ParameterStack extends Stack {
     });
   }
 
-
-  /**
-   * GZAC Params
-   */
-  private addGZACBackendParameters() {
-    new Secret(this, 'gzac-backend-m2m-credentials', {
-      description: 'Credentials for GZAC Backend M-2-M',
-      secretName: Statics._ssmGZACBackendM2MCredentials,
-      generateSecretString: {
-        excludePunctuation: true,
-        secretStringTemplate: JSON.stringify({
-          username: 'valtimo-user-m2m-client',
-        }),
-        generateStringKey: 'secret',
-      },
-    });
-  };
-  // private addGZACFrontendParameters(){};
   private addOpenProductParameters() {
     new Secret(this, 'open-product-credentials', {
       description: 'Credentials for the open product superuser',
