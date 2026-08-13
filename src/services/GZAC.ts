@@ -74,7 +74,6 @@ export class GZACService extends Construct {
   }
 
   private getEnvironmentConfiguration() {
-    const backendDomain = `https://${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`;
     const keycloakBaseUrl = `https://keycloak.${this.props.hostedzone.zoneName}`;
 
     return {
