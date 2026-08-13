@@ -140,7 +140,9 @@ export class ObjectNotificationService extends Construct {
     const metric = new Metric({
       namespace: 'ObjectNotificationService',
       metricName: 'NotificationSuccessRate',
-      dimensionsMap: { ObjectsNotificationInstance: this.props.configKey },
+      // `service` must match the Metrics `serviceName` in NotificationHandler.lambda.ts —
+      // Powertools adds it as a dimension on every metric automatically.
+      dimensionsMap: { service: 'object-notification-handler', ObjectsNotificationInstance: this.props.configKey },
       statistic: 'Average',
       period: Duration.hours(1),
     });
