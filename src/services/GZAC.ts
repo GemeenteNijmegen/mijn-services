@@ -75,15 +75,36 @@ export class GZACService extends Construct {
 
   private getEnvironmentConfiguration() {
     const keycloakBaseUrl = `https://keycloak.${this.props.hostedzone.zoneName}`;
+    const keycloakIssuerUri = `${keycloakBaseUrl}/realms/gzac`;
+    const frontendDomain = `https://gzac.${this.props.hostedzone.zoneName}`;
 
     return {
       SPRING_PROFILES_ACTIVE: 'docker',
       SPRING_DATASOURCE_URL: this.databaseConnectionString,
       SPRING_DATASOURCE_NAME: this.props.serviceConfiguration.databaseName,
 
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI: `${keycloakBaseUrl}/realms/gzac/protocol/openid-connect/certs`,
+      // OAuth2 Resource Server (JWT validation)
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI: `${keycloakIssuerUri}/protocol/openid-connect/certs`,
 
-      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: `https://gzac.${this.props.hostedzone.zoneName}`,
+      // OAuth2 Client Provider (Keycloak issuer URIs)
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAKJWT_ISSUERURI: keycloakIssuerUri,
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAKAPI_ISSUERURI: keycloakIssuerUri,
+
+      // OAuth2 Client Registration
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKJWT_CLIENTID: 'valtimo-user-m2m-client',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_CLIENTID: 'valtimo-user-m2m-client',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_AUTHORIZATIONGRANTTYPE: 'client_credentials',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_SCOPE: 'openid',
+
+      // RabbitMQ
+      SPRING_RABBITMQ_HOST: `${this.props.serviceConfiguration.id}-rabbit-mq.mijn-services.local`,
+      SPRING_RABBITMQ_PORT: '5672',
+      SPRING_RABBITMQ_USERNAME: 'guest',
+      SPRING_RABBITMQ_PASSWORD: 'guest',
+
+      // Valtimo / GZAC
+      VALTIMO_APP_HOSTNAME: frontendDomain,
+      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: frontendDomain,
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS: '*',
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDHEADERS: '*',
       VALTIMO_WEB_CORS_PATHS: '/**',
@@ -97,10 +118,13 @@ export class GZACService extends Construct {
     const secrets = {
       SPRING_DATASOURCE_USERNAME: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
       SPRING_DATASOURCE_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_CLIENTSECRET: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
       KEYCLOAK_RESOURCE: Secret.fromSecretsManager(this.gzacApiCredentials, 'username'),
       KEYCLOAK_CREDENTIALS_SECRET: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
       KEYCLOAK_REALM: Secret.fromSsmParameter(params.keycloakRealm),
       KEYCLOAK_AUTH_SERVER_URL: Secret.fromSsmParameter(params.keycloakUrl),
+      VALTIMO_PLUGIN_ENCRYPTIONSECRET: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
+      OPERATON_BPM_ADMINUSER_PASSWORD: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
     };
     return secrets;
   }
