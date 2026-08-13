@@ -1,4 +1,5 @@
 import { Duration, Token } from 'aws-cdk-lib';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import {
   AwsLogDriver,
@@ -27,6 +28,7 @@ import {
   EcsServiceFactoryProps,
   ECSServiceUtils,
 } from '../constructs/EcsServiceFactory';
+import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { AdditionalDatabase } from '../custom-resources/database/AdditionalDatabase';
 import { Statics } from '../Statics';
 
@@ -38,6 +40,7 @@ interface GZACServiceProps {
    */
   readonly serviceConfiguration: GZACConfiguration;
   readonly key: Key;
+  readonly certificate: ICertificate;
 }
 
 export class GZACService extends Construct {
@@ -174,6 +177,13 @@ export class GZACService extends Construct {
       targets: [service],
       priority: this.props.serviceConfiguration.loadbalancerPriority,
       deregistrationDelay: Duration.minutes(1),
+    });
+
+    new SubdomainCloudfront(this, 'subdomain', {
+      certificate: this.props.certificate,
+      hostedZone: this.props.hostedzone,
+      loadbalancer: this.props.service.loadbalancer.alb,
+      subdomain: this.props.serviceConfiguration.subdomain,
     });
 
     return service;
@@ -315,7 +325,7 @@ export class GZACService extends Construct {
   private setupParameters() {
 
     const keycloakUrl = new StringParameter(this, `${this.props.serviceConfiguration.id}-keycloak-url`, {
-      stringValue: 'https://keycloak.mijn-services-xxxx.csp-nijmegen.nl',
+      stringValue: `https://keycloak.${this.props.hostedzone.zoneName}`,
       description: 'Keycloak URL used by the gzac backend',
       parameterName: `/${Statics.projectName}/${this.props.serviceConfiguration.id}/backend/keycloak-url`,
     });

@@ -161,14 +161,17 @@ export class GZACFrontendService extends Construct {
   }
 
   private setupParameters() {
+    const hostedZoneName = this.props.hostedzone.zoneName;
+    const frontendDomain = `${this.props.serviceConfiguration.subdomain}.${hostedZoneName}`;
+
     const backendUrl = new StringParameter(this, 'backend-url', {
-      stringValue: 'https://gzac-api.mijn-services-xxxx.csp-nijmegen.nl',
+      stringValue: `https://gzac-api.${hostedZoneName}`,
       description: 'URL pointing the gzac backend used by frontend',
       parameterName: `/${Statics.projectName}/${this.props.serviceConfiguration.id}/frontend/api-url`,
     });
 
     const keycloakUrl = new StringParameter(this, 'keycloak-url', {
-      stringValue: 'https://keycloak.mijn-services-xxxx.csp-nijmegen.nl',
+      stringValue: `https://keycloak.${hostedZoneName}`,
       description: 'Keycloak URL used by the gzac frontend',
       parameterName: `/${Statics.projectName}/${this.props.serviceConfiguration.id}/frontend/keycloak-url`,
     });
@@ -180,19 +183,19 @@ export class GZACFrontendService extends Construct {
     });
 
     const keycloakClientId = new StringParameter(this, 'keycloak-client-id', {
-      stringValue: 'gzac-xxxx',
+      stringValue: 'gzac-frontend',
       description: 'Keycloak client id used by the gzac frontend',
       parameterName: `/${Statics.projectName}/${this.props.serviceConfiguration.id}/frontend/keycloak-client-id`,
     });
 
     const keycloakRedirectUrl = new StringParameter(this, 'keycloak-redirect-uri', {
-      stringValue: 'https://keycloak.mijn-services-xxxx.csp-nijmegen.nl',
+      stringValue: `https://${frontendDomain}`,
       description: 'Keycloak redirect URI used by the gzac frontend',
       parameterName: `/${Statics.projectName}/${this.props.serviceConfiguration.id}/frontend/keycloak-redirect-uri`,
     });
 
     const keycloakLogoutRedirectUrl = new StringParameter(this, 'keycloak-logout-redirect-uri', {
-      stringValue: 'https://mijn-services-xxxx.csp-nijmegen.nl',
+      stringValue: `https://${frontendDomain}`,
       description: 'Keycloak logout redirect URI used by the gzac frontend',
       parameterName: `/${Statics.projectName}/${this.props.serviceConfiguration.id}/frontend/keycloak-logout-redirect-uri`,
     });

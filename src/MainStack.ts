@@ -360,6 +360,7 @@ export class MainStack extends Stack {
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
         serviceConfiguration: gzacService,
+        certificate: this.certificate(),
       });
     }
   }
