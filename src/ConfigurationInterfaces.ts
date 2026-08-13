@@ -2,7 +2,6 @@ import { Criticality } from '@gemeentenijmegen/aws-constructs';
 import { Environment } from 'aws-cdk-lib';
 import { ScheduleExpression } from 'aws-cdk-lib/aws-scheduler';
 import { OperatingHours } from './constructs/operating-hours/OperatingHourEnforcer';
-import { debug } from 'console';
 
 /**
  * Adds a configuration field to another interface

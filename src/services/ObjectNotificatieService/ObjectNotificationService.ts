@@ -39,7 +39,7 @@ export class ObjectNotificationService extends Construct {
       },
       memorySize: 1024,
       timeout: Duration.minutes(5),
-      description: 'Object Notification Service handler'
+      description: 'Object Notification Service handler',
     });
     idemPotencyHashTable.grantReadWriteData(lambda);
 

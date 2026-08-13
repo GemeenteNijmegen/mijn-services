@@ -176,8 +176,8 @@ export const development: Configuration = {
     taskSize: {
       cpu: '512',
       memory: '1024',
-      desiredTaskCount: 0
-    }
+      desiredTaskCount: 0,
+    },
   }],
   gzacServices: [{
     id: 'gzac-backend-1',
@@ -190,7 +190,7 @@ export const development: Configuration = {
     taskSize: {
       cpu: '512',
       memory: '1024',
-      desiredTaskCount: 0
-    }
+      desiredTaskCount: 0,
+    },
   }],
 };
