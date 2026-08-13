@@ -46,7 +46,23 @@ export const handler = makeIdempotent(async (event: { configKey: string }) => {
     logger.info('completed execution');
 
     metrics.addDimension('ObjectsNotificationInstance', event.configKey);
-    metrics.addMetric('NotificationSuccessRate', MetricUnit.Count, analyzer?.successRate ?? 1);
+
+
+    if (analyzer) {
+      // When do nothing, set successrate to 1 instead of 0.
+      const successRate = analyzer.totalCount == 0 ? 1 : analyzer.successRate;
+      metrics.addMetric('NotificationSuccessRate', MetricUnit.Count, successRate);
+      console.log(JSON.stringify({
+        succeded: analyzer.successCount,
+        failed: analyzer.failureCount,
+        total: analyzer.totalCount,
+        successRate: successRate,
+      }));
+    } else {
+      console.info('No data returned from notifier');
+    }
+
+
     metrics.publishStoredMetrics();
 
   } catch (error) {
