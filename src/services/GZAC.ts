@@ -74,20 +74,16 @@ export class GZACService extends Construct {
   }
 
   private getEnvironmentConfiguration() {
-    const trustedDomain = `https://${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`;
+    const keycloakBaseUrl = `https://keycloak.${this.props.hostedzone.zoneName}`;
 
     return {
       SPRING_PROFILES_ACTIVE: 'docker',
       SPRING_DATASOURCE_URL: this.databaseConnectionString,
       SPRING_DATASOURCE_NAME: this.props.serviceConfiguration.databaseName,
 
-      // VALTIMO_APP_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl/gzac',
-      // VALTIMO_CONNECTORENCRYPTION_SECRET: '579156b12b9a457a579156b12b9a457a',
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI: `${keycloakBaseUrl}/realms/gzac/protocol/openid-connect/certs`,
 
-      // VALTIMO_OAUTH_PUBLIC_KEY:
-      //   'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB',
-
-      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: trustedDomain,
+      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: `https://gzac.${this.props.hostedzone.zoneName}`,
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS: '*',
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDHEADERS: '*',
       VALTIMO_WEB_CORS_PATHS: '/**',
