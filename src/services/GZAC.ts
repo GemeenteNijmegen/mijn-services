@@ -1,5 +1,5 @@
-import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Duration, Token } from 'aws-cdk-lib';
+import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import {
   AwsLogDriver,
