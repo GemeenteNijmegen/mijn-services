@@ -3,7 +3,7 @@ import { ConfigTable } from '@gemeentenijmegen/config/construct';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
-import { Function } from 'aws-cdk-lib/aws-lambda';
+import { Function, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { FilterPattern } from 'aws-cdk-lib/aws-logs';
 import { Schedule, ScheduleExpression, ScheduleTargetInput } from 'aws-cdk-lib/aws-scheduler';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-scheduler-targets';
@@ -40,6 +40,7 @@ export class ObjectNotificationService extends Construct {
       memorySize: 1024,
       timeout: Duration.minutes(5),
       description: 'Object Notification Service handler',
+      tracing: Tracing.ACTIVE,
     });
     idemPotencyHashTable.grantReadWriteData(lambda);
 

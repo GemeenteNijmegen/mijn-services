@@ -27,6 +27,15 @@ const persistenceStore = new DynamoDBPersistenceLayer({
 // First check for locks on the execution (default one hour)
 export const handler = makeIdempotent(async (event: { configKey: string }) => {
 
+  // The facade segment created by Lambda itself cannot be annotated directly,
+  // so open a subsegment for this invocation to annotate instead.
+  const segment = tracer.getSegment();
+  let subsegment;
+  if (segment) {
+    subsegment = segment.addNewSubsegment('## index.handler');
+    tracer.setSegment(subsegment);
+  }
+
   tracer.annotateColdStart(); // Flags finished cold start (idempotently)
   tracer.addServiceNameAnnotation();
 
@@ -45,6 +54,11 @@ export const handler = makeIdempotent(async (event: { configKey: string }) => {
     logger.error('Error during processing of event', error as Error);
     tracer?.addErrorAsMetadata(error as Error);
     throw error;
+  } finally {
+    if (segment) {
+      subsegment?.close();
+      tracer.setSegment(segment);
+    }
   }
 }, {
   persistenceStore,
