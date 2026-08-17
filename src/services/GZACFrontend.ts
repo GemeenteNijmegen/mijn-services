@@ -57,7 +57,6 @@ export class GZACFrontendService extends Construct {
 
     return {
       secrets: {
-        API_URI: Secret.fromSsmParameter(params.backendUrl),
         KEYCLOAK_URL: Secret.fromSsmParameter(params.keycloakUrl),
         KEYCLOAK_REALM: Secret.fromSsmParameter(params.keycloakRealm),
         KEYCLOAK_CLIENT_ID: Secret.fromSsmParameter(params.keycloakClientId),
@@ -65,6 +64,7 @@ export class GZACFrontendService extends Construct {
         KEYCLOAK_LOGOUT_REDIRECT_URI: Secret.fromSsmParameter(params.keycloakLogoutRedirectUrl),
       },
       envionment: {
+        API_URI: `https://gzac-api.${this.props.hostedzone.zoneName}`,
         WHITELISTED_DOMAIN: domainName,
         ENABLE_CASE_WIDGETS: 'true',
         ENABLE_TASK_PANEL: 'true',
@@ -84,7 +84,13 @@ export class GZACFrontendService extends Construct {
     // Main service container
     task.addContainer('gzac-frontend', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
-      // image: ContainerImage.fromAsset('./src/containers/gzac-frontend'),
+      command: [
+        '/bin/sh', '-c',
+        // Replace hardcoded gzac-backend upstream with API_URI, then run normal startup
+        'sed -i "s|http://gzac-backend:8080|${API_URI}|g" /etc/nginx/conf.d/default.conf && '
+        + 'envsubst < /usr/share/nginx/html/assets/config.template.js > /usr/share/nginx/html/assets/config.js && '
+        + 'exec nginx -g "daemon off;"',
+      ],
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
