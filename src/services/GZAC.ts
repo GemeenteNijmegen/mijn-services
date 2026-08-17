@@ -177,7 +177,7 @@ export class GZACService extends Construct {
       },
       desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
       enableExecuteCommand: true,
-      healthCheckGracePeriod: Duration.seconds(120), // Give time to start
+      healthCheckGracePeriod: Duration.seconds(300), // GZAC needs 3-4 min to start
     });
     this.setupConnectivity('gzac-backend', service.connections.securityGroups);
 
@@ -187,8 +187,8 @@ export class GZACService extends Construct {
       conditions: [ListenerCondition.hostHeaders([fqdomain])],
       healthCheck: {
         enabled: true,
-        path: '/',
-        healthyHttpCodes: '200,302',
+        path: '/actuator/health/readiness',
+        healthyHttpCodes: '200',
         healthyThresholdCount: 2,
         unhealthyThresholdCount: 6,
         timeout: Duration.seconds(10),
