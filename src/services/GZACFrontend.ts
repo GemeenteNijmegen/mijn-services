@@ -83,7 +83,14 @@ export class GZACFrontendService extends Construct {
 
     // Main service container
     task.addContainer('gzac-frontend', {
-      image: ContainerImage.fromAsset('./src/containers/gzac-frontend'),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      command: [
+        '/bin/sh', '-c',
+        // Replace hardcoded gzac-backend upstream with API_URI, then run normal startup
+        'sed -i "s|http://gzac-backend:8080|${API_URI}|g" /etc/nginx/conf.d/default.conf && '
+        + 'envsubst < /usr/share/nginx/html/assets/config.template.js > /usr/share/nginx/html/assets/config.js && '
+        + 'exec nginx -g "daemon off;"',
+      ],
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
