@@ -55,6 +55,7 @@ export class GZACService extends Construct {
   private databaseUserCredentials: ISecret;
 
   private readonly gzacApiCredentials: ISecret;
+  private readonly pluginEncryptionSecret: ISecret;
 
   constructor(scope: Construct, id: string, props: GZACServiceProps) {
     super(scope, id);
@@ -64,6 +65,7 @@ export class GZACService extends Construct {
     this.logs = this.logGroup();
     this.setupDatabase();
     this.gzacApiCredentials = this.setupGzacApiCredentials();
+    this.pluginEncryptionSecret = this.setupPluginEncryptionSecret();
 
     // Create services
     const gzacRabbitMQService = this.setupRabbitMqService();
@@ -123,7 +125,7 @@ export class GZACService extends Construct {
       KEYCLOAK_CREDENTIALS_SECRET: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
       KEYCLOAK_REALM: Secret.fromSsmParameter(params.keycloakRealm),
       KEYCLOAK_AUTH_SERVER_URL: Secret.fromSsmParameter(params.keycloakUrl),
-      VALTIMO_PLUGIN_ENCRYPTIONSECRET: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
+      VALTIMO_PLUGIN_ENCRYPTIONSECRET: Secret.fromSecretsManager(this.pluginEncryptionSecret, 'key'),
       OPERATON_BPM_ADMINUSER_PASSWORD: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
     };
     return secrets;
@@ -338,6 +340,20 @@ export class GZACService extends Construct {
           username: 'valtimo-user-m2m-client',
         }),
         generateStringKey: 'secret',
+      },
+    });
+  }
+
+  private setupPluginEncryptionSecret() {
+    return new SecretParameter(this, 'gzac-plugin-encryption-secret', {
+      description: 'AES-256 encryption key for GZAC plugin properties (must be exactly 32 bytes)',
+      generateSecretString: {
+        excludePunctuation: true,
+        excludeUppercase: false,
+        includeSpace: false,
+        passwordLength: 32,
+        secretStringTemplate: JSON.stringify({}),
+        generateStringKey: 'key',
       },
     });
   }
