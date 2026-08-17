@@ -166,4 +166,31 @@ export const development: Configuration = {
       loadbalancerPriority: 50,
     },
   ],
+  gzacFrontendServices: [{
+    id: 'gzac-frontend-1',
+    subdomain: 'gzac',
+    image: 'ritense/gzac-frontend:13.41.0',
+    logLevel: 'DEBUG',
+    debug: true,
+    loadbalancerPriority: 70,
+    taskSize: {
+      cpu: '512',
+      memory: '1024',
+      desiredTaskCount: 1,
+    },
+  }],
+  gzacServices: [{
+    id: 'gzac-backend-1',
+    subdomain: 'gzac-api',
+    image: 'ritense/gzac-backend:13.41.0',
+    logLevel: 'DEBUG',
+    debug: true,
+    loadbalancerPriority: 80,
+    databaseName: 'gzac',
+    taskSize: {
+      cpu: '512',
+      memory: '1024',
+      desiredTaskCount: 1,
+    },
+  }],
 };

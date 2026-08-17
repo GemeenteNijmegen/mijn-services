@@ -1,4 +1,8 @@
 {
+  "manifestVersion": 3,
+  "env": {
+    "PATH": "$(npx -c \"node --print process.env.PATH\")"
+  },
   "tasks": {
     "build": {
       "name": "build",
@@ -37,10 +41,32 @@
       },
       "steps": [
         {
-          "builtin": "release/bump-version"
+          "builtin": "release/resolve-latest-tag",
+          "outputEnv": "LATEST_TAG"
+        },
+        {
+          "spawn": "bump:releasable-commits",
+          "outputEnv": "RELEASABLE_COMMITS",
+          "condition": "git rev-parse --verify --quiet \"refs/tags/$LATEST_TAG\""
+        },
+        {
+          "builtin": "release/suggest-version-bump",
+          "outputEnv": "SUGGESTED_BUMP"
+        },
+        {
+          "builtin": "release/apply-version-bump"
         }
       ],
-      "condition": "git log --oneline -1 | grep -qv \"chore(release):\""
+      "condition": "git log --oneline -1 | grep -v \"chore(release):\" > /dev/null"
+    },
+    "bump:releasable-commits": {
+      "name": "bump:releasable-commits",
+      "description": "Print the releasable commits since the latest release",
+      "steps": [
+        {
+          "exec": "git log --oneline $LATEST_TAG..HEAD"
+        }
+      ]
     },
     "bundle": {
       "name": "bundle",
@@ -74,7 +100,7 @@
       "description": "Create a JavaScript bundle from src/constructs/operating-hours/operatingHoursEnforcer.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/constructs/operating-hours/operatingHoursEnforcer.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/constructs/operating-hours/operatingHoursEnforcer.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/constructs/operating-hours/operatingHoursEnforcer.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/constructs/operating-hours/operatingHoursEnforcer.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -83,7 +109,7 @@
       "description": "Continuously update the JavaScript bundle from src/constructs/operating-hours/operatingHoursEnforcer.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/constructs/operating-hours/operatingHoursEnforcer.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/constructs/operating-hours/operatingHoursEnforcer.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/constructs/operating-hours/operatingHoursEnforcer.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/constructs/operating-hours/operatingHoursEnforcer.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -92,7 +118,7 @@
       "description": "Create a JavaScript bundle from src/custom-resources/create-databases/create-databases.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -101,7 +127,7 @@
       "description": "Continuously update the JavaScript bundle from src/custom-resources/create-databases/create-databases.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/custom-resources/create-databases/create-databases.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/create-databases/create-databases.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -110,7 +136,7 @@
       "description": "Create a JavaScript bundle from src/custom-resources/database/databaseCustomResource.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/database/databaseCustomResource.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/database/databaseCustomResource.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/custom-resources/database/databaseCustomResource.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/database/databaseCustomResource.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -119,7 +145,7 @@
       "description": "Continuously update the JavaScript bundle from src/custom-resources/database/databaseCustomResource.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/database/databaseCustomResource.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/database/databaseCustomResource.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/custom-resources/database/databaseCustomResource.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/database/databaseCustomResource.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -128,7 +154,7 @@
       "description": "Create a JavaScript bundle from src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -137,7 +163,7 @@
       "description": "Continuously update the JavaScript bundle from src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/custom-resources/securitygroupByName/securitygroupByName.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/custom-resources/securitygroupByName/securitygroupByName.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -146,7 +172,7 @@
       "description": "Create a JavaScript bundle from src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -155,7 +181,7 @@
       "description": "Continuously update the JavaScript bundle from src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/ObjectNotificatieService/NotificationHandler/NotificationHandler.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -164,7 +190,7 @@
       "description": "Create a JavaScript bundle from src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -173,7 +199,7 @@
       "description": "Continuously update the JavaScript bundle from src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/NotificationReceiver/receiver.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/* --watch"
         }
       ]
     },
@@ -182,7 +208,7 @@
       "description": "Create a JavaScript bundle from src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/*"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/*"
         }
       ]
     },
@@ -191,7 +217,16 @@
       "description": "Continuously update the JavaScript bundle from src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts",
       "steps": [
         {
-          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"tsconfig.dev.json\" --external:@aws-sdk/* --watch"
+          "exec": "esbuild --bundle src/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda.ts --target=\"node24\" --platform=\"node\" --outfile=\"assets/services/OpenKlantRegistrationService/RegistrationHandler/registration-handler.lambda/index.js\" --tsconfig=\"test/tsconfig.json\" --external:@aws-sdk/* --watch"
+        }
+      ]
+    },
+    "cfn-lint": {
+      "name": "cfn-lint",
+      "description": "Lint synthesized CloudFormation templates",
+      "steps": [
+        {
+          "exec": "cfn-lint cdk.out/**/*.template.json -i W3005 W2001"
         }
       ]
     },
@@ -236,7 +271,12 @@
       "description": "Synthesize project files",
       "steps": [
         {
-          "exec": "ts-node --project tsconfig.dev.json .projenrc.ts"
+          "execArgs": [
+            "ts-node",
+            "--project",
+            "projenrc/tsconfig.json",
+            ".projenrc.ts"
+          ]
         }
       ]
     },
@@ -245,7 +285,10 @@
       "description": "Deploys your CDK app to the AWS cloud",
       "steps": [
         {
-          "exec": "cdk deploy",
+          "execArgs": [
+            "cdk",
+            "deploy"
+          ],
           "receiveArgs": true
         }
       ]
@@ -255,7 +298,10 @@
       "description": "Destroys your cdk app in the AWS cloud",
       "steps": [
         {
-          "exec": "cdk destroy",
+          "execArgs": [
+            "cdk",
+            "destroy"
+          ],
           "receiveArgs": true
         }
       ]
@@ -265,7 +311,10 @@
       "description": "Diffs the currently deployed app against your code",
       "steps": [
         {
-          "exec": "cdk diff"
+          "execArgs": [
+            "cdk",
+            "diff"
+          ]
         }
       ]
     },
@@ -313,23 +362,24 @@
         }
       ]
     },
-    "lint": {
-      "name": "lint",
-      "steps": [
-        {
-          "exec": "cfn-lint cdk.out/**/*.template.json -i W3005 W2001"
-        }
-      ]
-    },
     "package": {
       "name": "package",
       "description": "Creates the distribution package",
       "steps": [
         {
-          "exec": "mkdir -p dist/js"
+          "execArgs": [
+            "mkdir",
+            "-p",
+            "dist/js"
+          ]
         },
         {
-          "exec": "npm pack --pack-destination dist/js"
+          "execArgs": [
+            "npm",
+            "pack",
+            "--pack-destination",
+            "dist/js"
+          ]
         }
       ]
     },
@@ -380,7 +430,10 @@
       "description": "Synthesizes your cdk app into cdk.out",
       "steps": [
         {
-          "exec": "cdk synth"
+          "execArgs": [
+            "cdk",
+            "synth"
+          ]
         }
       ]
     },
@@ -389,7 +442,11 @@
       "description": "Synthesizes your cdk app into cdk.out and suppresses the template in stdout (part of \"yarn build\")",
       "steps": [
         {
-          "exec": "cdk synth -q"
+          "execArgs": [
+            "cdk",
+            "synth",
+            "-q"
+          ]
         }
       ]
     },
@@ -440,13 +497,70 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@20 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/aws-lambda,@types/jest,@types/jsonwebtoken,@types/node,@types/pg,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript,@aws-lambda-powertools/batch,@aws-lambda-powertools/idempotency,@aws-lambda-powertools/logger,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-ec2,@aws-sdk/client-ecs,@aws-sdk/client-sqs,@gemeentenijmegen/apigateway-http,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/config,@gemeentenijmegen/cross-region-parameters,@gemeentenijmegen/object-notifier,@gemeentenijmegen/projen-project-type,@gemeentenijmegen/utils,@middy/core,cdk-remote-stack,dotenv,jsonwebtoken,pg,zod"
+          "execArgs": [
+            "npx",
+            "npm-check-updates@20",
+            "--upgrade",
+            "--target=minor",
+            "--peer",
+            "--no-deprecated",
+            "--dep=dev,prod,peer,optional",
+            "--filter=@types/aws-lambda,@types/jest,@types/jsonwebtoken,@types/node,@types/pg,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript,@aws-lambda-powertools/batch,@aws-lambda-powertools/idempotency,@aws-lambda-powertools/logger,@aws-lambda-powertools/metrics,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-ec2,@aws-sdk/client-ecs,@aws-sdk/client-sqs,@gemeentenijmegen/apigateway-http,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/config,@gemeentenijmegen/cross-region-parameters,@gemeentenijmegen/object-notifier,@gemeentenijmegen/projen-project-type,@gemeentenijmegen/utils,@middy/core,cdk-remote-stack,dotenv,jsonwebtoken,pg,zod"
+          ]
         },
         {
           "exec": "npm install"
         },
         {
-          "exec": "npm update @stylistic/eslint-plugin @types/aws-lambda @types/jest @types/jsonwebtoken @types/node @types/pg @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk aws-sdk-client-mock commit-and-tag-version esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen ts-jest ts-node typescript @aws-lambda-powertools/batch @aws-lambda-powertools/idempotency @aws-lambda-powertools/logger @aws-lambda-powertools/tracer @aws-sdk/client-dynamodb @aws-sdk/client-ec2 @aws-sdk/client-ecs @aws-sdk/client-sqs @gemeentenijmegen/apigateway-http @gemeentenijmegen/aws-constructs @gemeentenijmegen/config @gemeentenijmegen/cross-region-parameters @gemeentenijmegen/object-notifier @gemeentenijmegen/projen-project-type @gemeentenijmegen/utils @middy/core aws-cdk-lib cdk-remote-stack constructs dotenv jsonwebtoken pg zod"
+          "execArgs": [
+            "npm",
+            "update",
+            "@stylistic/eslint-plugin",
+            "@types/aws-lambda",
+            "@types/jest",
+            "@types/jsonwebtoken",
+            "@types/node",
+            "@types/pg",
+            "@typescript-eslint/eslint-plugin",
+            "@typescript-eslint/parser",
+            "aws-cdk",
+            "aws-sdk-client-mock",
+            "commit-and-tag-version",
+            "esbuild",
+            "eslint-import-resolver-typescript",
+            "eslint-plugin-import",
+            "eslint",
+            "jest",
+            "jest-junit",
+            "projen",
+            "ts-jest",
+            "ts-node",
+            "typescript",
+            "@aws-lambda-powertools/batch",
+            "@aws-lambda-powertools/idempotency",
+            "@aws-lambda-powertools/logger",
+            "@aws-lambda-powertools/metrics",
+            "@aws-lambda-powertools/tracer",
+            "@aws-sdk/client-dynamodb",
+            "@aws-sdk/client-ec2",
+            "@aws-sdk/client-ecs",
+            "@aws-sdk/client-sqs",
+            "@gemeentenijmegen/apigateway-http",
+            "@gemeentenijmegen/aws-constructs",
+            "@gemeentenijmegen/config",
+            "@gemeentenijmegen/cross-region-parameters",
+            "@gemeentenijmegen/object-notifier",
+            "@gemeentenijmegen/projen-project-type",
+            "@gemeentenijmegen/utils",
+            "@middy/core",
+            "aws-cdk-lib",
+            "cdk-remote-stack",
+            "constructs",
+            "dotenv",
+            "jsonwebtoken",
+            "pg",
+            "zod"
+          ]
         },
         {
           "exec": "npx projen"
@@ -461,16 +575,20 @@
       "description": "Watches changes in your source code and rebuilds and deploys to the current account",
       "steps": [
         {
-          "exec": "cdk deploy --hotswap"
+          "execArgs": [
+            "cdk",
+            "deploy",
+            "--hotswap"
+          ]
         },
         {
-          "exec": "cdk watch"
+          "execArgs": [
+            "cdk",
+            "watch"
+          ]
         }
       ]
     }
-  },
-  "env": {
-    "PATH": "$(npx -c \"node --print process.env.PATH\")"
   },
   "//": "~~ Generated by projen. To modify, edit .projenrc.ts and run \"npx projen\"."
 }

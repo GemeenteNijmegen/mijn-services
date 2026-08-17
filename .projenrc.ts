@@ -38,6 +38,7 @@ const project = new GemeenteNijmegenCdkApp({
     '@aws-sdk/client-ecs',
     '@aws-lambda-powertools/idempotency',
     '@aws-lambda-powertools/tracer',
+    '@aws-lambda-powertools/metrics',
     '@middy/core',
     '@aws-lambda-powertools/batch',
   ],
