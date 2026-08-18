@@ -1,5 +1,6 @@
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { Port } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, Compatibility, ContainerImage, FargateService, Protocol, Secret, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Key } from 'aws-cdk-lib/aws-kms';
@@ -131,6 +132,9 @@ export class GZACFrontendService extends Construct {
       enableExecuteCommand: true,
       healthCheckGracePeriod: Duration.seconds(120), // Give time to start
     });
+
+    // Allow frontend to reach the ALB for proxying API calls to backend
+    service.connections.allowTo(this.props.service.loadbalancer.alb, Port.tcp(443), 'Allow frontend to proxy to ALB');
 
 
     // Attach to loadbalancer
