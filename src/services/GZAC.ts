@@ -86,7 +86,6 @@ export class GZACService extends Construct {
       SPRING_DATASOURCE_NAME: this.props.serviceConfiguration.databaseName,
 
       // OAuth2 Resource Server (JWT validation)
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: keycloakIssuerUri,
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI: `${keycloakIssuerUri}/protocol/openid-connect/certs`,
 
       // OAuth2 Client Provider (Keycloak issuer URIs)
