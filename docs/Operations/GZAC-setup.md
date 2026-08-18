@@ -59,9 +59,12 @@ In de `gzac` realm → Clients → Create client:
 Om admin users via AD te laten inloggen in de `gzac` realm:
 
 1. Identity Providers → Add provider → "Keycloack OpenID Connect"
-2. Zie andere realms voor instelling van "identity providers".
-3. Zet "First Login Flow" op een flow die automatisch gebruikers aanmaakt
-4. Mapper toevoegen voor het mappen van AD groepen naar Keycloak roles
+2. Alias: `medewerker-oidc`
+3. Zie andere realms voor instelling van "identity providers".
+4. Zet "First Login Flow" op een flow die automatisch gebruikers aanmaakt
+5. Mapper toevoegen voor het mappen van AD groepen naar Keycloak roles
+6. Registreer de Redirect URI in Azure AD app registration → Authentication:
+   `https://keycloak.{hostedzone}/realms/gzac/broker/medewerker-oidc/endpoint`
 
 ### 5. Realm roles aanmaken
 
