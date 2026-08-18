@@ -64,7 +64,8 @@ export class GZACFrontendService extends Construct {
         KEYCLOAK_LOGOUT_REDIRECT_URI: Secret.fromSsmParameter(params.keycloakLogoutRedirectUrl),
       },
       envionment: {
-        API_URI: `https://gzac-api.${this.props.hostedzone.zoneName}`,
+        API_URI: `https://${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
+        NGINX_BACKEND_URL: `https://gzac-api.${this.props.hostedzone.zoneName}`,
         WHITELISTED_DOMAIN: domainName,
         ENABLE_CASE_WIDGETS: 'true',
         ENABLE_TASK_PANEL: 'true',
@@ -86,8 +87,9 @@ export class GZACFrontendService extends Construct {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       command: [
         '/bin/sh', '-c',
-        // Replace hardcoded gzac-backend upstream with API_URI, then run normal startup
-        'sed -i "s|http://gzac-backend:8080|${API_URI}|g" /etc/nginx/conf.d/default.conf && '
+        // Replace hardcoded gzac-backend upstream with backend URL and extend proxy paths, then run normal startup
+        'sed -i "s|http://gzac-backend:8080|${NGINX_BACKEND_URL}|g" /etc/nginx/conf.d/default.conf && '
+        + 'sed -i "s|/(api\\|management\\|v3\\|mock-api)|/(api\\|management\\|v1\\|v3\\|mock-api)|g" /etc/nginx/conf.d/default.conf && '
         + 'envsubst < /usr/share/nginx/html/assets/config.template.js > /usr/share/nginx/html/assets/config.js && '
         + 'exec nginx -g "daemon off;"',
       ],
