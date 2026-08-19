@@ -92,7 +92,74 @@ Na eerste deployment worden SSM parameters aangemaakt met default waarden afgele
 
 Deze worden dynamisch gezet vanuit de hostedzone en hoeven normaal niet handmatig aangepast te worden.
 
+## PBAC (Policy Based Access Control)
+
+Valtimo 13.x gebruikt PBAC om API-toegang te reguleren. Het stock Docker image (`ritense/gzac-backend`) bevat **geen** permission-configuratie, waardoor alle endpoints standaard 403 Forbidden teruggeven — ook al is de JWT-authenticatie succesvol.
+
+### Hoe het werkt
+
+- Bij het opstarten scant de backend de classpath op `config/global/role/*.role.json` en `config/global/permission/*.permission.json`.
+- Roles definiëren welke Keycloak realm roles herkend worden door PBAC.
+- Permissions koppelen een `roleKey` + `resourceType` + `actions` combinatie. Zonder matching permission → 403.
+- De env var `VALTIMO_CHANGELOG_PBAC_CLEAR_TABLES=true` zorgt ervoor dat de permission-tabel bij elke startup wordt opgeschoond en opnieuw geladen vanuit de JSON-bestanden.
+
+### Bestanden
+
+De PBAC configuratie wordt geïnjecteerd via een custom Dockerfile (`src/containers/gzac-backend/Dockerfile`) die het stock image uitbreidt:
+
+```
+src/containers/gzac-backend/
+├── Dockerfile
+└── config/global/
+    ├── role/all.role.json          # Definieert ROLE_USER en ROLE_ADMIN
+    └── permission/all.permission.json  # Verleent toegang per resource type
+```
+
+### Permissions aanpassen
+
+Om permissions toe te voegen of te wijzigen:
+
+1. Bewerk `src/containers/gzac-backend/config/global/permission/all.permission.json`
+2. Elke entry heeft de volgende structuur:
+   ```json
+   {
+     "resourceType": "com.ritense.document.domain.impl.JsonSchemaDocument",
+     "actions": ["view", "view_list", "create", "modify", "delete"],
+     "roleKey": "ROLE_ADMIN"
+   }
+   ```
+3. Deploy opnieuw — de permissions worden bij startup automatisch geladen
+4. Optioneel: voeg `conditions` toe voor fijnmazige toegangscontrole (bijv. alleen specifieke zaaktypen)
+
+### Bekende resource types
+
+| Resource type | Beschrijving |
+|---|---|
+| `com.ritense.case_.domain.definition.CaseDefinition` | Zaaktype definities |
+| `com.ritense.document.domain.impl.JsonSchemaDocument` | Zaken/documenten |
+| `com.ritense.document.domain.impl.JsonSchemaDocumentDefinition` | Document definities |
+| `com.ritense.valtimo.operaton.domain.OperatonTask` | Taken |
+| `com.ritense.dashboard.domain.Dashboard` | Dashboards |
+| `com.ritense.note.domain.Note` | Notities |
+| `com.ritense.zakenapi.security.Zaak` | ZGW Zaken |
+| `com.ritense.objectenapi.security.Object` | Objecten API |
+
+### Belangrijk
+
+- Er bestaat **geen** `valtimo.authorization.enabled=false` property om PBAC uit te schakelen.
+- De enige manier om 403's op te lossen is door de juiste permissions te deployen.
+- ROLE_ADMIN in Keycloak moet exact matchen met de `roleKey` in de permission files.
+
 ## Troubleshooting
+
+### Backend geeft 403 op alle endpoints (PBAC)
+
+Als de JWT-authenticatie werkt (je ziet `Authenticated token` in de logs) maar alle API calls 403 geven:
+
+- Controleer of de permission files correct in het Docker image zitten: `docker run --rm <image> ls /app/resources/config/global/permission/`
+- Check de backend logs op: `"Requesting permissions 'view:...' and found matching permissions: []"` — lege lijst = geen permissions geconfigureerd
+- Verifieer dat de Keycloak realm roles (`ROLE_USER`, `ROLE_ADMIN`) exact matchen met de `roleKey` in de permission JSON
+- Bij twijfel: zet `VALTIMO_CHANGELOG_PBAC_CLEAR_TABLES=true` om een frisse deploy van permissions af te dwingen
 
 ### Backend start niet op
 
