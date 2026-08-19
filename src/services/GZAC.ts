@@ -83,7 +83,7 @@ export class GZACService extends Construct {
     return {
       SPRING_PROFILES_ACTIVE: 'docker',
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: 'DEBUG',
-      VALTIMO_AUTHORIZATION_ENABLED: 'false',
+      VALTIMO_CHANGELOG_PBAC_CLEAR_TABLES: 'true',
       SPRING_DATASOURCE_URL: this.databaseConnectionString,
       SPRING_DATASOURCE_NAME: this.props.serviceConfiguration.databaseName,
 
@@ -143,8 +143,12 @@ export class GZACService extends Construct {
     });
 
     // Add the backend container
+    // Uses a custom Dockerfile that extends the stock image with PBAC permission files.
+    // Without these permission files, Valtimo's PBAC denies all API requests with 403.
     task.addContainer('gzac-backend', {
-      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
+      image: ContainerImage.fromAsset('./src/containers/gzac-backend', {
+        buildArgs: { BASE_IMAGE: this.props.serviceConfiguration.image },
+      }),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
