@@ -105,27 +105,33 @@ Valtimo 13.x gebruikt PBAC om API-toegang te reguleren. Het stock Docker image (
 
 ### Bestanden
 
-De PBAC configuratie wordt geïnjecteerd via een custom Dockerfile (`src/containers/gzac-backend/Dockerfile`) die het stock image uitbreidt:
+De PBAC configuratie wordt geïnjecteerd via een custom Dockerfile (`src/containers/gzac-backend/Dockerfile`) die het stock image uitbreidt. Een multi-stage build pakt de WAR uit, voegt de permission file toe aan `WEB-INF/classes/config/pbac/`, en herpackeert hem:
 
 ```
 src/containers/gzac-backend/
 ├── Dockerfile
-└── config/global/
-    ├── role/all.role.json          # Definieert ROLE_USER en ROLE_ADMIN
-    └── permission/all.permission.json  # Verleent toegang per resource type
+└── config/pbac/
+    └── all.permission.json  # Verleent toegang per resource type per role
 ```
+
+De roles (`ROLE_USER`, `ROLE_ADMIN`) zitten al in het stock image (`WEB-INF/classes/config/pbac/all.role.json`).
 
 ### Permissions aanpassen
 
 Om permissions toe te voegen of te wijzigen:
 
-1. Bewerk `src/containers/gzac-backend/config/global/permission/all.permission.json`
-2. Elke entry heeft de volgende structuur:
+1. Bewerk `src/containers/gzac-backend/config/pbac/all.permission.json`
+2. Elke entry heeft de volgende structuur (het bestand is een changeset met een array van individuele permissions):
    ```json
    {
-     "resourceType": "com.ritense.document.domain.impl.JsonSchemaDocument",
-     "actions": ["view", "view_list", "create", "modify", "delete"],
-     "roleKey": "ROLE_ADMIN"
+     "changesetId": "mijn-services-permissions-v1",
+     "permissions": [
+       {
+         "resourceType": "com.ritense.document.domain.impl.JsonSchemaDocument",
+         "action": "view",
+         "roleKey": "ROLE_ADMIN"
+       }
+     ]
    }
    ```
 3. Deploy opnieuw — de permissions worden bij startup automatisch geladen
