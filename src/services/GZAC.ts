@@ -82,6 +82,7 @@ export class GZACService extends Construct {
 
     return {
       SPRING_PROFILES_ACTIVE: 'docker',
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: 'DEBUG',
       SPRING_DATASOURCE_URL: this.databaseConnectionString,
       SPRING_DATASOURCE_NAME: this.props.serviceConfiguration.databaseName,
 
