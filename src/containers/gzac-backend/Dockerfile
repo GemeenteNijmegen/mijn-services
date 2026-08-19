@@ -3,18 +3,14 @@ ARG BASE_IMAGE=ritense/gzac-backend:13.41.0
 # Name the base image so we can COPY from it
 FROM ${BASE_IMAGE} AS base
 
-# Stage 1: Use a JDK image to inject the permission file into the WAR
-FROM eclipse-temurin:21-jdk-alpine AS builder
+# Stage 1: Use zip to inject the permission file into the WAR without touching MANIFEST.MF
+FROM alpine:3.20 AS builder
+RUN apk add --no-cache zip
 COPY --from=base /app.war /app.war
-COPY config/pbac/all.permission.json /tmp/all.permission.json
+COPY config/pbac/all.permission.json /tmp/WEB-INF/classes/config/pbac/all.permission.json
 
-# Add permission file into the WAR's classpath (WEB-INF/classes/config/pbac/)
-RUN mkdir -p /tmp/war && \
-    cd /tmp/war && \
-    jar xf /app.war && \
-    cp /tmp/all.permission.json WEB-INF/classes/config/pbac/all.permission.json && \
-    jar cf /app.war . && \
-    rm -rf /tmp/war
+# 'zip' adds/updates files in the archive without altering existing entries like MANIFEST.MF
+RUN cd /tmp && zip /app.war WEB-INF/classes/config/pbac/all.permission.json
 
 # Stage 2: Use the original base image with the modified WAR
 FROM base
