@@ -7,7 +7,7 @@ Deze documentatie beschrijft de handmatige stappen die nodig zijn om GZAC (front
 - **Frontend**: `gzac.{hostedzone}` (bijv. `gzac.mijn-services-dev.csp-nijmegen.nl`)
 - **Backend**: `gzac-api.{hostedzone}` (bijv. `gzac-api.mijn-services-dev.csp-nijmegen.nl`)
 - **Keycloak realm**: `gzac`
-- **Docker images**: `ritense/gzac-frontend` en `ritense/gzac-backend` (versie 13.x)
+- **Docker images**: `ritense/gzac-frontend` en `ghcr.io/gemeentenijmegen/gzac-backend` (versie 13.x)
 
 ## Handmatige stappen na deployment
 
@@ -103,28 +103,20 @@ Valtimo 13.x gebruikt PBAC om API-toegang te reguleren. Het stock Docker image (
 - Permissions koppelen een `roleKey` + `resourceType` + `actions` combinatie. Zonder matching permission → 403.
 - De env var `VALTIMO_CHANGELOG_PBAC_CLEAR_TABLES=true` zorgt ervoor dat de permission-tabel bij elke startup wordt opgeschoond en opnieuw geladen vanuit de JSON-bestanden.
 
-### Bestanden
+### Backend repository
 
-De PBAC configuratie wordt geïnjecteerd via een custom Dockerfile (`src/containers/gzac-backend/Dockerfile`) die het stock image uitbreidt. Een multi-stage build pakt de WAR uit, voegt de permission file toe aan `WEB-INF/classes/config/pbac/`, en herpackeert hem:
+De PBAC configuratie zit in een apart project: [github.com/GemeenteNijmegen/gzac-backend](https://github.com/GemeenteNijmegen/gzac-backend). Dit is een fork van de `gzac-backend-template` van Ritense.
 
-```
-src/containers/gzac-backend/
-├── Dockerfile
-└── config/pbac/
-    └── all.permission.json  # Verleent toegang per resource type per role
-```
-
-De roles (`ROLE_USER`, `ROLE_ADMIN`) zitten al in het stock image (`WEB-INF/classes/config/pbac/all.role.json`).
+Het bestand `src/main/resources/config/pbac/all.permission.json` bevat alle permissions. Bij een `gradle build` worden deze meegecompileerd in de WAR. Het resulterende Docker image wordt gepubliceerd naar `ghcr.io/gemeentenijmegen/gzac-backend`.
 
 ### Permissions aanpassen
 
-Om permissions toe te voegen of te wijzigen:
-
-1. Bewerk `src/containers/gzac-backend/config/pbac/all.permission.json`
-2. Elke entry heeft de volgende structuur (het bestand is een changeset met een array van individuele permissions):
+1. Clone de [gzac-backend](https://github.com/GemeenteNijmegen/gzac-backend) repository
+2. Bewerk `src/main/resources/config/pbac/all.permission.json`
+3. Het bestand gebruikt het changeset format:
    ```json
    {
-     "changesetId": "mijn-services-permissions-v1",
+     "changesetId": "gemeente-nijmegen-permissions-v1",
      "permissions": [
        {
          "resourceType": "com.ritense.document.domain.impl.JsonSchemaDocument",
@@ -134,8 +126,14 @@ Om permissions toe te voegen of te wijzigen:
      ]
    }
    ```
-3. Deploy opnieuw — de permissions worden bij startup automatisch geladen
-4. Optioneel: voeg `conditions` toe voor fijnmazige toegangscontrole (bijv. alleen specifieke zaaktypen)
+4. Push → CI bouwt nieuw image → deploy `mijn-services` om het nieuwe image op te pikken
+
+### Upgraden
+
+1. Wijzig `valtimoVersion` in `gradle.properties` van de gzac-backend repo
+2. Check de [Valtimo release notes](https://docs.valtimo.nl) voor breaking changes of nieuwe resource types
+3. Rebuild en push nieuw image
+4. Update de image tag in `mijn-services/src/configuration/development.ts`
 
 ### Bekende resource types
 
@@ -162,9 +160,8 @@ Om permissions toe te voegen of te wijzigen:
 
 Als de JWT-authenticatie werkt (je ziet `Authenticated token` in de logs) maar alle API calls 403 geven:
 
-- Controleer of de permission files correct in het Docker image zitten: `docker run --rm <image> ls /app/resources/config/global/permission/`
-- Check de backend logs op: `"Requesting permissions 'view:...' and found matching permissions: []"` — lege lijst = geen permissions geconfigureerd
-- Verifieer dat de Keycloak realm roles (`ROLE_USER`, `ROLE_ADMIN`) exact matchen met de `roleKey` in de permission JSON
+- Controleer de backend logs op: `"Requesting permissions 'view:...' and found matching permissions: []"` — lege lijst = geen permissions geconfigureerd
+- Verifieer dat de Keycloak realm roles (`ROLE_USER`, `ROLE_ADMIN`) exact matchen met de `roleKey` in de permission JSON (in de gzac-backend repo)
 - Bij twijfel: zet `VALTIMO_CHANGELOG_PBAC_CLEAR_TABLES=true` om een frisse deploy van permissions af te dwingen
 
 ### Backend start niet op
@@ -183,21 +180,33 @@ Check de ECS task logs. Veelvoorkomende fouten:
 
 ## Upgraden
 
-Images updaten in `src/configuration/development.ts` (of de relevante omgeving):
+### Frontend
+
+Frontend image updaten in `src/configuration/development.ts`:
 
 ```typescript
 gzacFrontendServices: [{
   image: 'ritense/gzac-frontend:{versie}',
   // ...
 }],
+```
+
+Check Docker Hub voor de laatste frontend versies:
+- https://hub.docker.com/r/ritense/gzac-frontend/tags
+
+### Backend
+
+De backend wordt vanuit een eigen repository gebouwd: [github.com/GemeenteNijmegen/gzac-backend](https://github.com/GemeenteNijmegen/gzac-backend)
+
+1. Wijzig `valtimoVersion` in `gradle.properties` naar de gewenste versie
+2. Push → CI bouwt nieuw image naar `ghcr.io/gemeentenijmegen/gzac-backend`
+3. Update eventueel de tag in `src/configuration/development.ts`:
+
+```typescript
 gzacServices: [{
-  image: 'ritense/gzac-backend:{versie}',
+  image: 'ghcr.io/gemeentenijmegen/gzac-backend:latest',
   // ...
 }],
 ```
-
-Check Docker Hub voor de laatste versies:
-- https://hub.docker.com/r/ritense/gzac-frontend/tags
-- https://hub.docker.com/r/ritense/gzac-backend/tags
 
 > **Let op**: Frontend en backend versies moeten op dezelfde minor versie zitten (bijv. beide 13.41.0).

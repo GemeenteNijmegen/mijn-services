@@ -182,7 +182,7 @@ export const development: Configuration = {
   gzacServices: [{
     id: 'gzac-backend-1',
     subdomain: 'gzac-api',
-    image: 'ritense/gzac-backend:13.41.0',
+    image: 'ghcr.io/gemeentenijmegen/gzac-backend:latest',
     logLevel: 'DEBUG',
     debug: true,
     loadbalancerPriority: 80,
