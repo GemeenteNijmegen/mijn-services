@@ -91,7 +91,7 @@ export class GZACFrontendService extends Construct {
         '/bin/sh', '-c',
         // Replace hardcoded gzac-backend upstream with internal ALB, set correct Host header, extend proxy paths
         'sed -i "s|http://gzac-backend:8080|${NGINX_BACKEND_URL}|g" /etc/nginx/conf.d/default.conf && '
-        + 'sed -i "s|proxy_set_header Host \\$host|proxy_set_header Host ${NGINX_BACKEND_HOST}|g" /etc/nginx/conf.d/default.conf && '
+        + 'sed -i "s|proxy_set_header Host \\$host|proxy_set_header Host ${NGINX_BACKEND_HOST}\\n        proxy_set_header Authorization \\$http_authorization|g" /etc/nginx/conf.d/default.conf && '
         + 'sed -i "/proxy_pass/a \\        proxy_ssl_verify off;" /etc/nginx/conf.d/default.conf && '
         + 'sed -i "s|/(api\\|management\\|v3\\|mock-api)|/(api\\|management\\|v1\\|v3\\|mock-api)|g" /etc/nginx/conf.d/default.conf && '
         + 'envsubst < /usr/share/nginx/html/assets/config.template.js > /usr/share/nginx/html/assets/config.js && '
