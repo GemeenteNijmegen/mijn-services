@@ -143,12 +143,8 @@ export class GZACService extends Construct {
     });
 
     // Add the backend container
-    // Uses a custom Dockerfile that extends the stock image with PBAC permission files.
-    // Without these permission files, Valtimo's PBAC denies all API requests with 403.
     task.addContainer('gzac-backend', {
-      image: ContainerImage.fromAsset('./src/containers/gzac-backend', {
-        buildArgs: { BASE_IMAGE: this.props.serviceConfiguration.image },
-      }),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
