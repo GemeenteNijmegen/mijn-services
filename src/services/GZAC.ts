@@ -55,6 +55,7 @@ export class GZACService extends Construct {
   private databaseUserCredentials: ISecret;
 
   private readonly gzacApiCredentials: ISecret;
+  private readonly pluginEncryptionSecret: ISecret;
 
   constructor(scope: Construct, id: string, props: GZACServiceProps) {
     super(scope, id);
@@ -64,6 +65,7 @@ export class GZACService extends Construct {
     this.logs = this.logGroup();
     this.setupDatabase();
     this.gzacApiCredentials = this.setupGzacApiCredentials();
+    this.pluginEncryptionSecret = this.setupPluginEncryptionSecret();
 
     // Create services
     const gzacRabbitMQService = this.setupRabbitMqService();
@@ -74,20 +76,44 @@ export class GZACService extends Construct {
   }
 
   private getEnvironmentConfiguration() {
-    const trustedDomain = `https://${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`;
+    const keycloakBaseUrl = `https://keycloak.${this.props.hostedzone.zoneName}`;
+    const keycloakIssuerUri = `${keycloakBaseUrl}/realms/gzac`;
+    const frontendDomain = `https://gzac.${this.props.hostedzone.zoneName}`;
 
     return {
       SPRING_PROFILES_ACTIVE: 'docker',
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: 'DEBUG',
+      LOGGING_LEVEL_COM_RITENSE_AUTHORIZATION: 'DEBUG',
+      VALTIMO_CHANGELOG_PBAC_CLEAR_TABLES: 'true',
       SPRING_DATASOURCE_URL: this.databaseConnectionString,
       SPRING_DATASOURCE_NAME: this.props.serviceConfiguration.databaseName,
 
-      // VALTIMO_APP_HOSTNAME: 'https://mijn-services.accp.nijmegen.nl/gzac',
-      // VALTIMO_CONNECTORENCRYPTION_SECRET: '579156b12b9a457a579156b12b9a457a',
+      // OAuth2 Resource Server (JWT validation)
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI: `${keycloakIssuerUri}/protocol/openid-connect/certs`,
 
-      // VALTIMO_OAUTH_PUBLIC_KEY:
-      //   'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB',
+      // OAuth2 Client Provider (Keycloak issuer URIs)
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAKJWT_ISSUERURI: keycloakIssuerUri,
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAKAPI_ISSUERURI: keycloakIssuerUri,
 
-      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: trustedDomain,
+      // OAuth2 Client Registration
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKJWT_CLIENTID: 'gzac-frontend',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKJWT_AUTHORIZATIONGRANTTYPE: 'authorization_code',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKJWT_SCOPE: 'openid',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKJWT_PROVIDER: 'keycloakjwt',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_CLIENTID: 'valtimo-user-m2m-client',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_AUTHORIZATIONGRANTTYPE: 'client_credentials',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_SCOPE: 'openid',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_PROVIDER: 'keycloakapi',
+
+      // RabbitMQ
+      SPRING_RABBITMQ_HOST: `${this.props.serviceConfiguration.id}-rabbit-mq.mijn-services.local`,
+      SPRING_RABBITMQ_PORT: '5672',
+      SPRING_RABBITMQ_USERNAME: 'guest',
+      SPRING_RABBITMQ_PASSWORD: 'guest',
+
+      // Valtimo / GZAC
+      VALTIMO_APP_HOSTNAME: frontendDomain,
+      VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS: frontendDomain,
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS: '*',
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDHEADERS: '*',
       VALTIMO_WEB_CORS_PATHS: '/**',
@@ -101,10 +127,13 @@ export class GZACService extends Construct {
     const secrets = {
       SPRING_DATASOURCE_USERNAME: Secret.fromSecretsManager(this.databaseUserCredentials, 'username'),
       SPRING_DATASOURCE_PASSWORD: Secret.fromSecretsManager(this.databaseUserCredentials, 'password'),
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_CLIENTSECRET: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
       KEYCLOAK_RESOURCE: Secret.fromSecretsManager(this.gzacApiCredentials, 'username'),
       KEYCLOAK_CREDENTIALS_SECRET: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
       KEYCLOAK_REALM: Secret.fromSsmParameter(params.keycloakRealm),
       KEYCLOAK_AUTH_SERVER_URL: Secret.fromSsmParameter(params.keycloakUrl),
+      VALTIMO_PLUGIN_ENCRYPTIONSECRET: Secret.fromSecretsManager(this.pluginEncryptionSecret, 'key'),
+      OPERATON_BPM_ADMINUSER_PASSWORD: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
     };
     return secrets;
   }
@@ -155,7 +184,7 @@ export class GZACService extends Construct {
       },
       desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
       enableExecuteCommand: true,
-      healthCheckGracePeriod: Duration.seconds(120), // Give time to start
+      healthCheckGracePeriod: Duration.seconds(300), // GZAC needs 3-4 min to start
     });
     this.setupConnectivity('gzac-backend', service.connections.securityGroups);
 
@@ -165,8 +194,8 @@ export class GZACService extends Construct {
       conditions: [ListenerCondition.hostHeaders([fqdomain])],
       healthCheck: {
         enabled: true,
-        path: '/',
-        healthyHttpCodes: '200,302',
+        path: '/actuator/health/readiness',
+        healthyHttpCodes: '200',
         healthyThresholdCount: 2,
         unhealthyThresholdCount: 6,
         timeout: Duration.seconds(10),
@@ -318,6 +347,20 @@ export class GZACService extends Construct {
           username: 'valtimo-user-m2m-client',
         }),
         generateStringKey: 'secret',
+      },
+    });
+  }
+
+  private setupPluginEncryptionSecret() {
+    return new SecretParameter(this, 'gzac-plugin-encryption-secret', {
+      description: 'AES-256 encryption key for GZAC plugin properties (must be exactly 32 bytes)',
+      generateSecretString: {
+        excludePunctuation: true,
+        excludeUppercase: false,
+        includeSpace: false,
+        passwordLength: 32,
+        secretStringTemplate: JSON.stringify({}),
+        generateStringKey: 'key',
       },
     });
   }

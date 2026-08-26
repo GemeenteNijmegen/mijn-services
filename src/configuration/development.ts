@@ -182,14 +182,14 @@ export const development: Configuration = {
   gzacServices: [{
     id: 'gzac-backend-1',
     subdomain: 'gzac-api',
-    image: 'ritense/gzac-backend:13.41.0',
+    image: 'ghcr.io/gemeentenijmegen/gzac-backend:latest',
     logLevel: 'DEBUG',
     debug: true,
     loadbalancerPriority: 80,
     databaseName: 'gzac',
     taskSize: {
-      cpu: '512',
-      memory: '1024',
+      cpu: '1024',
+      memory: '2048',
       desiredTaskCount: 1,
     },
   }],
