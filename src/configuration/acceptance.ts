@@ -40,6 +40,7 @@ export const acceptance: Configuration = {
     logLevel: 'DEBUG',
     debug: true,
     apiVersion: '1.3.1',
+    useNewDatabase: true,
     taskSize: {
       desiredTaskCount: 0,
       cpu: '512',
