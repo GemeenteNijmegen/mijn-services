@@ -40,6 +40,17 @@ export const acceptance: Configuration = {
     logLevel: 'DEBUG',
     debug: true,
     apiVersion: '1.3.1',
+    taskSize: {
+      desiredTaskCount: 0,
+      cpu: '512',
+      memory: '1024',
+    },
+    celeryTaskSize: {
+      desiredTaskCount: 0,
+      cpu: '512',
+      memory: '1024',
+    },
+    migrationImage: 'openzaak/open-zaak:1.30.0',
   },
   objectsService: {
     image: 'maykinmedia/open-object:4.1.0',

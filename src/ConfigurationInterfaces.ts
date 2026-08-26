@@ -229,6 +229,19 @@ export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, Celery
    * itself but that does not seem to happen.
    */
   apiVersion: string;
+
+  /**
+   * Image (usually a newer version than `image`) used for the standalone
+   * database migration task definition. When set, a CDK-owned `objects-migrate`
+   * task definition is created that runs `python src/manage.py migrate` off the
+   * load balancer, to be executed via the `src/django-migrate` runner during a
+   * maintenance window. This lets the migration run against the new version
+   * ahead of (and independently from) moving the service to that version.
+   *
+   * Leave unset outside of a migration window; no migration task is created.
+   * @default - no migration task definition is created
+   */
+  migrationImage?: string;
 }
 
 export interface OpenZaakConfigurationV2 extends OpenZaakConfiguration {

@@ -145,7 +145,7 @@ export class OpenNotificatiesService extends Construct {
 
 
       LOG_NOTIFICATIONS_IN_DB: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.persitNotifications, false),
-      NOTIFICATION_NUMBER_OF_DAYS_RETAINED: "30",
+      NOTIFICATION_NUMBER_OF_DAYS_RETAINED: '30',
     };
 
     if (this.props.openNotificationsConfiguration.useNewDatabase == true) {
