@@ -252,7 +252,16 @@ export class OpenZaakService extends Construct {
       }),
       healthCheck: {
         // command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
-        command: ['CMD-SHELL', '/celery_worker_liveness_probe.sh >> /proc/1/fd/1 2>&1'],
+        // De oude health checks werken niet meer: https://open-zaak.readthedocs.io/en/stable/installation/health_checks.html#installation-health-checks
+        command: [
+          'CMD-SHELL',
+          'maykin-common worker-health-check ' +
+          '--broker="$CELERY_BROKER_URL" ' +
+          '--liveness-file=/app/tmp/celery_worker_event_loop.live ' +
+          '--max-age=70 ' +
+          '--worker-name="${CELERY_WORKER_QUEUE:-celery}@${HOSTNAME%%.*}" ' +
+          '>> /proc/1/fd/1 2>&1',
+        ],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
