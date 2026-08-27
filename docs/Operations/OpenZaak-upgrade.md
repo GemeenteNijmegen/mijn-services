@@ -12,7 +12,7 @@ Latest versie: 1.30.0
 - 1.27.0 - Nieuw storage backends (s3, azure blob)
 - 1.28.0 - Latest geen speciale dingen
 - 1.29.0 - datamigratie documenten
-- 1.30.0 -
+- 1.30.0 - healthcheck aanroep gewijzigd: https://open-zaak.readthedocs.io/en/stable/installation/health_checks.html#installation-health-checks
 
 
 ## Stap 0 - Voorbereiding
@@ -73,12 +73,92 @@ Inloggen mijn-services wachtwoord
 \dt
 ```
 
-Voer eventueel een query uit 
+Voer eventueel een query uit om de laatste zaken op te halen:
 `SELECT * FROM zaken_zaak  ORDER BY registratiedatum DESC LIMIT 10;`
 
 Backup is nu gemaakt.
 Nieuwe database is gemaakt en gevuld
 De config van de omgeving  `useNewDatabase: true,` is gedeployed
 
+### Stap 2.1 Check 1.29.0 data migratie nulmeting
+https://github.com/open-zaak/open-zaak/blob/1.29.0/src/openzaak/components/documenten/migrations/0037_enkelvoudiginformatieobjectcanonical_latest_version.py
+
+Er gaat een kolom bijkomen. Dus die kunnen we voor de updates checken en daarna. 
+
+```
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'documenten_enkelvoudiginformatieobjectcanonical'
+  AND column_name = 'latest_version_id';
+```
+--> Moet niet aanwezig zijn nu
+
+```
+SELECT COUNT(DISTINCT canonical_id) AS expected_latest_versions
+FROM documenten_enkelvoudiginformatieobject;
+```
+--> aantal records waarvoor latest_verion_id aangemaakt moet worden.
+
 ## Stap 3 - Draai de migrationtask
-Specifieke securitygroup voor task open-zaak-migrate
+Specifieke securitygroup voor task open-zaak-migrate en public uit.
+
+Controleer eventueel de nieuwe database om te zien of latets_version_id nu bestaat er gevuld is met de queries uit de vorige stap.
+
+## Stap 4 - Updaten main en celery
+Controleer eerst de healthcheck uit versie update 1.30.0 in beide containers.
+
+Oude container:
+```
+  command: [
+    'CMD-SHELL',
+    'python /app/bin/check_celery_worker_liveness.py >> /proc/1/fd/1 2>&1',
+  ],
+```
+
+Nieuwe container:
+```
+  command: [
+    'CMD-SHELL',
+    '/app/bin/celery_worker_liveness_probe.sh >> /proc/1/fd/1 2>&1',
+  ],
+```
+
+Als er een health check in de loadbalancer is:
+`path: '/',`
+
+Naar
+`path: '/_healthz/livez/',`
+
+Pull request
+In de config van de omgeving:
+- Update de versie van main EN celery
+- 1.30.0
+- Laat desiredtaskcount op 0 staan voor nu
+
+Deploy
+
+- Zet in de console main en celery naar desired task count 1
+- Controleer de logs
+
+Pull request
+In de conig van de omgeving:
+- Zet de desired task count op 1
+
+Deploy
+
+- Check of de container gestart zijn
+
+## Stap 5
+
+In de step function zijn nu waarschijnlijk inzendingen fout gegaan in de ZGW stap.
+Retry failures van alles dat mis is gegaan.
+
+
+
+## Rollback
+Indien het fout gaat:
+
+Pull request:
+In de omgeving:
+- newDatabase false
+- Versies main en celery 1.17.0
