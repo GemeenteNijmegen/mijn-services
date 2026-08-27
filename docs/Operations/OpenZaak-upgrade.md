@@ -16,7 +16,7 @@ Latest versie: 1.30.0
 
 
 ## Stap 0 - Voorbereiding
-- Zorg dat de OTEL uit staat (env vars.)
+- Zorg dat de OTEL uit staat (env vars.) In huidige open zaak service staat al `OTEL_SDK_DISABLED: 'true',`
 - Zorg dat de container voor de main service groot genoeg is (op dev ging het pas goed met een container van 0.5 vcpu en 1gb mem)
 - Zorg dat de timeouts voor health checks 2,5minuten zijn minstends (container health check en ALB health check graceperiod)
 
@@ -31,15 +31,25 @@ Secret mijn-services database
 S3 bucketnaam voor backup dumps
 `aws s3 cp ./<<NAAM LOKALE DUMPFILE MET DATUM>>.dump s3://<<S3 NAAM>>/<<NAAM DUMPFILE MET DATUM>>.dump`
 
-
-
-
-## Stap 1 - Upgrade migrationtask naar laatste versie en zet open-zaak uit
+## Stap 1.1 - Upgrade migrationtask naar 1.23.0 en zet open-zaak uit
 
 In de config van de omgeving in deze repo
 - Alle services stoppen via config (desired task count 0) in taskdefinition (main en celery)
-- Migrationtask toevoegen aan config met laatste versie
+- Migrationtask toevoegen aan config met `1.23.0`
 - Deployment (waarbij de hoofdcontainers dus uit zullen staan)
+
+Zorgt dat de nieuwe database klaar staat zoals in stap 2
+Na deployment draai stap 3: migration task.
+
+## Stap 1.2 - Upgrade migrationtask van 1.23.0 naar laatste versie en zet open-zaak uit
+
+In de config van de omgeving in deze repo
+- Alle services stoppen via config (desired task count 0) in taskdefinition (main en celery) 
+- Migrationtask toevoegen aan config met laatste versie `1.30.0`
+- Deployment (waarbij de hoofdcontainers dus uit zullen staan)
+
+Zorgt dat de nieuwe database klaar staat zoals in stap 2 (zou bij de vorige stap naar 1.23.0 al zo moeten zijn)
+Na deployment draai stap 3: migration task.
 
 
 ## Stap 2 - DB migratie (zodra open zaak uit staat)
@@ -100,11 +110,60 @@ FROM documenten_enkelvoudiginformatieobject;
 --> aantal records waarvoor latest_verion_id aangemaakt moet worden.
 
 ## Stap 3 - Draai de migrationtask
-Specifieke securitygroup voor task open-zaak-migrate en public uit.
+Controleer de task definition of het echt de juiste versie is in de console `open-zaak-migrate`
 
-Controleer eventueel de nieuwe database om te zien of latets_version_id nu bestaat er gevuld is met de queries uit de vorige stap.
+- Lokaal log in het mijn-services account met ep rechten
+- Draai eerst `bash bin/django-migrate/run-objects-migrate.sh `
+- Hier moet openzaak bij staan
+- `bash bin/django-migrate/run-objects-migrate.sh --prefix openzaak`  --> kijk of het de juiste versie van de taskdefinition is
+- `bash bin/django-migrate/run-objects-migrate.sh --prefix openzaak run` --> met run draait het echt en toont de logs
+
+
+Controleer eventueel de nieuwe database om te zien of latets_version_id nu bestaat er gevuld is met de queries uit de vorige stap bij de upgrade naar `1.30.0`
 
 ## Stap 4 - Updaten main en celery
+
+
+Pull request
+In de config van de omgeving:
+- Update de versie van main EN celery
+- 1.30.0
+- Laat desiredtaskcount op 0 staan voor nu
+
+Deploy
+
+- Zet in de console main en celery naar desired task count 1
+- Controleer de logs
+
+Pull request
+In de conig van de omgeving:
+- Zet de desired task count op 1
+
+Deploy
+
+- Check of de container gestart zijn
+
+## Stap 5
+Zaak aanmaken met documenten gaat snel door de hele keten met een testformulier.
+
+Retry failures van alles dat mis is gegaan in open forms.
+
+
+
+## Rollback
+Indien het fout gaat:
+
+Pull request:
+In de omgeving:
+- newDatabase false
+- Versies main en celery 1.17.0
+
+
+
+
+## Healthchecks na goede uitrol
+
+
 Controleer eerst de healthcheck uit versie update 1.30.0 in beide containers.
 
 Oude container:
@@ -128,37 +187,3 @@ Als er een health check in de loadbalancer is:
 
 Naar
 `path: '/_healthz/livez/',`
-
-Pull request
-In de config van de omgeving:
-- Update de versie van main EN celery
-- 1.30.0
-- Laat desiredtaskcount op 0 staan voor nu
-
-Deploy
-
-- Zet in de console main en celery naar desired task count 1
-- Controleer de logs
-
-Pull request
-In de conig van de omgeving:
-- Zet de desired task count op 1
-
-Deploy
-
-- Check of de container gestart zijn
-
-## Stap 5
-
-In de step function zijn nu waarschijnlijk inzendingen fout gegaan in de ZGW stap.
-Retry failures van alles dat mis is gegaan.
-
-
-
-## Rollback
-Indien het fout gaat:
-
-Pull request:
-In de omgeving:
-- newDatabase false
-- Versies main en celery 1.17.0
