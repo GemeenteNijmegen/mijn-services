@@ -36,7 +36,7 @@ export const acceptance: Configuration = {
     persitNotifications: true,
   },
   openZaak: { // Only used for formulieren. See openZaakServices for how to deploy muliple open-zaak services.
-    image: 'openzaak/open-zaak:1.17.0',
+    image: 'openzaak/open-zaak:1.30.0',
     logLevel: 'DEBUG',
     debug: true,
     apiVersion: '1.3.1',

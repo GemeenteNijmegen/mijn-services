@@ -69,6 +69,16 @@ psql -h $ENDPOINT -U mijn_services -d open-zaak-database -c "CREATE EXTENSION IF
 pg_restore -h $ENDPOINT -U mijn_services -d open-zaak-database --no-owner --role=open-zaak-database -F c open-zaak.dump
 ```
 
+Deze errors zijn verwacht en kun je negeren:
+```
+pg_restore: error: could not execute query: ERROR:  must be owner of extension postgis
+Command was: COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
+
+
+pg_restore: error: could not execute query: ERROR:  permission denied for table spatial_ref_sys
+Command was: COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
+pg_restore: warning: errors ignored on restore: 
+```
 
 Check of de nieuwe database gevuld is:
 
