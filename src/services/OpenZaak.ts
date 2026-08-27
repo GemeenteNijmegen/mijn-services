@@ -252,7 +252,7 @@ export class OpenZaakService extends Construct {
       }),
       healthCheck: {
         // command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
-        command: ['CMD-SHELL', 'python /app/bin/celery_worker_liveness_probe.sh >> /proc/1/fd/1 2>&1'],
+        command: ['CMD-SHELL', '/app/bin/celery_worker_liveness_probe.sh >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
