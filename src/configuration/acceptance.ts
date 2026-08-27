@@ -42,12 +42,12 @@ export const acceptance: Configuration = {
     apiVersion: '1.3.1',
     useNewDatabase: true,
     taskSize: {
-      desiredTaskCount: 0,
+      desiredTaskCount: 1,
       cpu: '512',
       memory: '1024',
     },
     celeryTaskSize: {
-      desiredTaskCount: 0,
+      desiredTaskCount: 1,
       cpu: '512',
       memory: '1024',
     },
