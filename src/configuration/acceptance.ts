@@ -51,7 +51,7 @@ export const acceptance: Configuration = {
       cpu: '512',
       memory: '1024',
     },
-    migrationImage: 'openzaak/open-zaak:1.23.0',
+    migrationImage: 'openzaak/open-zaak:1.30.0',
   },
   objectsService: {
     image: 'maykinmedia/open-object:4.1.0',
