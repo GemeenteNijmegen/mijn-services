@@ -8,10 +8,10 @@
 # "does the task def even work" check against an already-migrated dev DB.
 #
 # Usage:
-#   bash src/django-migrate/run-objects-migrate.sh                    # print the run-task command, run nothing
-#   bash src/django-migrate/run-objects-migrate.sh run                # run it, auto-tail logs, report exit code
-#   bash src/django-migrate/run-objects-migrate.sh logs ID            # tail an already-running task (id or ARN)
-#   bash src/django-migrate/run-objects-migrate.sh --prefix P run     # disambiguate when multiple stacks
+#   bash bin/django-migrate/run-objects-migrate.sh                    # print the run-task command, run nothing
+#   bash bin/django-migrate/run-objects-migrate.sh run                # run it, auto-tail logs, report exit code
+#   bash bin/django-migrate/run-objects-migrate.sh logs ID            # tail an already-running task (id or ARN)
+#   bash bin/django-migrate/run-objects-migrate.sh --prefix P run     # disambiguate when multiple stacks
 #                                                                      # emit outputs with the same Description
 #                                                                      # (P must be a prefix of the OutputKey)
 #
