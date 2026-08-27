@@ -119,6 +119,13 @@ FROM documenten_enkelvoudiginformatieobject;
 ```
 --> aantal records waarvoor latest_verion_id aangemaakt moet worden.
 
+Na de migratie naar 1.30.0 (met 1.23.0 tussenstap):
+```
+SELECT COUNT(DISTINCT latest_version_id) AS actual_latest_versions
+FROM documenten_enkelvoudiginformatieobjectcanonical;
+```
+--> moeten er evenveel zijn als de query hiervoor
+
 ## Stap 3 - Draai de migrationtask
 Controleer de task definition of het echt de juiste versie is in de console `open-zaak-migrate`
 
