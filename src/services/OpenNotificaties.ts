@@ -73,10 +73,11 @@ export class OpenNotificatiesService extends Construct {
     const rabbitMqService = this.setupRabbitMqService();
     const mainService = this.setupService();
     const celeryService = this.setupCeleryService();
-    this.setupCeleryBeatService();
+    const celeryBeatService = this.setupCeleryBeatService();
 
     rabbitMqService.connections.allowFrom(mainService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
     rabbitMqService.connections.allowFrom(celeryService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
+    rabbitMqService.connections.allowFrom(celeryBeatService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
   }
 
   private getEnvironmentConfiguration() {
@@ -145,7 +146,7 @@ export class OpenNotificatiesService extends Construct {
 
 
       LOG_NOTIFICATIONS_IN_DB: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.persitNotifications, false),
-      NOTIFICATION_NUMBER_OF_DAYS_RETAINED: '30',
+      NOTIFICATION_NUMBER_OF_DAYS_RETAINED: '60',
     };
 
     if (this.props.openNotificationsConfiguration.useNewDatabase == true) {
@@ -378,6 +379,7 @@ export class OpenNotificatiesService extends Construct {
     });
     this.setupConnectivity('celery-beat', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    return service;
   }
 
   private logGroup() {
