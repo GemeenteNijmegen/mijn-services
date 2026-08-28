@@ -375,7 +375,7 @@ export class OpenNotificatiesService extends Construct {
       id: 'celery-beat',
       options: {
         desiredCount: this.props.openNotificationsConfiguration.celeryTaskSize?.desiredTaskCount ?? 1,
-        enableExecuteCommand: true
+        enableExecuteCommand: true,
       },
     });
     this.setupConnectivity('celery-beat', service.connections.securityGroups);
