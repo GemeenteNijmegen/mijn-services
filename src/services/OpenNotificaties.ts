@@ -379,6 +379,7 @@ export class OpenNotificatiesService extends Construct {
     });
     this.setupConnectivity('celery-beat', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
+    ECSServiceUtils.allowExecutingCommands(task);
     return service;
   }
 
