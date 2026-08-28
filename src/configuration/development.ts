@@ -57,6 +57,8 @@ export const development: Configuration = {
       memory: '1024',
     },
     useNewDatabase: true,
+    migrationImage: 'openzaak/open-zaak:1.30.0',
+    disableHealthcCheckCeleryContainer: true,
   },
   openZaakServices: [{ // TODO carefull we have a overlap in redis channels, we need to make this configurable here as well.
     image: 'openzaak/open-zaak:1.28.1',
