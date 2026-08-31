@@ -208,7 +208,8 @@ export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration
   persitNotifications?: boolean;
 }
 
-export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
+export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration,
+  DatabaseMigrationToggle, MigrationImage, HealthCheckOptions {
   /**
    * Docker image to use.
    * Usually includes the version number.
@@ -577,6 +578,33 @@ export interface DatabaseMigrationToggle {
    * @default - false
    */
   useNewDatabase?: boolean;
+}
+
+export interface MigrationImage {
+  /**
+   * Image (usually a newer version than `image`) used for the standalone
+   * database migration task definition. When set, a CDK-owned `objects-migrate`
+   * task definition is created that runs `python src/manage.py migrate` off the
+   * load balancer, to be executed via the `src/django-migrate` runner during a
+   * maintenance window. This lets the migration run against the new version
+   * ahead of (and independently from) moving the service to that version.
+   *
+   * Leave unset outside of a migration window; no migration task is created.
+   * @default - no migration task definition is created
+   */
+  migrationImage?: string;
+}
+
+export interface HealthCheckOptions {
+  /**
+   * Optional boolean
+   * When `true` disable the celery container health check
+   * by making the health check command `exit 0`
+   * Can be useful in case of experimenting or upgrading
+   *
+   * @default - the container healthcheck that has been set
+   */
+  disableHealthcCheckCeleryContainer?: boolean;
 }
 
 

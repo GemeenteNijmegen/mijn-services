@@ -1,5 +1,6 @@
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { Port } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, Compatibility, ContainerImage, FargateService, Protocol, Secret, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Key } from 'aws-cdk-lib/aws-kms';
@@ -57,7 +58,6 @@ export class GZACFrontendService extends Construct {
 
     return {
       secrets: {
-        API_URI: Secret.fromSsmParameter(params.backendUrl),
         KEYCLOAK_URL: Secret.fromSsmParameter(params.keycloakUrl),
         KEYCLOAK_REALM: Secret.fromSsmParameter(params.keycloakRealm),
         KEYCLOAK_CLIENT_ID: Secret.fromSsmParameter(params.keycloakClientId),
@@ -65,6 +65,9 @@ export class GZACFrontendService extends Construct {
         KEYCLOAK_LOGOUT_REDIRECT_URI: Secret.fromSsmParameter(params.keycloakLogoutRedirectUrl),
       },
       envionment: {
+        API_URI: `https://${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
+        NGINX_BACKEND_URL: `https://alb.${this.props.hostedzone.zoneName}`,
+        NGINX_BACKEND_HOST: `gzac-api.${this.props.hostedzone.zoneName}`,
         WHITELISTED_DOMAIN: domainName,
         ENABLE_CASE_WIDGETS: 'true',
         ENABLE_TASK_PANEL: 'true',
@@ -84,7 +87,16 @@ export class GZACFrontendService extends Construct {
     // Main service container
     task.addContainer('gzac-frontend', {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
-      // image: ContainerImage.fromAsset('./src/containers/gzac-frontend'),
+      command: [
+        '/bin/sh', '-c',
+        // Replace hardcoded gzac-backend upstream with internal ALB, set correct Host header, extend proxy paths
+        'sed -i "s|http://gzac-backend:8080|${NGINX_BACKEND_URL}|g" /etc/nginx/conf.d/default.conf && '
+        + 'sed -i "s|proxy_set_header Host \\$host|proxy_set_header Host ${NGINX_BACKEND_HOST}\\n        proxy_set_header Authorization \\$http_authorization|g" /etc/nginx/conf.d/default.conf && '
+        + 'sed -i "/proxy_pass/a \\        proxy_ssl_verify off;" /etc/nginx/conf.d/default.conf && '
+        + 'sed -i "s|/(api\\|management\\|v3\\|mock-api)|/(api\\|management\\|v1\\|v3\\|mock-api)|g" /etc/nginx/conf.d/default.conf && '
+        + 'envsubst < /usr/share/nginx/html/assets/config.template.js > /usr/share/nginx/html/assets/config.js && '
+        + 'exec nginx -g "daemon off;"',
+      ],
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'],
         interval: Duration.seconds(10),
@@ -120,6 +132,9 @@ export class GZACFrontendService extends Construct {
       enableExecuteCommand: true,
       healthCheckGracePeriod: Duration.seconds(120), // Give time to start
     });
+
+    // Allow frontend to reach the ALB for proxying API calls to backend
+    service.connections.allowTo(this.props.service.loadbalancer.alb, Port.tcp(443), 'Allow frontend to proxy to ALB');
 
 
     // Attach to loadbalancer

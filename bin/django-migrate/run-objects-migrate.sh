@@ -8,15 +8,36 @@
 # "does the task def even work" check against an already-migrated dev DB.
 #
 # Usage:
-#   bash src/django-migrate/run-objects-migrate.sh          # print the run-task command, run nothing
-#   bash src/django-migrate/run-objects-migrate.sh run      # run it, auto-tail logs, report exit code
-#   bash src/django-migrate/run-objects-migrate.sh logs ID  # tail an already-running task (id or ARN)
+#   bash bin/django-migrate/run-objects-migrate.sh                    # print the run-task command, run nothing
+#   bash bin/django-migrate/run-objects-migrate.sh run                # run it, auto-tail logs, report exit code
+#   bash bin/django-migrate/run-objects-migrate.sh logs ID            # tail an already-running task (id or ARN)
+#   bash bin/django-migrate/run-objects-migrate.sh --prefix P run     # disambiguate when multiple stacks
+#                                                                      # emit outputs with the same Description
+#                                                                      # (P must be a prefix of the OutputKey)
 #
 # Requires: awscli v2 + jq, with credentials for the dev account already active.
 
 set -euo pipefail
 
 REGION="${AWS_REGION:-eu-central-1}"
+KEY_PREFIX="${KEY_PREFIX:-}"
+
+while [[ "${1:-}" == --* ]]; do
+  case "$1" in
+    --prefix)
+      KEY_PREFIX="${2:?--prefix requires a value}"
+      shift 2
+      ;;
+    --prefix=*)
+      KEY_PREFIX="${1#--prefix=}"
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
 
 # awslogs stream name = <streamPrefix>/<containerName>/<taskId>; both are "migrate".
 STREAM_PREFIX="migrate/migrate"
@@ -26,8 +47,21 @@ OUTPUTS="$(aws cloudformation describe-stacks --region "${REGION}" \
   --query 'Stacks[].Outputs[]' --output json)"
 
 lookup() {
-  # $1 = the CfnOutput Description to match
-  echo "${OUTPUTS}" | jq -r --arg d "$1" '[.[] | select(.Description==$d)][0].OutputValue // empty'
+  # $1 = the CfnOutput Description to match; matches are further filtered by
+  # KEY_PREFIX (a prefix of OutputKey) when set, to disambiguate duplicate
+  # descriptions coming from multiple deployed stacks.
+  local desc="$1"
+  local matches
+  matches="$(echo "${OUTPUTS}" | jq -c --arg d "${desc}" --arg p "${KEY_PREFIX}" \
+    '[.[] | select(.Description==$d) | select($p=="" or (.OutputKey | startswith($p)))]')"
+  local count
+  count="$(echo "${matches}" | jq 'length')"
+  if [ "${count}" -gt 1 ]; then
+    echo "ERROR: multiple outputs matched description '${desc}'; pass --prefix to disambiguate. Candidates:" >&2
+    echo "${matches}" | jq -r '.[] | "  " + .OutputKey' >&2
+    exit 1
+  fi
+  echo "${matches}" | jq -r '.[0].OutputValue // empty'
 }
 
 CLUSTER="$(lookup 'django-migrate ECS_CLUSTER')"

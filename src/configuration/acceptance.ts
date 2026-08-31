@@ -36,10 +36,22 @@ export const acceptance: Configuration = {
     persitNotifications: true,
   },
   openZaak: { // Only used for formulieren. See openZaakServices for how to deploy muliple open-zaak services.
-    image: 'openzaak/open-zaak:1.17.0',
+    image: 'openzaak/open-zaak:1.30.0',
     logLevel: 'DEBUG',
     debug: true,
     apiVersion: '1.3.1',
+    useNewDatabase: true,
+    taskSize: {
+      desiredTaskCount: 1,
+      cpu: '512',
+      memory: '1024',
+    },
+    celeryTaskSize: {
+      desiredTaskCount: 1,
+      cpu: '512',
+      memory: '1024',
+    },
+    migrationImage: 'openzaak/open-zaak:1.30.0',
   },
   objectsService: {
     image: 'maykinmedia/open-object:4.1.0',

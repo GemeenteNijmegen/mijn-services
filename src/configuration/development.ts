@@ -57,6 +57,8 @@ export const development: Configuration = {
       memory: '1024',
     },
     useNewDatabase: true,
+    migrationImage: 'openzaak/open-zaak:1.30.0',
+    disableHealthcCheckCeleryContainer: true,
   },
   openZaakServices: [{ // TODO carefull we have a overlap in redis channels, we need to make this configurable here as well.
     image: 'openzaak/open-zaak:1.28.1',
@@ -182,14 +184,14 @@ export const development: Configuration = {
   gzacServices: [{
     id: 'gzac-backend-1',
     subdomain: 'gzac-api',
-    image: 'ritense/gzac-backend:13.41.0',
+    image: 'ghcr.io/gemeentenijmegen/gzac-backend:latest',
     logLevel: 'DEBUG',
     debug: true,
     loadbalancerPriority: 80,
     databaseName: 'gzac',
     taskSize: {
-      cpu: '512',
-      memory: '1024',
+      cpu: '1024',
+      memory: '2048',
       desiredTaskCount: 1,
     },
   }],
