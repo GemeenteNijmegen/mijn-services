@@ -308,12 +308,11 @@ export class OpenZaakService extends Construct {
   /**
    * Standalone, CDK-owned migration task definition. Runs `manage.py migrate`
    * off the load balancer (no ECS Service, no ALB, no target group), to be
-   * invoked with `aws ecs run-task` by the `src/django-migrate` runner during a
+   * invoked with `aws ecs run-task` by the `bin/django-migrate` runner during a
    * maintenance window.
    *
    * Only created when `migrationImage` is configured, so it can be pinned to the
-   * new version independently of the running service. Emits the values the
-   * runner's `.env` needs as stack outputs.
+   * new version independently of the running service.
    */
   private setupMigrationTask() {
     const migrationImage = this.props.openZaakConfiguration.migrationImage;
@@ -359,9 +358,7 @@ export class OpenZaakService extends Construct {
   }
 
   /**
-     * Emit everything the `src/django-migrate` runner's `.env` needs, so the
-     * operator does not have to hunt through the console. See
-     * `src/django-migrate/.env.example`.
+     * `./bin/django-migrate/run-objects-migrate.sh.
      */
   private migrationTaskOutputs(task: TaskDefinition, containerName: string, securityGroup: ISecurityGroup) {
     const subnetIds = this.props.service.cluster.vpc.selectSubnets({
