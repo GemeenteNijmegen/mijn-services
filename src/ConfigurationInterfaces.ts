@@ -184,7 +184,8 @@ export interface OpenKlantConfiguration extends MainTaskSizeConfiguration, Celer
   debug?: boolean;
 }
 
-export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
+export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration,
+  DatabaseMigrationToggle, MigrationImage, HealthCheckOptions {
   /**
    * Docker image to use.
    * Usually includes the version number.

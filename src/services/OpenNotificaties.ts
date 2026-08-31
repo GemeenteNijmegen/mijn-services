@@ -1,6 +1,6 @@
-import { Duration, Token } from 'aws-cdk-lib';
-import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { CfnOutput, Duration, Fn, Token } from 'aws-cdk-lib';
+import { ISecurityGroup, Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { AwsLogDriver, ContainerImage, Protocol, Secret, TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -74,6 +74,7 @@ export class OpenNotificatiesService extends Construct {
     const mainService = this.setupService();
     const celeryService = this.setupCeleryService();
     const celeryBeatService = this.setupCeleryBeatService();
+    this.setupMigrationTask();
 
     rabbitMqService.connections.allowFrom(mainService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
     rabbitMqService.connections.allowFrom(celeryService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
@@ -146,7 +147,7 @@ export class OpenNotificatiesService extends Construct {
 
 
       LOG_NOTIFICATIONS_IN_DB: Utils.toPythonBooleanString(this.props.openNotificationsConfiguration.persitNotifications, false),
-      NOTIFICATION_NUMBER_OF_DAYS_RETAINED: '60',
+      NOTIFICATION_NUMBER_OF_DAYS_RETAINED: '30',
     };
 
     if (this.props.openNotificationsConfiguration.useNewDatabase == true) {
@@ -313,7 +314,9 @@ export class OpenNotificatiesService extends Construct {
         credentials: this.props.dockerhubCredentials,
       }),
       healthCheck: {
-        command: ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
+        command: this.props.openNotificationsConfiguration.disableHealthcCheckCeleryContainer
+          ? ['CMD-SHELL', 'exit 0']
+          : ['CMD-SHELL', 'celery inspect ping >> /proc/1/fd/1 2>&1'],
         interval: Duration.seconds(10),
         startPeriod: Duration.seconds(60),
       },
@@ -353,7 +356,9 @@ export class OpenNotificatiesService extends Construct {
         credentials: this.props.dockerhubCredentials,
       }),
       healthCheck: {
-        command: ['CMD-SHELL', 'celery', 'inspect', 'ping', '--app', 'nrc'],
+        command: this.props.openNotificationsConfiguration.disableHealthcCheckCeleryContainer
+          ? ['CMD-SHELL', 'exit 0']
+          : ['CMD-SHELL', 'celery', 'inspect', 'ping', '--app', 'nrc'],
         interval: Duration.seconds(10),
       },
       readonlyRootFilesystem: false, // Required for ECS Exec
@@ -382,6 +387,93 @@ export class OpenNotificatiesService extends Construct {
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     ECSServiceUtils.allowExecutingCommands(task);
     return service;
+  }
+
+  /**
+     * Standalone, CDK-owned migration task definition. Runs `manage.py migrate`
+     * off the load balancer (no ECS Service, no ALB, no target group), to be
+     * invoked with `aws ecs run-task` by the `bin/django-migrate` runner during a
+     * maintenance window.
+     *
+     * Only created when `migrationImage` is configured, so it can be pinned to the
+     * new version independently of the running service.
+     */
+  private setupMigrationTask() {
+    const migrationImage = this.props.openNotificationsConfiguration.migrationImage;
+    if (!migrationImage) {
+      return;
+    }
+
+    const CONTAINER_NAME = 'migrate';
+
+    const task = this.serviceFactory.createTaskDefinition('migrate', {
+      family: `${Statics.projectName}-opennotificaties-migrate`,
+      cpu: this.props.openNotificationsConfiguration.taskSize?.cpu ?? '256',
+      memoryMiB: this.props.openNotificationsConfiguration.taskSize?.memory ?? '512',
+    });
+
+    task.addContainer(CONTAINER_NAME, {
+      image: ContainerImage.fromRegistry(migrationImage, {
+        credentials: this.props.dockerhubCredentials,
+      }),
+      command: ['python', 'src/manage.py', 'migrate', '--noinput'],
+      readonlyRootFilesystem: false,
+      secrets: this.getSecretConfiguration(),
+      environment: this.getEnvironmentConfiguration(),
+      logging: new AwsLogDriver({
+        streamPrefix: 'migrate',
+        logGroup: this.logs,
+      }),
+    });
+    // No ECS Service is created, so no security group exists yet. Create one and
+    // wire it to the database + cache exactly like the running service's SG, so
+    // the operator can hand it to `run-task`.
+    const migrationSecurityGroup = new SecurityGroup(this, 'migrate-security-group', {
+      vpc: this.props.service.cluster.vpc,
+      description: 'Open notificaties  standalone migration task',
+      allowAllOutbound: true,
+    });
+    this.setupConnectivity('migrate', [migrationSecurityGroup]);
+
+    this.allowAccessToSecrets(task.executionRole!);
+    ECSServiceUtils.allowExecutingCommands(task);
+
+    this.migrationTaskOutputs(task, CONTAINER_NAME, migrationSecurityGroup);
+  }
+
+  /**
+       * `./bin/django-migrate/run-objects-migrate.sh.
+       */
+  private migrationTaskOutputs(task: TaskDefinition, containerName: string, securityGroup: ISecurityGroup) {
+    const subnetIds = this.props.service.cluster.vpc.selectSubnets({
+      subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+    }).subnetIds;
+
+    new CfnOutput(this, 'migrate-cluster', {
+      value: this.props.service.cluster.clusterName,
+      description: 'django-migrate ECS_CLUSTER',
+    });
+    // ARN includes the exact family:revision to pin as MIGRATION_TASK_DEFINITION.
+    new CfnOutput(this, 'migrate-taskdefinition', {
+      value: task.taskDefinitionArn,
+      description: 'django-migrate MIGRATION_TASK_DEFINITION (family:revision)',
+    });
+    new CfnOutput(this, 'migrate-container', {
+      value: containerName,
+      description: 'django-migrate MIGRATION_CONTAINER_NAME',
+    });
+    new CfnOutput(this, 'migrate-subnets', {
+      value: Fn.join(',', subnetIds),
+      description: 'django-migrate SUBNETS',
+    });
+    new CfnOutput(this, 'migrate-security-groups', {
+      value: securityGroup.securityGroupId,
+      description: 'django-migrate SECURITY_GROUPS',
+    });
+    new CfnOutput(this, 'migrate-log-group', {
+      value: this.logs.logGroupName,
+      description: 'CloudWatch log group for the migration task',
+    });
   }
 
   private logGroup() {

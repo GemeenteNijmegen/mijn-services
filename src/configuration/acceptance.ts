@@ -34,6 +34,11 @@ export const acceptance: Configuration = {
     logLevel: 'DEBUG',
     debug: true,
     persitNotifications: true,
+    migrationImage: 'openzaak/open-notificaties:1.12.0', // 1.12.0 same as 1.23.0 in open zaak
+    taskSize: {
+      cpu: '512',
+      memory: '1024',
+    },
   },
   openZaak: { // Only used for formulieren. See openZaakServices for how to deploy muliple open-zaak services.
     image: 'openzaak/open-zaak:1.30.0',

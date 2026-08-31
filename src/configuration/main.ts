@@ -28,6 +28,11 @@ export const main: Configuration = {
     logLevel: 'INFO',
     debug: false,
     persitNotifications: true,
+    migrationImage: 'openzaak/open-notificaties:1.12.0', // 1.12.0 same as 1.23.0 in open zaak
+    taskSize: {
+      cpu: '512',
+      memory: '1024',
+    },
   },
   openZaak: {
     image: 'openzaak/open-zaak:1.17.0',
