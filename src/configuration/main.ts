@@ -42,6 +42,8 @@ export const main: Configuration = {
       cpu: '512',
       memory: '2048',
     },
+    disableHealthcCheckCeleryContainer: true,
+    migrationImage: 'openzaak/open-zaak:1.23.0',
   },
   objectsService: {
     image: 'maykinmedia/open-object:4.1.0',
