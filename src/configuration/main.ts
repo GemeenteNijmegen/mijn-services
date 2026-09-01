@@ -42,11 +42,14 @@ export const main: Configuration = {
     taskSize: {
       cpu: '512',
       memory: '2048',
+      desiredTaskCount: 0,
     },
     celeryTaskSize: {
       cpu: '512',
       memory: '2048',
+      desiredTaskCount: 0,
     },
+    useNewDatabase: true,
     disableHealthcCheckCeleryContainer: true,
     migrationImage: 'openzaak/open-zaak:1.23.0',
   },
