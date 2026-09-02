@@ -51,7 +51,7 @@ export const main: Configuration = {
     },
     useNewDatabase: true,
     disableHealthcCheckCeleryContainer: true,
-    migrationImage: 'openzaak/open-zaak:1.23.0',
+    migrationImage: 'openzaak/open-zaak:1.30.0',
   },
   objectsService: {
     image: 'maykinmedia/open-object:4.1.0',
