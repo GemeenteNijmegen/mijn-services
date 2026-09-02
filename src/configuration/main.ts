@@ -50,7 +50,6 @@ export const main: Configuration = {
       desiredTaskCount: 1,
     },
     useNewDatabase: true,
-    disableHealthcCheckCeleryContainer: true,
     migrationImage: 'openzaak/open-zaak:1.30.0',
   },
   objectsService: {
