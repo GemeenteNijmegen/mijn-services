@@ -35,7 +35,7 @@ export const main: Configuration = {
     },
   },
   openZaak: {
-    image: 'openzaak/open-zaak:1.17.0',
+    image: 'openzaak/open-zaak:1.30.0',
     logLevel: 'INFO',
     debug: false,
     apiVersion: '1.3.1',
