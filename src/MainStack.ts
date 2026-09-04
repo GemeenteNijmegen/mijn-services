@@ -444,7 +444,7 @@ export class MainStack extends Stack {
       console.warn('No VTB configuration provided. Skipping creation of VTB services!');
       return;
     }
-    this.configuration.vtbServices.forEach((vtb, index) => {
+    this.configuration.vtbServices.forEach((vtb) => {
       new VtbService(this, vtb.cdkId, {
         hostedzone: this.hostedzone,
         key: this.key,
