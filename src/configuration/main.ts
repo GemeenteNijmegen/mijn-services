@@ -125,6 +125,6 @@ export const main: Configuration = {
       redisCacheDatabaseNumber: 18,
       redisCeleryDatabaseNumber: 19,
       loadbalancerPriority: 70,
-    }
-  ]
+    },
+  ],
 };
