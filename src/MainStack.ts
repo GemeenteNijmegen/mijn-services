@@ -449,8 +449,8 @@ export class MainStack extends Stack {
         hostedzone: this.hostedzone,
         key: this.key,
         cache: this.cache,
-        cacheDatabaseIndex: 14 + index * 2,
-        cacheDatabaseIndexCelery: 15 + index * 2,
+        cacheDatabaseIndex: 14,
+        cacheDatabaseIndexCelery: 15,
         alternativeDomainNames: this.configuration.alternativeDomainNames,
         dockerhubCredentials: this.dockerhubCredentials,
 
