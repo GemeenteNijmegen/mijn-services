@@ -444,13 +444,13 @@ export class MainStack extends Stack {
       console.warn('No VTB configuration provided. Skipping creation of VTB services!');
       return;
     }
-    this.configuration.vtbServices.forEach((vtb, index) => {
+    this.configuration.vtbServices.forEach((vtb) => {
       new VtbService(this, vtb.cdkId, {
         hostedzone: this.hostedzone,
         key: this.key,
         cache: this.cache,
-        cacheDatabaseIndex: 14 + index * 2,
-        cacheDatabaseIndexCelery: 15 + index * 2,
+        cacheDatabaseIndex: 14,
+        cacheDatabaseIndexCelery: 15,
         alternativeDomainNames: this.configuration.alternativeDomainNames,
         dockerhubCredentials: this.dockerhubCredentials,
 

@@ -54,6 +54,7 @@ const project = new GemeenteNijmegenCdkApp({
   },
   gitignore: [
     'typen-beheer',
+    'docs/agent-context',
   ],
 });
 

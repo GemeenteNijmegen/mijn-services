@@ -31,6 +31,7 @@ jspm_packages/
 .yarn-integrity
 .cache
 typen-beheer
+docs/agent-context
 test-reports/junit.xml
 test/__snapshots__/*
 .env
