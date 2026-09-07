@@ -89,4 +89,42 @@ export const main: Configuration = {
       loadbalancerPriority: 50,
     },
   ],
+  openZaakServices: [
+    {
+      id: 'woweb-open-zaak',
+      image: 'openzaak/open-zaak:1.29.0',
+      logLevel: 'DEBUG',
+      celeryTaskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
+      databaseName: 'woweb-open-zaak',
+      subdomain: 'woweb-open-zaak',
+      redisCacheDatabaseNumber: 16,
+      redisCeleryDatabaseNumber: 17,
+      loadbalancerPriority: 60,
+    },
+    {
+      id: 'sociaal-domein-open-zaak',
+      image: 'openzaak/open-zaak:1.28.1',
+      logLevel: 'DEBUG',
+      celeryTaskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
+      taskSize: {
+        cpu: '512',
+        memory: '1024',
+      },
+      databaseName: 'sociaal-domein-open-zaak',
+      subdomain: 'sociaal-domein-open-zaak',
+      redisCacheDatabaseNumber: 18,
+      redisCeleryDatabaseNumber: 19,
+      loadbalancerPriority: 70,
+    },
+  ],
 };

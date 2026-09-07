@@ -233,7 +233,7 @@ export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, Celery
   apiVersion: string;
 }
 
-export interface OpenZaakConfigurationV2 extends OpenZaakConfiguration {
+export interface OpenZaakConfigurationV2 extends Omit<OpenZaakConfiguration, 'apiVersion'> {
   /**
    * Name of the database to use
    */

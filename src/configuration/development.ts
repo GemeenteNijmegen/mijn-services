@@ -60,11 +60,10 @@ export const development: Configuration = {
     migrationImage: 'openzaak/open-zaak:1.30.0',
     disableHealthcCheckCeleryContainer: true,
   },
-  openZaakServices: [{ // TODO carefull we have a overlap in redis channels, we need to make this configurable here as well.
+  openZaakServices: [{
     image: 'openzaak/open-zaak:1.28.1',
     logLevel: 'DEBUG',
     debug: true,
-    apiVersion: '1.3.1',
     celeryTaskSize: {
       cpu: '512',
       memory: '1024',

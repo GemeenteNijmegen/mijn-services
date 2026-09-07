@@ -116,7 +116,6 @@ export const acceptance: Configuration = {
     image: 'openzaak/open-zaak:1.29.0',
     logLevel: 'DEBUG',
     debug: true,
-    apiVersion: '1.3.1',
     celeryTaskSize: {
       cpu: '512',
       memory: '1024',
