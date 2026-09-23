@@ -29,7 +29,7 @@ export const acceptance: Configuration = {
     },
   },
   openNotificaties: {
-    image: 'openzaak/open-notificaties:1.8.0',
+    image: 'openzaak/open-notificaties:1.16.2',
     rabbitMqImage: 'rabbitmq:4.0.5-alpine',
     logLevel: 'DEBUG',
     debug: true,

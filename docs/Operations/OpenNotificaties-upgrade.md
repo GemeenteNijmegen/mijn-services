@@ -79,14 +79,14 @@ psql -h $ENDPOINT -U mijn_services -d postgres
 
 ## Stap 2 - Migraties draaien
 - Draai de migratie van 1.12.0 `bash bin/django-migrate/run-objects-migrate.sh --prefix opennotificaties`
-- Migratie image upgraden naar 1.16.2 (via CDK) && Use redis flag op true setten
+- Nieuwe PR: 
+  - Migratie image upgraden naar 1.16.2
+  - Use redis flag op true setten
+  - Upgraden runtime image naar 1.16.2
 - Draai de migratie van 1.16.2 `bash bin/django-migrate/run-objects-migrate.sh --prefix opennotificaties`
 
 
 ## Stap 3 - Starten services
-
-- Upgraden runtime image naar 1.16.2
-NA UITROLLEN RUNTIME IMAGE:
 - desired task count op 1 om de boel weer aan te zetten
 
 ## Stap 4 - Aanzetten objects
