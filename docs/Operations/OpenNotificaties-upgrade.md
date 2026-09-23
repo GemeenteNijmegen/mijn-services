@@ -81,8 +81,9 @@ psql -h $ENDPOINT -U mijn_services -d postgres
 - Draai de migratie van 1.12.0 `bash bin/django-migrate/run-objects-migrate.sh --prefix opennotificaties`
 - Nieuwe PR: 
   - Migratie image upgraden naar 1.16.2
-  - Use redis flag op true setten
   - Upgraden runtime image naar 1.16.2
+  - Use redis flag op true zetten
+  - Nieuwe celery health check aanzetten
 - Draai de migratie van 1.16.2 `bash bin/django-migrate/run-objects-migrate.sh --prefix opennotificaties`
 
 

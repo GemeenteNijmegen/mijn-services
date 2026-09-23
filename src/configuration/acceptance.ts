@@ -40,13 +40,9 @@ export const acceptance: Configuration = {
     taskSize: {
       cpu: '512',
       memory: '1024',
-      desiredTaskCount: 0,
+      desiredTaskCount: 1,
     },
-    celeryTaskSize: {
-      cpu: '256',
-      memory: '512',
-      desiredTaskCount: 0,
-    }
+    disableHealthcCheckCeleryContainer: true,
   },
   openZaak: { // Only used for formulieren. See openZaakServices for how to deploy muliple open-zaak services.
     image: 'openzaak/open-zaak:1.30.0',
