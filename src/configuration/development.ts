@@ -38,6 +38,7 @@ export const development: Configuration = {
     debug: true,
     persitNotifications: true,
     useNewDatabase: true,
+    useRedis: true,
     taskSize: {
       cpu: '512',
       memory: '1024',

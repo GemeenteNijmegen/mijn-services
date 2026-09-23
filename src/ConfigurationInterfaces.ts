@@ -207,6 +207,11 @@ export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration
    * @default false
    */
   persitNotifications?: boolean;
+  /**
+   * Use redis
+   * @default false
+   */
+  useRedis?: boolean;
 }
 
 export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration,

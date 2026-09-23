@@ -35,10 +35,17 @@ export const acceptance: Configuration = {
     debug: true,
     persitNotifications: true,
     migrationImage: 'openzaak/open-notificaties:1.12.0', // 1.12.0 same as 1.23.0 in open zaak
+    useNewDatabase: true,
     taskSize: {
       cpu: '512',
       memory: '1024',
+      desiredTaskCount: 0,
     },
+    celeryTaskSize: {
+      cpu: '256',
+      memory: '512',
+      desiredTaskCount: 0,
+    }
   },
   openZaak: { // Only used for formulieren. See openZaakServices for how to deploy muliple open-zaak services.
     image: 'openzaak/open-zaak:1.30.0',

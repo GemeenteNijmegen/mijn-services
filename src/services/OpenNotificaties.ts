@@ -92,8 +92,7 @@ export class OpenNotificatiesService extends Construct {
     const redisBrokerUrl = 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery;
 
     // Very temporarely: remove after upgrading!
-    const isLatestVersion = this.props.openNotificationsConfiguration.image.endsWith('1.16.0');
-
+    const useRedis = this.props.openNotificationsConfiguration.useRedis ?? false;
 
     const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'nrc.conf.docker',
@@ -117,7 +116,7 @@ export class OpenNotificatiesService extends Construct {
       SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // Celery
-      CELERY_BROKER_URL: isLatestVersion ? redisBrokerUrl : rabbitMqBrokerUrl,
+      CELERY_BROKER_URL: useRedis ? redisBrokerUrl : rabbitMqBrokerUrl,
       CELERY_RESULT_BACKEND: redisBrokerUrl,
       CELERY_LOGLEVEL: this.props.openNotificationsConfiguration.logLevel,
       CELERY_WORKER_CONCURRENCY: '4',
