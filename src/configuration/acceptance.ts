@@ -34,8 +34,9 @@ export const acceptance: Configuration = {
     logLevel: 'DEBUG',
     debug: true,
     persitNotifications: true,
-    migrationImage: 'openzaak/open-notificaties:1.12.0', // 1.12.0 same as 1.23.0 in open zaak
+    migrationImage: 'openzaak/open-notificaties:1.16.2',
     useNewDatabase: true,
+    useRedis: true,
     taskSize: {
       cpu: '512',
       memory: '1024',

@@ -72,17 +72,19 @@ psql -h $ENDPOINT -U mijn_services -d postgres
 \l 
 \c open-notificaties-database
 \dt
+# SELECT * FROM "datamodel_notificatieresponse" LIMIT 10;
 ```
 
 
+
 ## Stap 2 - Migraties draaien
-- Draai de migratie van 1.12.0 `bash bin/django-migrate/run-objects-migrate.sh --prefix opennotificatie`
-- Migratie image upgraden naar 1.16.2 (via CDK)
-- Draai de migratie van 1.16.2 `bash bin/django-migrate/run-objects-migrate.sh --prefix opennotificatie`
+- Draai de migratie van 1.12.0 `bash bin/django-migrate/run-objects-migrate.sh --prefix opennotificaties`
+- Migratie image upgraden naar 1.16.2 (via CDK) && Use redis flag op true setten
+- Draai de migratie van 1.16.2 `bash bin/django-migrate/run-objects-migrate.sh --prefix opennotificaties`
 
 
 ## Stap 3 - Starten services
-- Use redis flag op true setten
+
 - Upgraden runtime image naar 1.16.2
 NA UITROLLEN RUNTIME IMAGE:
 - desired task count op 1 om de boel weer aan te zetten
