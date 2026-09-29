@@ -263,6 +263,11 @@ export interface OpenZaakConfigurationV2 extends Omit<OpenZaakConfiguration, 'ap
    * Loadblancer rule priority number (should be unique for all rules)
    */
   loadbalancerPriority: number;
+  /**
+   * Disable notifications (so no open-notificaties is required)
+   * @default true
+   */
+  disableNotifications?: boolean;
 }
 export interface ObjectsConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle, EnvironmentReference {
   /**

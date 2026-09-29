@@ -105,6 +105,7 @@ export class OpenZaakv2Service extends Construct {
       S3_STORAGE_BUCKET_NAME: this.filesBucket.bucketName,
       // S3_ACCESS_KEY_ID: '', // boto3 is used so credentials are pickedup by the SDK.
 
+      NOTIFICATIONS_DISABLED: this.props.openZaakConfiguration.disableNotifications === false ? 'false' : 'true', // Defaults to true
     };
 
 
