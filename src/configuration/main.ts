@@ -98,9 +98,9 @@ export const main: Configuration = {
         cpu: '512',
         memory: '1024',
       },
-      taskSize: {
-        cpu: '512',
-        memory: '1024',
+      taskSize: { // BIG to start with, half is probably fine
+        cpu: '2048',
+        memory: '4096'
       },
       databaseName: 'woweb-open-zaak',
       subdomain: 'woweb-open-zaak',
