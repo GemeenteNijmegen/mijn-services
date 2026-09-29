@@ -93,7 +93,7 @@ export const main: Configuration = {
     {
       id: 'woweb-open-zaak',
       image: 'openzaak/open-zaak:1.29.0',
-      logLevel: 'DEBUG',
+      logLevel: 'INFO',
       celeryTaskSize: {
         cpu: '512',
         memory: '1024',
@@ -111,7 +111,7 @@ export const main: Configuration = {
     {
       id: 'sociaal-domein-open-zaak',
       image: 'openzaak/open-zaak:1.28.1',
-      logLevel: 'DEBUG',
+      logLevel: 'INFO',
       celeryTaskSize: {
         cpu: '512',
         memory: '1024',

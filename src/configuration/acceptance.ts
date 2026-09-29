@@ -29,16 +29,20 @@ export const acceptance: Configuration = {
     },
   },
   openNotificaties: {
-    image: 'openzaak/open-notificaties:1.8.0',
+    image: 'openzaak/open-notificaties:1.16.2',
     rabbitMqImage: 'rabbitmq:4.0.5-alpine',
     logLevel: 'DEBUG',
     debug: true,
     persitNotifications: true,
-    migrationImage: 'openzaak/open-notificaties:1.12.0', // 1.12.0 same as 1.23.0 in open zaak
+    migrationImage: 'openzaak/open-notificaties:1.16.2',
+    useNewDatabase: true,
+    useRedis: true,
     taskSize: {
       cpu: '512',
       memory: '1024',
+      desiredTaskCount: 1,
     },
+    disableHealthcCheckCeleryContainer: true,
   },
   openZaak: { // Only used for formulieren. See openZaakServices for how to deploy muliple open-zaak services.
     image: 'openzaak/open-zaak:1.30.0',
