@@ -32,12 +32,12 @@ export const main: Configuration = {
     taskSize: {
       cpu: '512',
       memory: '1024',
-      desiredTaskCount: 0,
+      desiredTaskCount: 1,
     },
     celeryTaskSize: {
       cpu: '512',
       memory: '1024',
-      desiredTaskCount: 0,
+      desiredTaskCount: 1,
     },
     disableHealthcCheckCeleryContainer: true,
     useRedis: true,
