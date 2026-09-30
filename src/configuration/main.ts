@@ -40,7 +40,7 @@ export const main: Configuration = {
       desiredTaskCount: 0,
     },
     disableHealthcCheckCeleryContainer: true,
-    useRedis: false,
+    useRedis: true,
     useNewDatabase: true,
   },
   openZaak: {
