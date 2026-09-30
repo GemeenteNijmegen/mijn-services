@@ -101,7 +101,7 @@ export const main: Configuration = {
       taskSize: { // BIG to start with, half is probably fine
         cpu: '2048',
         memory: '4096',
-        desiredTaskCount: 0,
+        desiredTaskCount: 1,
       },
       databaseName: 'woweb-open-zaak',
       subdomain: 'woweb-open-zaak',
