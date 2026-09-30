@@ -23,12 +23,12 @@ export const main: Configuration = {
     logLevel: 'INFO',
   },
   openNotificaties: {
-    image: 'openzaak/open-notificaties:1.8.0',
+    image: 'openzaak/open-notificaties:1.16.2',
     rabbitMqImage: 'rabbitmq:4.0.5-alpine',
     logLevel: 'INFO',
     debug: false,
     persitNotifications: true,
-    migrationImage: 'openzaak/open-notificaties:1.12.0', // 1.12.0 same as 1.23.0 in open zaak
+    migrationImage: 'openzaak/open-notificaties:1.16.2',
     taskSize: {
       cpu: '512',
       memory: '1024',
