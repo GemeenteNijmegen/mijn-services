@@ -32,7 +32,16 @@ export const main: Configuration = {
     taskSize: {
       cpu: '512',
       memory: '1024',
+      desiredTaskCount: 0,
     },
+    celeryTaskSize: {
+      cpu: '512',
+      memory: '1024',
+      desiredTaskCount: 0,
+    },
+    disableHealthcCheckCeleryContainer: true,
+    useRedis: false,
+    useNewDatabase: true,
   },
   openZaak: {
     image: 'openzaak/open-zaak:1.30.0',
