@@ -106,7 +106,7 @@ export const development: Configuration = {
   corsaZgwService: {
     logLevel: 'DEBUG',
     debug: true,
-    image: 'ghcr.io/gemeentenijmegen/corsa-zgw:2ced3ffa0a637342b832e105ff64cf71ec20d98f',
+    image: 'ghcr.io/gemeentenijmegen/corsa-zgw:0662b3deef34fdd80a54419edd09d1a1c9055618',
   },
   vtbServices: [
     {
