@@ -639,7 +639,7 @@ export interface CorsaZgwServiceConfiguration extends MainTaskSizeConfiguration 
   /**
    * @default latest
    */
-  imageTag?: string;
+  image: string;
 }
 
 export interface VtbConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {

@@ -246,7 +246,7 @@ export class CorsaZgwService extends Construct {
 
     // Configuration container
     const initContainer = task.addContainer('setup', {
-      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       command: ['/init.sh'],
       essential: false,
       readonlyRootFilesystem: false,
@@ -260,7 +260,7 @@ export class CorsaZgwService extends Construct {
 
     // Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'], // TODO implement normal heathcheck
         interval: Duration.seconds(10),
@@ -320,7 +320,7 @@ export class CorsaZgwService extends Construct {
 
     // Configuration container
     const initContainer = task.addContainer('setup', {
-      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       command: ['/init.sh'],
       essential: false,
       readonlyRootFilesystem: false,
@@ -334,7 +334,7 @@ export class CorsaZgwService extends Construct {
 
     // Main service container
     const container = task.addContainer('worker', {
-      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       command: ['php', 'artisan', 'horizon'],
       healthCheck: {
         command: ['CMD-SHELL', 'php artisan horizon:status'],
