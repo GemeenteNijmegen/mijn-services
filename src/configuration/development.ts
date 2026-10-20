@@ -107,6 +107,9 @@ export const development: Configuration = {
     logLevel: 'DEBUG',
     debug: true,
     image: 'ghcr.io/gemeentenijmegen/corsa-zgw:0662b3deef34fdd80a54419edd09d1a1c9055618',
+    id: 'corsa-zgw',
+    loadbalancerPriority: 90,
+    subdomain: 'corsa-zgw',
   },
   vtbServices: [
     {

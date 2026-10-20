@@ -640,6 +640,9 @@ export interface CorsaZgwServiceConfiguration extends MainTaskSizeConfiguration 
    * @default latest
    */
   image: string;
+  loadbalancerPriority: number;
+  id: string;
+  subdomain: string;
 }
 
 export interface VtbConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {

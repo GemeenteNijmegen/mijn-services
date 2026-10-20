@@ -3,12 +3,14 @@ import { Duration, Token } from 'aws-cdk-lib';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
-import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
+import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { CorsaZgwServiceConfiguration } from '../ConfigurationInterfaces';
@@ -230,16 +232,10 @@ export class CorsaZgwService extends Construct {
 
   private setupService() {
 
-    const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
-      volumes: [{ name: VOLUME_NAME }],
       cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
-
-    // Allow queue access
-    // this.queue.queue.grantSendMessages(task.taskRole);
-    // this.queue.queue.grantConsumeMessages(task.taskRole);
 
     // Allow execute commands using ECS console
     ECSServiceUtils.allowExecutingCommands(task);
@@ -290,16 +286,42 @@ export class CorsaZgwService extends Construct {
       condition: ContainerDependencyCondition.COMPLETE,
     });
 
-    const service = this.serviceFactory.createService({
-      id: 'corsa-zgw',
-      task: task,
-      domain: `${CorsaZgwService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`,
-      options: {
-        desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
-        enableExecuteCommand: true, // Used to gain access to the Laravel CLI in the container for management of DB etc.
+    // Setup the service
+    const service = new FargateService(this, `${this.props.serviceConfiguration.id}-service`, {
+      cluster: this.props.service.cluster,
+      taskDefinition: task,
+      cloudMapOptions: { // Expose for intercontainer communication
+        cloudMapNamespace: this.props.service.namespace,
+        containerPort: 8080,
+        dnsRecordType: DnsRecordType.SRV,
+        dnsTtl: Duration.seconds(60),
       },
-      // healthCheckPath: '/health', // TODO Not configurabel yet while using subdomain (this is the correct path though)
+      desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
+      enableExecuteCommand: true,
+      healthCheckGracePeriod: Duration.seconds(120), // Give time to start
     });
+
+    // Attach to loadbalancer
+    let domain = `${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`;
+    this.props.service.loadbalancer.listener.addTargets(this.props.serviceConfiguration.id, {
+      conditions: [ListenerCondition.hostHeaders([domain])],
+      healthCheck: {
+        enabled: true,
+        path: '/health',
+        healthyHttpCodes: '200',
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 6,
+        timeout: Duration.seconds(10),
+        interval: Duration.seconds(15),
+        protocol: AlbProtocol.HTTP,
+      },
+      port: 80,
+      targets: [service],
+      priority: this.props.serviceConfiguration.loadbalancerPriority,
+      deregistrationDelay: Duration.minutes(1),
+    });
+    ECSServiceUtils.allowExecutingCommands(task);
+
     this.setupConnectivity('corsa-zgw', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
