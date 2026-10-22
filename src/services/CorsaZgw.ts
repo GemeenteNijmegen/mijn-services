@@ -151,6 +151,13 @@ export class CorsaZgwService extends Construct {
       OPENZAAK_URL: Secret.fromSsmParameter(this.openZaakUrl),
       OPENZAAK_CATALOGI_URL: Secret.fromSsmParameter(this.openZaakCatalogusUrl),
 
+      // New style replaces  OPENZAAK_CLIENT_ID and OPENZAAK_CLIENT_SECRET
+      ZGW_CLIENT_ID: Secret.fromSecretsManager(this.credentialsForConnectingToOpenZaak, 'clientId'),
+      ZGW_CLIENT_SECRET: Secret.fromSecretsManager(this.credentialsForConnectingToOpenZaak, 'clientSecret'),
+      // ZGW_ZAKEN_BASE_URL: `{OPENZAAK_URL}zaken/api/v1/` // Rely on OPENZAAK_URL for now.
+      // ZGW_CATALOGI_BASE_URL: `{OPENZAAK_URL}catalogi/api/v1/`
+      // ZGW_DOCUMENTEN_BASE_URL: `{OPENZAAK_URL}documenten/api/v1/`
+
       // Corsa credentials
       CORSA_MTLS_PRIVATE_KEY: Secret.fromSecretsManager(this.corsaMtlsPrivateKey),
       CORSA_MTLS_CERTIFICATE: Secret.fromSsmParameter(this.corsaMtlsCertificat),
