@@ -9,7 +9,7 @@ const project = new GemeenteNijmegenCdkApp({
       branches: ['development'],
       labels: ['auto-merge'],
     },
-    cooldown: 7
+    cooldown: 7,
   },
   devDeps: [
     '@types/pg',
