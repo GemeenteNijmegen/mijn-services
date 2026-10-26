@@ -9,6 +9,7 @@ const project = new GemeenteNijmegenCdkApp({
       branches: ['development'],
       labels: ['auto-merge'],
     },
+    cooldown: 7
   },
   devDeps: [
     '@types/pg',
@@ -41,6 +42,7 @@ const project = new GemeenteNijmegenCdkApp({
     '@aws-lambda-powertools/metrics',
     '@middy/core',
     '@aws-lambda-powertools/batch',
+    "npm-cooldown",
   ],
   jestOptions: {
     jestConfig: {

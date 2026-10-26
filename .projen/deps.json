@@ -186,6 +186,10 @@
       "type": "runtime"
     },
     {
+      "name": "npm-cooldown",
+      "type": "runtime"
+    },
+    {
       "name": "pg",
       "type": "runtime"
     },
