@@ -507,7 +507,7 @@
             "--peer",
             "--no-deprecated",
             "--dep=dev,prod,peer,optional",
-            "--filter=@types/aws-lambda,@types/jest,@types/jsonwebtoken,@types/node,@types/pg,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript,@aws-lambda-powertools/batch,@aws-lambda-powertools/idempotency,@aws-lambda-powertools/logger,@aws-lambda-powertools/metrics,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-ec2,@aws-sdk/client-ecs,@aws-sdk/client-sqs,@gemeentenijmegen/apigateway-http,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/config,@gemeentenijmegen/cross-region-parameters,@gemeentenijmegen/object-notifier,@gemeentenijmegen/projen-project-type,@gemeentenijmegen/utils,@middy/core,cdk-remote-stack,dotenv,jsonwebtoken,npm-cooldown,pg,zod"
+            "--filter=@types/aws-lambda,@types/jest,@types/jsonwebtoken,@types/node,@types/pg,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript,@aws-lambda-powertools/batch,@aws-lambda-powertools/idempotency,@aws-lambda-powertools/logger,@aws-lambda-powertools/metrics,@aws-lambda-powertools/tracer,@aws-sdk/client-dynamodb,@aws-sdk/client-ec2,@aws-sdk/client-ecs,@aws-sdk/client-sqs,@gemeentenijmegen/apigateway-http,@gemeentenijmegen/aws-constructs,@gemeentenijmegen/config,@gemeentenijmegen/cross-region-parameters,@gemeentenijmegen/object-notifier,@gemeentenijmegen/projen-project-type,@gemeentenijmegen/utils,@middy/core,cdk-remote-stack,dotenv,jsonwebtoken,pg,zod"
           ]
         },
         {
@@ -560,7 +560,6 @@
             "constructs",
             "dotenv",
             "jsonwebtoken",
-            "npm-cooldown",
             "pg",
             "zod"
           ]

@@ -42,7 +42,6 @@ const project = new GemeenteNijmegenCdkApp({
     '@aws-lambda-powertools/metrics',
     '@middy/core',
     '@aws-lambda-powertools/batch',
-    "npm-cooldown",
   ],
   jestOptions: {
     jestConfig: {
