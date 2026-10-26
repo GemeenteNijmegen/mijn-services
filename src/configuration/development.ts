@@ -110,6 +110,7 @@ export const development: Configuration = {
     id: 'corsa-zgw',
     loadbalancerPriority: 90,
     subdomain: 'corsa-zgw',
+    disableMtlsForCorsaClient: true, // Connects to corsa mock without mtls
   },
   vtbServices: [
     {

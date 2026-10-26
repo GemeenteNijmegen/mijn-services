@@ -643,6 +643,12 @@ export interface CorsaZgwServiceConfiguration extends MainTaskSizeConfiguration 
   loadbalancerPriority: number;
   id: string;
   subdomain: string;
+  /**
+   * When true disables the loading of the mtls cert
+   * and private key for corsa-zaakdms client.
+   * @default false
+   */
+  disableMtlsForCorsaClient?: boolean;
 }
 
 export interface VtbConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {
