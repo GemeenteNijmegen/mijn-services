@@ -23,16 +23,25 @@ export const main: Configuration = {
     logLevel: 'INFO',
   },
   openNotificaties: {
-    image: 'openzaak/open-notificaties:1.8.0',
+    image: 'openzaak/open-notificaties:1.16.2',
     rabbitMqImage: 'rabbitmq:4.0.5-alpine',
     logLevel: 'INFO',
     debug: false,
     persitNotifications: true,
-    migrationImage: 'openzaak/open-notificaties:1.12.0', // 1.12.0 same as 1.23.0 in open zaak
+    migrationImage: 'openzaak/open-notificaties:1.16.2',
     taskSize: {
       cpu: '512',
       memory: '1024',
+      desiredTaskCount: 1,
     },
+    celeryTaskSize: {
+      cpu: '512',
+      memory: '1024',
+      desiredTaskCount: 1,
+    },
+    disableHealthcCheckCeleryContainer: true,
+    useRedis: true,
+    useNewDatabase: true,
   },
   openZaak: {
     image: 'openzaak/open-zaak:1.30.0',
@@ -99,8 +108,9 @@ export const main: Configuration = {
         memory: '1024',
       },
       taskSize: { // BIG to start with, half is probably fine
-        cpu: '2048',
-        memory: '4096',
+        cpu: '1024',
+        memory: '2048',
+        desiredTaskCount: 1,
       },
       databaseName: 'woweb-open-zaak',
       subdomain: 'woweb-open-zaak',
