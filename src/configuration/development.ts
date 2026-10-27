@@ -106,7 +106,11 @@ export const development: Configuration = {
   corsaZgwService: {
     logLevel: 'DEBUG',
     debug: true,
-    imageTag: 'af7cb9eda590f975323ef6b7479d08758ca46cf1',
+    image: 'ghcr.io/gemeentenijmegen/corsa-zgw:e93bc0ad96d7503ae3dddba60b574fb343e93c0a',
+    id: 'corsa-zgw',
+    loadbalancerPriority: 90,
+    subdomain: 'corsa-zgw',
+    disableMtlsForCorsaClient: true, // Connects to corsa mock without mtls
   },
   vtbServices: [
     {

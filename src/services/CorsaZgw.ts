@@ -3,12 +3,14 @@ import { Duration, Token } from 'aws-cdk-lib';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
-import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
+import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
+import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { CorsaZgwServiceConfiguration } from '../ConfigurationInterfaces';
@@ -149,6 +151,13 @@ export class CorsaZgwService extends Construct {
       OPENZAAK_URL: Secret.fromSsmParameter(this.openZaakUrl),
       OPENZAAK_CATALOGI_URL: Secret.fromSsmParameter(this.openZaakCatalogusUrl),
 
+      // New style replaces  OPENZAAK_CLIENT_ID and OPENZAAK_CLIENT_SECRET
+      ZGW_CLIENT_ID: Secret.fromSecretsManager(this.credentialsForConnectingToOpenZaak, 'clientId'),
+      ZGW_CLIENT_SECRET: Secret.fromSecretsManager(this.credentialsForConnectingToOpenZaak, 'clientSecret'),
+      // ZGW_ZAKEN_BASE_URL: `{OPENZAAK_URL}zaken/api/v1/` // Rely on OPENZAAK_URL for now.
+      // ZGW_CATALOGI_BASE_URL: `{OPENZAAK_URL}catalogi/api/v1/`
+      // ZGW_DOCUMENTEN_BASE_URL: `{OPENZAAK_URL}documenten/api/v1/`
+
       // Corsa credentials
       CORSA_MTLS_PRIVATE_KEY: Secret.fromSecretsManager(this.corsaMtlsPrivateKey),
       CORSA_MTLS_CERTIFICATE: Secret.fromSsmParameter(this.corsaMtlsCertificat),
@@ -217,10 +226,10 @@ export class CorsaZgwService extends Construct {
 
 
       // Static corsa connection config
-      ESB__SEND_CERT: '/cert/corsa-mtls.pem', // __ is not a typo
-      ESB_SEND_PK: '/cert/corsa-mtls.key',
-      ESB_VERIFY: '/cert/esb-mtls.pem',
-      ZAAKDMS_SENDER_APPLICATION: 'VIP', // We are using the VIP cert and key data is as if it were from VIP.
+      ESB__SEND_CERT: this.props.serviceConfiguration.disableMtlsForCorsaClient ? 'null' : '/cert/corsa-mtls.pem', // __ is not a typo
+      ESB_SEND_PK: this.props.serviceConfiguration.disableMtlsForCorsaClient ? 'null' : '/cert/corsa-mtls.key',
+      ESB_VERIFY: this.props.serviceConfiguration.disableMtlsForCorsaClient ? 'true' : '/cert/esb-mtls.pem',
+      ZAAKDMS_SENDER_APPLICATION: 'VIP', // We are using the a own cert and key but on the VIP/JZ4ALL endpoint.
       ZAAKDMS_SENDER_ADMINISTRATIVE: 'APV',
       ZAAKDMS_SENDER_ORGANISATION: 'Woweb B.V.',
 
@@ -230,23 +239,17 @@ export class CorsaZgwService extends Construct {
 
   private setupService() {
 
-    const VOLUME_NAME = 'tmp';
     const task = this.serviceFactory.createTaskDefinition('main', {
-      volumes: [{ name: VOLUME_NAME }],
       cpu: this.props.serviceConfiguration.taskSize?.cpu ?? '256',
       memoryMiB: this.props.serviceConfiguration.taskSize?.memory ?? '512',
     });
-
-    // Allow queue access
-    // this.queue.queue.grantSendMessages(task.taskRole);
-    // this.queue.queue.grantConsumeMessages(task.taskRole);
 
     // Allow execute commands using ECS console
     ECSServiceUtils.allowExecutingCommands(task);
 
     // Configuration container
     const initContainer = task.addContainer('setup', {
-      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       command: ['/init.sh'],
       essential: false,
       readonlyRootFilesystem: false,
@@ -260,7 +263,7 @@ export class CorsaZgwService extends Construct {
 
     // Main service container
     const container = task.addContainer('main', {
-      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       healthCheck: {
         command: ['CMD-SHELL', 'exit 0'], // TODO implement normal heathcheck
         interval: Duration.seconds(10),
@@ -290,16 +293,42 @@ export class CorsaZgwService extends Construct {
       condition: ContainerDependencyCondition.COMPLETE,
     });
 
-    const service = this.serviceFactory.createService({
-      id: 'corsa-zgw',
-      task: task,
-      domain: `${CorsaZgwService.SUBDOMAIN}.${this.props.hostedzone.zoneName}`,
-      options: {
-        desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
-        enableExecuteCommand: true, // Used to gain access to the Laravel CLI in the container for management of DB etc.
+    // Setup the service
+    const service = new FargateService(this, `${this.props.serviceConfiguration.id}-service`, {
+      cluster: this.props.service.cluster,
+      taskDefinition: task,
+      cloudMapOptions: { // Expose for intercontainer communication
+        cloudMapNamespace: this.props.service.namespace,
+        containerPort: 8080,
+        dnsRecordType: DnsRecordType.SRV,
+        dnsTtl: Duration.seconds(60),
       },
-      // healthCheckPath: '/health', // TODO Not configurabel yet while using subdomain (this is the correct path though)
+      desiredCount: this.props.serviceConfiguration.taskSize?.desiredTaskCount ?? 1,
+      enableExecuteCommand: true,
+      healthCheckGracePeriod: Duration.seconds(120), // Give time to start
     });
+
+    // Attach to loadbalancer
+    let domain = `${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`;
+    this.props.service.loadbalancer.listener.addTargets(this.props.serviceConfiguration.id, {
+      conditions: [ListenerCondition.hostHeaders([domain])],
+      healthCheck: {
+        enabled: true,
+        path: '/health',
+        healthyHttpCodes: '200',
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 6,
+        timeout: Duration.seconds(10),
+        interval: Duration.seconds(15),
+        protocol: AlbProtocol.HTTP,
+      },
+      port: 80,
+      targets: [service],
+      priority: this.props.serviceConfiguration.loadbalancerPriority,
+      deregistrationDelay: Duration.minutes(1),
+    });
+    ECSServiceUtils.allowExecutingCommands(task);
+
     this.setupConnectivity('corsa-zgw', service.connections.securityGroups);
     this.allowAccessToSecrets(service.taskDefinition.executionRole!);
     return service;
@@ -320,7 +349,7 @@ export class CorsaZgwService extends Construct {
 
     // Configuration container
     const initContainer = task.addContainer('setup', {
-      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       command: ['/init.sh'],
       essential: false,
       readonlyRootFilesystem: false,
@@ -334,7 +363,7 @@ export class CorsaZgwService extends Construct {
 
     // Main service container
     const container = task.addContainer('worker', {
-      image: ContainerImage.fromEcrRepository(this.props.repository, this.props.serviceConfiguration.imageTag),
+      image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       command: ['php', 'artisan', 'horizon'],
       healthCheck: {
         command: ['CMD-SHELL', 'php artisan horizon:status'],
