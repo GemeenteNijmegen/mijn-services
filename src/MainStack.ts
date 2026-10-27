@@ -11,7 +11,6 @@ import { Construct } from 'constructs';
 import { Configurable, Configuration } from './ConfigurationInterfaces';
 import { ContainerPlatform } from './constructs/ContainerPlatform';
 import { DnsRecords } from './constructs/DnsRecords';
-import { EcrRepository } from './constructs/EcrRepository';
 import { OperatingHourEnforcer } from './constructs/operating-hours/OperatingHourEnforcer';
 import { CacheDatabase } from './constructs/Redis';
 import { CorsaZgwService } from './services/CorsaZgw';
@@ -371,15 +370,12 @@ export class MainStack extends Stack {
       return;
     }
 
-    const repo = new EcrRepository(this, 'corsa-zgw-ecr', 'CorsaZgwService');
-
     const corsaZgwServiceConfig = this.configuration.corsaZgwService;
 
     new CorsaZgwService(this, 'corsa-zgw-service', {
       redis: this.cache,
       cacheChannel: 13,
       key: this.key,
-      repository: repo.repository,
       service: {
         cluster: platform.cluster,
         link: platform.vpcLink,
