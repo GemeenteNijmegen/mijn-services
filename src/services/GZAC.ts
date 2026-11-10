@@ -46,6 +46,37 @@ interface GZACServiceProps {
 export class GZACService extends Construct {
 
   private static readonly RABBIT_MQ_PORT = 5672;
+  private static readonly RABBIT_MQ_IMAGE = 'rabbitmq:4.0.5-alpine';
+
+  /**
+   * RabbitMQ definitions (user, queues, exchange) loaded at broker startup.
+   * The guest password hash corresponds to password 'guest'.
+   */
+  private static rabbitMqDefinitions() {
+    const vhost = '/';
+    return {
+      users: [{
+        name: 'guest',
+        password_hash: 'nH4Lo1k4PNJTWJIUD658CaIXnAEPuFIvh2feuVYlltBmYh+B',
+        hashing_algorithm: 'rabbit_password_hashing_sha256',
+        tags: ['administrator'],
+        limits: {},
+      }],
+      vhosts: [{ name: vhost }],
+      permissions: [{ user: 'guest', vhost, configure: '.*', write: '.*', read: '.*' }],
+      queues: [
+        { name: 'valtimo-inbox', vhost, durable: true, auto_delete: false, arguments: { 'x-queue-type': 'stream' } },
+        { name: 'valtimo-audit', vhost, durable: true, auto_delete: false, arguments: { 'x-queue-type': 'quorum' } },
+      ],
+      exchanges: [
+        { name: 'valtimo-events', vhost, type: 'fanout', durable: true, auto_delete: false, internal: false, arguments: {} },
+      ],
+      bindings: [
+        { source: 'valtimo-events', vhost, destination: 'valtimo-audit', destination_type: 'queue', routing_key: '', arguments: {} },
+        { source: 'valtimo-events', vhost, destination: 'valtimo-inbox', destination_type: 'queue', routing_key: '', arguments: {} },
+      ],
+    };
+  }
 
   private readonly logs: LogGroup;
   private readonly props: GZACServiceProps;
@@ -231,14 +262,23 @@ export class GZACService extends Construct {
       compatibility: Compatibility.FARGATE,
     });
 
-    // Add the container
+    // Add the container (public image, config is written at startup so no custom image build is needed)
     task.addContainer('gzac-rabbit-mq', {
-      image: ContainerImage.fromAsset('./src/containers/gzac-rabbitmq'),
+      image: ContainerImage.fromRegistry(GZACService.RABBIT_MQ_IMAGE),
+      entryPoint: ['/bin/sh', '-c'],
+      command: [
+        'printf "%s" "$RABBITMQ_DEFINITIONS" > /etc/rabbitmq/definitions.json && '
+        + 'printf "loopback_users.guest = false\\nload_definitions = /etc/rabbitmq/definitions.json\\n" > /etc/rabbitmq/conf.d/20-gzac.conf && '
+        + 'exec docker-entrypoint.sh rabbitmq-server',
+      ],
+      environment: {
+        RABBITMQ_DEFINITIONS: JSON.stringify(GZACService.rabbitMqDefinitions()),
+      },
       logging: new AwsLogDriver({
         streamPrefix: 'gzac-rabbit-mq',
         logGroup: this.logs,
       }),
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false, // RabbitMQ writes its config and data to the root filesystem
       portMappings: [
         {
           containerPort: GZACService.RABBIT_MQ_PORT,
