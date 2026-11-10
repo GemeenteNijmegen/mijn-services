@@ -65,7 +65,7 @@ export class GZACFrontendService extends Construct {
         KEYCLOAK_LOGOUT_REDIRECT_URI: Secret.fromSsmParameter(params.keycloakLogoutRedirectUrl),
       },
       envionment: {
-        API_URI: `https://${this.props.serviceConfiguration.subdomain}.${this.props.hostedzone.zoneName}`,
+        API_URI: `${domainName}/api/`, // Valtimo backend endpoints live under /api (e.g. /api/v1/case-definition)
         NGINX_BACKEND_URL: `https://alb.${this.props.hostedzone.zoneName}`,
         NGINX_BACKEND_HOST: `gzac-api.${this.props.hostedzone.zoneName}`,
         WHITELISTED_DOMAIN: domainName,
@@ -89,11 +89,10 @@ export class GZACFrontendService extends Construct {
       image: ContainerImage.fromRegistry(this.props.serviceConfiguration.image),
       command: [
         '/bin/sh', '-c',
-        // Replace hardcoded gzac-backend upstream with internal ALB, set correct Host header, extend proxy paths
+        // Replace hardcoded gzac-backend upstream with internal ALB, set correct Host header
         'sed -i "s|http://gzac-backend:8080|${NGINX_BACKEND_URL}|g" /etc/nginx/conf.d/default.conf && '
         + 'sed -i "s|proxy_set_header Host \\$host|proxy_set_header Host ${NGINX_BACKEND_HOST};\\n        proxy_set_header Authorization \\$http_authorization|g" /etc/nginx/conf.d/default.conf && '
         + 'sed -i "/proxy_pass/a \\        proxy_ssl_verify off;" /etc/nginx/conf.d/default.conf && '
-        + 'sed -i "s|/(api\\|management\\|v3\\|mock-api)|/(api\\|management\\|v1\\|v3\\|mock-api)|g" /etc/nginx/conf.d/default.conf && '
         + 'envsubst < /usr/share/nginx/html/assets/config.template.js > /usr/share/nginx/html/assets/config.js && '
         + 'exec nginx -g "daemon off;"',
       ],
