@@ -148,6 +148,7 @@ export class GZACService extends Construct {
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS: '*',
       VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDHEADERS: '*',
       VALTIMO_WEB_CORS_PATHS: '/**',
+      VALTIMO_DRAFT_ENABLED: this.props.serviceConfiguration.enableDrafts ? 'true' : 'false',
     };
   }
 

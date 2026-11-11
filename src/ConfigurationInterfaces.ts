@@ -531,6 +531,13 @@ export interface GZACConfiguration extends MainTaskSizeConfiguration {
    */
   debug?: boolean;
   /**
+   * Enable Valtimo draft mode, allowing admins to create and edit
+   * case definitions and global configuration (plugins etc.) in the UI.
+   * Should not be enabled in production.
+   * @default false
+   */
+  enableDrafts?: boolean;
+  /**
    * Loadbalancer rule prio.
    */
   loadbalancerPriority: number;

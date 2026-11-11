@@ -193,6 +193,7 @@ export const development: Configuration = {
     debug: true,
     loadbalancerPriority: 80,
     databaseName: 'gzac',
+    enableDrafts: true,
     taskSize: {
       cpu: '1024',
       memory: '2048',
