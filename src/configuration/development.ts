@@ -175,7 +175,7 @@ export const development: Configuration = {
   gzacFrontendServices: [{
     id: 'gzac-frontend-1',
     subdomain: 'gzac',
-    image: 'ritense/gzac-frontend:13.41.0',
+    image: 'ghcr.io/gemeentenijmegen/gzac-frontend:latest',
     logLevel: 'DEBUG',
     debug: true,
     loadbalancerPriority: 70,
