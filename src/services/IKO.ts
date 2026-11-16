@@ -1,4 +1,4 @@
-import { Duration, Token } from 'aws-cdk-lib';
+import { Duration, SecretValue, Token } from 'aws-cdk-lib';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import {
@@ -81,6 +81,7 @@ export class IKOService extends Construct {
 
   private getEnvironmentConfiguration() {
     const realm = this.props.serviceConfiguration.keycloakRealm ?? 'iko';
+    const clientId = this.props.serviceConfiguration.keycloakClientId ?? 'iko';
     const keycloakIssuerUri = `https://keycloak.${this.props.hostedzone.zoneName}/realms/${realm}`;
     const cache = this.props.cache.db;
 
@@ -103,10 +104,10 @@ export class IKOService extends Construct {
 
       // OAuth2 (admin login and API tokens)
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUERURI: keycloakIssuerUri,
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTID: this.props.serviceConfiguration.keycloakClientId ?? 'iko',
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTID: clientId,
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: keycloakIssuerUri,
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUTHORITIESCLAIMNAME: "['resource_access']['iko']['roles']",
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES: 'iko',
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUTHORITIESCLAIMNAME: `['resource_access']['${clientId}']['roles']`,
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES: clientId,
       IKO_SECURITY_ADMIN_ROLESCLAIM: 'roles',
       IKO_SECURITY_ADMIN_AUTHORITIES: 'ROLE_ADMIN',
       IKO_SECURITY_ADMIN_SESSION_TIMEOUT: '30m',
@@ -277,16 +278,16 @@ export class IKOService extends Construct {
 
   /**
    * AES key used by IKO to encrypt connector configuration in its database.
-   * IKO expects a base64 encoded 256 bit key, the generated value is a placeholder:
-   * replace it with the output of `openssl rand -base64 32` before first use.
+   * IKO expects a base64 encoded 256 bit key. The initial value is not valid base64,
+   * so IKO refuses to start until it is replaced with the output of `openssl rand -base64 32`.
+   * A generated value would decode to a valid (but wrong) key, and connector configuration
+   * stored with it could not be decrypted after replacing it.
    */
   private setupCryptoKey() {
     return new SecretParameter(this, 'crypto-key', {
       description: `AES-256 key (base64) for encrypting IKO connector configuration (${this.props.serviceConfiguration.id})`,
-      generateSecretString: {
-        excludePunctuation: true,
-        secretStringTemplate: JSON.stringify({}),
-        generateStringKey: 'key',
+      secretObjectValue: {
+        key: SecretValue.unsafePlainText('REPLACE_ME_WITH_OPENSSL_RAND_BASE64_32'),
       },
     });
   }

@@ -573,7 +573,8 @@ export interface IKOConfiguration extends MainTaskSizeConfiguration {
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
   /**
    * Enable debug mode and logging
-   * Also shows raw header values in the ADP debug trace viewer.
+   * Also shows raw request headers (including tokens) in IKO's debug trace viewer,
+   * do not enable in production.
    */
   debug?: boolean;
   /**
@@ -591,7 +592,8 @@ export interface IKOConfiguration extends MainTaskSizeConfiguration {
    */
   keycloakRealm?: string;
   /**
-   * Keycloak client ID used for admin login
+   * Keycloak client ID used for admin login. Also the expected audience
+   * and the client whose roles are used for API access.
    * @default iko
    */
   keycloakClientId?: string;

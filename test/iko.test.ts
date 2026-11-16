@@ -1,4 +1,4 @@
-import { App, Stack } from 'aws-cdk-lib';
+import { App, NestedStack, Stack } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
@@ -12,11 +12,19 @@ import { ServiceLoadBalancer } from '../src/constructs/LoadBalancer';
 import { CacheDatabase } from '../src/constructs/Redis';
 import { IKOService } from '../src/services/IKO';
 
+interface SynthResult {
+  /** Template of the stack containing the platform (loadbalancer, cache) */
+  parent: Template;
+  /** Template of the stack containing the IKO service */
+  iko: Template;
+}
+
 /**
  * Stand up an IKOService with a minimal platform (just the pieces the
- * service consumes) and return the synthesized template.
+ * service consumes). Optionally places the service in a nested stack,
+ * the way the main stack does.
  */
-function synthIko(serviceConfiguration: IKOConfiguration): Template {
+function synth(serviceConfiguration: IKOConfiguration, nested = false): SynthResult {
   const app = new App();
   const stack = new Stack(app, 'test-stack', {
     env: { account: '123456789012', region: 'eu-central-1' },
@@ -38,7 +46,8 @@ function synthIko(serviceConfiguration: IKOConfiguration): Template {
   const loadbalancer = new ServiceLoadBalancer(stack, 'lb', { vpc, hostedzone });
   const cache = new CacheDatabase(stack, 'cache', { vpc });
 
-  new IKOService(stack, 'iko', {
+  const scope = nested ? new NestedStack(stack, 'iko-stack') : stack;
+  new IKOService(scope, 'iko', {
     cache,
     hostedzone,
     key: new Key(stack, 'key'),
@@ -54,7 +63,14 @@ function synthIko(serviceConfiguration: IKOConfiguration): Template {
     },
   });
 
-  return Template.fromStack(stack);
+  return {
+    parent: Template.fromStack(stack),
+    iko: Template.fromStack(Stack.of(scope)),
+  };
+}
+
+function synthIko(serviceConfiguration: IKOConfiguration): Template {
+  return synth(serviceConfiguration).iko;
 }
 
 const baseConfiguration: IKOConfiguration = {
@@ -102,6 +118,17 @@ test('Keycloak realm and client can be overridden', () => {
   })));
   expect(env.SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUERURI).toBe('https://keycloak.example.com/realms/other-realm');
   expect(env.SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTID).toBe('other-client');
+  expect(env.SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUDIENCES).toBe('other-client');
+  expect(env.SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_AUTHORITIESCLAIMNAME).toBe("['resource_access']['other-client']['roles']");
+});
+
+test('Crypto key starts as a placeholder that is not valid base64', () => {
+  const template = synthIko(baseConfiguration);
+  const secrets = Object.values(template.findResources('AWS::SecretsManager::Secret'));
+  const cryptoKey = secrets.find((secret: any) => secret.Properties.Description?.startsWith('AES-256 key'));
+  expect(cryptoKey).toBeDefined();
+  const key = JSON.parse(cryptoKey!.Properties.SecretString).key;
+  expect(key).not.toMatch(/^[A-Za-z0-9+/]*={0,2}$/);
 });
 
 test('Credentials are passed as secrets, not as plain environment variables', () => {
@@ -153,12 +180,35 @@ test('Creates its own database', () => {
   });
 });
 
+function securityGroupIdOf(template: Template, type: string) {
+  const ids = Object.keys(template.findResources('AWS::EC2::SecurityGroup'))
+    .filter(id => id.startsWith(type));
+  expect(ids).toHaveLength(1);
+  return { 'Fn::GetAtt': [ids[0], 'GroupId'] };
+}
+
 test('Load balancer can reach the management port', () => {
   const template = synthIko(baseConfiguration);
   template.hasResourceProperties('AWS::EC2::SecurityGroupIngress', {
     IpProtocol: 'tcp',
     FromPort: 9090,
     ToPort: 9090,
-    SourceSecurityGroupId: Match.anyValue(),
+    SourceSecurityGroupId: securityGroupIdOf(template, 'lbalbSecurityGroup'),
   });
+});
+
+test('Service can reach the shared redis cluster', () => {
+  const template = synthIko(baseConfiguration);
+  template.hasResourceProperties('AWS::EC2::SecurityGroupIngress', {
+    GroupId: securityGroupIdOf(template, 'cacheredissecuritygroup'),
+    SourceSecurityGroupId: securityGroupIdOf(template, 'ikoikoserviceSecurityGroup'),
+  });
+});
+
+test('Synthesizes inside a nested stack with the listener rule in the parent stack', () => {
+  const { parent, iko } = synth(baseConfiguration, true);
+  parent.resourceCountIs('AWS::CloudFormation::Stack', 1);
+  parent.hasResourceProperties('AWS::ElasticLoadBalancingV2::ListenerRule', { Priority: 100 });
+  iko.resourceCountIs('AWS::ECS::Service', 1);
+  iko.resourceCountIs('Custom::SingleDatabase', 1);
 });

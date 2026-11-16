@@ -18,7 +18,7 @@ Elke IKO instance staat in een eigen nested stack (`{id}-stack`), omdat de main 
 
 ### 1. Encryptiesleutel zetten
 
-IKO versleutelt connector configuratie (hosts, tokens) in de database met een AES-256 sleutel. De sleutel die CDK genereert is een placeholder en heeft niet het juiste formaat.
+IKO versleutelt connector configuratie (hosts, tokens) in de database met een AES-256 sleutel. CDK zet een placeholder (`REPLACE_ME_...`); zolang die erin staat start IKO niet op.
 
 1. Genereer een sleutel: `openssl rand -base64 32`
 2. Ga in AWS naar Secrets Manager en zoek het secret met `crypto-key` in de naam
@@ -84,15 +84,17 @@ Connectoren (Open Klant, Objecten API, Open Zaak, BRP, ...) worden niet via deze
 - De connector code (Camel YAML) staat per connector in de IKO repository onder `doc/connectors/`
 - Per connector instance worden host en token in de admin UI ingevuld; deze worden versleuteld opgeslagen met de sleutel uit stap 1
 
+Met `debug: true` toont de debug trace viewer in de admin UI ruwe request headers, inclusief tokens van connectoren. Zet dit niet aan in productie.
+
 Connectoren die mTLS nodig hebben (zoals BRP via de WS-gateway) vereisen keystores en `CAMEL_SSL_*` environment variables in de container. Dit is nog niet ingericht.
 
 ## Troubleshooting
 
 ### Service start niet of wordt steeds herstart
 
+- **`Illegal base64 character`**: de encryptiesleutel is nog de placeholder of heeft niet het juiste formaat (zie stap 1).
 - Check de ECS task logs. IKO (Spring Boot + Camel) heeft een paar minuten nodig om op te starten; de health check grace period is 5 minuten.
 - **Database fouten bij opstarten**: controleer of de `Custom::SingleDatabase` resource de database heeft aangemaakt en of het db credentials secret klopt.
-- **`Illegal base64` of key-length fouten**: de encryptiesleutel heeft niet het juiste formaat (zie stap 1).
 
 ### Inloggen op /admin lukt niet
 
