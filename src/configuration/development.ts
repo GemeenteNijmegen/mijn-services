@@ -200,4 +200,19 @@ export const development: Configuration = {
       desiredTaskCount: 0,
     },
   }],
+  ikoServices: [{
+    id: 'iko',
+    subdomain: 'iko',
+    image: 'ghcr.io/integraal-klant-en-objectbeeld/iko:1.5.2',
+    logLevel: 'DEBUG',
+    debug: true,
+    loadbalancerPriority: 100,
+    databaseName: 'iko',
+    redisDatabaseNumber: 19,
+    taskSize: {
+      cpu: '1024',
+      memory: '2048',
+      desiredTaskCount: 1,
+    },
+  }],
 };

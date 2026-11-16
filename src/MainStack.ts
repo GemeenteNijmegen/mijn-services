@@ -1,6 +1,6 @@
 import { GemeenteNijmegenVpc } from '@gemeentenijmegen/aws-constructs';
 import { RemoteParameters } from '@gemeentenijmegen/cross-region-parameters';
-import { Duration, Stack, StackProps } from 'aws-cdk-lib';
+import { Duration, NestedStack, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
@@ -16,6 +16,7 @@ import { CacheDatabase } from './constructs/Redis';
 import { CorsaZgwService } from './services/CorsaZgw';
 import { GZACService } from './services/GZAC';
 import { GZACFrontendService } from './services/GZACFrontend';
+import { IKOService } from './services/IKO';
 import { KeyCloakServiceV2 } from './services/KeyCloakV2';
 import { ObjectsService } from './services/Objects';
 import { OpenKlantService } from './services/OpenKlant';
@@ -106,6 +107,7 @@ export class MainStack extends Stack {
     this.openZaakServices(containerPlatform);
     this.keyCloakServices(containerPlatform);
     this.gzacFrontendService(containerPlatform);
+    this.ikoServices(containerPlatform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
@@ -359,6 +361,32 @@ export class MainStack extends Stack {
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
         serviceConfiguration: gzacService,
+        certificate: this.certificate(),
+      });
+    }
+  }
+
+  private ikoServices(platform: ContainerPlatform) {
+    if (!this.configuration.ikoServices) {
+      console.warn('No IKO configuration provided. Skipping creation of IKO services!');
+      return;
+    }
+    for (const ikoService of this.configuration.ikoServices) {
+      // Nested stack keeps the main stack below the CloudFormation limit of 500 resources
+      const ikoStack = new NestedStack(this, `${ikoService.id}-stack`);
+      new IKOService(ikoStack, ikoService.id, {
+        hostedzone: this.hostedzone,
+        key: this.key,
+        cache: this.cache,
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
+          port: 8080,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+        serviceConfiguration: ikoService,
         certificate: this.certificate(),
       });
     }
