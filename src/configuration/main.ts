@@ -68,8 +68,8 @@ export const main: Configuration = {
     debug: false,
     useNewDatabase: true,
     taskSize: {
-      cpu: '512',
-      memory: '1024',
+      cpu: '1024',
+      memory: '2048',
       desiredTaskCount: 1,
     },
     celeryTaskSize: {
