@@ -2,7 +2,6 @@ import { RemoteParameters } from '@gemeentenijmegen/cross-region-parameters';
 import { Duration, Token } from 'aws-cdk-lib';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { ISecurityGroup, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { AwsLogDriver, ContainerDependencyCondition, ContainerImage, FargateService, Protocol, Secret } from 'aws-cdk-lib/aws-ecs';
 import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { IRole } from 'aws-cdk-lib/aws-iam';
@@ -25,8 +24,6 @@ export interface CorsaZgwProps {
   readonly cacheChannel: number;
 
   readonly service: EcsServiceFactoryProps;
-
-  readonly repository: Repository;
 
   readonly hostedzone: IHostedZone;
 
@@ -58,7 +55,6 @@ export class CorsaZgwService extends Construct {
   private readonly corsaMtlsCertificat: StringParameter;
   private readonly corsaMtlsCaBundle: StringParameter;
   private readonly corsaEndpoint: StringParameter;
-  private readonly openZaakCatalogusUrl: StringParameter;
   private readonly openZaakUrl: StringParameter;
   private readonly slackWebhookUrl: StringParameter;
   private readonly slackWebhookChannel: StringParameter;
@@ -123,11 +119,6 @@ export class CorsaZgwService extends Construct {
       },
     });
 
-    this.openZaakCatalogusUrl = new StringParameter(this, 'open-zaak-catalogus-url', {
-      description: 'Corza ZGW: open-zaak catalogus url',
-      stringValue: '-',
-    });
-
     this.openZaakUrl = new StringParameter(this, 'open-zaak-url', {
       description: 'Corza ZGW: open-zaak url',
       stringValue: '-',
@@ -149,7 +140,6 @@ export class CorsaZgwService extends Construct {
       OPENZAAK_CLIENT_ID: Secret.fromSecretsManager(this.credentialsForConnectingToOpenZaak, 'clientId'),
       OPENZAAK_CLIENT_SECRET: Secret.fromSecretsManager(this.credentialsForConnectingToOpenZaak, 'clientSecret'),
       OPENZAAK_URL: Secret.fromSsmParameter(this.openZaakUrl),
-      OPENZAAK_CATALOGI_URL: Secret.fromSsmParameter(this.openZaakCatalogusUrl),
 
       // New style replaces  OPENZAAK_CLIENT_ID and OPENZAAK_CLIENT_SECRET
       ZGW_CLIENT_ID: Secret.fromSecretsManager(this.credentialsForConnectingToOpenZaak, 'clientId'),

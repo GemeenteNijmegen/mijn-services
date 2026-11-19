@@ -175,14 +175,14 @@ export const development: Configuration = {
   gzacFrontendServices: [{
     id: 'gzac-frontend-1',
     subdomain: 'gzac',
-    image: 'ritense/gzac-frontend:13.41.0',
+    image: 'ghcr.io/gemeentenijmegen/gzac-frontend:latest',
     logLevel: 'DEBUG',
     debug: true,
     loadbalancerPriority: 70,
     taskSize: {
       cpu: '512',
       memory: '1024',
-      desiredTaskCount: 1,
+      desiredTaskCount: 0,
     },
   }],
   gzacServices: [{
@@ -193,6 +193,22 @@ export const development: Configuration = {
     debug: true,
     loadbalancerPriority: 80,
     databaseName: 'gzac',
+    enableDrafts: true,
+    taskSize: {
+      cpu: '1024',
+      memory: '2048',
+      desiredTaskCount: 0,
+    },
+  }],
+  ikoServices: [{
+    id: 'iko',
+    subdomain: 'iko',
+    image: 'ghcr.io/integraal-klant-en-objectbeeld/iko:1.5.2',
+    logLevel: 'DEBUG',
+    debug: true,
+    loadbalancerPriority: 100,
+    databaseName: 'iko',
+    redisDatabaseNumber: 19,
     taskSize: {
       cpu: '1024',
       memory: '2048',

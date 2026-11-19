@@ -134,6 +134,12 @@ export interface Configuration {
 
   gzacFrontendServices?: GZACFrontendConfiguration[];
 
+  /**
+   * List of IKO (Integraal Klant & Objectbeeld) instances to deploy.
+   * Each instance gets its own database and subdomain.
+   */
+  ikoServices?: IKOConfiguration[];
+
   openProductServices?: OpenProductServicesConfiguration;
 
   corsaZgwService?: CorsaZgwServiceConfiguration;
@@ -531,9 +537,66 @@ export interface GZACConfiguration extends MainTaskSizeConfiguration {
    */
   debug?: boolean;
   /**
+   * Enable Valtimo draft mode, allowing admins to create and edit
+   * case definitions and global configuration (plugins etc.) in the UI.
+   * Should not be enabled in production.
+   * @default false
+   */
+  enableDrafts?: boolean;
+  /**
    * Loadbalancer rule prio.
    */
   loadbalancerPriority: number;
+}
+
+export interface IKOConfiguration extends MainTaskSizeConfiguration {
+  /**
+   * CDK ID
+   */
+  id: string;
+  /**
+   * Subdomain to publish this service on
+   */
+  subdomain: string;
+  /**
+   * database name (auto created)
+   */
+  databaseName: string;
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
+  image: string;
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   * Also shows raw request headers (including tokens) in IKO's debug trace viewer,
+   * do not enable in production.
+   */
+  debug?: boolean;
+  /**
+   * Loadbalancer rule prio.
+   */
+  loadbalancerPriority: number;
+  /**
+   * Redis database number to use in the shared cache cluster.
+   * Must be unique across all services.
+   */
+  redisDatabaseNumber: number;
+  /**
+   * Keycloak realm used for admin login and API tokens
+   * @default iko
+   */
+  keycloakRealm?: string;
+  /**
+   * Keycloak client ID used for admin login. Also the expected audience
+   * and the client whose roles are used for API access.
+   * @default iko
+   */
+  keycloakClientId?: string;
 }
 
 export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
