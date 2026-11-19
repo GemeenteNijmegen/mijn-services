@@ -106,7 +106,7 @@ export const development: Configuration = {
   corsaZgwService: {
     logLevel: 'DEBUG',
     debug: true,
-    image: 'ghcr.io/gemeentenijmegen/corsa-zgw:e93bc0ad96d7503ae3dddba60b574fb343e93c0a',
+    image: 'ghcr.io/gemeentenijmegen/corsa-zgw:1a5956bf2628fd4c73eb76645db9503f879d9fa0',
     id: 'corsa-zgw',
     loadbalancerPriority: 90,
     subdomain: 'corsa-zgw',
