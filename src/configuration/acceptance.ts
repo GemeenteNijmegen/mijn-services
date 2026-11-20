@@ -146,4 +146,13 @@ export const acceptance: Configuration = {
       loadbalancerPriority: 60,
     },
   ],
+  corsaZgwService: {
+    logLevel: 'DEBUG',
+    debug: true,
+    image: 'ghcr.io/gemeentenijmegen/corsa-zgw:4024a272bf9ee16f13f27b86a6dad2dbd79234af',
+    id: 'corsa-zgw',
+    loadbalancerPriority: 70,
+    subdomain: 'corsa-zgw',
+    disableMtlsForCorsaClient: true, // Connects to corsa mock without mtls
+  },
 };

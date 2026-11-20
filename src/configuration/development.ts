@@ -106,7 +106,11 @@ export const development: Configuration = {
   corsaZgwService: {
     logLevel: 'DEBUG',
     debug: true,
-    imageTag: 'af7cb9eda590f975323ef6b7479d08758ca46cf1',
+    image: 'ghcr.io/gemeentenijmegen/corsa-zgw:4024a272bf9ee16f13f27b86a6dad2dbd79234af',
+    id: 'corsa-zgw',
+    loadbalancerPriority: 90,
+    subdomain: 'corsa-zgw',
+    disableMtlsForCorsaClient: true, // Connects to corsa mock without mtls
   },
   vtbServices: [
     {
@@ -171,14 +175,14 @@ export const development: Configuration = {
   gzacFrontendServices: [{
     id: 'gzac-frontend-1',
     subdomain: 'gzac',
-    image: 'ritense/gzac-frontend:13.41.0',
+    image: 'ghcr.io/gemeentenijmegen/gzac-frontend:latest',
     logLevel: 'DEBUG',
     debug: true,
     loadbalancerPriority: 70,
     taskSize: {
       cpu: '512',
       memory: '1024',
-      desiredTaskCount: 1,
+      desiredTaskCount: 0,
     },
   }],
   gzacServices: [{
@@ -189,6 +193,22 @@ export const development: Configuration = {
     debug: true,
     loadbalancerPriority: 80,
     databaseName: 'gzac',
+    enableDrafts: true,
+    taskSize: {
+      cpu: '1024',
+      memory: '2048',
+      desiredTaskCount: 0,
+    },
+  }],
+  ikoServices: [{
+    id: 'iko',
+    subdomain: 'iko',
+    image: 'ghcr.io/integraal-klant-en-objectbeeld/iko:1.5.2',
+    logLevel: 'DEBUG',
+    debug: true,
+    loadbalancerPriority: 100,
+    databaseName: 'iko',
+    redisDatabaseNumber: 19,
     taskSize: {
       cpu: '1024',
       memory: '2048',
