@@ -22,6 +22,7 @@ import { ObjectsService } from './services/Objects';
 import { OpenKlantService } from './services/OpenKlant';
 import { OpenKlantRegistrationService } from './services/OpenKlantRegistrationService/OpenKlantRegistrationService';
 import { OpenNotificatiesService } from './services/OpenNotificaties';
+import { OpenNotificatiesV2Service } from './services/OpenNotificatiesV2';
 import { OpenProductService } from './services/OpenProduct/OpenProduct';
 import { OpenZaakService } from './services/OpenZaak';
 import { OpenZaakv2Service } from './services/OpenZaakv2';
@@ -108,6 +109,7 @@ export class MainStack extends Stack {
     this.keyCloakServices(containerPlatform);
     this.gzacFrontendService(containerPlatform);
     this.ikoServices(containerPlatform);
+    this.openNotificatiesV2Services(containerPlatform);
   }
 
   private openKlantService(platform: ContainerPlatform) {
@@ -361,6 +363,33 @@ export class MainStack extends Stack {
           vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
         },
         serviceConfiguration: gzacService,
+        certificate: this.certificate(),
+      });
+    }
+  }
+
+  private openNotificatiesV2Services(platform: ContainerPlatform) {
+    if (!this.configuration.openNotificatiesServices) {
+      console.warn('No open-notificaties configurations provided. Skipping creation of open notificaties services!');
+      return;
+    }
+    for (const openNotificatiesService of this.configuration.openNotificatiesServices) {
+      // Nested stack keeps the main stack below the CloudFormation limit of 500 resources
+      const stack = new NestedStack(this, `${openNotificatiesService.id}-stack`);
+      new OpenNotificatiesV2Service(stack, openNotificatiesService.id, {
+        hostedzone: this.hostedzone,
+        key: this.key,
+        cache: this.cache,
+        dockerhubCredentials: this.dockerhubCredentials,
+        service: {
+          cluster: platform.cluster,
+          link: platform.vpcLink,
+          namespace: platform.namespace,
+          loadbalancer: platform.loadBalancer,
+          port: 8000,
+          vpcLinkSecurityGroup: platform.vpcLinkSecurityGroup,
+        },
+        serviceConfiguration: openNotificatiesService,
         certificate: this.certificate(),
       });
     }
