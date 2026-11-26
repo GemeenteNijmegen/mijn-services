@@ -30,13 +30,11 @@ export const acceptance: Configuration = {
   },
   openNotificaties: {
     image: 'openzaak/open-notificaties:1.16.2',
-    rabbitMqImage: 'rabbitmq:4.0.5-alpine',
     logLevel: 'DEBUG',
     debug: true,
     persitNotifications: true,
     migrationImage: 'openzaak/open-notificaties:1.16.2',
     useNewDatabase: true,
-    useRedis: true,
     taskSize: {
       cpu: '512',
       memory: '1024',

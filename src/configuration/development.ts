@@ -33,12 +33,10 @@ export const development: Configuration = {
   },
   openNotificaties: {
     image: 'openzaak/open-notificaties:1.16.0',
-    rabbitMqImage: 'rabbitmq:4.0.5-alpine',
     logLevel: 'DEBUG',
     debug: true,
     persitNotifications: true,
     useNewDatabase: true,
-    useRedis: true,
     taskSize: {
       cpu: '512',
       memory: '1024',

@@ -6,7 +6,6 @@ import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { ISecret, Secret as SecretParameter } from 'aws-cdk-lib/aws-secretsmanager';
-import { DnsRecordType } from 'aws-cdk-lib/aws-servicediscovery';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { OpenNotificatiesConfiguration } from '../ConfigurationInterfaces';
@@ -32,9 +31,6 @@ export interface OpenNotificatiesServiceProps {
 }
 
 export class OpenNotificatiesService extends Construct {
-
-  private static RABBIT_MQ_NAME = 'queue';
-  private static RABBIT_MQ_PORT = 5672;
 
   private readonly logs: LogGroup;
   private readonly props: OpenNotificatiesServiceProps;
@@ -69,16 +65,11 @@ export class OpenNotificatiesService extends Construct {
       },
     });
 
-
-    const rabbitMqService = this.setupRabbitMqService();
-    const mainService = this.setupService();
-    const celeryService = this.setupCeleryService();
-    const celeryBeatService = this.setupCeleryBeatService();
+    this.setupService();
+    this.setupCeleryService();
+    this.setupCeleryBeatService();
     this.setupMigrationTask();
 
-    rabbitMqService.connections.allowFrom(mainService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
-    rabbitMqService.connections.allowFrom(celeryService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
-    rabbitMqService.connections.allowFrom(celeryBeatService.connections, Port.tcp(OpenNotificatiesService.RABBIT_MQ_PORT));
   }
 
   private getEnvironmentConfiguration() {
@@ -87,12 +78,7 @@ export class OpenNotificatiesService extends Construct {
     const trustedDomains = this.props.alternativeDomainNames?.map(a => a) ?? [];
     trustedDomains.push(this.props.hostedzone.zoneName);
 
-    const rabbitMqHost = `${OpenNotificatiesService.RABBIT_MQ_NAME}.${this.props.service.namespace.namespaceName}`;
-    const rabbitMqBrokerUrl = `amqp://guest:guest@${rabbitMqHost}:${OpenNotificatiesService.RABBIT_MQ_PORT}//`;
     const redisBrokerUrl = 'redis://' + cacheHost + this.props.cacheDatabaseIndexCelery;
-
-    // Very temporarely: remove after upgrading!
-    const useRedis = this.props.openNotificationsConfiguration.useRedis ?? false;
 
     const env: Record<string, string> = {
       DJANGO_SETTINGS_MODULE: 'nrc.conf.docker',
@@ -116,11 +102,10 @@ export class OpenNotificatiesService extends Construct {
       SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
 
       // Celery
-      CELERY_BROKER_URL: useRedis ? redisBrokerUrl : rabbitMqBrokerUrl,
+      CELERY_BROKER_URL: redisBrokerUrl,
       CELERY_RESULT_BACKEND: redisBrokerUrl,
       CELERY_LOGLEVEL: this.props.openNotificationsConfiguration.logLevel,
       CELERY_WORKER_CONCURRENCY: '4',
-      RABBITMQ_HOST: rabbitMqHost,
 
       // Conectivity
       CORS_ALLOW_ALL_ORIGINS: 'True',
@@ -131,16 +116,8 @@ export class OpenNotificatiesService extends Construct {
       OPENNOTIFICATIES_DOMAIN: trustedDomains[0],
       AUTORISATIES_API_ROOT: `https://${trustedDomains[0]}/open-zaak/autorisaties/api/v1`, // TODO remove hardcoded path 'open-zaak'
 
-
       // Used by setup_configuration file and separate service
       OPEN_ZAAK_BASE_URL: `https://${trustedDomains[0]}/open-zaak`,
-
-      // 11 Feb 2025 - This is replaced by the setup_configuration file and separate service
-      // What configuration steps to run while setup_configuration is called
-      // SITES_CONFIG_ENABLE: 'True',
-      // AUTHORIZATION_CONFIG_ENABLE: 'True',
-      // OPENZAAK_NOTIF_CONFIG_ENABLE: 'True',
-      // NOTIFICATION_RETRY_CONFIG_ENABLE: 'False',
 
       OTEL_SDK_DISABLED: 'true',
 
@@ -198,46 +175,6 @@ export class OpenNotificatiesService extends Construct {
     }
 
     return secrets;
-  }
-
-  private setupRabbitMqService() {
-
-    const task = this.serviceFactory.createTaskDefinition('rabbit-mq');
-    task.addContainer('main', {
-      image: ContainerImage.fromRegistry(this.props.openNotificationsConfiguration.rabbitMqImage, {
-        credentials: this.props.dockerhubCredentials,
-      }),
-      logging: new AwsLogDriver({
-        streamPrefix: 'rabbit-mq',
-        logGroup: this.logs,
-      }),
-      readonlyRootFilesystem: false, // Required for ECS Exec
-      portMappings: [{
-        containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
-      }],
-      secrets: {},
-      environment: {},
-      healthCheck: {
-        command: ['CMD-SHELL', 'nc -z localhost 5672 || exit 1'], // Very simple tcp connectivity check without rabbit mq stuff.
-        startPeriod: Duration.seconds(60),
-      },
-    });
-    const service = this.serviceFactory.createService({
-      task,
-      path: undefined, // Not exposed service
-      id: OpenNotificatiesService.RABBIT_MQ_NAME,
-      options: {
-        desiredCount: 1,
-      },
-      customCloudMap: {
-        cloudMapNamespace: this.props.service.namespace,
-        containerPort: OpenNotificatiesService.RABBIT_MQ_PORT,
-        name: OpenNotificatiesService.RABBIT_MQ_NAME,
-        dnsRecordType: DnsRecordType.A, // Required for lookup
-        dnsTtl: Duration.seconds(60),
-      },
-    });
-    return service;
   }
 
   private setupService() {

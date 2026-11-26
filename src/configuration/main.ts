@@ -24,7 +24,6 @@ export const main: Configuration = {
   },
   openNotificaties: {
     image: 'openzaak/open-notificaties:1.16.2',
-    rabbitMqImage: 'rabbitmq:4.0.5-alpine',
     logLevel: 'INFO',
     debug: false,
     persitNotifications: true,
@@ -40,7 +39,6 @@ export const main: Configuration = {
       desiredTaskCount: 1,
     },
     disableHealthcCheckCeleryContainer: true,
-    useRedis: true,
     useNewDatabase: true,
   },
   openZaak: {
