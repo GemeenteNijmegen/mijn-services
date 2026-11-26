@@ -47,23 +47,27 @@ export class GZACService extends Construct {
 
   private static readonly RABBIT_MQ_PORT = 5672;
   private static readonly RABBIT_MQ_IMAGE = 'rabbitmq:4.0.5-alpine';
+  private static readonly RABBIT_MQ_USERNAME = 'gzac';
+  private static readonly RABBIT_MQ_PASSWORD_HASH_PLACEHOLDER = '__RABBITMQ_PASSWORD_HASH__';
 
   /**
    * RabbitMQ definitions (user, queues, exchange) loaded at broker startup.
-   * The guest password hash corresponds to password 'guest'.
+   * The password hash is a placeholder, replaced at container startup with
+   * the hash of the password from Secrets Manager.
    */
   private static rabbitMqDefinitions() {
     const vhost = '/';
+    const username = GZACService.RABBIT_MQ_USERNAME;
     return {
       users: [{
-        name: 'guest',
-        password_hash: 'nH4Lo1k4PNJTWJIUD658CaIXnAEPuFIvh2feuVYlltBmYh+B',
+        name: username,
+        password_hash: GZACService.RABBIT_MQ_PASSWORD_HASH_PLACEHOLDER,
         hashing_algorithm: 'rabbit_password_hashing_sha256',
         tags: ['administrator'],
         limits: {},
       }],
       vhosts: [{ name: vhost }],
-      permissions: [{ user: 'guest', vhost, configure: '.*', write: '.*', read: '.*' }],
+      permissions: [{ user: username, vhost, configure: '.*', write: '.*', read: '.*' }],
       queues: [
         { name: 'valtimo-inbox', vhost, durable: true, auto_delete: false, arguments: { 'x-queue-type': 'stream' } },
         { name: 'valtimo-audit', vhost, durable: true, auto_delete: false, arguments: { 'x-queue-type': 'quorum' } },
@@ -87,6 +91,7 @@ export class GZACService extends Construct {
 
   private readonly gzacApiCredentials: ISecret;
   private readonly pluginEncryptionSecret: ISecret;
+  private readonly rabbitMqCredentials: ISecret;
 
   constructor(scope: Construct, id: string, props: GZACServiceProps) {
     super(scope, id);
@@ -97,6 +102,7 @@ export class GZACService extends Construct {
     this.setupDatabase();
     this.gzacApiCredentials = this.setupGzacApiCredentials();
     this.pluginEncryptionSecret = this.setupPluginEncryptionSecret();
+    this.rabbitMqCredentials = this.setupRabbitMqCredentials();
 
     // Create services
     const gzacRabbitMQService = this.setupRabbitMqService();
@@ -139,8 +145,6 @@ export class GZACService extends Construct {
       // RabbitMQ
       SPRING_RABBITMQ_HOST: `${this.props.serviceConfiguration.id}-rabbit-mq.mijn-services.local`,
       SPRING_RABBITMQ_PORT: '5672',
-      SPRING_RABBITMQ_USERNAME: 'guest',
-      SPRING_RABBITMQ_PASSWORD: 'guest',
 
       // Valtimo / GZAC
       VALTIMO_APP_HOSTNAME: frontendDomain,
@@ -166,6 +170,8 @@ export class GZACService extends Construct {
       KEYCLOAK_AUTH_SERVER_URL: Secret.fromSsmParameter(params.keycloakUrl),
       VALTIMO_PLUGIN_ENCRYPTIONSECRET: Secret.fromSecretsManager(this.pluginEncryptionSecret, 'key'),
       OPERATON_BPM_ADMINUSER_PASSWORD: Secret.fromSecretsManager(this.gzacApiCredentials, 'secret'),
+      SPRING_RABBITMQ_USERNAME: Secret.fromSecretsManager(this.rabbitMqCredentials, 'username'),
+      SPRING_RABBITMQ_PASSWORD: Secret.fromSecretsManager(this.rabbitMqCredentials, 'password'),
     };
     return secrets;
   }
@@ -263,17 +269,22 @@ export class GZACService extends Construct {
       compatibility: Compatibility.FARGATE,
     });
 
-    // Add the container (public image, config is written at startup so no custom image build is needed)
+    // Add the container (public image, config is written at startup so no custom image build is needed).
+    // The password is hashed at startup, so neither the password nor its hash is part of the task definition.
     task.addContainer('gzac-rabbit-mq', {
       image: ContainerImage.fromRegistry(GZACService.RABBIT_MQ_IMAGE),
       entryPoint: ['/bin/sh', '-c'],
       command: [
-        'printf "%s" "$RABBITMQ_DEFINITIONS" > /etc/rabbitmq/definitions.json && '
-        + 'printf "loopback_users.guest = false\\nload_definitions = /etc/rabbitmq/definitions.json\\n" > /etc/rabbitmq/conf.d/20-gzac.conf && '
+        'RABBITMQ_PASSWORD_HASH=$(rabbitmqctl -q hash_password "$RABBITMQ_PASSWORD") && '
+        + `printf "%s" "$RABBITMQ_DEFINITIONS" | sed "s|${GZACService.RABBIT_MQ_PASSWORD_HASH_PLACEHOLDER}|$RABBITMQ_PASSWORD_HASH|" > /etc/rabbitmq/definitions.json && `
+        + 'printf "load_definitions = /etc/rabbitmq/definitions.json\\n" > /etc/rabbitmq/conf.d/20-gzac.conf && '
         + 'exec docker-entrypoint.sh rabbitmq-server',
       ],
       environment: {
         RABBITMQ_DEFINITIONS: JSON.stringify(GZACService.rabbitMqDefinitions()),
+      },
+      secrets: {
+        RABBITMQ_PASSWORD: Secret.fromSecretsManager(this.rabbitMqCredentials, 'password'),
       },
       logging: new AwsLogDriver({
         streamPrefix: 'gzac-rabbit-mq',
@@ -402,6 +413,19 @@ export class GZACService extends Construct {
         passwordLength: 32,
         secretStringTemplate: JSON.stringify({}),
         generateStringKey: 'key',
+      },
+    });
+  }
+
+  private setupRabbitMqCredentials() {
+    return new SecretParameter(this, 'rabbit-mq-credentials', {
+      description: 'Credentials for the GZAC RabbitMQ broker',
+      generateSecretString: {
+        excludePunctuation: true,
+        secretStringTemplate: JSON.stringify({
+          username: GZACService.RABBIT_MQ_USERNAME,
+        }),
+        generateStringKey: 'password',
       },
     });
   }
