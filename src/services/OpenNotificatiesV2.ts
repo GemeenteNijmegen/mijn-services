@@ -13,7 +13,14 @@ import {
   Secret,
   TaskDefinition,
 } from 'aws-cdk-lib/aws-ecs';
-import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import {
+  ApplicationListenerRule,
+  ApplicationProtocol,
+  ApplicationTargetGroup,
+  Protocol as AlbProtocol,
+  ListenerAction,
+  ListenerCondition,
+} from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { DatabaseInstance } from 'aws-cdk-lib/aws-rds';
@@ -190,8 +197,12 @@ export class OpenNotificatiesV2Service extends Construct {
   private setupExposure() {
     const config = this.props.serviceConfiguration;
 
-    this.props.service.loadbalancer.listener.addTargets(config.id, {
-      conditions: [ListenerCondition.hostHeaders([this.domain])],
+    // Target group and rule are created in this construct (not via listener.addTargets),
+    // so they end up in the stack of this service instead of the load balancer's stack.
+    const targetGroup = new ApplicationTargetGroup(this, 'target-group', {
+      vpc: this.props.service.cluster.vpc,
+      port: OpenNotificatiesV2Service.PORT,
+      protocol: ApplicationProtocol.HTTP,
       healthCheck: {
         enabled: true,
         path: '/',
@@ -202,11 +213,17 @@ export class OpenNotificatiesV2Service extends Construct {
         interval: Duration.seconds(15),
         protocol: AlbProtocol.HTTP,
       },
-      port: OpenNotificatiesV2Service.PORT,
       targets: [this.service],
-      priority: config.loadbalancerPriority,
       deregistrationDelay: Duration.minutes(1),
     });
+
+    new ApplicationListenerRule(this, 'listener-rule', {
+      listener: this.props.service.loadbalancer.listener,
+      priority: config.loadbalancerPriority,
+      conditions: [ListenerCondition.hostHeaders([this.domain])],
+      action: ListenerAction.forward([targetGroup]),
+    });
+    this.service.connections.allowFrom(this.props.service.loadbalancer.alb, Port.tcp(OpenNotificatiesV2Service.PORT));
 
     new SubdomainCloudfront(this, 'subdomain', {
       certificate: this.props.certificate,

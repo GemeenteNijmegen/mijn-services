@@ -24,7 +24,7 @@ interface SynthResult {
  * Stand up an OpenNotificatiesV2Service with a minimal platform. Optionally
  * places the service in a nested stack, the way the main stack does.
  */
-function synth(serviceConfiguration: OpenNotificatiesConfigurationV2, nested = false): SynthResult {
+function synth(serviceConfiguration: OpenNotificatiesConfigurationV2 | undefined, nested = false): SynthResult {
   const app = new App();
   const stack = new Stack(app, 'test-stack', {
     env: { account: '123456789012', region: 'eu-central-1' },
@@ -46,13 +46,18 @@ function synth(serviceConfiguration: OpenNotificatiesConfigurationV2, nested = f
   const loadbalancer = new ServiceLoadBalancer(stack, 'lb', { vpc, hostedzone });
   const cache = new CacheDatabase(stack, 'cache', { vpc });
   const dockerhubCredentials = new Secret(stack, 'dockerhub');
+  const key = new Key(stack, 'key');
+  const certificate = Certificate.fromCertificateArn(stack, 'cert', 'arn:aws:acm:us-east-1:123456789012:certificate/test');
 
+  if (!serviceConfiguration) {
+    return { parent: Template.fromStack(stack), service: Template.fromStack(stack) };
+  }
   const scope = nested ? new NestedStack(stack, 'open-notificaties-stack') : stack;
   new OpenNotificatiesV2Service(scope, serviceConfiguration.id, {
     cache,
     hostedzone,
-    key: new Key(stack, 'key'),
-    certificate: Certificate.fromCertificateArn(stack, 'cert', 'arn:aws:acm:us-east-1:123456789012:certificate/test'),
+    key,
+    certificate,
     dockerhubCredentials,
     serviceConfiguration,
     service: {
@@ -238,4 +243,27 @@ test('Service can reach the shared redis cluster', () => {
     GroupId: securityGroupIdOf(template, 'cacheredissecuritygroup'),
     SourceSecurityGroupId: securityGroupIdOf(template, 'testopennotificatiesserviceSecurityGroup'),
   });
+});
+
+test('In a nested stack, the parent only gains the nested stack', () => {
+  const platformOnly = synth(undefined, true).parent;
+  const { parent, service } = synth(baseConfiguration, true);
+  const before = new Set(Object.keys(platformOnly.toJSON().Resources));
+  const added = Object.entries(parent.toJSON().Resources)
+    .filter(([id]) => !before.has(id))
+    .map(([, resource]: [string, any]) => resource.Type)
+    .sort();
+  expect(added).toEqual(['AWS::CloudFormation::Stack']);
+  service.resourceCountIs('AWS::ElasticLoadBalancingV2::ListenerRule', 1);
+  service.resourceCountIs('AWS::ECS::Service', 1);
+  service.resourceCountIs('AWS::CloudFront::Distribution', 1);
+  service.resourceCountIs('Custom::SingleDatabase', 1);
+});
+
+test('Service is created after the listener rule attaches its target group', () => {
+  const template = synthService(baseConfiguration);
+  const ruleIds = Object.keys(template.findResources('AWS::ElasticLoadBalancingV2::ListenerRule'));
+  const services = Object.values(template.findResources('AWS::ECS::Service')) as any[];
+  expect(ruleIds).toHaveLength(1);
+  expect(services[0].DependsOn).toEqual(expect.arrayContaining(ruleIds));
 });
