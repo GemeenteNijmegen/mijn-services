@@ -15,7 +15,7 @@ De oude Open Notificaties op `/open-notificaties` (`openNotificaties` in de conf
   - `celery` en `celery-beat` starten pas als `web` healthy is, zodat de migraties eerst klaar zijn.
 - **Database**: eigen database (`databaseName`) op de gedeelde RDS instance, wordt automatisch aangemaakt
 - **Redis**: gedeelde ElastiCache cluster, twee eigen database nummers: cache (`redisCacheDatabaseNumber`) en celery broker (`redisCeleryDatabaseNumber`). Geen RabbitMQ.
-- **Nested stack**: elke instance staat in een eigen nested stack (`{id}-stack`), ook de load balancer rule en target group. De main stack zit tegen de CloudFormation limiet van 500 resources aan.
+- **Nested stack**: elke instance staat in een eigen nested stack (`{id}-stack`), ook de load balancer rule en target group. De main stack zit tegen de CloudFormation limiet van 500 resources aan (development: 498); elke instance kost daar één resource.
 
 Meerdere tasks (`taskSize.desiredTaskCount` > 1) kan: het versturen gebruikt een lock in Redis, dus een tweede `celery-beat` verstuurt niets dubbel. Web en worker schalen dan wel samen op.
 
