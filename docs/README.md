@@ -22,3 +22,14 @@ nodig.
   - Het OMC heeft een API-key nodig om bij Open Klant te kunnen, deze wordt in de
     secrets manager opgeslagen als {omc-id}/open-klant/api-key. De key komt uit 'API-auth/Token authoriztions' (nieuwe aanmaken).
  
+## IKO (Integraal Klant & Objectbeeld)
+IKO combineert gegevens uit verschillende bronnen (Open Klant, Objecten API, Open Zaak, BRP, ...)
+tot één klant- en objectbeeld. Een IKO instance neem je op in de configuratie onder `ikoServices`.
+Na de eerste deployment zijn handmatige stappen nodig in Keycloak en Secrets Manager, zie
+[IKO setup](./Operations/IKO-setup.md).
+
+## Open Notificaties v2
+Open Notificaties per Open Zaak, elk op een eigen subdomein en als één ECS service (web, celery en
+celery beat in één task, Redis als broker). Een instance neem je op in de configuratie onder
+`openNotificatiesServices`. De koppeling met Open Zaak wordt na de deployment met de hand ingericht, zie
+[Open Notificaties v2 setup](./Operations/OpenNotificaties-v2.md).

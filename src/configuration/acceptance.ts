@@ -146,4 +146,25 @@ export const acceptance: Configuration = {
       loadbalancerPriority: 60,
     },
   ],
+  corsaZgwService: {
+    logLevel: 'DEBUG',
+    debug: true,
+    image: 'ghcr.io/gemeentenijmegen/corsa-zgw:4024a272bf9ee16f13f27b86a6dad2dbd79234af',
+    id: 'corsa-zgw',
+    loadbalancerPriority: 70,
+    subdomain: 'corsa-zgw',
+    disableMtlsForCorsaClient: true, // Connects to corsa mock without mtls
+  },
+  openNotificatiesServices: [{
+    id: 'woweb-open-notificaties',
+    subdomain: 'woweb-open-notificaties',
+    databaseName: 'woweb-open-notificaties',
+    image: 'openzaak/open-notificaties:1.16.2',
+    logLevel: 'DEBUG',
+    debug: true,
+    persistNotifications: true,
+    loadbalancerPriority: 110,
+    redisCacheDatabaseNumber: 20,
+    redisCeleryDatabaseNumber: 21,
+  }],
 };

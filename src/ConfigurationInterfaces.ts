@@ -134,6 +134,19 @@ export interface Configuration {
 
   gzacFrontendServices?: GZACFrontendConfiguration[];
 
+  /**
+   * List of IKO (Integraal Klant & Objectbeeld) instances to deploy.
+   * Each instance gets its own database and subdomain.
+   */
+  ikoServices?: IKOConfiguration[];
+
+  /**
+   * List of Open Notificaties instances to deploy, usually one per Open Zaak.
+   * Each instance gets its own database and subdomain. The link with an
+   * Open Zaak (autorisaties, credentials, kanalen) is configured in the admin.
+   */
+  openNotificatiesServices?: OpenNotificatiesConfigurationV2[];
+
   openProductServices?: OpenProductServicesConfiguration;
 
   corsaZgwService?: CorsaZgwServiceConfiguration;
@@ -531,9 +544,114 @@ export interface GZACConfiguration extends MainTaskSizeConfiguration {
    */
   debug?: boolean;
   /**
+   * Enable Valtimo draft mode, allowing admins to create and edit
+   * case definitions and global configuration (plugins etc.) in the UI.
+   * Should not be enabled in production.
+   * @default false
+   */
+  enableDrafts?: boolean;
+  /**
    * Loadbalancer rule prio.
    */
   loadbalancerPriority: number;
+}
+
+export interface IKOConfiguration extends MainTaskSizeConfiguration {
+  /**
+   * CDK ID
+   */
+  id: string;
+  /**
+   * Subdomain to publish this service on
+   */
+  subdomain: string;
+  /**
+   * database name (auto created)
+   */
+  databaseName: string;
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
+  image: string;
+  /**
+   * Log level for the container
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   * Also shows raw request headers (including tokens) in IKO's debug trace viewer,
+   * do not enable in production.
+   */
+  debug?: boolean;
+  /**
+   * Loadbalancer rule prio.
+   */
+  loadbalancerPriority: number;
+  /**
+   * Redis database number to use in the shared cache cluster.
+   * Must be unique across all services.
+   */
+  redisDatabaseNumber: number;
+  /**
+   * Keycloak realm used for admin login and API tokens
+   * @default iko
+   */
+  keycloakRealm?: string;
+  /**
+   * Keycloak client ID used for admin login. Also the expected audience
+   * and the client whose roles are used for API access.
+   * @default iko
+   */
+  keycloakClientId?: string;
+}
+
+export interface OpenNotificatiesConfigurationV2 extends MainTaskSizeConfiguration {
+  /**
+   * CDK ID, also used in descriptions.
+   * Do not change after the first deployment: it recreates the secret key and database credentials.
+   */
+  id: string;
+  /**
+   * Subdomain to publish this service on
+   */
+  subdomain: string;
+  /**
+   * Database name (auto created)
+   */
+  databaseName: string;
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
+  image: string;
+  /**
+   * Log level for the containers
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+  /**
+   * Keep sent notifications in the database (for 30 days)
+   * @default false
+   */
+  persistNotifications?: boolean;
+  /**
+   * Loadbalancer rule priority, must be unique across all rules
+   */
+  loadbalancerPriority: number;
+  /**
+   * Redis database number for the cache.
+   * Must be unique across all services.
+   */
+  redisCacheDatabaseNumber: number;
+  /**
+   * Redis database number for the celery broker and results.
+   * Must be unique across all services.
+   */
+  redisCeleryDatabaseNumber: number;
 }
 
 export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
@@ -639,7 +757,16 @@ export interface CorsaZgwServiceConfiguration extends MainTaskSizeConfiguration 
   /**
    * @default latest
    */
-  imageTag?: string;
+  image: string;
+  loadbalancerPriority: number;
+  id: string;
+  subdomain: string;
+  /**
+   * When true disables the loading of the mtls cert
+   * and private key for corsa-zaakdms client.
+   * @default false
+   */
+  disableMtlsForCorsaClient?: boolean;
 }
 
 export interface VtbConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration {

@@ -68,8 +68,8 @@ export const main: Configuration = {
     debug: false,
     useNewDatabase: true,
     taskSize: {
-      cpu: '512',
-      memory: '1024',
+      cpu: '1024',
+      memory: '2048',
       desiredTaskCount: 1,
     },
     celeryTaskSize: {
@@ -108,8 +108,8 @@ export const main: Configuration = {
         memory: '1024',
       },
       taskSize: { // BIG to start with, half is probably fine
-        cpu: '2048',
-        memory: '4096',
+        cpu: '1024',
+        memory: '2048',
         desiredTaskCount: 1,
       },
       databaseName: 'woweb-open-zaak',
@@ -137,4 +137,16 @@ export const main: Configuration = {
       loadbalancerPriority: 70,
     },
   ],
+  openNotificatiesServices: [{
+    id: 'woweb-open-notificaties',
+    subdomain: 'woweb-open-notificaties',
+    databaseName: 'woweb-open-notificaties',
+    image: 'openzaak/open-notificaties:1.16.2',
+    logLevel: 'INFO',
+    debug: false,
+    persistNotifications: true,
+    loadbalancerPriority: 110,
+    redisCacheDatabaseNumber: 20,
+    redisCeleryDatabaseNumber: 21,
+  }],
 };
