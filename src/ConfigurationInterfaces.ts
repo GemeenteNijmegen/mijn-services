@@ -140,6 +140,13 @@ export interface Configuration {
    */
   ikoServices?: IKOConfiguration[];
 
+  /**
+   * List of Open Notificaties instances to deploy, usually one per Open Zaak.
+   * Each instance gets its own database and subdomain. The link with an
+   * Open Zaak (autorisaties, credentials, kanalen) is configured in the admin.
+   */
+  openNotificatiesServices?: OpenNotificatiesConfigurationV2[];
+
   openProductServices?: OpenProductServicesConfiguration;
 
   corsaZgwService?: CorsaZgwServiceConfiguration;
@@ -597,6 +604,53 @@ export interface IKOConfiguration extends MainTaskSizeConfiguration {
    * @default iko
    */
   keycloakClientId?: string;
+}
+
+export interface OpenNotificatiesConfigurationV2 extends MainTaskSizeConfiguration {
+  /**
+   * CDK ID, also used in descriptions
+   */
+  id: string;
+  /**
+   * Subdomain to publish this service on
+   */
+  subdomain: string;
+  /**
+   * Database name (auto created)
+   */
+  databaseName: string;
+  /**
+   * Docker image to use.
+   * Usually includes the version number.
+   */
+  image: string;
+  /**
+   * Log level for the containers
+   */
+  logLevel: 'DEBUG' | 'INFO' | 'ERROR';
+  /**
+   * Enable debug mode and logging
+   */
+  debug?: boolean;
+  /**
+   * Keep sent notifications in the database (for 30 days)
+   * @default false
+   */
+  persistNotifications?: boolean;
+  /**
+   * Loadbalancer rule priority, must be unique across all rules
+   */
+  loadbalancerPriority: number;
+  /**
+   * Redis database number for the cache.
+   * Must be unique across all services.
+   */
+  redisCacheDatabaseNumber: number;
+  /**
+   * Redis database number for the celery broker and results.
+   * Must be unique across all services.
+   */
+  redisCeleryDatabaseNumber: number;
 }
 
 export interface OpenProductServicesConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration, DatabaseMigrationToggle {
