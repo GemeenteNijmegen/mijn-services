@@ -22,6 +22,8 @@ Voor OpenNotificaties is er een nieuwe opzet in gebruik (iets met een configurat
 [Zie hier voor een voorbeeld](https://github.com/open-zaak/open-notificaties/blob/main/docker/setup_configuration/data.yaml). 
 Ik heb dit nog niet aan de praat gekregen, de configuratie wordt daarom met de hand gedaan.
 
+Open Notificaties v2 (per instance een eigen subdomein, `openNotificatiesServices`) wordt ook met de hand geconfigureerd, zie [Open Notificaties v2 setup](./Operations/OpenNotificaties-v2.md).
+
 
 ## Open zaak
 Open zaak maakt nog niet gebruik van dezelfde configuratie file als open notificaties. 

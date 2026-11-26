@@ -214,4 +214,16 @@ export const development: Configuration = {
       desiredTaskCount: 1,
     },
   }],
+  openNotificatiesServices: [{
+    id: 'sociaal-domein-open-notificaties',
+    subdomain: 'sociaal-domein-open-notificaties',
+    databaseName: 'sociaal-domein-open-notificaties',
+    image: 'openzaak/open-notificaties:1.16.2',
+    logLevel: 'DEBUG',
+    debug: true,
+    persistNotifications: true,
+    loadbalancerPriority: 110,
+    redisCacheDatabaseNumber: 20,
+    redisCeleryDatabaseNumber: 21,
+  }],
 };
