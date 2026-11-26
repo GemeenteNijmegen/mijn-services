@@ -170,6 +170,7 @@ Check de ECS task logs. Veelvoorkomende fouten:
 
 - **`Could not resolve placeholder 'SPRING_SECURITY_OAUTH2_...'`**: Er mist een environment variable in de task definition. Controleer of de CDK stack correct is gedeployed.
 - **`Connection refused` op RabbitMQ**: De RabbitMQ sidecar service is niet gestart of de service discovery naam klopt niet. Check of de RabbitMQ task draait in hetzelfde cluster.
+- **`ACCESS_REFUSED` op RabbitMQ**: Backend en RabbitMQ lezen gebruiker en wachtwoord uit hetzelfde secret in Secrets Manager (naam bevat `rabbitmqcredentials`, beschrijving 'Credentials for the GZAC RabbitMQ broker'). RabbitMQ zet het wachtwoord alleen bij het opstarten. Is het secret aangepast, herstart dan eerst de RabbitMQ service en daarna de backend.
 - **`401` of `403` bij Keycloak**: Het client secret in Secrets Manager matcht niet met Keycloak. Sync de secrets (zie stap 3).
 
 ### Frontend laadt niet

@@ -205,10 +205,6 @@ export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration
    */
   image: string;
   /**
-   * Docker image to use for rabbitMQ
-   */
-  rabbitMqImage: string;
-  /**
    * Log level for the container
    */
   logLevel: 'DEBUG' | 'INFO' | 'ERROR';
@@ -220,11 +216,6 @@ export interface OpenNotificatiesConfiguration extends MainTaskSizeConfiguration
    * @default false
    */
   persitNotifications?: boolean;
-  /**
-   * Use redis
-   * @default false
-   */
-  useRedis?: boolean;
 }
 
 export interface OpenZaakConfiguration extends MainTaskSizeConfiguration, CeleryTaskSizeConfiguration,
