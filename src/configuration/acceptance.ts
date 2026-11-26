@@ -153,7 +153,6 @@ export const acceptance: Configuration = {
     id: 'corsa-zgw',
     loadbalancerPriority: 70,
     subdomain: 'corsa-zgw',
-    disableMtlsForCorsaClient: true, // Connects to corsa mock without mtls
   },
   openNotificatiesServices: [{
     id: 'woweb-open-notificaties',

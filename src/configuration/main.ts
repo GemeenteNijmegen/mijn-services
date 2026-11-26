@@ -149,4 +149,12 @@ export const main: Configuration = {
     redisCacheDatabaseNumber: 20,
     redisCeleryDatabaseNumber: 21,
   }],
+  corsaZgwService: { // Schaduw draaien in productie, gekoppeld aan corsa-mock
+    logLevel: 'DEBUG',
+    debug: true,
+    image: 'ghcr.io/gemeentenijmegen/corsa-zgw:e93bc0ad96d7503ae3dddba60b574fb343e93c0a',
+    id: 'corsa-zgw',
+    loadbalancerPriority: 80,
+    subdomain: 'corsa-zgw',
+  },
 };
