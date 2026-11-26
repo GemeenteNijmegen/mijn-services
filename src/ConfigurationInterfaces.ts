@@ -608,7 +608,8 @@ export interface IKOConfiguration extends MainTaskSizeConfiguration {
 
 export interface OpenNotificatiesConfigurationV2 extends MainTaskSizeConfiguration {
   /**
-   * CDK ID, also used in descriptions
+   * CDK ID, also used in descriptions.
+   * Do not change after the first deployment: it recreates the secret key and database credentials.
    */
   id: string;
   /**

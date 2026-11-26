@@ -245,6 +245,17 @@ test('Service can reach the shared redis cluster', () => {
   });
 });
 
+/**
+ * CDK puts a 'disallow all' egress placeholder on a security group without egress rules
+ * and drops it as soon as any rule exists. In the main stack other services already
+ * add rules to the load balancer, so the placeholder is not a change caused by this service.
+ */
+function withoutEgressPlaceholder(resources: Record<string, any>) {
+  return JSON.parse(JSON.stringify(resources, (key, value) =>
+    key === 'SecurityGroupEgress' && value.every((rule: any) => rule.Description === 'Disallow all traffic') ? undefined : value,
+  ));
+}
+
 test('In a nested stack, the parent only gains the nested stack', () => {
   const platformOnly = synth(undefined, true).parent;
   const { parent, service } = synth(baseConfiguration, true);
@@ -254,6 +265,8 @@ test('In a nested stack, the parent only gains the nested stack', () => {
     .map(([, resource]: [string, any]) => resource.Type)
     .sort();
   expect(added).toEqual(['AWS::CloudFormation::Stack']);
+  const unchanged = Object.fromEntries(Object.entries(parent.toJSON().Resources).filter(([id]) => before.has(id)));
+  expect(withoutEgressPlaceholder(unchanged)).toEqual(withoutEgressPlaceholder(platformOnly.toJSON().Resources));
   service.resourceCountIs('AWS::ElasticLoadBalancingV2::ListenerRule', 1);
   service.resourceCountIs('AWS::ECS::Service', 1);
   service.resourceCountIs('AWS::CloudFront::Distribution', 1);
@@ -266,4 +279,12 @@ test('Service is created after the listener rule attaches its target group', () 
   const services = Object.values(template.findResources('AWS::ECS::Service')) as any[];
   expect(ruleIds).toHaveLength(1);
   expect(services[0].DependsOn).toEqual(expect.arrayContaining(ruleIds));
+});
+
+test('Logical ids of its secrets stay stable, renaming them would replace the credentials', () => {
+  const secrets = Object.keys(synthService(baseConfiguration).findResources('AWS::SecretsManager::Secret'));
+  expect(secrets).toEqual(expect.arrayContaining([
+    expect.stringMatching(/^testopennotificatiessecretkey[0-9A-F]{8}$/),
+    expect.stringMatching(/^testopennotificatiesdbcredentials[0-9A-F]{8}$/),
+  ]));
 });

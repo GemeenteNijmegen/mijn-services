@@ -102,7 +102,6 @@ export class OpenNotificatiesV2Service extends Construct {
       IS_HTTPS: 'True',
       SITE_DOMAIN: this.domain,
       CSRF_TRUSTED_ORIGINS: `https://${this.domain}`,
-      OPENNOTIFICATIES_ORGANIZATION: Statics.organization,
       SESSION_COOKIE_AGE: Statics.sessionTimeoutDefaultSeconds.toString(),
       UWSGI_PROCESSES: '2',
 
@@ -223,7 +222,6 @@ export class OpenNotificatiesV2Service extends Construct {
       conditions: [ListenerCondition.hostHeaders([this.domain])],
       action: ListenerAction.forward([targetGroup]),
     });
-    this.service.connections.allowFrom(this.props.service.loadbalancer.alb, Port.tcp(OpenNotificatiesV2Service.PORT));
 
     new SubdomainCloudfront(this, 'subdomain', {
       certificate: this.props.certificate,
