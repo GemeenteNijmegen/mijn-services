@@ -13,6 +13,7 @@ import {
   Secret,
   TaskDefinition,
 } from 'aws-cdk-lib/aws-ecs';
+import { Protocol as AlbProtocol, ListenerCondition } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { DatabaseInstance } from 'aws-cdk-lib/aws-rds';
@@ -24,6 +25,7 @@ import { Construct } from 'constructs';
 import { OpenNotificatiesConfigurationV2 } from '../ConfigurationInterfaces';
 import { EcsServiceFactoryProps, ECSServiceUtils } from '../constructs/EcsServiceFactory';
 import { CacheDatabase } from '../constructs/Redis';
+import { SubdomainCloudfront } from '../constructs/SubdomainCloudfront';
 import { AdditionalDatabase } from '../custom-resources/database/AdditionalDatabase';
 import { Statics } from '../Statics';
 import { Utils } from '../Utils';
@@ -70,6 +72,7 @@ export class OpenNotificatiesV2Service extends Construct {
     });
     this.setupDatabase();
     this.service = this.setupService();
+    this.setupExposure();
   }
 
   private get domain() {
@@ -182,6 +185,35 @@ export class OpenNotificatiesV2Service extends Construct {
     });
     this.setupConnectivity(service.connections.securityGroups);
     return service;
+  }
+
+  private setupExposure() {
+    const config = this.props.serviceConfiguration;
+
+    this.props.service.loadbalancer.listener.addTargets(config.id, {
+      conditions: [ListenerCondition.hostHeaders([this.domain])],
+      healthCheck: {
+        enabled: true,
+        path: '/',
+        healthyHttpCodes: '200',
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 6,
+        timeout: Duration.seconds(10),
+        interval: Duration.seconds(15),
+        protocol: AlbProtocol.HTTP,
+      },
+      port: OpenNotificatiesV2Service.PORT,
+      targets: [this.service],
+      priority: config.loadbalancerPriority,
+      deregistrationDelay: Duration.minutes(1),
+    });
+
+    new SubdomainCloudfront(this, 'subdomain', {
+      certificate: this.props.certificate,
+      hostedZone: this.props.hostedzone,
+      loadbalancer: this.props.service.loadbalancer.alb,
+      subdomain: config.subdomain,
+    });
   }
 
   private addContainer(task: TaskDefinition, name: string, options: { command?: string[]; healthCheck?: HealthCheck }): ContainerDefinition {

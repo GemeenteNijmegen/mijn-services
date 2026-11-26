@@ -192,3 +192,50 @@ test('Creates its own database', () => {
     Name: '/mijn-services/internal/database/test-open-notificaties/credentials',
   });
 });
+
+function securityGroupIdOf(template: Template, prefix: string) {
+  const ids = Object.keys(template.findResources('AWS::EC2::SecurityGroup'))
+    .filter(id => id.startsWith(prefix));
+  expect(ids).toHaveLength(1);
+  return { 'Fn::GetAtt': [ids[0], 'GroupId'] };
+}
+
+test('Is exposed on its subdomain with the configured priority', () => {
+  const template = synthService(baseConfiguration);
+  template.hasResourceProperties('AWS::ElasticLoadBalancingV2::ListenerRule', {
+    Priority: 110,
+    Conditions: Match.arrayWith([
+      Match.objectLike({
+        Field: 'host-header',
+        HostHeaderConfig: { Values: ['test-open-notificaties.example.com'] },
+      }),
+    ]),
+  });
+  template.hasResourceProperties('AWS::CloudFront::Distribution', {
+    DistributionConfig: Match.objectLike({
+      Aliases: ['test-open-notificaties.example.com'],
+    }),
+  });
+  template.hasResourceProperties('AWS::ElasticLoadBalancingV2::TargetGroup', {
+    Port: 8000,
+    HealthCheckPath: '/',
+  });
+});
+
+test('Load balancer can reach the web container', () => {
+  const template = synthService(baseConfiguration);
+  template.hasResourceProperties('AWS::EC2::SecurityGroupIngress', {
+    IpProtocol: 'tcp',
+    FromPort: 8000,
+    ToPort: 8000,
+    SourceSecurityGroupId: securityGroupIdOf(template, 'lbalbSecurityGroup'),
+  });
+});
+
+test('Service can reach the shared redis cluster', () => {
+  const template = synthService(baseConfiguration);
+  template.hasResourceProperties('AWS::EC2::SecurityGroupIngress', {
+    GroupId: securityGroupIdOf(template, 'cacheredissecuritygroup'),
+    SourceSecurityGroupId: securityGroupIdOf(template, 'testopennotificatiesserviceSecurityGroup'),
+  });
+});
