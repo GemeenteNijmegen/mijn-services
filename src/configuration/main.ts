@@ -107,7 +107,7 @@ export const main: Configuration = {
         cpu: '512',
         memory: '1024',
       },
-      taskSize: { // BIG to start with, half is probably fine
+      taskSize: {
         cpu: '1024',
         memory: '2048',
         desiredTaskCount: 1,
