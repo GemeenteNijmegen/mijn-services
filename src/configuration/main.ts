@@ -137,4 +137,16 @@ export const main: Configuration = {
       loadbalancerPriority: 70,
     },
   ],
+  openNotificatiesServices: [{
+    id: 'woweb-open-notificaties',
+    subdomain: 'woweb-open-notificaties',
+    databaseName: 'woweb-open-notificaties',
+    image: 'openzaak/open-notificaties:1.16.2',
+    logLevel: 'INFO',
+    debug: false,
+    persistNotifications: true,
+    loadbalancerPriority: 110,
+    redisCacheDatabaseNumber: 20,
+    redisCeleryDatabaseNumber: 21,
+  }],
 };

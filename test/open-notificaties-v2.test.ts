@@ -176,7 +176,7 @@ test('Credentials are passed as secrets, not as plain environment variables', ()
 test('Task size and count default and can be overridden', () => {
   const defaults = synthService(baseConfiguration);
   expect(taskDefinition(defaults).Properties.Cpu).toBe('512');
-  expect(taskDefinition(defaults).Properties.Memory).toBe('1536');
+  expect(taskDefinition(defaults).Properties.Memory).toBe('2048');
   defaults.hasResourceProperties('AWS::ECS::Service', { DesiredCount: 1 });
 
   const overridden = synthService({

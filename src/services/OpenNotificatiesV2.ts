@@ -135,7 +135,7 @@ export class OpenNotificatiesV2Service extends Construct {
 
     const task = new TaskDefinition(this, 'task', {
       cpu: config.taskSize?.cpu ?? '512',
-      memoryMiB: config.taskSize?.memory ?? '1536',
+      memoryMiB: config.taskSize?.memory ?? '2048',
       compatibility: Compatibility.FARGATE,
     });
 
