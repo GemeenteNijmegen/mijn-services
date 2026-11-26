@@ -27,3 +27,9 @@ IKO combineert gegevens uit verschillende bronnen (Open Klant, Objecten API, Ope
 tot één klant- en objectbeeld. Een IKO instance neem je op in de configuratie onder `ikoServices`.
 Na de eerste deployment zijn handmatige stappen nodig in Keycloak en Secrets Manager, zie
 [IKO setup](./Operations/IKO-setup.md).
+
+## Open Notificaties v2
+Open Notificaties per Open Zaak, elk op een eigen subdomein en als één ECS service (web, celery en
+celery beat in één task, Redis als broker). Een instance neem je op in de configuratie onder
+`openNotificatiesServices`. De koppeling met Open Zaak wordt na de deployment met de hand ingericht, zie
+[Open Notificaties v2 setup](./Operations/OpenNotificaties-v2.md).
