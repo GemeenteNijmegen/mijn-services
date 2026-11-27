@@ -132,6 +132,7 @@ export const acceptance: Configuration = {
     redisCacheDatabaseNumber: 17,
     redisCeleryDatabaseNumber: 18,
     loadbalancerPriority: 50,
+    disableNotifications: false,
   }],
   keyCloackServices: [
     {
