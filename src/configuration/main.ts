@@ -24,7 +24,6 @@ export const main: Configuration = {
   },
   openNotificaties: {
     image: 'openzaak/open-notificaties:1.16.2',
-    rabbitMqImage: 'rabbitmq:4.0.5-alpine',
     logLevel: 'INFO',
     debug: false,
     persitNotifications: true,
@@ -40,7 +39,6 @@ export const main: Configuration = {
       desiredTaskCount: 1,
     },
     disableHealthcCheckCeleryContainer: true,
-    useRedis: true,
     useNewDatabase: true,
   },
   openZaak: {
@@ -107,7 +105,7 @@ export const main: Configuration = {
         cpu: '512',
         memory: '1024',
       },
-      taskSize: { // BIG to start with, half is probably fine
+      taskSize: {
         cpu: '1024',
         memory: '2048',
         desiredTaskCount: 1,
@@ -149,4 +147,12 @@ export const main: Configuration = {
     redisCacheDatabaseNumber: 20,
     redisCeleryDatabaseNumber: 21,
   }],
+  corsaZgwService: { // Schaduw draaien in productie, gekoppeld aan corsa-mock
+    logLevel: 'DEBUG',
+    debug: true,
+    image: 'ghcr.io/gemeentenijmegen/corsa-zgw:e93bc0ad96d7503ae3dddba60b574fb343e93c0a',
+    id: 'corsa-zgw',
+    loadbalancerPriority: 80,
+    subdomain: 'corsa-zgw',
+  },
 };
