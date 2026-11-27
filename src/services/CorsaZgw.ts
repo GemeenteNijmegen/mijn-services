@@ -157,7 +157,7 @@ export class CorsaZgwService extends Construct {
 
       // Slack webhook
       SLACK_WEBHOOK_URL: Secret.fromSsmParameter(this.slackWebhookUrl),
-      SLACK_WEBHOOK_CHANNEL: Secret.fromSsmParameter(this.slackWebhookUrl),
+      SLACK_WEBHOOK_CHANNEL: Secret.fromSsmParameter(this.slackWebhookChannel),
 
     };
   }
